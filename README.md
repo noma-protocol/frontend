@@ -1,3 +1,3 @@
-## Noma Money
+## Oikos Protocol
 
-This is the code for the Noma Money website available [here](https://noma.money). 
+This is the code for the Oikos frontend available [here](https://exchange.oikos.cash). 
