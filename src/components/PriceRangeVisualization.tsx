@@ -22,9 +22,17 @@ const PriceRangeVisualization = ({ data, width, height }) => {
   } = useTooltip();
 
   // Define margins
-  const margin = { top: 20, bottom: 50, left: 0, right: 0 };
-  const xMax = width - margin.left - margin.right;
-  const yMax = height - margin.top - margin.bottom;
+  const sidePadding = width * 0.05;
+
+  const margin = {
+    top:    20,
+    bottom: 50,
+    left:   sidePadding,
+    right:  sidePadding,
+  };
+
+  const xMax = width  - margin.left - margin.right;
+  const yMax = height - margin.top  - margin.bottom;
 
   // Determine if we should use a logarithmic scale
   const minPrice = Math.min(...data.map(d => parseFloat(d.priceLower)));
