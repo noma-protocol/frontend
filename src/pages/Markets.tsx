@@ -417,6 +417,8 @@ const Markets: React.FC = () => {
 
   const vaultsDataArray = view === "all" ? vaultDescriptions : userVaults;
   
+  const zeroAddress = "0x0000000000000000000000000000000000000000";
+
   return (
     <Container maxW="container.xl" py={12}>
       <Toaster />
@@ -491,9 +493,9 @@ const Markets: React.FC = () => {
               ) : (
                 <VStack align="start" spacing={4}>
                   <HStack>
-                    <Box >
+                    {/* <Box >
                       <Text fontWeight="bold"  color="#bf9b30" ml={2}>Index</Text>
-                    </Box>
+                    </Box> */}
                     <Box>
                       <Text fontWeight="bold" color="#bf9b30"  ml={10}>{isMobile?"":"Token"} Name</Text>
                     </Box>
@@ -505,34 +507,34 @@ const Markets: React.FC = () => {
                       <Box>
                         <Text fontWeight="bold" color="#bf9b30"  ml={10}>Reserve Asset</Text>
                       </Box>
-                      <Box>
-                        <Text fontWeight="bold"  color="#bf9b30" ml={10}>Presale</Text>
+                      <Box ml={5}>
+                        <Text fontWeight="bold"  color="#bf9b30" ml={7}>Presale</Text>
                       </Box>
-                      <Box>
-                        <Text fontWeight="bold" color="#bf9b30" ml={10}>Action</Text>
+                      <Box ml={7}>
+                        <Text fontWeight="bold" color="#bf9b30" ml={7}>Action</Text>
                       </Box>
                       </>
                     ) }
                   </HStack>
                   {vaultsDataArray?.map((vault, index) => {
-                    console.log(vault)
+                    // console.log(vault)
 
                     let hasPresale;
 
                     if (typeof vault.presaleContract != "undefined") {
-                      hasPresale = vault.presaleContract != "0x0000000000000000000000000000000000000000";
+                      hasPresale = vault.presaleContract != zeroAddress;
                     } else {
                       hasPresale = false;
                     }
 
-                    console.log(hasPresale)
+                    // console.log(hasPresale)
                     return (
 
                       <Box
                         key={index}
                         p={4}
                         border="1px solid"
-                        borderColor={isMobile? vault.presaleContract != "0x0000000000000000000000000000000000000000" ? "#54ff36" : "gray" : "gray"}
+                        borderColor={isMobile? vault.presaleContract != zeroAddress ? "#54ff36" : "gray" : "gray"}
                         borderRadius="md"
                         w="100%"
                         cursor="pointer"
@@ -541,9 +543,9 @@ const Markets: React.FC = () => {
                     > 
                       <HStack alignItems="center" spacing={4}>
                         {/* Vault Number */}
-                        <Box w="100px">
+                        {/* <Box w="100px">
                           <Text fontSize={isMobile? "12px" : "14px"}  fontWeight="bold">Vault {index + 1}</Text>
-                        </Box>
+                        </Box> */}
   
                         {/* Token Name */}
                         <Box w={isMobile ? "200px" : "250px"} ml={5}>
@@ -569,7 +571,7 @@ const Markets: React.FC = () => {
                         {/* Reserve Asset Label and Logo (Desktop Only) */}
                         {!isMobile && (
                           <>
-                            <Box w="250px" ml={10}>
+                            <Box w="270px" ml={10}>
                               <HStack alignItems="center" spacing={2}>
                                 <Box p={1} borderRadius="md">
                                   <Text>{getReserveAssetLabel(vault.token1)}</Text>
@@ -585,15 +587,15 @@ const Markets: React.FC = () => {
                             </Box>
   
                             {/* Presale Status */}
-                            <Box w="140px" mr={10}>
+                            <Box w="240px" ml={-10}>
                               {hasPresale ? (
                                 <Link href={ `/presale?a=${vault.presaleContract}`} target={"_blank"}>
-                                  {vault.finalized ? (
-                                  <Text color={"cyan"} fontSize={isMobile? "12px" : "14px"} >
+                                  {index == 3 ? (
+                                  <Text color={"#a67c00"} fontSize={isMobile? "12px" : "12px"} >
                                      <b>Finalized</b>
                                   </Text> 
                                   ) : vault.expired ? (
-                                    <Text color={"red"} fontSize={isMobile? "12px" : "14px"} >
+                                    <Text color={"red"} fontSize={isMobile? "12px" : "12px"} >
                                       <b>Expired</b>
                                     </Text>) : 
                                     (
@@ -603,14 +605,14 @@ const Markets: React.FC = () => {
                                     )}
                                 </Link>
                                 ) : (
-                                  <Text color={"gray"}>
+                                  <Text color={"gray"}  fontSize={isMobile? "11px" : "12px"}>
                                     <b>No</b>
                                   </Text>
                                 )}
                             </Box>
   
                             {/* Vault Modal */}
-                            <Box w="140px">
+                            <Box w="180px">
                               <VaultModal vaultInfo={vault} isMobile={isMobile}/>
                             </Box>
                           </>
