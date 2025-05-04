@@ -657,7 +657,7 @@ const Borrow = () => {
                                                     <Text as="h3" color="#a67c00">Roll Loan</Text>
                                                 </DrawerTitle>
                                                 <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
-                                                    <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)}>×</Button>
+                                                    <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
                                                 </DrawerCloseTrigger>
                                             </DrawerHeader>
                                             <DrawerBody>
