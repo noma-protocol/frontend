@@ -30,7 +30,7 @@ import {
 import { Toaster, toaster } from "../components/ui/toaster"
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
-import { commify, generateBytes32String } from "../utils";
+import { commify, generateBytes32String, getContractAddress } from "../utils";
 import Logo from "../assets/images/noma_logo_transparent.png";
 import { ethers } from "ethers"; // Import ethers.js
 const { formatEther, parseEther } = ethers.utils;
@@ -45,7 +45,6 @@ import config from '../config';
 import bnbLogo from "../assets/images/bnb.png";
 
 const { environment, presaleContractAddress } = config;
-
 
 const PresaleArtifact = await import(`../assets/Presale.json`);
 const PresaleAbi = PresaleArtifact.abi;
@@ -168,7 +167,7 @@ const Presale: React.FC = () => {
     }
     setContributionAmount(number);
   }
-
+  
     const {
       data: presaleInfo
     } = useContractRead({
@@ -812,7 +811,7 @@ const Presale: React.FC = () => {
                   <Box w="100px">
                       <Text fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}>Contributed</Text>
                   </Box>
-                  <Box w={isMobile ? "69px" : "90px"}>
+                  <Box w={isMobile ? "69px" : "120px"}>
                       <Text
                           color="#f3b500"
                           fontWeight="bold"
@@ -837,7 +836,7 @@ const Presale: React.FC = () => {
                           {contributions === 0 ? "You get" : "Balance"}
                       </Text>
                   </Box>
-                  <Box w={isMobile ? "69px" : "90px"}>
+                  <Box w={isMobile ? "69px" : "120px"}>
                       <Text
                           color="#f3b500"
                           fontWeight="bold"
