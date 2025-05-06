@@ -11,7 +11,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 <Box w={isMobile ? "100px" : "150px"}>
                     <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>Balance</Text>
                 </Box>
-                <Box w={"110px"}>
+                <Box w={"160px"}>
                     <Text
                         color="#f3b500"
                         fontWeight="bold"
@@ -35,7 +35,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 <Box w={isMobile ? "100px" : "150px"}>
                     <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>Token price</Text>
                 </Box>
-                <Box   w={"110px"} >
+                <Box   w={"160px"} >
                     <Text
                         color="#f3b500"
                         fontWeight="bold"
@@ -58,7 +58,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 <Box w={isMobile ? "100px" : "150px"}>
                     <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>{contributions > 0 ? "Contributed" : "Contributing"}</Text>
                 </Box>
-                <Box w={"110px"} >
+                <Box w={"160px"} >
                     <Text
                         color="#f3b500"
                         fontWeight="bold"
@@ -83,7 +83,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                         {contributions > 0 ? "Balance" : "You get"}
                     </Text>
                 </Box>
-                <Box  w={"115px"} >
+                <Box  w={"165px"} >
                     <Text
                         color="#f3b500"
                         fontWeight="bold"
