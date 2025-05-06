@@ -23,7 +23,7 @@ function App() {
 
   const projectId = "1607c5f300e1191999e3033443961435";
   const metadata = {
-    name: "Noma Protocol",
+    name: "Oikos Protocol",
     description: "Decentralized Money",
     url: "https://web3modal.com",
     icons: ["https://avatars.githubusercontent.com/u/37784886"],
