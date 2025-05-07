@@ -3,8 +3,8 @@ import * as ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import App from "./App";
-import HomePage from "./pages/Home";
-import Bootstrap from "./pages/Bootstrap";
+// import HomePage from "./pages/Home";
+// import Bootstrap from "./pages/Bootstrap";
 import Presale from "./pages/Presale";
 import Launchpad from "./pages/Launchpad";
 import Markets from "./pages/Markets";
@@ -18,14 +18,14 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      {
-        path: "/",
-        element: <HomePage  />,
-      },
-      {
-        path: "/bootstrap",
-        element: <Bootstrap  />,
-      },      
+      // {
+      //   path: "/",
+      //   element: <HomePage  />,
+      // },
+      // {
+      //   path: "/bootstrap",
+      //   element: <Bootstrap  />,
+      // },      
       {
         path: "/presale",
         element: <Presale  />,
