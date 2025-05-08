@@ -518,6 +518,10 @@ const Borrow = () => {
 
     }
 
+    const displayedCollateral = Number(formatEther(`${loanData?.collateralAmount || 0}`)) > 1000000 ?
+        formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) :
+        formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) ;
+
     return (
         <Container maxW="container.xl=" py={12} pl={"0%"} ml={"10%"}>
             <Toaster />
@@ -611,7 +615,7 @@ const Borrow = () => {
                                     <Box px={2} mt={2}> 
                                         <HStack>
                                             <Box  fontSize="sm">
-                                            {formatNumberPrecise(formatEther(`${loanData.collateralAmount}`), 5)}
+                                            {displayedCollateral}
                                             </Box>
                                             <Box  fontSize="xx-small">
                                             {token0Info.tokenSymbol}
