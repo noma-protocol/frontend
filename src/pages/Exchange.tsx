@@ -194,7 +194,7 @@ const Exchange: React.FC = () => {
     watch: true,
   });
 
-  // console.log(`Imv is ${formatEther(`${imv || 0}`)}`);
+  console.log(`Imv is ${formatEther(`${imv || 0}`)}`);
     
   useEffect(() => {
 
@@ -591,7 +591,7 @@ const Exchange: React.FC = () => {
     } = useContractWrite({
         address: exchangeHelperAddress,
         abi: ExchangeHelperAbi,
-        functionName: "buyTokensETH",
+        functionName: "buyTokens",
         args: buyArgs,
         value: parseEther(`${amountToBuy}`),
         onSuccess(data) {
@@ -610,13 +610,37 @@ const Exchange: React.FC = () => {
             });         
         }
     });
+    
+    const {
+      write: buyTokensWETH
+  } = useContractWrite({
+      address: exchangeHelperAddress,
+      abi: ExchangeHelperAbi,
+      functionName: "buyTokensWETH",
+      args: buyArgs,
+      onSuccess(data) {
+          setIsLoading(false);
+          setIsLoadingExecuteTrade(false);
+      },
+      onError(error) {
+          console.error(`transaction failed: ${error.message}`);
+          setIsLoading(false);
+          setIsLoadingExecuteTrade(false);
+          const msg = Number(error.message.toString().indexOf("InvalidSwap()")) > -1 ? "Error with swap operation" :
+                      error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
+          toaster.create({
+              title: "Error",
+              description: msg,
+          });         
+      }
+  });
 
     const {
         write: sellTokens
     } = useContractWrite({
         address: exchangeHelperAddress,
         abi: ExchangeHelperAbi,
-        functionName: "sellTokens",
+        functionName: useWeth == "1" ? "sellTokens" : "sellTokensETH",
         args: sellArgs,
         onSuccess(data) {
             setIsLoading(false);
@@ -645,11 +669,37 @@ const Exchange: React.FC = () => {
         functionName: "approve",
         args: [
             exchangeHelperAddress,
-            ethers.constants.MaxUint256
+            parseEther(`${amountToSell}`)
+        ],
+        onSuccess(data) {
+          // setIsLoading(false);
+          sellTokens();
+        },
+        onError(error) {
+            console.error(`transaction failed: ${error.message}`);
+            setIsLoading(false);
+            setIsLoadingExecuteTrade(false);
+            const msg = Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
+            toaster.create({
+                title: "Error",
+                description: msg,
+            });         
+        }
+    });
+
+    const {
+        write: approveWeth
+    } = useContractWrite({
+        address: token1,
+        abi: ERC20Abi,
+        functionName: "approve",
+        args: [
+            exchangeHelperAddress,
+            parseEther(`${amountToBuy}`)
         ],
         onSuccess(data) {
             // setIsLoading(false);
-            sellTokens();
+            buyTokensWETH();
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
@@ -674,19 +724,35 @@ const Exchange: React.FC = () => {
     const handleBuyTokens = () => {
         if (isLoading) return;
 
-        const args = [
+        let args = [];
+
+        setIsLoading(true);
+        
+        if (useWeth == "1") {
+
+          args = [
             poolInfo.poolAddress,
             `${spotPrice}`,
             parseEther(`${amountToBuy}`),
             address,
             false
-        ]
+          ]
 
-        console.log(args);
+          setBuyArgs(args);
+          approveWeth();
+        } else if (useWeth == "0") {
 
-        setIsLoading(true);
-        setBuyArgs(args);
-        buyTokensETH();
+          args = [
+            poolInfo.poolAddress,
+            `${spotPrice}`,
+            parseEther(`${amountToBuy}`),
+            address,
+            false
+          ]
+
+          setBuyArgs(args);
+          buyTokensETH();
+        }
     }
 
     const handleSellTokens = () => {
@@ -735,7 +801,7 @@ const Exchange: React.FC = () => {
     }
 
   return (
-    <Container maxW="container.xl" py={12} minH="900px">
+    <Container maxW="container.xl" py={12} minH="1100px" >
       <Toaster />
 
       {!isConnected ? (
