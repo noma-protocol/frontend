@@ -9,6 +9,7 @@ import BalanceCard from '../components/BalanceCard';
 import ethLogo from '../assets/images/weth.svg';
 import bnbLogo from '../assets/images/bnb.png';
 import LoanAddCollateral from '../components/LoanAddCollateral';
+import LoanRepay from '../components/LoanRepay';
 
 import placeholderLogo from '../assets/images/question.svg';
 import {
@@ -19,7 +20,7 @@ import {
     SelectTrigger,
     SelectValueText,
   } from "../components/ui/select";
-import { commify, commifyDecimals, getDaysLeft, calculateExpiryDate, getContractAddress } from '../utils';
+import { formatNumberPrecise, calculateLoanFees, commify, commifyDecimals, getDaysLeft, calculateExpiryDate, getContractAddress } from '../utils';
 import {
     NumberInputRoot,
     NumberInputLabel,
@@ -93,6 +94,8 @@ const Borrow = () => {
     const [collateral, setCollateral] = useState("0");
     const [extraCollateral, setExtraCollateral] = useState("0");
     const [isAdding, setIsAdding] = useState(false);
+    const [repayAmount, setRepayAmount] = useState("0");
+
 
     let loanData ;
 
@@ -105,6 +108,19 @@ const Borrow = () => {
             { label: "1 year",  value: Number((86400 * 365)).toString()},
             ],
     });
+
+  useEffect(() => {
+    const interval  = setInterval(() => {
+        const fetchEthBalance = async () => {
+            const ethBalance = await localProvider.getBalance(address);
+            setEthBalance(ethBalance);
+        };
+
+        fetchEthBalance();
+    }, 3000);
+
+    return () => clearInterval(interval);
+    }, [address]);
 
     const { 
         write : deposit,
@@ -164,14 +180,14 @@ const Borrow = () => {
     });
     
     if (typeof activeLoan !== "undefined") {
-        console.log({activeLoan});
+        // console.log({activeLoan});
         loanData = {
             borrowAmount: activeLoan[0] || 0,
             collateralAmount: activeLoan[1] || 0,
             expires: activeLoan[3] || 0,
         }
     
-        console.log({loanData});
+        // console.log({loanData});
     }
 
     const {
@@ -184,22 +200,22 @@ const Borrow = () => {
         args: [vaultAddress]
     });
 
-    console.log({IMV});
+    // console.log({IMV});
 
     const ltv = (formatEther(`${loanData?.collateralAmount || 0}`) * formatEther(`${IMV || 1}`)) / formatEther(`${loanData?.borrowAmount|| 0}` );   
     
-    const {
-        data: loanFees,
-        refetch: fetchLoanFees
-    } = useContractRead({
-        address: vaultAddress,
-        abi: LendingVaultAbi,
-        functionName: "calculateLoanFees",
-        args: [parseEther(`${borrowAmount}`), `${duration}`]
-    });
+    // const {
+    //     data: loanFees,
+    //     refetch: fetchLoanFees
+    // } = useContractRead({
+    //     address: vaultAddress,
+    //     abi: LendingVaultAbi,
+    //     functionName: "calculateLoanFees",
+    //     args: [parseEther(`${borrowAmount}`), `${duration}`],
+    //     watch: true,
+    // });
 
-    console.log({borrowAmount});
-    console.log({loanFees});
+    const loanFees = calculateLoanFees(`${borrowAmount}`, `${duration}`);
 
     const {
         write: approve
@@ -280,6 +296,7 @@ const Borrow = () => {
                         Number(error.message.toString().indexOf("NoLiquidity")) > -1 ? "Not enough liquidity" :
                         Number(error.message.toString().indexOf("0x31eed5fe")) > -1 ? "Not enough floor liquidity" :
                         Number(error.message.toString().indexOf("0xf16664fd")) > -1 ? "Only one loan per address" :
+                        Number(error.message.toString().indexOf("0x37218288")) > -1 ? "Borrowing not allowed during floor bootstrap" :
                         Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -296,7 +313,7 @@ const Borrow = () => {
         abi: ExtVaultAbi,
         functionName: "payback",
         args: [
-            // address
+            parseEther(`${repayAmount}`),
         ],
         onSuccess(data) {
             setIsRepaying(false);
@@ -310,6 +327,7 @@ const Borrow = () => {
             setIsLoading(false);
             setIsRepaying(false);
             const msg =  Number(error.message.toString().indexOf("0722f1dc")) > -1 ? "No active loan" :
+                        Number(error.message.toString().indexOf("0x3d56fe34")) > -1 ? "Invalid repay amount" :
                         Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -325,11 +343,13 @@ const Borrow = () => {
         abi: ExtVaultAbi,
         functionName: "roll",
         args: [
-            address,
             `${duration}`
         ],
         onSuccess(data) {
             setIsRolling(false);
+            setTimeout(() => {
+                  window.location.reload();
+            }, 4000); // 3000ms = 3 seconds  
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
@@ -453,10 +473,6 @@ const Borrow = () => {
         setBorrowAmount(value);
     }
 
-    const handleClickRepay = () => {
-        setIsRepaying(true);
-        approveToken1();
-    }
 
     const handleBorrow = () => {
         setIsBorrowing(true);
@@ -477,7 +493,7 @@ const Borrow = () => {
     // fetchActiveLoan();
     
     const rollLoanAmount = (formatEther(`${loanData?.collateralAmount || 0}`) * formatEther(`${IMV || 0}`)) - formatEther(`${loanData?.borrowAmount || 0}`);
-    console.log({rollLoanAmount});
+    // console.log({rollLoanAmount});
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -496,11 +512,10 @@ const Borrow = () => {
         addCollateral();
     }
 
+    const handleClickRepayAmount = () => {
+        setIsRepaying(true);
+        approveToken1();
 
-    const handleSetCollateral = (e) => {
-        const value = e.target.value;
-        if (isNaN(value) || value == "") return 
-        setExtraCollateral(value);
     }
 
     return (
@@ -528,6 +543,7 @@ const Borrow = () => {
                     textAlign="left"
                     position="relative"
                     mt={"50px"}
+                    marginBottom={"15%"}
                     // border="1px solid red"
                 >
                 {isAddress(vaultAddress) ? (
@@ -595,7 +611,7 @@ const Borrow = () => {
                                     <Box px={2} mt={2}> 
                                         <HStack>
                                             <Box  fontSize="sm">
-                                            {commify(formatEther(`${loanData.collateralAmount}`), 4)}
+                                            {formatNumberPrecise(formatEther(`${loanData.collateralAmount}`), 5)}
                                             </Box>
                                             <Box  fontSize="xx-small">
                                             {token0Info.tokenSymbol}
@@ -617,7 +633,8 @@ const Borrow = () => {
                                     <Box px={2}  mt={2} ml={-10}> 
                                     <VStack>
                                     <LoanAddCollateral
-                                        handleSetCollateral={handleSetCollateral}
+                                        token0Symbol={token0Info.tokenSymbol}
+                                        handleSetCollateral={setExtraCollateral}
                                         extraCollateral={extraCollateral}
                                         isMobile={isMobile}
                                         ltv={ltv}
@@ -625,84 +642,93 @@ const Borrow = () => {
                                         isAdding={isAdding}
                                         setIsAdding={setIsAdding}
                                         isLoading={isLoading}
+                                        setIsLoading={setIsLoading}
+                                        isTokenInfoLoading={isTokenInfoLoading}
                                     />
+                                    <LoanRepay
+                                        fullCollateral={loanData?.collateralAmount}
+                                        loanAmount={loanData?.borrowAmount}
+                                        token0Symbol={token0Info.tokenSymbol}
+                                        repayAmount={repayAmount}
+                                        setRepayAmount={setRepayAmount}
+                                        handleClickRepayAmount={handleClickRepayAmount}
+                                        isRepaying={isRepaying}
+                                        setIsRepaying={setIsRepaying}
+                                        isMobile={isMobile}
+                                        imv={IMV}
+                                        ltv={ltv}
+                                        isLoading={isTokenInfoLoading}
+                                    />
+                                    <DrawerRoot >
+                                    <DrawerTrigger asChild>
                                     <Button 
                                         variant={"outline"}
                                         h={8}
-                                        onClick={() => handleClickRepay()}
-                                        disabled={isRepaying || isLoading}
+                                        // onClick={() => setIsLoading(true)}
+                                        disabled={isRolling || isLoading || isTokenInfoLoading || ltv <= 1}
                                         w={"120px"}
-                                        border="1px solid"
-                                        >
-                                        {isRepaying ? <Spinner size="sm" /> : "Repay"}
+                                        border="1px solid #f3f7c6"
+                                    >
+                                    {isLoading ? <Spinner size="sm" /> : <Text color={"#f3f7c6"}>Roll</Text>}
                                     </Button>
-                                        <DrawerRoot >
-                                        <DrawerTrigger asChild>
-                                        <Button 
-                                            variant={"outline"}
-                                            h={8}
-                                            onClick={() => setIsRolling(true)}
-                                            disabled={isRolling || isLoading || ltv <= 1}
-                                            w={"120px"}
-                                            border="1px solid"
-                                        >
-                                        {isRolling ? <Spinner size="sm" /> : "Roll"}
-                                        </Button>
-                                        </DrawerTrigger>
-                                        <DrawerBackdrop />
-                                        <DrawerContent>
-                                            <Box mt="80%" ml={5}>
-                                            <DrawerHeader>
-                                                <DrawerTitle>
-                                                    <Text as="h3" color="#a67c00">Roll Loan</Text>
-                                                </DrawerTitle>
-                                                <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
-                                                    <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
-                                                </DrawerCloseTrigger>
-                                            </DrawerHeader>
-                                            <DrawerBody>
-                                                {/* <Input
-                                                    placeholder="Amount to roll"
-                                                    // onChange={(e) => setWrapAmount(e.target.value)}
-                                                    w="80%"
-                                                /> */}
-                                            <Box >                              
+                                    </DrawerTrigger>
+                                    <DrawerBackdrop />
+                                    <DrawerContent>
+                                        <Box mt="80%" ml={5}>
+                                        <DrawerHeader>
+                                            <DrawerTitle>
+                                                <Text as="h3" color="#a67c00">Roll Loan</Text>
+                                            </DrawerTitle>
+                                            <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
+                                                <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
+                                            </DrawerCloseTrigger>
+                                        </DrawerHeader>
+                                        <DrawerBody>
+                                            {/* <Input
+                                                placeholder="Amount to roll"
+                                                // onChange={(e) => setWrapAmount(e.target.value)}
+                                                w="80%"
+                                            /> */}
+                                        <Box border="1px solid #a67c00" borderRadius="md" p={3} w="90%" >                              
 
-                                                <HStack>
-                                                    <Box w="140px">New Duration:</Box>
-                                                    <Box><Text color="white">{duration / 86400} days</Text></Box>
-                                                </HStack>
-                                                <HStack>
-                                                    <Box  w="140px">Expires On:</Box>
-                                                    <Box><Text color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
-                                                </HStack>
-                                            </Box>        
-                                            <Box >
-                                                <HStack>
-                                                    <Box  w="140px">Amount:</Box>
-                                                    <Box><Text color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
-                                                </HStack>
-                                                <HStack>
-                                                    <Box  w="140px">Loan Fees:</Box>
-                                                    <Box><Text color="white">{commifyDecimals(rollLoanAmount * 0.00027 * getDaysLeft(`${loanData?.expires}`), 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
-                                                </HStack>
-                                            </Box>  
-                                            <Box mt={10}>
-                                            <DrawerActionTrigger asChild>
-                                                    <Button variant="outline"  w="120px" onClick={() => setIsRolling(false)}>
-                                                        Cancel
-                                                    </Button>
-                                                </DrawerActionTrigger>
-                                                <Button colorScheme="blue" onClick={handleClickRoll} w="120px">
-                                                    {isWrapping ? <Spinner size="sm" /> : "Confirm"}
-                                                </Button>                                
-                                            </Box>                                
-                                            </DrawerBody>
-                                            </Box>
-                                            {/* <DrawerFooter>
-                                            </DrawerFooter> */}
-                                        </DrawerContent>
-                                        </DrawerRoot>
+                                            <HStack>
+                                                <Box w="120px"><Text fontSize="sm" color="#f3f7c6">New Duration:</Text></Box>
+                                                <Box><Text fontSize="sm" color="white">{duration / 86400} days</Text></Box>
+                                            </HStack>
+                                            <HStack>
+                                                <Box  w="120px"><Text fontSize="sm" c color="#f3f7c6">Expires On:</Text></Box>
+                                                <Box><Text fontSize="sm" color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
+                                            </HStack>
+                                            <HStack>
+                                                <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Amount:</Text></Box>
+                                                <Box><Text fontSize="sm" color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
+                                            </HStack>
+                                            <HStack>
+                                                <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Loan Fees:</Text></Box>
+                                                <Box>
+                                                    <Text color="white" fontSize="sm">
+                                                    {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}&nbsp;
+                                                    {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info.tokenSymbol}
+                                                    </Text></Box>
+                                            </HStack>
+                                        </Box>  
+                                        <Box mt={10}>
+                                        <DrawerActionTrigger asChild>
+                                                <Button variant="outline"  w="120px" onClick={() => setIsRolling(false)}>
+                                                    Cancel
+                                                </Button>
+                                               
+                                            </DrawerActionTrigger>
+                                            <Button colorScheme="blue" onClick={handleClickRoll} w="120px" ml={2}>
+                                                {isRolling ? <Spinner size="sm" /> : "Confirm"}
+                                            </Button>                                
+                                        </Box>                                
+                                        </DrawerBody>
+                                        </Box>
+                                        {/* <DrawerFooter>
+                                        </DrawerFooter> */}
+                                    </DrawerContent>
+                                    </DrawerRoot>
 
                                     </VStack>
                                     </Box>
@@ -771,6 +797,8 @@ const Borrow = () => {
                                         setTokenSupply={(() => {})}
                                         setPrice={setBorrowAmount}
                                         setFloorPrice={(() => {})}
+                                        height={"38px"}
+                                        mt={1}
                                     >
                                         <NumberInputLabel h={"38px"} w={{ base: "", lg: "auto" }} />
                                         <NumberInputField h={"38px"} w={{ base: "", lg: "200px" }} />
@@ -788,29 +816,32 @@ const Borrow = () => {
                                         <HStack>
                                             <Box w="auto"><Text>{commify(borrowAmount)} </Text></Box>
                                             <Box>{token1Info.tokenSymbol}</Box>
-                                            <Box  w="120px" fontSize={"11px"}> ({duration / 86400} days)</Box>
+                                            <Box  w="120px" fontSize={"11px"}> <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
                                         </HStack>
                                     </Box>
                                     </HStack>
                                     <Box mt={5}>
-                                        <Text fontWeight={"bold"} color="#a67c00">Collateral required</Text>
+                                        <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"12px":"15px"}>Collateral required</Text>
                                     </Box>
                                     <Box>
                                         <Text>{commify(collateral || 0)} {token0Info.tokenSymbol}</Text>
                                     </Box>
                                     <Box mt={5}>
                                        <HStack>
-                                        <Box> <Text fontWeight={"bold"} color="#a67c00">Loan Fees</Text>    </Box>
+                                        <Box> <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"12px":"15px"}>Loan Fees</Text>    </Box>
                                         <Box><Image src={placeholderLogo} w={15}></Image></Box>
                                        </HStack>
                                     </Box>
                                     <Box>
-                                        <Text>{commifyDecimals(formatEther(`${loanFees || 0}`), 6)} {token1Info.tokenSymbol}</Text>
+                                        <Text>{commifyDecimals(`${loanFees || 0}`, 8)} {token1Info.tokenSymbol}</Text>
                                     </Box>
                                     <Box mt={5}> 
+                                            <HStack>
+                                                <Box><Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"12px":"15px"}>IMV</Text> </Box>
+                                                <Box><Image src={placeholderLogo} w={15}></Image></Box>
+                                            </HStack>
                                         <HStack>
-                                            <Box><Text fontWeight={"bold"} color="#a67c00">IMV</Text> </Box>
-                                            <Box>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 4)}</Box>
+                                            <Box>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Box>
                                             <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info?.tokenSymbol}/{token1Info?.tokenSymbol}</Box>
                                         </HStack>
                                     </Box> 
@@ -844,10 +875,10 @@ const Borrow = () => {
                             </SelectRoot>
                             </Box>
                             <Box>
-                                <Button mt={2} h={"30px"}  borderColor={"#a67c00"} variant="outline" ml={5} onClick={() => handleBorrow()}  
-                                disabled={isLoading || loanData?.borrowAmount > 0 || borrowAmount == 0} w={"120px"}>
-                                    {isBorrowing ? <Spinner size="sm" color="#a67c00" /> : <Text color="white">Borrow</Text>}
-                                </Button>
+                            <Button mt={2} h={"30px"}  borderColor={"#a67c00"} variant="outline" ml={5} onClick={() => handleBorrow()}  
+                            disabled={isTokenInfoLoading || loanData?.borrowAmount > 0 || borrowAmount == 0} w={"120px"}>
+                                <Text color="#a67c00">Borrow</Text>
+                            </Button>
                             </Box>
                         </SimpleGrid>
 
