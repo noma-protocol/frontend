@@ -131,7 +131,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
                   color: "#fff",
                   background: "#FF4560",
                 },
-                text: `Spot Price: ${spotPrice.toFixed(4)} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
+                text: `Spot Price: ${spotPrice.toFixed(6)} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
               },
             },
             {
@@ -144,7 +144,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
                   color: "#fff",
                   background: "black",
                 },
-                text: `IMV: ${Number(formatEther(`${imv}`)).toFixed(4)}`,
+                text: `IMV: ${Number(formatEther(`${imv}`)).toFixed(6)}`,
                 offsetY: -10, // Adjust offset if needed
               },
             },
