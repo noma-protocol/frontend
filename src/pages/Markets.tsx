@@ -436,7 +436,7 @@ const Markets: React.FC = () => {
       ) : (
         <Box
           w="100%"
-          h="70vh"
+          h="80vh"
           color="white"
           display="flex"
           alignItems="center"
@@ -446,16 +446,8 @@ const Markets: React.FC = () => {
           // mt={50}
           // mb={50}
         >
-          <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"} >
-            <Box px={4} mt={-350}>
-            {/* Header Section */}
-            {/* <Heading as="h3">
-              Markets
-              <Text fontSize="md">
-                All tokens launched with the Noma protocol in one place 🚀
-              </Text>
-            </Heading> */}
-            {/* View Toggle Buttons */}
+          <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"}>
+            <Box px={4} mt={isMobile? -60:-450} mb={4} w="100%">
             <HStack spacing={4} mb={4}>
               <Button
                 onClick={() => handleSetView("all")}
@@ -476,11 +468,13 @@ const Markets: React.FC = () => {
 
             {/* Vaults List */}
             <Box
-              mt={-250}
+              mt={isMobile?-40:-350}
+              ml={isMobile ? 5: 0}
               border="1px solid gray"
               p={8}
               borderRadius={20}
               w={isMobile ? "auto" : "80%"}
+              h="200px"
               backgroundColor="#222831"
             >
               {view === "all" && isAllVaultsLoading ? (
