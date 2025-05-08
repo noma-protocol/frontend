@@ -329,10 +329,12 @@ const Liquidity: React.FC = () => {
           justifyContent="center"
           textAlign="left"
           position="relative"
-          mt={"50px"}
+          // mt={"50px"}
+          h="80vh"
+          // border="1px solid #a67c00"
+
         >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20vw"}>
-            <Box px={4}>
+          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20vw"} px={4}>
               {/* Header Section */}
               {/* <Heading as="h3">
                 Liquidity
@@ -341,7 +343,7 @@ const Liquidity: React.FC = () => {
                 </Text>
               </Heading> */}
 
-              <Box mt={8}>
+              <Box mt={isAllVaultsLoading ? "-420px" : "150px"} h="10vh">
               {isAllVaultsLoading ? (
                   <><HStack><Box><Text>Loading vaults...</Text></Box> <Box><Spinner size="sm" /></Box></HStack></>
               ) : vaultsSelectData?.items?.length > 0 ? (
@@ -394,7 +396,6 @@ const Liquidity: React.FC = () => {
                     <Text>Failed to fetch vault info. Please try again later.</Text>
                 )}
                 
-            </Box>
           </SimpleGrid>
         </Box>
       )}
