@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import {  HStack, Box, Button, Spinner, Text } from "@chakra-ui/react";
-import { commifyDecimals, } from '../utils';
+import {  VStack, HStack, Box, Button, Spinner, Text } from "@chakra-ui/react";
+import { formatNumberPrecise, commifyDecimals, commify } from '../utils';
 
 import {
     DrawerRoot,
@@ -20,7 +20,29 @@ import {
     NumberInputField,
   } from "../components/ui/number-input";
 
-const LoadAddCollateral = ({  extraCollateral, handleSetCollateral, isMobile, ltv, setIsAdding, isLoading, isAdding, handleClickAdd, ...props}) => {
+const LoadAddCollateral = ({  
+    token0Symbol, 
+    extraCollateral, 
+    handleSetCollateral, 
+    isMobile, 
+    ltv, 
+    setIsAdding, 
+    isLoading, 
+    setIsLoading, 
+    isTokenInfoLoading, 
+    isAdding, 
+    handleClickAdd, 
+    ...props
+}) => {
+    
+    const _handleSetCollateral = (e) => {
+        const value = e.target.value;
+        if (isNaN(value) || value == "") return 
+        if (Number(value) > 100000000) return;
+        handleSetCollateral(value);
+    }
+
+    const displayCollateral = extraCollateral >= 1000000 ? formatNumberPrecise(extraCollateral, 5) : commify(extraCollateral, 4);
 
     return (
     <>
@@ -29,12 +51,12 @@ const LoadAddCollateral = ({  extraCollateral, handleSetCollateral, isMobile, lt
         <Button 
             variant={"outline"}
             h={8}
-            // onClick={() => setIsAdding(true)}
-            disabled={isAdding || isLoading}
+            // onClick={() => setIsLoading(true)}
+            disabled={isTokenInfoLoading || isLoading}
             w={"120px"}
-            border="1px solid"
+            border="1px solid #f3f7c6"
         >
-        {isAdding ? <Spinner size="sm" /> : "Add"}
+        {isLoading ? <Spinner size="sm" /> : <Text color={"#f3f7c6"}>Add </Text>}
         </Button>
         </DrawerTrigger>
         <DrawerBackdrop />
@@ -60,29 +82,39 @@ const LoadAddCollateral = ({  extraCollateral, handleSetCollateral, isMobile, lt
                     <NumberInputRoot
                         isMobile={isMobile}
                         min={0}
-                        max={999999999}
+                        max={9999999}
                         step={0.1}
-                        onChange={handleSetCollateral}
+                        onChange={_handleSetCollateral}
                         ml={isMobile ? 0 : 1.5}
                         marginRight={"5px"}
+                        setValue={handleSetCollateral}
+                        targetValue={extraCollateral}
+                        customStep={0.1}
                     >
                         <NumberInputLabel h={"38px"} w={{ base: "", lg: "auto" }} />
                         <NumberInputField h={"38px"} w={{ base: "", lg: "200px" }} />
                     </NumberInputRoot>
                     </Box>
                 </HStack>
-                {/* <HStack>
-                    <Box>Loan Fees:</Box>
-                    <Box><Text color="white">{commifyDecimals(rollLoanAmount * 0.00027 * getDaysLeft(`${loanData?.expires}`), 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
-                </HStack> */}
-            </Box>  
+            </Box>
+            <Box>
+                <VStack border="1px solid #a67c00" borderRadius="md" p={3} mt={5} spacing={2} w="80%" alignItems="flex-start">
+                <Box>
+                    <Text color="#a67c00" fontSize="sm">Adding:</Text>
+                </Box>
+                <Box>
+                    <Text color="#f3f7c6" ml={2} fontSize="sm">{displayCollateral} {isLoading ? <Spinner size="sm" /> : token0Symbol}</Text>
+                </Box>                
+
+                </VStack>
+            </Box>
             <Box mt={10}>
             <DrawerActionTrigger asChild>
                     <Button variant="outline"  w="120px" onClick={() => setIsAdding(false)}>
                         Cancel
                     </Button>
                 </DrawerActionTrigger>
-                <Button colorScheme="blue" onClick={handleClickAdd} w="120px">
+                <Button colorScheme="blue" onClick={handleClickAdd} w="120px" ml={2}>
                     {isAdding ? <Spinner size="sm" /> : "Confirm"}
                 </Button>                                
             </Box>                                
