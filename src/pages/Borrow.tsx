@@ -594,7 +594,7 @@ const Borrow = () => {
                         p={4}
                         // border="1px solid yellow"
                     >
-                        <GridItem border={"1px solid white"} p={4} ml={20} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem border={"1px solid white"} p={4} px={6} ml={20} borderRadius={10} backgroundColor={"#222831"}>
                             <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">Active Loan</Text>
                             <SimpleGrid columns={5} mt={-5}>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
@@ -774,7 +774,7 @@ const Borrow = () => {
                                 page="borrow" 
                             />
                         </GridItem>
-                        <GridItem border={"1px solid white"} p={4} ml={20} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem border={"1px solid white"} p={4} px={6} pb={8} ml={20} borderRadius={10} backgroundColor={"#222831"}>
                         <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">New Loan</Text>
                         <SimpleGrid columns={3} w="700px" mt={-5}>
                             <Box w="500px"backgroundColor={"#a67c00"}  mb={2}>
@@ -812,18 +812,17 @@ const Borrow = () => {
                                         <Image src={bnbLogo}></Image>
                                     </Box>
                                 </HStack>
-                                    <HStack mt={5}>
+                                    <br />
                                     <Box>
-                                        <Text>Borrowing:</Text>
+                                        <Text fontWeight={"bold"} color="#a67c00">Borrowing</Text>
                                     </Box>
                                     <Box>
                                         <HStack>
-                                            <Box w="auto"><Text>{commify(borrowAmount)} </Text></Box>
+                                            <Box w="40px"><Text>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
                                             <Box>{token1Info.tokenSymbol}</Box>
-                                            <Box  w="120px" fontSize={"11px"}> <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
+                                            <Box  w="120px" fontSize={"11px"} mt={"2px"}> <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
                                         </HStack>
                                     </Box>
-                                    </HStack>
                                     <Box mt={5}>
                                         <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"12px":"15px"}>Collateral required</Text>
                                     </Box>
@@ -881,7 +880,7 @@ const Borrow = () => {
                             <Box>
                             <Button mt={2} h={"30px"}  borderColor={"#a67c00"} variant="outline" ml={5} onClick={() => handleBorrow()}  
                             disabled={isTokenInfoLoading || loanData?.borrowAmount > 0 || borrowAmount == 0} w={"120px"}>
-                                <Text color="#a67c00">Borrow</Text>
+                               {isBorrowing ? <Spinner size="sm" color="#a67c00"/> :  <Text color="#a67c00">Borrow</Text>}
                             </Button>
                             </Box>
                         </SimpleGrid>
