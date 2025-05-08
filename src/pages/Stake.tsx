@@ -506,8 +506,8 @@ const Stake = () => {
 
                     >
                         <GridItem border={"1px solid white"} p={4} ml={20}  backgroundColor={"#222831"} borderRadius={10}>
-                            <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"}>Active Position</Text>
-                            <SimpleGrid columns={5} mt={-5}>
+                            <Text fontSize={"14px"} fontWeight={"bold"}>Active Position</Text>
+                            <SimpleGrid columns={5} mt={-5} fontSize={"14px"}>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> s{token0Info.tokenSymbol} </Box>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
@@ -517,8 +517,8 @@ const Stake = () => {
                                     <>
                                     <Box px={2} mt={2}> 
                                         <HStack>
-                                            <Box  fontSize="sm">
-                                            {commify(formatEther(`${stakedBalance || 0}`))}
+                                            <Box  fontSize="xs">
+                                            {commify(formatEther(`${stakedBalance || 0}`), 4)}
                                             </Box>
                                             <Box  fontSize="xx-small">
                                             {token0Info.tokenSymbol}
@@ -526,11 +526,11 @@ const Stake = () => {
                                         </HStack>
                                     </Box>
                                     <Box px={2} mt={2}>
-                                        {commify(formatEther(`${sNomaBalance || 0}`), 8)}
+                                        {commify(formatEther(`${sNomaBalance || 0}`), 4)}
                                     </Box>
                                     <Box px={2} mt={2}>     
                                         <HStack>
-                                            <Box  fontSize="sm">
+                                            <Box  fontSize="xs">
                                             {commify(rewards, 4)}
                                             </Box>
                                             <Box  fontSize="xx-small">
@@ -595,13 +595,10 @@ const Stake = () => {
                             />
                         </GridItem>
                         <GridItem border={"1px solid white"} p={4} ml={20}  backgroundColor={"#222831"} borderRadius={10}>
-                        <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"}>New Position</Text>
-                        <SimpleGrid columns={3} w="700px" mt={-5}>
+                        <Text fontSize={"14px"} fontWeight={"bold"}>New Position</Text>
+                        <SimpleGrid columns={2} w="700px" mt={-5} fontSize={"14px"}>
                             <Box w="500px" backgroundColor={"#bf9b30"}  mb={2}>
                                 <Text>&nbsp;<b>Amount</b></Text>
-                            </Box>
-                            <Box  >
-                                <Text ml="40px">&nbsp;&nbsp;&nbsp;<b>Duration</b></Text>
                             </Box>
                             <Box backgroundColor={"#bf9b30"} mb={2}>
                                 <Text ml={5}>Actions</Text>
@@ -691,8 +688,6 @@ const Stake = () => {
                                     ))}
                                 </SelectContent>
                             </SelectRoot> */}
-                            </Box>
-                            <Box>
                                 <Button 
                                     mt={1} h={"30px"}  
                                     borderColor={"#a67c00"} 

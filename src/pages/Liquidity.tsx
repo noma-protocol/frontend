@@ -334,14 +334,14 @@ const Liquidity: React.FC = () => {
           <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20vw"}>
             <Box px={4}>
               {/* Header Section */}
-              <Heading as="h3">
+              {/* <Heading as="h3">
                 Liquidity
                 <Text fontSize="md">
                   All tokens launched with the Noma protocol in one place 🚀
                 </Text>
-              </Heading>
+              </Heading> */}
 
-              <Box mt={4}>
+              <Box mt={8}>
               {isAllVaultsLoading ? (
                   <><HStack><Box><Text>Loading vaults...</Text></Box> <Box><Spinner size="sm" /></Box></HStack></>
               ) : vaultsSelectData?.items?.length > 0 ? (

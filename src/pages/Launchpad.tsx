@@ -423,14 +423,15 @@ const Launchpad: React.FC = () => {
                 textAlign="left"
                 position="relative"
                 mt={50}
+                mb={"30%"}
             >
             <SimpleGrid columns={1} w="100%" ml={isMobile?"2vh":"20vw"}>
-                <Heading as={"h3"}>
+                {/* <Heading as={"h3"}>
                     Launchpad
                     <Text>Launch your Unruggable & Up only token 🚀</Text>
-                </Heading>
+                </Heading> */}
                 {deployStep == 0 ? (
-                <SimpleGrid columns={1} w="100%">
+                <SimpleGrid columns={1} w="100%" mt={20}>
                     <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="400px" backgroundColor="#222831">
                         <Heading as={"h4"} color="white" mr={8}>
                             <HStack>
