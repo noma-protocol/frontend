@@ -16,7 +16,7 @@ import {
     SelectTrigger,
     SelectValueText,
   } from "../components/ui/select";
-import { commify, commifyDecimals, getDaysLeft, calculateExpiryDate, getContractAddress } from '../utils';
+import { formatNumberPrecise, commify, commifyDecimals, getDaysLeft, calculateExpiryDate, getContractAddress } from '../utils';
 import {
     NumberInputRoot,
     NumberInputLabel,
@@ -458,7 +458,7 @@ const Stake = () => {
                     position="relative"
                     mt={"50px"}
                     // border="1px solid red"
-
+                    mb={"15%"}
                 >
                 {/* {isAddress(vaultAddress) ? (
                     isMobile ? (
@@ -506,7 +506,7 @@ const Stake = () => {
 
                     >
                         <GridItem border={"1px solid white"} p={4} ml={20}  backgroundColor={"#222831"} borderRadius={10}>
-                            <Text fontSize={"14px"} fontWeight={"bold"}>Active Position</Text>
+                            <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
                             <SimpleGrid columns={5} mt={-5} fontSize={"14px"}>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> s{token0Info.tokenSymbol} </Box>
@@ -517,8 +517,8 @@ const Stake = () => {
                                     <>
                                     <Box px={2} mt={2}> 
                                         <HStack>
-                                            <Box  fontSize="xs">
-                                            {commify(formatEther(`${stakedBalance || 0}`), 4)}
+                                            <Box  fontSize="sm">
+                                            {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
                                             </Box>
                                             <Box  fontSize="xx-small">
                                             {token0Info.tokenSymbol}
@@ -526,11 +526,11 @@ const Stake = () => {
                                         </HStack>
                                     </Box>
                                     <Box px={2} mt={2}>
-                                        {commify(formatEther(`${sNomaBalance || 0}`), 4)}
+                                        {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 4)}
                                     </Box>
                                     <Box px={2} mt={2}>     
                                         <HStack>
-                                            <Box  fontSize="xs">
+                                            <Box  fontSize="sm">
                                             {commify(rewards, 4)}
                                             </Box>
                                             <Box  fontSize="xx-small">
@@ -551,7 +551,7 @@ const Stake = () => {
                                         disabled={isUnstaking} 
                                         w={"120px"}
                                     >
-                                        {isUnstaking ? <Spinner size="sm" color="cyan" /> : <Text color="white">Unstake</Text>}
+                                        {isUnstaking ? <Spinner size="sm" color="#a67c00" /> : <Text color="#a67c00">Unstake</Text>}
                                     </Button>
                                     </Box>
 
@@ -595,7 +595,7 @@ const Stake = () => {
                             />
                         </GridItem>
                         <GridItem border={"1px solid white"} p={4} ml={20}  backgroundColor={"#222831"} borderRadius={10}>
-                        <Text fontSize={"14px"} fontWeight={"bold"}>New Position</Text>
+                        <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">New Position</Text>
                         <SimpleGrid columns={2} w="700px" mt={-5} fontSize={"14px"}>
                             <Box w="500px" backgroundColor={"#bf9b30"}  mb={2}>
                                 <Text>&nbsp;<b>Amount</b></Text>
@@ -618,6 +618,7 @@ const Stake = () => {
                                         setTokenSupply={(() => {})}
                                         setPrice={setStakeAmount}
                                         setFloorPrice={(() => {})}
+                                        h="30px"
                                     >
                                         <NumberInputLabel h={"38px"} w={{ base: "", lg: "auto" }} />
                                         <NumberInputField h={"38px"} w={{ base: "", lg: "200px" }} />
@@ -633,7 +634,7 @@ const Stake = () => {
                                     </Box>
                                     <Box>
                                         <HStack>
-                                            <Box w="auto"><Text>{commify(stakeAmount)} </Text></Box>
+                                            <Box w="auto"><Text>{formatNumberPrecise(stakeAmount, 4)} </Text></Box>
                                             <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info.tokenSymbol}</Box>
                                         </HStack>
                                     </Box>
@@ -695,7 +696,7 @@ const Stake = () => {
                                     onClick={() => handleStake()}  
                                     disabled={isLoading} w={"120px"}
                                 >
-                                    {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text color="white">Stake</Text>}
+                                    {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text color="#a67c00">Stake</Text>}
                                 </Button>
                             </Box>
                         </SimpleGrid>
