@@ -3,15 +3,16 @@ import { Box, Flex, Image, Stack, Heading, Text, Button, HStack } from "@chakra-
 import { isMobile } from "react-device-detect";
 import styled from "styled-components";
 import { useMenu } from "../hooks/MenuContext"; // Import useMenu hook for context
+import ArtImage from "../assets/images/features_3.svg";
 
-const StyledLink = styled.a`
-  color: gray !important; /* Force color to be white */
-  text-decoration: none; /* Remove underline */
+// const StyledLink = styled.a`
+//   color: gray !important; /* Force color to be white */
+//   text-decoration: none; /* Remove underline */
 
-  &:visited {
-    color: gray !important; /* Ensure visited links stay white */
-  }
-`;
+//   &:visited {
+//     color: gray !important; /* Ensure visited links stay white */
+//   }
+// `;
 
 const Hero: React.FC = () => {
   const { isMenuOpen } = useMenu(); // Access menu state from context
@@ -25,64 +26,6 @@ const Hero: React.FC = () => {
       minH="100vh"
       position="relative" // Required for absolute positioning of the banner
     >
-      {/* Animated Banner */}
-      {!isMenuOpen ? (
-        <Box
-          key={`banner-${isMenuOpen}`} // Unique key to force re-render
-          bg="lightgreen"
-          height="60px"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          overflow="hidden"
-          position="absolute"
-          top="150px"
-          left="0"
-          width="100vw"
-          zIndex="5"
-          visibility="visible" // Ensure it's visible when not hidden
-          className="animated-banner"
-        >
-        <Box
-          as="span"
-          whiteSpace="nowrap"
-          fontSize="16px"
-          color="black"
-          display="flex"
-          animation={`scroll ${isMobile ? "20s" : "40s"} linear infinite`}
-        >
-          <Box as="span">Earn</Box>
-          <Box as="span" color="gray">&nbsp;<b>$NOMA</b>&nbsp;</Box>
-          <Box as="span">points by participating in our community and promoting the upcoming</Box>
-          <Box as="span" color="gray">&nbsp;<b>bootstrap</b>&nbsp;</Box>
-          <Box as="span">event.&nbsp;&nbsp;Read more</Box>
-          <StyledLink href="https://nomaprotocol.medium.com/bootstrap-event-49c1ad496ab6" target="_blank">
-            &nbsp;<b>here</b>&nbsp;
-          </StyledLink>
-          <Box as="span">&nbsp;&nbsp;👈👈👈&nbsp;&nbsp;</Box>
-          <Box as="span" color="gray">&nbsp;<b>$NOMA</b>&nbsp;</Box>
-          <Box as="span">points earned globally:&nbsp;</Box>
-          <Box as="span" color="gray" fontSize="21px" mt={-1}>&nbsp;&nbsp;<b>28,973</b>&nbsp;&nbsp;📈</Box>
-        </Box>
-
-        </Box>
-      ) : (
-        <Box visibility="hidden" /> // Hide without removing from the DOM
-      )}
-
-      <style>
-        {`
-          @keyframes scroll {
-            0% {
-              transform: translateX(100%);
-            }
-            100% {
-              transform: translateX(-100%);
-            }
-          }         
-        `}
-      </style>
-
       {/* Main Hero Content */}
       <Box
         // ml={"5%"}
@@ -91,11 +34,11 @@ const Hero: React.FC = () => {
         flex={1}
         gap={20}
         className="container"
-        mt="120px" // Push content down to accommodate the banner
+        mt={isMobile ? "50%" : "120px"}
       >
-        <Box className="row align-items-center justify-content-center">
+        <Box className="row align-items-center justify-content-center" >
           <Flex direction={{ base: "column", md: "row" }} align="center" justify="center" width="full">
-            <Box className="col-md">
+            <Box className="col-md" >
               <Stack spacing={0}>
                 <Heading
                   fontSize={{
@@ -104,36 +47,39 @@ const Hero: React.FC = () => {
                     lg: "5xl",
                   }}
                 >
+                  <Box ml={isMobile ? -5 : 0}>
                   <Text as="span">
-                    Money with
+                    Unruggable tokens
                   </Text>
                   <br />
-                  <Text color="lightgreen" as="span">
-                    Special Powers
+                  <Text as="span">on </Text>
+                  <Text color="#f8bd45" as="span">
+                    Binance Smart Chain
                   </Text>
+                  </Box>
                 </Heading>
-                <Text color="white">
-                  Perpetually increasing and guaranteed Intrinsic Minimum Value (IMV) with permission-less market making on top of Uniswap V3.
-                </Text>
-                <HStack minW={100} justify={{ base: "center", md: "flex-start" }}>
-                  <a href="https://nomaprotocol.medium.com/announcing-noma-ecafef785e34" onClick={() => gaEventTracker("read_announcement")} target="_blank">
-                    <Button p={15} minW={100} fontWeight={600} background="black" color="lightgreen" h={70} border={"1px solid gray"}>
-                      Read our <br />announcement
+                  <Box ml={isMobile? 20 : 0}>
+                  <HStack minW={100} justify={{ base: "center", md: "flex-start" }}>
+                  <a href="https://oikoscash.medium.com/oikos-2025-a54f1b4fc5d9" onClick={() => gaEventTracker("read_announcement")} target="_blank">
+                    <Button p={15} minW={100} fontWeight={600} background="black" color="#f8bd45" h={70} border={"1px solid gray"} ml={isMobile?-20:0}>
+                      See the <br />announcement
                     </Button>
                   </a>
-                  <Button p={15} bg="lightgreen" minW={100} fontWeight={600} isDisabled h={70} borderStyle={"outset"} border={"1px solid white"}>
-                    <div style={{ textAlign: "center" }}>
-                      <div>Go to dApp</div>
-                      <div style={{ fontSize: "10px", marginTop: "5px", color: "gray" }}>Coming Soon</div>
-                    </div>
-                  </Button>
+                  &nbsp;
+                  <a href="https://docs.oikos.cash/"  target="_blank">
+                    <Button p={15} minW={150} fontWeight={600} background="black" color="#f8bd45" h={70} border={"1px solid gray"}>
+                      Read the <br />docs
+                    </Button>
+                  </a>
                 </HStack>
+                  </Box>
               </Stack>
             </Box>
-            <Box width={isMobile ? "0" : "50%"} textAlign="center">
+            <Box width={isMobile ? "0" : "35%"} textAlign="center" mr={"10%"}>
               <Image
+                height="380px"
                 objectFit="cover"
-                src="https://raw.githubusercontent.com/noma-protocol/assets/main/hands.png"
+                src={ArtImage}
                 visibility={isMobile ? "hidden" : "initial"}
               />
             </Box>
