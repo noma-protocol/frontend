@@ -62,7 +62,7 @@ const Footer: React.FC = () => {
             </Nav>
           </Col>
           <Col md="3" style={{marginTop:'50px', paddingLeft:"100px", marginLeft:isMobile? "5%": 0}}>
-            <h3 className="title" >Follow us:</h3>
+            <h3 className="title" color="white">Follow us:</h3>
               <a
                 href="https://twitter.com/oikos_cash"
                 id="tooltip39661217"
