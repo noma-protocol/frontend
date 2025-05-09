@@ -40,7 +40,7 @@ import addresses from "../assets/deployment.json";
 const { formatEther, parseEther, isAddress } = ethers.utils;
 const { JsonRpcProvider } = ethers.providers;
 
-const localProvider = new JsonRpcProvider("http://localhost:8545");
+const localProvider = new JsonRpcProvider("https://testnet-rpc.monad.xyz");
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
 const IWETHAbi = IWETHArtifact.abi;
@@ -58,8 +58,8 @@ const GonsTokenArtifact = await import(`../assets/GonsToken.json`);
 const GonsTokenAbi = GonsTokenArtifact.abi;
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
-const modelHelperAddress = getContractAddress(addresses, "1337", "ModelHelper");
+const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const modelHelperAddress = getContractAddress(addresses, "10143", "ModelHelper");
 
 const Stake = () => {
     const { address, isConnected } = useAccount();
