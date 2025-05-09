@@ -72,7 +72,7 @@ const ExchangeHelperAbi = ExchangeHelperArtifact.abi;
 const QuoterArtifact = await import(`../assets/QuoterV2.json`);
 const QuoterAbi = QuoterArtifact.abi;
 
-const localProvider = new JsonRpcProvider("http://localhost:8545");
+const localProvider = new JsonRpcProvider("https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW");
 
 // Dynamically import the NomaFactory artifact and extract its ABI
 const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
@@ -98,11 +98,11 @@ const WETHAbi = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
-const uniswapV3FactoryAddress = "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7";
-const exchangeHelperAddress = getContractAddress(addresses, "1337", "Exchange");
+const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
+const exchangeHelperAddress = getContractAddress(addresses, "10143", "Exchange");
 const quoterAddress = "0x78D78E420Da98ad378D7799bE8f4AF69033EB077";
-const addressModelHelper = getContractAddress(addresses, "1337", "ModelHelper");
+const addressModelHelper = getContractAddress(addresses, "10143", "ModelHelper");
 
 const feeTier = 3000;
 
@@ -194,8 +194,8 @@ const Exchange: React.FC = () => {
     watch: true,
   });
 
-  console.log(`Imv is ${formatEther(`${imv || 0}`)}`);
-    
+  console.log(`Imv is ${formatEther(`${imv || 0}`)} for vault ${selectedVault}`);
+
   useEffect(() => {
 
     if (token0 && token1) {
@@ -232,14 +232,14 @@ const Exchange: React.FC = () => {
     );
 
     const poolAddress = await uniswapV3FactoryContract.getPool(token0, token1, feeTier);
-
+    console.log(`Pool address for ${token0} and ${token1} is ${poolAddress}`);
     return poolAddress;
   };
 
   const {
     priceData,
     percentageChange
-  } = useUniswapPrice(poolInfo.poolAddress, "http://localhost:8545");
+  } = useUniswapPrice(poolInfo.poolAddress, "https://testnet-rpc.monad.xyz");
   
   /**
    * Fetch all vaults for the "All Markets" view
@@ -251,8 +251,10 @@ const Exchange: React.FC = () => {
     address: nomaFactoryAddress,
     abi: NomaFactoryAbi,
     functionName: "getDeployers",
-    enabled: isConnected,
+    // enabled: isConnected,
   });
+
+  console.log(`Deployers data: ${deployersData}`);
 
   useEffect(() => {
     const interval  = setInterval(() => {
@@ -318,7 +320,7 @@ const Exchange: React.FC = () => {
 
           try {
             const allVaultDescriptions = [];
-
+            console.log(`Deployers data: ${deployersData}`);
             // Iterate over deployers
             for (const deployer of deployersData) {
               const vaultsData = await nomaFactoryContract.getVaults(deployer);
@@ -340,6 +342,11 @@ const Exchange: React.FC = () => {
                   presaleContract: vaultDescriptionData[7],
                   stakingContract: vaultDescriptionData[8],
                 };
+
+                if (plainVaultDescription.tokenSymbol === "OKS") {
+                  console.log("Skipping OKS vault:", vault.toString());
+                  continue;
+                }
 
                 const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
@@ -453,7 +460,7 @@ const Exchange: React.FC = () => {
           newFloorPrice
         ] = await VaultContract.getVaultInfo();
   
-        // console.log(`Spot price is ${formatEther(`${spotPrice}`)}`);
+        console.log(`Spot price is ${formatEther(`${spotPrice}`)}`);
 
         // setCirculatingSupply(circulatingSupply);
         setSpotPrice(spotPrice);
@@ -917,7 +924,7 @@ const Exchange: React.FC = () => {
                         {/* <Line options={options} data={chartData} /> */}
                         <PriceData 
                           poolAddress={poolInfo.poolAddress} 
-                          providerUrl="http://localhost:8545"  
+                          providerUrl="https://testnet-rpc.monad.xyz"  
                           token0Symbol={token0Info?.tokenSymbol} 
                           token1Symbol={token1Info.tokenSymbol}
                         />
@@ -990,7 +997,7 @@ const Exchange: React.FC = () => {
                           <PriceData
                               imv={imv}
                               poolAddress={poolInfo.poolAddress} 
-                              providerUrl="http://localhost:8545"  
+                              providerUrl="https://testnet-rpc.monad.xyz"  
                               token0Symbol={token0Info?.tokenSymbol} 
                               token1Symbol={token1Info.tokenSymbol}
                             />

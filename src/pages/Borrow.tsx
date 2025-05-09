@@ -44,7 +44,7 @@ import addresses from "../assets/deployment.json";
 const { formatEther, parseEther, isAddress } = ethers.utils;
 const { JsonRpcProvider } = ethers.providers;
 
-const localProvider = new JsonRpcProvider("http://localhost:8545");
+const localProvider = new JsonRpcProvider("https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW");
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
 const IWETHAbi = IWETHArtifact.abi;
@@ -65,8 +65,8 @@ const ModelHelperArtifact = await import(`../assets/ModelHelper.json`);
 const ModelHelperAbi = ModelHelperArtifact.abi;
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
-const modelHelperAddress = getContractAddress(addresses, "1337", "ModelHelper");
+const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const modelHelperAddress = getContractAddress(addresses, "10143", "ModelHelper");
 
 const Borrow = () => {
     const { address, isConnected } = useAccount();
@@ -795,7 +795,6 @@ const Borrow = () => {
                                         max={999999999}
                                         step={0.1}
                                         onChange={handleSetAmountToBorrow}
-                                        ml={isMobile ? 0 : 1.5}
                                         marginRight={"5px"}
                                         value={borrowAmount}
                                         setTokenSupply={(() => {})}
@@ -817,8 +816,8 @@ const Borrow = () => {
                                         <Text fontWeight={"bold"} color="#a67c00">Borrowing</Text>
                                     </Box>
                                     <Box>
-                                        <HStack>
-                                            <Box w="40px"><Text>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
+                                        <HStack >
+                                            <Box w="50px" textAlign={"left"}><Text>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
                                             <Box>{token1Info.tokenSymbol}</Box>
                                             <Box  w="120px" fontSize={"11px"} mt={"2px"}> <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
                                         </HStack>

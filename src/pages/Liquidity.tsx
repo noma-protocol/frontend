@@ -32,7 +32,7 @@ import LiquidityChart from "../components/LiquidityChart";
 import addresses from "../assets/deployment.json";
 import {getContractAddress} from "../utils";
 
-const localProvider = new JsonRpcProvider("http://localhost:8545");
+const localProvider = new JsonRpcProvider("https://testnet-rpc.monad.xyz");
 
 // Dynamically import the NomaFactory artifact and extract its ABI
 const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
@@ -48,8 +48,8 @@ const ERC20Abi = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
-const uniswapV3FactoryAddress = "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7";
+const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const feeTier = 3000;
 
 const Liquidity: React.FC = () => {
@@ -128,7 +128,11 @@ const Liquidity: React.FC = () => {
                   presaleContract: vaultDescriptionData[7],
                 };
 
-
+                if (plainVaultDescription.tokenSymbol === "OKS") {
+                  console.log("Skipping OKS vault:", vault.toString());
+                  continue;
+                }
+                
                 const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
                 // Create a new object with the additional poolAddress property

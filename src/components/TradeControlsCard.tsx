@@ -65,7 +65,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 }) => {
 
   // console.log(`Token0Balance = ${token0Balance} | Token1Balance = ${token1Balance}`);
-  // Format the BNB balance (and avoid oversize values)
+  // Format the MON balance (and avoid oversize values)
   let formattedEthBalance = formatEther(`${ethBalance}`);
   if (Number(formattedEthBalance) > 1_000_000) {
     formattedEthBalance = commify(999999.9999);
@@ -134,6 +134,12 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
     }
   }
 
+  const handleSetTradeAsset = (e) => {
+    const useWethValue = e.value === "1"; // Convert to boolean
+    setUseWeth(useWethValue);
+    console.log(`Set useWeth to ${useWethValue}`);
+  }
+
   return (
     <Box
       mt={isMobile ? 10 : 5}
@@ -171,7 +177,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             // targetValue={`${contributionAmount}`}
             // formatOptions={{
             //     style: "currency",
-            //     currency: (tradeMode === "BUY" ? (token1Symbol == "WBNB" ? "BNB" : token1Symbol || "BNB") : "TOK"),
+            //     currency: (tradeMode === "BUY" ? (token1Symbol == "WBNB" ? "MON" : token1Symbol || "MON") : "TOK"),
             //     currencySign: "accounting",
             //   }}
             w={"220px"}
@@ -200,7 +206,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                       const scaledValue = e.value[0] / 100; // Convert back to decimal
                       handleSliderChange(scaledValue); // Pass the decimal value to the handler
                   }}
-                  max={sliderMax * 100} // Scale the max value as well
+                  max={sliderMax} // Scale the max value as well
                   colorPalette="yellow"
                   thumbAlignment="center"
                   disabled={isTokenInfoLoading} // Disable slider while token info is loading
@@ -333,16 +339,16 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           </Badge>
           <HStack gap="4" mt={2} ml={2}>
             <Box>
-              <Radio value={"1"}></Radio>
+              <Radio value={"1"} defaultChecked={useWeth == true} ></Radio>
             </Box>
             <Box>
-              <Text fontSize="13px">WBNB</Text>
+              <Text fontSize="13px">WMON</Text>
             </Box>
             <Box>
-              <Radio value={"0"}></Radio>
+              <Radio value={"0"} defaultChecked={useWeth == false}></Radio>
             </Box>
             <Box>
-              <Text fontSize="13px">BNB</Text>
+              <Text fontSize="13px">MON</Text>
             </Box>
           </HStack> 
           </Box>
@@ -360,7 +366,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 onClick={() => {
                   handleExecuteTrade();
                 }}
-                disabled={isLoadingExecuteTrade || isTokenInfoLoading || (token1Balance == 0 || token0Balance == 0)}
+                disabled={isLoadingExecuteTrade || isTokenInfoLoading || (token1Balance == 0 && token0Balance == 0)}
                 border="1px solid #a67c00"
               >
                 {isLoadingExecuteTrade ? <Spinner size="sm" /> : "Execute"}
@@ -403,7 +409,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                     onClick={() => {
                       handleExecuteTrade();
                     }}
-                    disabled={isLoadingExecuteTrade || isTokenInfoLoading || (tradeMode == "BUY" ? token1Balance == 0 : token0Balance == 0)}
+                    disabled={isLoadingExecuteTrade || isLoading  }
                     border="1px solid #a67c00"
                   >
                     {isLoadingExecuteTrade ? <Spinner size="sm" /> : "Execute"}

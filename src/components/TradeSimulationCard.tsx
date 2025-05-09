@@ -65,27 +65,27 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     const askQuote = _askQuote ? parseFloat(formatEther(_askQuote[0])) : null;
 
     // 1) Compute per-token rates:
-    const bidRate = bidQuote  / amountToBuy;   // e.g. 1.00420996 BNB/TOK
-    const askRate = askQuote / amountToSell;   // e.g. 0.997       BNB/TOK
+    const bidRate = bidQuote  / amountToBuy;   // e.g. 1.00420996 MON/TOK
+    const askRate = askQuote / amountToSell;   // e.g. 0.910143       MON/TOK
 
     // 2) Mid-price:
     const midRate = (bidRate + askRate) / 2;     // ~1.000605
 
-    // 3) Absolute spread in BNB/TOK:
+    // 3) Absolute spread in MON/TOK:
     const absSpread = askRate - bidRate;        // negative if bid>ask
 
     // 4) Percent spread relative to mid-price:
     const spreadPct = (Math.abs(absSpread) / midRate) * 100;  // ~0.72
 
     // 5) Log everything:
-    console.log("Trade Mode:",       tradeMode);
-    console.log("Amount to Buy:",    amountToBuy);
-    console.log("Amount to Sell:",   amountToSell);
-    console.log("Bid Price (BNB/TOK):", bidRate.toFixed(6));
-    console.log("Ask Price (BNB/TOK):", askRate.toFixed(6));
-    console.log("Mid Price:",           midRate.toFixed(6));
-    console.log("Spread (BNB/TOK):",    absSpread.toFixed(6));
-    console.log("Spread (%):",          spreadPct.toFixed(2));
+    // console.log("Trade Mode:",       tradeMode);
+    // console.log("Amount to Buy:",    amountToBuy);
+    // console.log("Amount to Sell:",   amountToSell);
+    // console.log("Bid Price (MON/TOK):", bidRate.toFixed(6));
+    // console.log("Ask Price (MON/TOK):", askRate.toFixed(6));
+    // console.log("Mid Price:",           midRate.toFixed(6));
+    // console.log("Spread (MON/TOK):",    absSpread.toFixed(6));
+    // console.log("Spread (%):",          spreadPct.toFixed(2));
 
     // console.log(`Dummy Quote Bid: ${quoteBid}`);
     // console.log(`Dummy Quote Ask: ${quoteAsk}`);
@@ -118,14 +118,14 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     return (
         <Box>
             <HStack>
-                <Box  w="160px"><Text  ml={8}>Spending:</Text></Box>
+                <Box  w="160px"><Text fontSize={"13px"} ml={8}>Spending:</Text></Box>
                 <Box><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy) : commify(amountToSell) }</Text></Box>
-                <Box fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "BNB"): token0Info.tokenSymbol} </Box>
+                <Box fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
             </HStack>
             <HStack>
                 <Box  w="160px"><Text fontSize={"13px"} ml={8}>Receiving:</Text></Box>
                 <Box><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy / bidRate) : commify(amountToSell * askRate)}</Text></Box>
-                <Box fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : "BNB")} </Box>
+                <Box fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : "MON")} </Box>
             </HStack>
             <HStack>
                 <Box w="160px"><Text fontSize={"13px"} ml={8}>Max Slippage:</Text></Box>
