@@ -311,7 +311,7 @@ const Liquidity: React.FC = () => {
   }
 
   return (
-    <Container maxW="container.xl" py={12}>
+    <Container maxW="container.xl">
       <Toaster />
 
       {!isConnected ? (
@@ -319,7 +319,7 @@ const Liquidity: React.FC = () => {
           display="flex"
           alignItems="center"
           justifyContent="center"
-          height="100vh"
+          // height="100vh"
           color="white"
         >
           <Heading as="h2">Connect your wallet</Heading>
@@ -334,7 +334,6 @@ const Liquidity: React.FC = () => {
           textAlign="left"
           position="relative"
           // mt={"50px"}
-          h="80vh"
           // border="1px solid #a67c00"
 
         >
@@ -347,7 +346,7 @@ const Liquidity: React.FC = () => {
                 </Text>
               </Heading> */}
 
-              <Box mt={isAllVaultsLoading ? "-420px" : "150px"} h="10vh">
+              <Box>
               {isAllVaultsLoading ? (
                   <><HStack><Box><Text>Loading vaults...</Text></Box> <Box><Spinner size="sm" /></Box></HStack></>
               ) : vaultsSelectData?.items?.length > 0 ? (

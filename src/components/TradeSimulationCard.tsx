@@ -141,6 +141,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             <Button variant="outline" h="30px" fontSize={isMobile?"12px": "11px"}>
                 {isRolling ? <Spinner size="sm" /> : "Edit"}
             </Button>
+            <br /><br /><br />
             </Box>
             </DrawerTrigger>
             <DrawerBackdrop />
