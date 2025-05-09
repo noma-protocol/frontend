@@ -1,5 +1,5 @@
 {
-  "name": "oikos-exchange",
+  "name": "oikos-frontend",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -43,6 +43,7 @@
     "react-loader-spinner": "^6.1.6",
     "react-router-dom": "^6.28.0",
     "react-toastify": "^10.0.4",
+    "reactstrap": "^9.2.3",
     "sort-by": "^1.2.0",
     "viem": "latest",
     "wagmi": "latest"
