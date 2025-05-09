@@ -200,6 +200,8 @@ const Exchange: React.FC = () => {
   const [quote, setQuote] = useState("");
   const [slippage, setSlippage] = useState("1");
   const [txAmount, setTxAmount] = useState("");
+  const [balanceBeforePurchase, setBalanceBeforePurchase] = useState(0);
+  const [balanceBeforeSale, setBalanceBeforeSale] = useState(0);
 
   const {
     data: imv
@@ -211,7 +213,7 @@ const Exchange: React.FC = () => {
     watch: true,
   });
 
-  console.log(`Imv is ${formatEther(`${imv || 0}`)} for vault ${selectedVault}`);
+  // console.log(`Imv is ${formatEther(`${imv || 0}`)} for vault ${selectedVault}`);
 
   useEffect(() => {
 
@@ -249,14 +251,14 @@ const Exchange: React.FC = () => {
     );
 
     const poolAddress = await uniswapV3FactoryContract.getPool(token0, token1, feeTier);
-    console.log(`Pool address for ${token0} and ${token1} is ${poolAddress}`);
+    // console.log(`Pool address for ${token0} and ${token1} is ${poolAddress}`);
     return poolAddress;
   };
 
   const {
     priceData,
     percentageChange
-  } = useUniswapPrice(poolInfo.poolAddress, "https://testnet-rpc.monad.xyz");
+  } = useUniswapPrice(poolInfo.poolAddress, "https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW");
   
   /**
    * Fetch all vaults for the "All Markets" view
@@ -271,7 +273,7 @@ const Exchange: React.FC = () => {
     // enabled: isConnected,
   });
 
-  console.log(`Deployers data: ${deployersData}`);
+  // console.log(`Deployers data: ${deployersData}`);
 
   useEffect(() => {
     const interval  = setInterval(() => {
@@ -398,7 +400,7 @@ const Exchange: React.FC = () => {
 
           try {
             const allVaultDescriptions = [];
-            console.log(`Deployers data: ${deployersData}`);
+            // console.log(`Deployers data: ${deployersData}`);
             // Iterate over deployers
             for (const deployer of deployersData) {
               const vaultsData = await nomaFactoryContract.getVaults(deployer);
@@ -407,7 +409,7 @@ const Exchange: React.FC = () => {
               for (const vault of vaultsData) {
                 const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
                 
-                console.log({vaultDescriptionData})
+                // console.log({vaultDescriptionData})
                 // Convert Proxy(_Result) to a plain object
                 const plainVaultDescription = {
                   tokenName: vaultDescriptionData[0],
@@ -422,7 +424,7 @@ const Exchange: React.FC = () => {
                 };
 
                 if (plainVaultDescription.tokenSymbol === "OKS") {
-                  console.log("Skipping OKS vault:", vault.toString());
+                  // console.log("Skipping OKS vault:", vault.toString());
                   continue;
                 }
 
@@ -485,7 +487,7 @@ const Exchange: React.FC = () => {
     if (vaultDescriptions.length > 0) {
         // setSelectedVault(vaultDescriptions[0].vault);
 
-        console.log(`Selected vault is ${selectedVault}`);
+        // console.log(`Selected vault is ${selectedVault}`);
 
         // find the selected vault in descriptions
         const _selectedVault = vaultDescriptions
@@ -538,7 +540,7 @@ const Exchange: React.FC = () => {
           newFloorPrice
         ] = await VaultContract.getVaultInfo();
   
-        console.log(`Spot price is ${formatEther(`${spotPrice}`)}`);
+        // console.log(`Spot price is ${formatEther(`${spotPrice}`)}`);
 
         // setCirculatingSupply(circulatingSupply);
         setSpotPrice(spotPrice);
@@ -680,8 +682,27 @@ const Exchange: React.FC = () => {
         args: buyArgs,
         value: parseEther(`${amountToBuy}`),
         onSuccess(data) {
-            setIsLoading(false);
-            setIsLoadingExecuteTrade(false);
+            setTimeout(() => {
+                      
+              const fetchEthBalance = async () => {
+                const ethBalance = await localProvider.getBalance(address);
+                console.log(`ETH Balance after purchase: ${ethBalance}`);
+                setEthBalance(ethBalance);
+
+                let  diff = formatEther(`${balanceBeforePurchase}`) - formatEther(`${ethBalance}`);
+
+                console.log(`${balanceBeforePurchase} - ${ethBalance}`);
+                setIsLoading(false);
+                setIsLoadingExecuteTrade(false);
+                toaster.create({
+                    title: "Success",
+                    description: `Spent ${commifyDecimals(diff, 4)} ETH`,
+                });
+              };
+              fetchEthBalance();
+
+
+            }, 6000); // 3000ms = 3 seconds      
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
@@ -841,7 +862,8 @@ const Exchange: React.FC = () => {
             address,
             false
           ]
-
+          
+          setBalanceBeforePurchase(ethBalance);
           setBuyArgs(args);
           buyTokensETH();
         }
@@ -997,6 +1019,15 @@ const Exchange: React.FC = () => {
                 {isMobile ? 
                 <Box mt={10}>
                     <Flex direction="column">
+                    <Box mt={10}>
+                        {/* <Line options={options} data={chartData} /> */}
+                        <PriceData 
+                          poolAddress={poolInfo.poolAddress} 
+                          providerUrl="https://testnet-rpc.monad.xyz"  
+                          token0Symbol={token0Info?.tokenSymbol} 
+                          token1Symbol={token1Info.tokenSymbol}
+                        />
+                    </Box>
                     <BalanceCard
                         ethBalance={ethBalance}
                         token0Balance={token0Info?.balance}
@@ -1018,17 +1049,8 @@ const Exchange: React.FC = () => {
                         vaultAddress={selectedVault}
                         page="exchange"
                     />
-                    <Box mt={10}>
-                        {/* <Line options={options} data={chartData} /> */}
-                        <PriceData 
-                          poolAddress={poolInfo.poolAddress} 
-                          providerUrl="https://testnet-rpc.monad.xyz"  
-                          token0Symbol={token0Info?.tokenSymbol} 
-                          token1Symbol={token1Info.tokenSymbol}
-                        />
-                    </Box>
-                    <Box w="90%" h="250px" border={isMobile ? "":"1px solid gray"}>
-                        <TradeControlsCard 
+                    <Box w="90%" h="440px" ml={5} border={isMobile ? 0 : "1px solid gray"}>
+                        <TradeControlsCard  
                             ethBalance={ethBalance}
                             token0Balance={token0Info?.balance} 
                             token0Symbol={token0Info?.tokenSymbol} 
@@ -1055,8 +1077,8 @@ const Exchange: React.FC = () => {
                             quoteMax={0}
                             />
                     </Box>
-                    <Box w="90%" h="250px"  pt={4}>
-                      {isMobile ? <><br /><br /><br /><br /><br /><br /><br /><br /></>: <></>}
+                    <Box w="90%" h="300px" ml={5}>
+                      
                     <Text fontWeight={"bold"} ml={8} color="#a67c00">
                         Trade Info 
                     </Text>
