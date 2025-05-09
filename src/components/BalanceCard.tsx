@@ -113,7 +113,7 @@ const BalanceCard = ({
             p={4}
             {...props} 
             h={{ base: "auto", md: "280px" }}
-            minH="280px"
+            minH="auto"
             borderRadius={10} 
             backgroundColor={withBg ? "none" : "#222831"}
         >
@@ -124,7 +124,7 @@ const BalanceCard = ({
                 <Box color="white" background="#bf9b30" p={2} pl={3}>
                     Asset
                 </Box>
-                <Box color="white" background="#bf9b30" p={2} textAlign="center">
+                <Box color="white" background="#bf9b30" p={2} textAlign="left">
                     Balance
                 </Box>
                 <Box color="white" background="#bf9b30" p={2} textAlign="center">
@@ -138,7 +138,7 @@ const BalanceCard = ({
                         <Text mt={1} ml={2}>MON</Text>
                     </HStack>
                 </Box>
-                <Box p={2} fontSize={fontSize} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
+                <Box p={2} fontSize={fontSize} textAlign="left" height="42px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formattedEthBalance)}
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
@@ -199,14 +199,14 @@ const BalanceCard = ({
                 {/* WMON Row */}
                 <Box p={2} height="42px" display="flex" alignItems="center">
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
-                        <Spinner size="sm" /> :
+                        <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2}>
                             <Image src={monadLogo} w="25px" alt={token1Symbol || 'Token'} />
                             <Text ml={2} mt={"-2px"}>{token1Symbol || 'Loading...'}</Text>
                         </HStack>
                     }
                 </Box>
-                <Box p={2} fontSize={fontSize} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
+                <Box p={2} fontSize={fontSize} textAlign="left" height="42px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token1Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
@@ -265,25 +265,25 @@ const BalanceCard = ({
                 </Box>
                 
                 {/* Token Row */}
-                <Box p={2}  display="flex" alignItems="center">
+                <Box p={2}  display="flex" alignItems="center" mt={-8}>
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
-                        <Spinner size="sm" /> :
-                        <HStack spacing={2}>
-                            <Box>
+                        <Spinner size="sm" ml={"3px"} /> :
+                        <HStack spacing={2} >
+                            <Box >
                              <Image
                                 src={token0Symbol == "OKS" ? oksLogo : placeHolder}
                                 w={token0Symbol == "OKS" ? "35px" : "25px"}
                                 alt={token0Symbol || 'Token'}
-
+                                
                             />
                             </Box>
                             <Box>
-                               <Text>{token0Symbol || 'Loading...'}</Text>
+                               <Text>&nbsp;{token0Symbol || 'Loading...'}</Text>
                             </Box>
                         </HStack>
                     }
                 </Box>
-                <Box p={2} fontSize={fontSize} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center">
+                <Box p={2} fontSize={fontSize} textAlign="left" height="70px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token0Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center">
