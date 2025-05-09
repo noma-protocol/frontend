@@ -381,10 +381,10 @@ const Exchange: React.FC = () => {
         if (token1Data) setToken1Info(token1Data);
         setIsRefreshingTokenInfo(false);
       });
-    }, 5000); // Increased interval to 5 seconds
+    }, 3000); // Increased interval to 5 seconds
 
     return () => clearInterval(interval);
-  } , [token0, token1, address]);
+  } , [ethBalance, token0, token1, address]);
 
   useEffect(() => {
     if (typeof deployersData !== "undefined") {
@@ -684,22 +684,30 @@ const Exchange: React.FC = () => {
         onSuccess(data) {
             setTimeout(() => {
                       
-              const fetchEthBalance = async () => {
+              const fetchBalances = async () => {
+                const tokenContract = new ethers.Contract(
+                  token0,
+                  ERC20Abi,
+                  localProvider
+                );
+
                 const ethBalance = await localProvider.getBalance(address);
-                console.log(`ETH Balance after purchase: ${ethBalance}`);
+                const balance = await tokenContract.balanceOf(address);
+
                 setEthBalance(ethBalance);
 
-                let  diff = formatEther(`${balanceBeforePurchase}`) - formatEther(`${ethBalance}`);
+                let  ethDiff = formatEther(`${balanceBeforeSale}`) - formatEther(`${ethBalance}`);
+                let  tokenDiff = formatEther(`${balance}`) - formatEther(`${balanceBeforePurchase}`);
 
-                console.log(`${balanceBeforePurchase} - ${ethBalance}`);
+                // console.log(`ethDiff: ${ethDiff} ETH, tokenDiff: ${tokenDiff} ${token0Info.tokenSymbol}`);
                 setIsLoading(false);
                 setIsLoadingExecuteTrade(false);
                 toaster.create({
                     title: "Success",
-                    description: `Spent ${commifyDecimals(diff, 4)} ETH`,
+                    description: `Spent ${commifyDecimals(ethDiff, 4)} MON.\nReceived ${commify(tokenDiff, 4)} ${token0Info.tokenSymbol}`,
                 });
               };
-              fetchEthBalance();
+              fetchBalances();
 
 
             }, 6000); // 3000ms = 3 seconds      
@@ -862,8 +870,8 @@ const Exchange: React.FC = () => {
             address,
             false
           ]
-          
-          setBalanceBeforePurchase(ethBalance);
+          setBalanceBeforePurchase(token0Info.balance);
+          setBalanceBeforeSale(ethBalance);
           setBuyArgs(args);
           buyTokensETH();
         }

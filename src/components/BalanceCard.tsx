@@ -202,7 +202,7 @@ const BalanceCard = ({
                         <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2}>
                             <Image src={monadLogo} w="25px" alt={token1Symbol || 'Token'} />
-                            <Text ml={2} mt={"-2px"}>{token1Symbol || 'Loading...'}</Text>
+                            <Text ml={2} mt={"-2px"}>{token1Symbol || <Spinner size="sm" />}</Text>
                         </HStack>
                     }
                 </Box>
@@ -278,7 +278,7 @@ const BalanceCard = ({
                             />
                             </Box>
                             <Box>
-                               <Text>&nbsp;{token0Symbol || 'Loading...'}</Text>
+                               <Text>&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
                             </Box>
                         </HStack>
                     }
