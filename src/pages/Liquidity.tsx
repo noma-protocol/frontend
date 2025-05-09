@@ -128,7 +128,7 @@ const Liquidity: React.FC = () => {
                   presaleContract: vaultDescriptionData[7],
                 };
 
-                if (plainVaultDescription.tokenSymbol === "OKS") {
+                if (plainVaultDescription.tokenSymbol === "OKS" || plainVaultDescription.tokenSymbol === "TST") {
                   console.log("Skipping OKS vault:", vault.toString());
                   continue;
                 }
@@ -311,7 +311,7 @@ const Liquidity: React.FC = () => {
   }
 
   return (
-    <Container maxW="container.xl">
+    <Container maxW="container.xl" h="90vh">
       <Toaster />
 
       {!isConnected ? (
@@ -333,11 +333,12 @@ const Liquidity: React.FC = () => {
           justifyContent="center"
           textAlign="left"
           position="relative"
+          mt={-50}
           // mt={"50px"}
-          // border="1px solid #a67c00"
+          
 
         >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20vw"} px={4}>
+          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20vw"} mt={"15vh"}>
               {/* Header Section */}
               {/* <Heading as="h3">
                 Liquidity

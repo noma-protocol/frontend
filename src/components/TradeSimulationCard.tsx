@@ -116,7 +116,12 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     //   console.log(`${amountToSell} / ${formatEther(`${quote || 0}`)} * ${amountToSell} = ${realQuote}`);
 
     return (
-        <Box>
+        <Box mt={-5}>
+                                  
+            <Text fontWeight={"bold"} ml={8} color="#a67c00">
+                Trade Info 
+            </Text>
+            
             <HStack>
                 <Box  w="160px"><Text fontSize={"13px"} ml={8}>Spending:</Text></Box>
                 <Box><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy) : commify(amountToSell) }</Text></Box>
