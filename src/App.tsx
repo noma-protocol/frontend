@@ -24,9 +24,9 @@ function App() {
   const TRACKING_ID = "UA-XXXXX-X"; // OUR_TRACKING_ID
   ReactGA.initialize(TRACKING_ID);
 
-  const projectId = "1607c5f300e1191999e3033443961XXX";
+  const projectId = "7820402434e60ca8c323d77ae01be61d";
   const metadata = {
-    name: "Noma Protocol",
+    name: "Oikos",
     description: "Next-gen Launchpad",
     url: "https://web3modal.com",
     icons: ["https://avatars.githubusercontent.com/u/37784886"],
