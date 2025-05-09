@@ -17,7 +17,7 @@ import {
   Spinner,
   Grid,
   Checkbox,
-GridItem,
+  GridItem,
 } from "@chakra-ui/react";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { Toaster, toaster } from "../components/ui/toaster";
@@ -274,9 +274,9 @@ const Exchange: React.FC = () => {
   useEffect(() => {
     const fetchInitialTokenInfo = async () => {
       if (!token0 || !token1) return;
-
+      
       setIsTokenInfoLoading(true);
-
+      
       try {
         // Fetch token0 info
         const token0Contract = new ethers.Contract(
@@ -284,37 +284,37 @@ const Exchange: React.FC = () => {
           ERC20Abi,
           localProvider
         );
-
+        
         const token0Name = await token0Contract.name();
         const token0Symbol = await token0Contract.symbol();
         const token0Decimals = await token0Contract.decimals();
         const token0Balance = await token0Contract.balanceOf(address);
-
+        
         // Fetch token1 info
         const token1Contract = new ethers.Contract(
           token1,
           ERC20Abi,
           localProvider
         );
-
+        
         const token1Name = await token1Contract.name();
         const token1Symbol = await token1Contract.symbol();
         const token1Decimals = await token1Contract.decimals();
         const token1Balance = await token1Contract.balanceOf(address);
-
+        
         // Update state with fetched data
-        setToken0Info({
-          tokenName: token0Name,
-          tokenSymbol: token0Symbol,
-          tokenDecimals: token0Decimals,
-          balance: token0Balance
+        setToken0Info({ 
+          tokenName: token0Name, 
+          tokenSymbol: token0Symbol, 
+          tokenDecimals: token0Decimals, 
+          balance: token0Balance 
         });
-
-        setToken1Info({
-          tokenName: token1Name,
-          tokenSymbol: token1Symbol,
-          tokenDecimals: token1Decimals,
-          balance: token1Balance
+        
+        setToken1Info({ 
+          tokenName: token1Name, 
+          tokenSymbol: token1Symbol, 
+          tokenDecimals: token1Decimals, 
+          balance: token1Balance 
         });
       } catch (error) {
         console.error("Error fetching initial token info:", error);
@@ -322,14 +322,14 @@ const Exchange: React.FC = () => {
         setIsTokenInfoLoading(false);
       }
     };
-
+    
     fetchInitialTokenInfo();
   }, [token0, token1, address]);
-
+  
   // Background refresh of token information
   useEffect(() => {
     if (!token0 || !token1) return;
-
+    
     const interval = setInterval(() => {
       const refreshTokenInfo = async (tokenAddress) => {
         // Use a different state for background refreshes
@@ -365,7 +365,7 @@ const Exchange: React.FC = () => {
       });
     }, 5000); // Increased interval to 5 seconds
 
-    return () => clearInterval(interval);
+    return () => clearInterval(interval);    
   } , [token0, token1, address]);
 
   useEffect(() => {
@@ -788,12 +788,12 @@ const Exchange: React.FC = () => {
       setIsTokenInfoLoading(true); // Set loading state for initial load
       setSelectedVault(event.target.value);
       setErrorDeployed(false); // Reset the error state when a new vault is selected
-
+      
       // Set a timeout to reset loading state in case token data fetch takes too long
       const safetyTimeout = setTimeout(() => {
         setIsTokenInfoLoading(false);
       }, 5000);
-
+      
       return () => clearTimeout(safetyTimeout);
     }
 
@@ -877,130 +877,254 @@ const Exchange: React.FC = () => {
     }
 
   return (
-    <Container maxW="container.xl" py={12} minH="1100px" >
+    <Container maxW="container.xl" px={{ base: 2, md: 4 }} py={{ base: 6, md: 8 }}>
       <Toaster />
 
       {!isConnected ? (
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          height="100vh"
+        <Flex
+          align="center"
+          justify="center"
+          height="70vh"
           color="white"
+          width="100%"
         >
           <Heading as="h2">Connect your wallet</Heading>
-        </Box>
+        </Flex>
       ) : (
         <Box
-          w="100%"
+          width="100%"
           color="white"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
           textAlign="left"
-          position="relative"
-          mt={"50px"}
         >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20vw"}>
-            <Box px={4}>
-              {/* Header Section */}
-              {/* <Heading as="h3">
-                Exchange
-                <Text fontSize="md">
-                  All tokens launched with the Noma protocol in one place 🚀
-                </Text>
-              </Heading> */}
+          <Box width="100%">
+            {/* Header Section */}
+            {/* <Heading as="h3">
+              Exchange
+              <Text fontSize="md">
+                All tokens launched with the Noma protocol in one place 🚀
+              </Text>
+            </Heading> */}
 
-              <Box mt={8}>
-              {isAllVaultsLoading ? (
-                <><HStack><Box><Text>Loading vaults...</Text></Box> <Box><Spinner size="sm" /></Box></HStack></>
-              ) : vaultsSelectData?.items?.length > 0 ? (
-                <Box>
-                <HStack>
-                <Box>
-                <SelectRoot
-                    ml={5}
-                    mb={2}
-                    collection={vaultsSelectData}
-                    size="sm"
-                    width={isMobile ? "185px" : "200px"}
-                    onChange={handleSelectMarket}
-                    value={selectedVault} // Bind the selected value to the state
-                    
+            {isAllVaultsLoading ? (
+              <Flex align="center" justify="center" py={4}>
+                <Text mr={2}>Loading vaults...</Text>
+                <Spinner size="sm" />
+              </Flex>
+            ) : vaultsSelectData?.items?.length > 0 ? (
+              <Box>
+                {/* Market Selection and Spot Price Display */}
+                <Flex
+                  direction={{ base: "column", md: "row" }}
+                  align={{ base: "flex-start", md: "center" }}
+                  justify="flex-start"
+                  width="100%"
+                  mb={4}
+                  px={{ base: 2, md: 4 }}
                 >
-                    <SelectTrigger>
-                    {vaultsSelectData.items.map((vaultData, index) => {
-                    if (index > 0) return;
-                        return (
-                        <SelectValueText placeholder={vaultData.label}>
-                        </SelectValueText>
-                        );
-                    })}                  
-                    </SelectTrigger>
-                    <SelectContent>
-                    {vaultsSelectData.items.map((vaultData) => {
-                        return (
-                        <SelectItem item={vaultData} key={vaultData.value}>
+                  <Box mb={{ base: 3, md: 0 }} mr={{ base: 0, md: 4 }}>
+                    <SelectRoot
+                      collection={vaultsSelectData}
+                      size="sm"
+                      width={{ base: "180px", md: "200px" }}
+                      onChange={handleSelectMarket}
+                      value={selectedVault}
+                    >
+                      <SelectTrigger>
+                        {vaultsSelectData.items.map((vaultData, index) => {
+                          if (index > 0) return null;
+                          return (
+                            <SelectValueText key={vaultData.value} placeholder={vaultData.label} />
+                          );
+                        })}                  
+                      </SelectTrigger>
+                      <SelectContent>
+                        {vaultsSelectData.items.map((vaultData) => (
+                          <SelectItem item={vaultData} key={vaultData.value}>
                             {vaultData.label}
-                        </SelectItem>
-                        );
-                    })}
-                    </SelectContent>
-                </SelectRoot>
-                </Box>
-                <Box mt={-2} ml={2}>
-                    {isMobile ?
-                    <VStack alignItems={"left"} ml={5}>
-                    <Box><Text >SPOT PRICE</Text></Box>
-                    <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
-                    <Box><Text>{token1Info?.tokenSymbol}/{token0Info?.tokenSymbol}</Text></Box>
-                    <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>(+{commifyDecimals(percentageChange, 2)}%)</Text></Box>
-                    </VStack>
-                    : 
-                    <HStack>
-                    <Box><Text >SPOT PRICE</Text></Box> 
-                    <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
-                    <Box><Text>{token1Info?.tokenSymbol}/{token0Info?.tokenSymbol}</Text></Box>
-                    <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({commifyDecimals(percentageChange, 2)}%)</Text></Box>
-                    </HStack>                    
-                    }
-                </Box>
-                </HStack>
-                {isMobile ? 
-                <Box mt={10}>
-                    <Flex direction="column">
-                    <BalanceCard
-                        ethBalance={ethBalance}
-                        token0Balance={token0Info?.balance}
-                        token0Symbol={token0Info?.tokenSymbol}
-                        token1Symbol={token1Info.tokenSymbol}
-                        token1Balance={token1Info?.balance}
-                        deposit={deposit}
-                        withdraw={withdraw}
-                        setIsLoading={setIsLoading}
-                        isLoading={isLoading}
-                        isTokenInfoLoading={isTokenInfoLoading}
-                        isRefreshingTokenInfo={isRefreshingTokenInfo}
-                        isWrapping={isWrapping}
-                        setIsWrapping={setIsWrapping}
-                        isUnwrapping={isUnwrapping}
-                        setIsUnwrapping={setIsUnwrapping}
-                        setWrapAmount={setWrapAmount}
-                        wrapAmount={wrapAmount}
-                        vaultAddress={selectedVault}
-                        page="exchange"
-                    />
-                    <Box mt={10}>
-                        {/* <Line options={options} data={chartData} /> */}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectRoot>
+                  </Box>
+                  
+                  {isMobile ? (
+                    <Box>
+                      <Text fontWeight="medium" color="gray.300">SPOT PRICE</Text>
+                      <Text fontSize="lg">{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text>
+                      <Flex align="center">
+                        <Text>{token1Info?.tokenSymbol}/{token0Info?.tokenSymbol}</Text>
+                        <Text 
+                          ml={2}
+                          color={percentageChange < 0 ? "red.400" : percentageChange > 0 ? "green.400" : "gray.400"} 
+                          fontWeight="bold" 
+                          fontSize="sm"
+                        >
+                          ({commifyDecimals(percentageChange, 2)}%)
+                        </Text>
+                      </Flex>
+                    </Box>
+                  ) : (
+                    <Flex align="center">
+                      <Text fontWeight="medium" color="gray.300" mr={2}>SPOT PRICE:</Text>
+                      <Text mr={2}>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text>
+                      <Text mr={2}>{token1Info?.tokenSymbol}/{token0Info?.tokenSymbol}</Text>
+                      <Text 
+                        color={percentageChange < 0 ? "red.400" : percentageChange > 0 ? "green.400" : "gray.400"} 
+                        fontWeight="bold" 
+                        fontSize="sm"
+                      >
+                        ({commifyDecimals(percentageChange, 2)}%)
+                      </Text>
+                    </Flex>
+                  )}
+                </Flex>
+
+                {/* Main Content Layout Section */}
+                <Box width="100%">
+                  {/* Mobile Layout */}
+                  <Box display={{ base: "block", md: "none" }}>
+                    <Flex 
+                      direction="column" 
+                      spacing={6} 
+                      width="100%"
+                      mt={6}
+                    >
+                      <Box mb={6}>
+                        <BalanceCard
+                          ethBalance={ethBalance}
+                          token0Balance={token0Info?.balance}
+                          token0Symbol={token0Info?.tokenSymbol}
+                          token1Symbol={token1Info.tokenSymbol}
+                          token1Balance={token1Info?.balance}
+                          deposit={deposit}
+                          withdraw={withdraw}
+                          setIsLoading={setIsLoading}
+                          isLoading={isLoading}
+                          isTokenInfoLoading={isTokenInfoLoading}
+                          isRefreshingTokenInfo={isRefreshingTokenInfo}
+                          isWrapping={isWrapping}
+                          setIsWrapping={setIsWrapping}
+                          isUnwrapping={isUnwrapping}
+                          setIsUnwrapping={setIsUnwrapping}
+                          setWrapAmount={setWrapAmount}
+                          wrapAmount={wrapAmount}
+                          vaultAddress={selectedVault}
+                          page="exchange"
+                        />
+                      </Box>
+                      
+                      <Box mb={6} width="100%">
                         <PriceData 
                           poolAddress={poolInfo.poolAddress} 
                           providerUrl="https://testnet-rpc.monad.xyz"  
                           token0Symbol={token0Info?.tokenSymbol} 
                           token1Symbol={token1Info.tokenSymbol}
+                          imv={imv}
                         />
-                    </Box>
-                    <Box w="90%" h="250px" border={isMobile ? "":"1px solid gray"}>
+                      </Box>
+                      
+                      <Box width="100%" mb={6}>
                         <TradeControlsCard 
+                          ethBalance={ethBalance}
+                          token0Balance={token0Info?.balance} 
+                          token0Symbol={token0Info?.tokenSymbol} 
+                          token1Symbol={token1Info.tokenSymbol} 
+                          token1Balance={token1Info?.balance}
+                          deposit={deposit}
+                          setIsLoading={setIsLoading}
+                          isLoading={isLoading}
+                          isTokenInfoLoading={isTokenInfoLoading}
+                          buyTokens={handleBuyTokens}
+                          sellTokens={handleSellTokens}
+                          spotPrice={spotPrice}
+                          isLoadingExecuteTrade={isLoadingExecuteTrade}
+                          setIsLoadingExecuteTrade={setIsLoadingExecuteTrade}
+                          amountToBuy={amountToBuy}
+                          amountToSell={amountToSell}
+                          setAmountToBuy={setAmountToBuy} 
+                          setAmountToSell={setAmountToSell}
+                          refreshParams={refreshParams}
+                          useWeth={useWeth}
+                          tradeMode={tradeMode}
+                          setTradeMode={setTradeMode}
+                          setUseWeth={handleSetWeth}
+                          quoteMax={0}
+                        />
+                      </Box>
+                      
+                      <Box width="100%">
+                        <Text fontWeight="bold" mb={4} color="#a67c00">
+                          Trade Info 
+                        </Text>
+                        <TradeSimulationCard 
+                          setQuote={setQuote}
+                          quote={quote}
+                          token0Info={token0Info}
+                          token1Info={token1Info}
+                          amountToBuy={amountToBuy}
+                          amountToSell={amountToSell}
+                          tradeMode={tradeMode}
+                          swapPath={swapPath}
+                          quoterAddress={quoterAddress}
+                          quoterAbi={QuoterAbi}
+                          setTxAmount={setTxAmount}
+                          slippage={slippage}
+                          setSlippage={setSlippage}
+                          isMobile={true}
+                        />
+                      </Box>
+                    </Flex>
+                  </Box>
+                  
+                  {/* Desktop Layout */}
+                  <Box display={{ base: "none", md: "block" }}>
+                    <Grid
+                      templateRows="auto auto"
+                      templateColumns="repeat(2, 1fr)"
+                      gap={6}
+                      mb={10}
+                      mt={6}
+                      width="100%"
+                    >
+                      <GridItem>
+                        <Box width="100%">
+                          <PriceData
+                            imv={imv}
+                            poolAddress={poolInfo.poolAddress} 
+                            providerUrl="https://testnet-rpc.monad.xyz"  
+                            token0Symbol={token0Info?.tokenSymbol} 
+                            token1Symbol={token1Info.tokenSymbol}
+                          />
+                        </Box>
+                      </GridItem>
+                      
+                      <GridItem>
+                        <BalanceCard
+                          ethBalance={ethBalance}
+                          token0Balance={token0Info?.balance}
+                          token0Symbol={token0Info?.tokenSymbol}
+                          token1Symbol={token1Info.tokenSymbol}
+                          token1Balance={token1Info?.balance}
+                          deposit={deposit}
+                          withdraw={withdraw}
+                          setIsLoading={setIsLoading}
+                          isLoading={isLoading}
+                          isTokenInfoLoading={isTokenInfoLoading}
+                          isRefreshingTokenInfo={isRefreshingTokenInfo}
+                          isWrapping={isWrapping}
+                          setIsWrapping={setIsWrapping}
+                          isUnwrapping={isUnwrapping}
+                          setIsUnwrapping={setIsUnwrapping}
+                          setWrapAmount={setWrapAmount}
+                          wrapAmount={wrapAmount}
+                          vaultAddress={selectedVault}
+                          page="exchange"
+                        />
+                      </GridItem>
+                      
+                      <GridItem>
+                        <Box width="100%">
+                          <TradeControlsCard 
                             ethBalance={ethBalance}
                             token0Balance={token0Info?.balance} 
                             token0Symbol={token0Info?.tokenSymbol} 
@@ -1017,154 +1141,51 @@ const Exchange: React.FC = () => {
                             setIsLoadingExecuteTrade={setIsLoadingExecuteTrade}
                             amountToBuy={amountToBuy}
                             amountToSell={amountToSell}
-                            setAmountToBuy={setAmountToBuy} 
-                            setAmountToSell={setAmountToSell}
+                            setAmountToBuy={setAmountToBuy}  
+                            setAmountToSell={setAmountToSell}  
                             refreshParams={refreshParams}
                             useWeth={useWeth}
                             tradeMode={tradeMode}
                             setTradeMode={setTradeMode}
                             setUseWeth={handleSetWeth}
-                            quoteMax={0}
-                            />
-                    </Box>
-                    <Box w="90%" h="250px"  pt={4}>
-                      {isMobile ? <><br /><br /><br /><br /><br /><br /><br /><br /></>: <></>}
-                    <Text fontWeight={"bold"} ml={8} color="#a67c00">
-                        Trade Info 
-                    </Text>
-
-                    <TradeSimulationCard 
-                        
-                                setQuote={setQuote}
-                                quote={quote}
-                                token0Info={token0Info}
-                                token1Info={token1Info}
-                                amountToBuy={amountToBuy}
-                                amountToSell={amountToSell}
-                                tradeMode={tradeMode}
-                                swapPath={swapPath}
-                                quoterAddress={quoterAddress}
-                                quoterAbi={QuoterAbi}
-                                setTxAmount={setTxAmount}
-                                slippage={slippage}
-                                setSlippage={setSlippage}
-                                isMobile={isMobile}
-                              />
-                    </Box>
-                    </Flex>
-                </Box> : 
-                    <Grid
-                        h="200px"
-                        templateRows="repeat(2, 1fr)"
-                        templateColumns="repeat(2, 1fr)"
-                        gap={4}
-                        mb={20}
-                        mt={10}
-                    >
-                        <GridItem>
-                            {/* <Line options={options} data={chartData} /> */}
-                          <Box mt={5}>
-                          <PriceData
-                              imv={imv}
-                              poolAddress={poolInfo.poolAddress} 
-                              providerUrl="https://testnet-rpc.monad.xyz"  
-                              token0Symbol={token0Info?.tokenSymbol} 
-                              token1Symbol={token1Info.tokenSymbol}
-                            />
-                          </Box>
-                        </GridItem>
-                        <GridItem>
-                            <Box mt={10}>
-                            <BalanceCard
-                                ethBalance={ethBalance}
-                                token0Balance={token0Info?.balance}
-                                token0Symbol={token0Info?.tokenSymbol}
-                                token1Symbol={token1Info.tokenSymbol}
-                                token1Balance={token1Info?.balance}
-                                deposit={deposit}
-                                withdraw={withdraw}
-                                setIsLoading={setIsLoading}
-                                isLoading={isLoading}
-                                isTokenInfoLoading={isTokenInfoLoading}
-                                isRefreshingTokenInfo={isRefreshingTokenInfo}
-                                isWrapping={isWrapping}
-                                setIsWrapping={setIsWrapping}
-                                isUnwrapping={isUnwrapping}
-                                setIsUnwrapping={setIsUnwrapping}
-                                setWrapAmount={setWrapAmount}
-                                wrapAmount={wrapAmount}
-                                vaultAddress={selectedVault}
-                                page="exchange"
-                                />
-                            </Box>
-                        </GridItem>
-                        <GridItem colSpan={1} mt={10}> 
-                            <Box w="100%" h="300px" /*border={isMobile ? "":"1px solid gray"}*/>
-                            <TradeControlsCard 
-                                ethBalance={ethBalance}
-                                token0Balance={token0Info?.balance} 
-                                token0Symbol={token0Info?.tokenSymbol} 
-                                token1Symbol={token1Info.tokenSymbol} 
-                                token1Balance={token1Info?.balance}
-                                deposit={deposit}
-                                setIsLoading={setIsLoading}
-                                isLoading={isLoading}
-                                isTokenInfoLoading={isTokenInfoLoading}
-                                buyTokens={handleBuyTokens}
-                                sellTokens={handleSellTokens}
-                                spotPrice={spotPrice}
-                                isLoadingExecuteTrade={isLoadingExecuteTrade}
-                                setIsLoadingExecuteTrade={setIsLoadingExecuteTrade}
-                                amountToBuy={amountToBuy}
-                                amountToSell={amountToSell}
-                                setAmountToBuy={setAmountToBuy}  
-                                setAmountToSell={setAmountToSell}  
-                                refreshParams={refreshParams}
-                                useWeth={useWeth}
-                                tradeMode={tradeMode}
-                                setTradeMode={setTradeMode}
-                                setUseWeth={handleSetWeth}
-                                quoteMax={0}                            
-                                />
-                            </Box>
-                        </GridItem> 
-                        <GridItem colSpan={1} mt={10} ml={20}> 
-                            <Box w="100%" h="auto" /*border={isMobile ? "":"1px solid gray"}*/  pt={8} >
-                              
-                              <Text fontWeight={"bold"} ml={8} color="#a67c00">
-                                  Trade Info 
-                              </Text>
-
-                              <TradeSimulationCard 
-                                setQuote={setQuote}
-                                quote={quote}
-                                token0Info={token0Info}
-                                token1Info={token1Info}
-                                amountToBuy={amountToBuy}
-                                amountToSell={amountToSell}
-                                tradeMode={tradeMode}
-                                swapPath={swapPath}
-                                quoterAddress={quoterAddress}
-                                quoterAbi={QuoterAbi}
-                                setTxAmount={setTxAmount}
-                                slippage={slippage}
-                                setSlippage={setSlippage}
-                                isMobile={isMobile}
-                              />
-                            </Box>
-                            
-                        </GridItem>                             
+                            quoteMax={0}                            
+                          />
+                        </Box>
+                      </GridItem> 
+                      
+                      <GridItem>
+                        <Box width="100%">
+                          <Text fontWeight="bold" mb={4} color="#a67c00">
+                            Trade Info 
+                          </Text>
+                          <TradeSimulationCard 
+                            setQuote={setQuote}
+                            quote={quote}
+                            token0Info={token0Info}
+                            token1Info={token1Info}
+                            amountToBuy={amountToBuy}
+                            amountToSell={amountToSell}
+                            tradeMode={tradeMode}
+                            swapPath={swapPath}
+                            quoterAddress={quoterAddress}
+                            quoterAbi={QuoterAbi}
+                            setTxAmount={setTxAmount}
+                            slippage={slippage}
+                            setSlippage={setSlippage}
+                            isMobile={false}
+                          />
+                        </Box>
+                      </GridItem>
                     </Grid>
-                }
+                  </Box>
                 </Box>
-
-              ) : (
+              </Box>
+            ) : (
+              <Flex align="center" justify="center" py={4}>
                 <Text>No vaults available.</Text>
-              )}
-                </Box>
-            </Box>
-          </SimpleGrid>
-
+              </Flex>
+            )}
+          </Box>
         </Box>
       )}
     </Container>
