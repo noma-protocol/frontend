@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import App from "./App";
-// import HomePage from "./pages/Home";
+import HomePage from "./pages/Home";
 // import Bootstrap from "./pages/Bootstrap";
 import Presale from "./pages/Presale";
 import Launchpad from "./pages/Launchpad";
@@ -18,14 +18,10 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      // {
-      //   path: "/",
-      //   element: <HomePage  />,
-      // },
-      // {
-      //   path: "/bootstrap",
-      //   element: <Bootstrap  />,
-      // },      
+      {
+        path: "/",
+        element: <Exchange  />,
+      },
       {
         path: "/presale",
         element: <Presale  />,
@@ -41,10 +37,6 @@ const router = createBrowserRouter([
       {
         path: "/liquidity",
         element: <Liquidity  />,
-      },
-      {
-        path: "/exchange",
-        element: <Exchange  />,
       },
       {
         path: "/borrow",
