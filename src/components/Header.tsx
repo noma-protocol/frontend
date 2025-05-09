@@ -42,7 +42,7 @@ const Header: React.FC = () => {
       <nav className="navbar navbar-expand navbar-fixed-top" >
         <div className="container header">
           
-        <Link href="/" >
+        <Link href="https://oikos.cash" >
 
           <Image
             src={Logo}
