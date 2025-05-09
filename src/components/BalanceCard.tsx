@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     VStack,
     Box,
     SimpleGrid,
     HStack,
-    Heading,
     Image,
     Text,
     Button,
-    Flex, 
     Input,
     Spinner,
-    Link
-} from '@chakra-ui/react'; // Chakra UI components
+    useBreakpointValue
+} from '@chakra-ui/react';
 import {
     DrawerRoot,
     DrawerTrigger,
@@ -22,321 +20,300 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerBody,
-    DrawerFooter,
     DrawerActionTrigger,
-} from '../components/ui/drawer'; // Ark UI Drawer components
+} from '../components/ui/drawer';
 import { ethers } from 'ethers';
-import { commify, commifyDecimals } from '../utils';
-import ethLogo from '../assets/images/weth.svg';
-import bnbLogo from '../assets/images/bnb-logo.png';
+import { commify } from '../utils';
 import monadLogo from '../assets/images/monad.png';
 import oksLogo from '../assets/images/logo_dark.png';
 import placeHolder from '../assets/images/question.svg';
-import nomaLogo from '../assets/images/noma_logo_transparent.png';
-
-import { isMobile } from "react-device-detect";
 
 const { formatEther } = ethers.utils;
 
-const BalanceCard: React.FC = ({ 
-    ethBalance, 
-    token0Symbol, 
-    token0Balance, 
-    token1Symbol, 
+const BalanceCard = ({
+    ethBalance,
+    token0Symbol,
+    token0Balance,
+    token1Symbol,
     token1Balance,
-    deposit, 
-    withdraw, 
-    isLoading, 
+    deposit,
+    withdraw,
+    isLoading,
     isWrapping,
     isUnwrapping,
     setIsWrapping,
     setIsUnwrapping,
-    setIsLoading, 
+    setIsLoading,
     isTokenInfoLoading,
+    isRefreshingTokenInfo = false, // New prop with default value
     wrapAmount,
-    setWrapAmount, 
+    setWrapAmount,
     vaultAddress,
     page,
     stakingContract,
-    ...props 
+    ...props
 }) => {
-    // const [wrapAmount, setWrapAmount] = useState('');
-    const [actionType, setActionType] = useState(''); // 'wrap' or 'unwrap'
+    const [actionType, setActionType] = useState('');
+    const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
 
-    ethBalance = formatEther(`${ethBalance}`);
-    const oversizeEth = ethBalance > 1_000_000;
+    // Use Chakra UI's responsive utilities
+    const isMobile = useBreakpointValue({ base: true, md: false });
+    const buttonSize = useBreakpointValue({ base: "80px", md: "100px" });
+    const fontSize = useBreakpointValue({ base: "12px", md: "13px" });
+    const cardWidth = useBreakpointValue({ 
+        base: "95%", 
+        sm: "95%",
+        md: "400px", 
+        lg: "450px" 
+    });
+    
+    // Listen for window resize events
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        if (typeof window !== 'undefined') {
+            window.addEventListener('resize', handleResize);
+            return () => window.removeEventListener('resize', handleResize);
+        }
+    }, []);
+
+    // Format values
+    const formattedEthBalance = formatEther(`${ethBalance}`);
+    const oversizeEth = Number(formattedEthBalance) > 1_000_000;
     const oversizeToken0 = token0Balance > 1_000_000;
     const oversizeToken1 = token1Balance > 1_000_000;
 
-    const withBg = page == "exchange" ? true : false;
-
-    // if (oversize) {
-    //     ethBalance = 999999.9999;
-    // }
+    const withBg = page === "exchange";
 
     const handleAction = () => {
-
-        if (wrapAmount == '' || wrapAmount == '0') return;
+        if (wrapAmount === '' || wrapAmount === '0') return;
+        
         if (actionType === 'wrap') {
             setIsWrapping(true);
-            // setWrapAmount(wrapAmount);
-            deposit(); // Pass the amount to the deposit function
+            deposit();
         } else if (actionType === 'unwrap') {
             setIsUnwrapping(true);
-            // setWrapAmount(wrapAmount);
-            withdraw(); // Pass the amount to the withdraw function
+            withdraw();
         }
     };
 
     const handleClickBorrow = () => {
-        const borrowLink = `/borrow?v=${vaultAddress}`;
-        window.location.href = borrowLink
+        window.location.href = `/borrow?v=${vaultAddress}`;
     }
 
     const handleClickStake = () => {
-        const stakeLink = `/stake?v=${vaultAddress}`;
-        window.location.href = stakeLink
-    }
-
-    let marginLeft = 0;
-    let marginTop = 0;
-
-    if (isMobile) {
-        if (page == "borrow") {
-            marginLeft = "-70px";
-            marginTop = 0;
-        } else {
-            marginLeft = -2;
-        }
-    } else if (withBg) {
-        marginLeft = 20;
-    }
-    else {
-        marginLeft = 5;
+        window.location.href = `/stake?v=${vaultAddress}`;
     }
 
     return (
         <Box 
-            w={isMobile?"40vh":"450px"} 
-            ml={marginLeft} 
-            border={withBg ?"none" : "1px solid white"} 
+            w={cardWidth}
+            mx="auto"
+            border={withBg ? "none" : "1px solid white"} 
             borderColor="gray" 
-            pt={4} 
-            pl={2} 
-            pr={2} 
-            pb={2} 
-            mt={marginTop}
+            p={4}
             {...props} 
-            h={"280px"}
+            h={{ base: "auto", md: "280px" }}
+            minH="280px"
             borderRadius={10} 
-            backgroundColor={withBg? "none" : "#222831"}
+            backgroundColor={withBg ? "none" : "#222831"}
         >
-            <Box pl={2}>
-                <Text fontWeight={"bold"} color="#a67c00">Wallet</Text>
-            </Box>
-            <SimpleGrid columns={3} p={2}>
-                <Box color="white" background={"#bf9b30"} pl={2} > 
+            <Text fontWeight="bold" color="#a67c00" mb={2}>Wallet</Text>
+            
+            <SimpleGrid columns={3} spacing={2}>
+                {/* Header Row */}
+                <Box color="white" background="#bf9b30" p={2} pl={3}>
                     Asset
                 </Box>
-                <Box color="white" background={"#bf9b30"}>
+                <Box color="white" background="#bf9b30" p={2} textAlign="center">
                     Balance
                 </Box>
-                <Box color="white" background={"#bf9b30"}>
+                <Box color="white" background="#bf9b30" p={2} textAlign="center">
                     Actions
                 </Box>
-                <Box h={'30px'} mt={2} p={2}>
-                    <HStack><Box><Image src={monadLogo} w="25px"></Image></Box><Box>MON</Box></HStack>
+                
+                {/* MON Row */}
+                <Box p={2} height="42px" display="flex" alignItems="center">
+                    <HStack spacing={2}>
+                        <Image src={monadLogo} w="25px" alt="MON" />
+                        <Text mt={1} ml={2}>MON</Text>
+                    </HStack>
                 </Box>
-                <Box h={'30px'} mt={2}  p={2} fontSize={isMobile?"12px": oversizeEth?"13px":"13px"}>
-                    {commify(ethBalance)}
+                <Box p={2} fontSize={fontSize} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
+                    {commify(formattedEthBalance)}
                 </Box>
-                <Box h={'40px'} mt={2} ml={2}>
-                <DrawerRoot>
-                    <DrawerTrigger asChild>
-                        <Button 
-                            disabled={isWrapping}
-                            border={ "1px solid" }
-                            borderColor={actionType === 'wrap' ? "#a67c00" : "gray"}
-                            variant="outline" 
-                            h="30px" 
-                            mt={1} 
-                            ml={2} 
-                            w={isMobile?"80px":"100px"} 
-                            onClick={() => setActionType('wrap')}
-                        >
-                            {isWrapping ? 
-                            <Spinner size="sm" /> : 
-                            <Text fontSize={isMobile?"12px":"13px"}>Wrap</Text>}
-                        </Button>
-                    </DrawerTrigger>
-                    <DrawerBackdrop />
-                    <DrawerContent>
-                        <Box mt="80%" ml={5}>
-                        <DrawerHeader>
-                            <DrawerTitle>
-                                <Text as="h3" color="#bf9b30">Wrap MON</Text>
-                            </DrawerTitle>
-                            <DrawerCloseTrigger asChild mt="82%" mr={5}>
-                                <Button variant="ghost" size="sm">×</Button>
-                            </DrawerCloseTrigger>
-                        </DrawerHeader>
-                        <DrawerBody>
-                            <Input
-                                placeholder="Enter amount to wrap"
-                                onChange={(e) => setWrapAmount(e.target.value)}
-                                w="80%"
-                            />
-                        <Box mt={10}>
-                        <DrawerActionTrigger asChild>
-                                <Button variant="outline" onClick={() => setWrapAmount('0')}  w="120px">
-                                    Cancel
-                                </Button>
-                            </DrawerActionTrigger>
-                            <Button colorScheme="blue" onClick={handleAction}  w="120px" ml={2}>
-                                {isWrapping ? <Spinner size="sm" /> : "Confirm"}
-                            </Button>                                
-                        </Box>                                
-                        </DrawerBody>
-                        </Box>
-                        {/* <DrawerFooter>
-                        </DrawerFooter> */}
-                    </DrawerContent>
-                </DrawerRoot>
-                </Box>
-                <Box h={'40px'} mt={1} p={2} >
-                    {isTokenInfoLoading ? 
-                    <Spinner size="sm" ml={2} /> : 
-                    <HStack><Box><Image src={monadLogo} w="25px"></Image></Box><Box>{token1Symbol}</Box></HStack>
-                    }
-                </Box>
-                <Box h={'40px'} mt={2} p={2} fontSize={isMobile?"12px":oversizeToken1?"13px":"13px"}>
-                    {commify(formatEther(`${token1Balance || 0}`))}
-                </Box>
-                <Box h={'40px'} mt={2} ml={2}>
+                <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
                     <DrawerRoot>
                         <DrawerTrigger asChild>
                             <Button 
-                                border={ "1px solid" }
-                                borderColor={actionType === 'unwrap' ? "#a67c00" : "gray"}
-                                disabled={isUnwrapping || token1Balance == 0} 
+                                disabled={isWrapping}
+                                border="1px solid"
+                                borderColor={actionType === 'wrap' ? "#a67c00" : "gray"}
                                 variant="outline" 
-                                h="30px" 
-                                mt={1} 
-                                ml={2} 
-                                w={isMobile?"80px":"100px"} 
-                                onClick={() => setActionType('unwrap')}
+                                h="30px"
+                                w={buttonSize}
+                                onClick={() => setActionType('wrap')}
                             >
-                                {isUnwrapping ? <Spinner size="sm" /> : <Text fontSize={isMobile?"12px": "13px"}>Unwrap</Text>}
+                                <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
+                                    {isWrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Wrap</Text>}
+                                </Box>
                             </Button>
                         </DrawerTrigger>
                         <DrawerBackdrop />
                         <DrawerContent>
-                            <Box mt="80%" ml={5}>
-                            <DrawerHeader>
-                                <DrawerTitle>
-                                    <Text as="h3" color="#bf9b30">Unwrap WBNB</Text>
-                                </DrawerTitle>
-                                <DrawerCloseTrigger asChild mt="82%" mr={5}>
-                                    <Button variant="ghost" size="sm">×</Button>
-                                </DrawerCloseTrigger>
-                            </DrawerHeader>
-                            <DrawerBody>
-                                <Input
-                                    placeholder="Enter amount to unwrap"
-                                    onChange={(e) => setWrapAmount(e.target.value)}
-                                    w="80%"
-                                />
-                            <Box mt={10}>
-                            <DrawerActionTrigger asChild>
-                                    <Button variant="outline" onClick={() => setWrapAmount('0')}  w="120px">
-                                        Cancel
-                                    </Button>
-                                </DrawerActionTrigger>
-                                <Button colorScheme="blue" onClick={handleAction} w="120px" ml={2}>
-                                    {isUnwrapping ? <Spinner size="sm" /> : "Confirm"}
-                                </Button>                                
-                            </Box>                                
-                            </DrawerBody>
+                            <Box p={4} mt={{ base: "50%", md: "80%" }}>
+                                <DrawerHeader>
+                                    <DrawerTitle>
+                                        <Text as="h3" color="#bf9b30">Wrap MON</Text>
+                                    </DrawerTitle>
+                                    <DrawerCloseTrigger asChild>
+                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2}>×</Button>
+                                    </DrawerCloseTrigger>
+                                </DrawerHeader>
+                                <DrawerBody>
+                                    <Input
+                                        placeholder="Enter amount to wrap"
+                                        onChange={(e) => setWrapAmount(e.target.value)}
+                                        w="100%"
+                                        mb={4}
+                                    />
+                                    <HStack mt={4} spacing={3} justifyContent="center">
+                                        <DrawerActionTrigger asChild>
+                                            <Button variant="outline" onClick={() => setWrapAmount('0')}>
+                                                <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
+                                                    Cancel
+                                                </Box>
+                                            </Button>
+                                        </DrawerActionTrigger>
+                                        <Button colorScheme="blue" onClick={handleAction}>
+                                            <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
+                                                {isWrapping ? <Spinner size="sm" /> : "Confirm"}
+                                            </Box>
+                                        </Button>
+                                    </HStack>
+                                </DrawerBody>
                             </Box>
-                            {/* <DrawerFooter>
-                            </DrawerFooter> */}
                         </DrawerContent>
                     </DrawerRoot>
                 </Box>
-                <Box 
-                // h={'40px'} 
-                 mt={2} 
-                // p={2}
-                // border="1px solid"
-                >
-                    {isTokenInfoLoading ? 
-                    <Spinner size="sm"  ml={4}  /> : 
-                    <HStack>
-                        <Box 
-                            // mt={isMobile ? -5 : -3} 
-                            // ml={isMobile ? -2 : -2}
-                            >
-                            <Image 
-                                // mt={-2}
-                                ml={2}
-                                src={token0Symbol == "OKS" ? oksLogo : placeHolder} 
-                                w={token0Symbol == "OKS" ? "45px" : "25px"}
-                            />
-                        </Box>
-                        <Box 
-                            // mt={isMobile ? -5 : -3}
-                            // mt={-2} 
-                            // ml={-2}
-                            // ml={2}
-                        >
-                            {token0Symbol}
-                        </Box>
+                
+                {/* WMON Row */}
+                <Box p={2} height="42px" display="flex" alignItems="center">
+                    {isTokenInfoLoading && !isRefreshingTokenInfo ?
+                        <Spinner size="sm" /> :
+                        <HStack spacing={2}>
+                            <Image src={monadLogo} w="25px" alt={token1Symbol || 'Token'} />
+                            <Text ml={2} mt={"-2px"}>{token1Symbol || 'Loading...'}</Text>
                         </HStack>
                     }
                 </Box>
-                <Box 
-                    // border="1px solid"
-                    // h={'40px'} 
-                    // mt={isMobile ? "-2px" : 0}
-                    mt={2}
-                    p={2} 
-                    fontSize={isMobile?"12px":oversizeToken0?"13px":"13px"}
-                >
+                <Box p={2} fontSize={fontSize} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
+                    {commify(formatEther(`${token1Balance || 0}`))}
+                </Box>
+                <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
+                    <DrawerRoot>
+                        <DrawerTrigger asChild>
+                            <Button 
+                                border="1px solid"
+                                borderColor={actionType === 'unwrap' ? "#a67c00" : "gray"}
+                                disabled={isUnwrapping || token1Balance == 0} 
+                                variant="outline" 
+                                h="30px"
+                                w={buttonSize}
+                                onClick={() => setActionType('unwrap')}
+                            >
+                                <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
+                                    {isUnwrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Unwrap</Text>}
+                                </Box>
+                            </Button>
+                        </DrawerTrigger>
+                        <DrawerBackdrop />
+                        <DrawerContent>
+                            <Box p={4} mt={{ base: "50%", md: "80%" }}>
+                                <DrawerHeader>
+                                    <DrawerTitle>
+                                        <Text as="h3" color="#bf9b30">Unwrap {token1Symbol}</Text>
+                                    </DrawerTitle>
+                                    <DrawerCloseTrigger asChild>
+                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2}>×</Button>
+                                    </DrawerCloseTrigger>
+                                </DrawerHeader>
+                                <DrawerBody>
+                                    <Input
+                                        placeholder="Enter amount to unwrap"
+                                        onChange={(e) => setWrapAmount(e.target.value)}
+                                        w="100%"
+                                        mb={4}
+                                    />
+                                    <HStack mt={4} spacing={3} justifyContent="center">
+                                        <DrawerActionTrigger asChild>
+                                            <Button variant="outline" onClick={() => setWrapAmount('0')}>
+                                                <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
+                                                    Cancel
+                                                </Box>
+                                            </Button>
+                                        </DrawerActionTrigger>
+                                        <Button colorScheme="blue" onClick={handleAction}>
+                                            <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
+                                                {isUnwrapping ? <Spinner size="sm" /> : "Confirm"}
+                                            </Box>
+                                        </Button>
+                                    </HStack>
+                                </DrawerBody>
+                            </Box>
+                        </DrawerContent>
+                    </DrawerRoot>
+                </Box>
+                
+                {/* Token Row */}
+                <Box p={2}  display="flex" alignItems="center">
+                    {isTokenInfoLoading && !isRefreshingTokenInfo ?
+                        <Spinner size="sm" /> :
+                        <HStack spacing={2}>
+                            <Box>
+                             <Image
+                                src={token0Symbol == "OKS" ? oksLogo : placeHolder}
+                                w={token0Symbol == "OKS" ? "35px" : "25px"}
+                                alt={token0Symbol || 'Token'}
+
+                            />
+                            </Box>
+                            <Box>
+                               <Text>{token0Symbol || 'Loading...'}</Text>
+                            </Box>
+                        </HStack>
+                    }
+                </Box>
+                <Box p={2} fontSize={fontSize} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center">
                     {commify(formatEther(`${token0Balance || 0}`))}
                 </Box>
-                <Box h={'40px'} mt={2} ml={4}>
+                <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center">
                     {page != "borrow" ?
-                    <VStack ml={-8}>
-                        <Box>                    
+                        <VStack spacing={2} align="center">
                             <Button 
                                 variant="outline" 
-                                h="30px" 
-                                mt={1} 
-                                ml={isMobile?4:2}
-                                w={isMobile?"80px":"100px"} 
+                                h="30px"
+                                w={buttonSize}
                                 disabled={token0Balance == 0}
                                 onClick={handleClickBorrow}
-                                fontSize={isMobile?"12px": oversizeEth?"13px":"13px"}
+                                fontSize={fontSize}
                             >
-                                Borrow
+                                <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
+                                    Borrow
+                                </Box>
                             </Button>
-                    </Box>
-                        <Box ml={"2px"} mt={1}>
-                        <Button 
-                            variant="outline" 
-                            h="30px" 
-                            mt={1} 
-                            ml={isMobile?4:2}
-                            w={isMobile?"80px":"100px"}  
-                            disabled={token0Balance == 0}
-                            onClick={handleClickStake}
-                            fontSize={isMobile?"12px": oversizeEth?"13px":"13px"}
-                        >
-                            Stake
-                        </Button>
-                        </Box>
-                    </VStack>
-                    
+                            <Button 
+                                variant="outline" 
+                                h="30px"
+                                w={buttonSize}
+                                disabled={token0Balance == 0}
+                                onClick={handleClickStake}
+                                fontSize={fontSize}
+                            >
+                                <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
+                                    Stake
+                                </Box>
+                            </Button>
+                        </VStack>
                     : <></>}
                 </Box>                
             </SimpleGrid>
