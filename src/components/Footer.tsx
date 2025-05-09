@@ -16,7 +16,17 @@ import { isMobile } from "react-device-detect";
 const Footer: React.FC = () => { 
   return (
     <>
-    <footer className="footer" style={{ borderTop: "1px solid #f8bd45" }}>
+  { !isMobile ? (    
+    <footer className="footer" 
+    style={{ 
+        position:  "relative",
+        bottom:    0,
+        left:      0,
+        width:     "100%",
+        borderTop: "1px solid #f8bd45",
+        background: "#000",     // or whatever bg you want
+        zIndex:    2400
+      }}>
       <Container>
         <Row >
           <Col md="3" style={{paddingTop: isMobile?25:0}}>
@@ -122,7 +132,7 @@ const Footer: React.FC = () => {
         </Row>
         {isMobile ? <><br /><br /></> : <></>}
       </Container>
-    </footer>
+    </footer>) : <></>}
     </>
   );
 };
