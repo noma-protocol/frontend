@@ -423,7 +423,7 @@ const Exchange: React.FC = () => {
                   stakingContract: vaultDescriptionData[8],
                 };
 
-                if (plainVaultDescription.tokenSymbol === "OKS") {
+                if (plainVaultDescription.tokenSymbol === "OKS" || plainVaultDescription.tokenSymbol === "TST") {
                   // console.log("Skipping OKS vault:", vault.toString());
                   continue;
                 }
@@ -733,8 +733,38 @@ const Exchange: React.FC = () => {
       functionName: "buyTokensWETH",
       args: buyArgs,
       onSuccess(data) {
-          setIsLoading(false);
-          setIsLoadingExecuteTrade(false);
+            setTimeout(() => {
+                      
+              const fetchBalances = async () => {
+                const token0Contract = new ethers.Contract(
+                  token0,
+                  ERC20Abi,
+                  localProvider
+                );
+                const token1Contract = new ethers.Contract(
+                  token1,
+                  ERC20Abi,
+                  localProvider
+                );
+
+                const wethBalance = await token1Contract.balanceOf(address);
+                const balance = await token0Contract.balanceOf(address);
+
+                let  wethDiff = formatEther(`${balanceBeforeSale}`) - formatEther(`${wethBalance}`);
+                let  tokenDiff = formatEther(`${balance}`) - formatEther(`${balanceBeforePurchase}`);
+
+                // console.log(`ethDiff: ${ethDiff} ETH, tokenDiff: ${tokenDiff} ${token0Info.tokenSymbol}`);
+                setIsLoading(false);
+                setIsLoadingExecuteTrade(false);
+                toaster.create({
+                    title: "Success",
+                    description: `Spent ${commifyDecimals(wethDiff, 4)} WMON.\nReceived ${commify(tokenDiff, 4)} ${token0Info.tokenSymbol}`,
+                });
+              };
+              fetchBalances();
+
+
+            }, 6000); // 3000ms = 3 seconds  
       },
       onError(error) {
           console.error(`transaction failed: ${error.message}`);
@@ -757,8 +787,45 @@ const Exchange: React.FC = () => {
         functionName: useWeth == "1" ? "sellTokens" : "sellTokensETH",
         args: sellArgs,
         onSuccess(data) {
-            setIsLoading(false);
-            setIsLoadingExecuteTrade(false);
+            setTimeout(() => {
+                      
+              const fetchBalances = async () => {
+                const token0Contract = new ethers.Contract(
+                  token0,
+                  ERC20Abi,
+                  localProvider
+                );
+                const token1Contract = new ethers.Contract(
+                  token1,
+                  ERC20Abi,
+                  localProvider
+                );
+                console.log(`Balance WETH/MON before transaction : ${formatEther(`${balanceBeforePurchase}`)}`);
+                console.log(`Token0 Balance before transaction : ${formatEther(`${balanceBeforeSale}`)}`);
+
+                const ethBalance = await localProvider.getBalance(address);
+                const wethBalance = await token1Contract.balanceOf(address);
+                const balance = await token0Contract.balanceOf(address);
+
+                
+                let  wethDiff =  (useWeth == 1 ? formatEther(`${wethBalance}`) : formatEther(`${ethBalance}`)) - formatEther(`${balanceBeforePurchase}`) ;
+
+                let  tokenDiff = Number(formatEther(`${balanceBeforeSale}`)) - formatEther(`${balance}`);
+
+                console.log(`Balance WETH/MON before transaction : ${formatEther(`${balanceBeforePurchase}`)} diff : ${wethDiff} WETH/MON`);
+
+                // console.log(`ethDiff: ${ethDiff} ETH, tokenDiff: ${tokenDiff} ${token0Info.tokenSymbol}`);
+                setIsLoading(false);
+                setIsLoadingExecuteTrade(false);
+                toaster.create({
+                    title: "Success",
+                    description: `Sold  ${commify(tokenDiff, 4)} WMON.\nReceived ${commify(wethDiff, 4)} ${useWeth == 1 ? token1Info.tokenSymbol : "MON"}`,
+                });
+              };
+              fetchBalances();
+
+
+            }, 6000); // 3000ms = 3 seconds  
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
@@ -859,6 +926,8 @@ const Exchange: React.FC = () => {
             false
           ]
 
+          setBalanceBeforePurchase(token0Info.balance);
+          setBalanceBeforeSale(token1Info.balance);
           setBuyArgs(args);
           approveWeth();
         } else if (useWeth == "0") {
@@ -888,7 +957,10 @@ const Exchange: React.FC = () => {
             false
         ]
 
-        console.log(args);
+        // console.log(args);
+
+        setBalanceBeforePurchase(useWeth == "0" ? ethBalance :  token1Info.balance);
+        setBalanceBeforeSale(token0Info.balance);
 
         setIsLoading(true);
         setSellArgs(args);
@@ -1057,7 +1129,7 @@ const Exchange: React.FC = () => {
                         vaultAddress={selectedVault}
                         page="exchange"
                     />
-                    <Box w="90%" h="440px" ml={5} border={isMobile ? 0 : "1px solid gray"}>
+                    <Box w="90%" h="440px" ml={2} border={isMobile ? 0 : "1px solid gray"}>
                         <TradeControlsCard  
                             ethBalance={ethBalance}
                             token0Balance={token0Info?.balance} 
@@ -1085,11 +1157,7 @@ const Exchange: React.FC = () => {
                             quoteMax={0}
                             />
                     </Box>
-                    <Box w="90%" h="300px" ml={5}>
-                      
-                    <Text fontWeight={"bold"} ml={8} color="#a67c00">
-                        Trade Info 
-                    </Text>
+                    <Box w="90%" h="300px" ml={2}>
 
                     <TradeSimulationCard 
                         
@@ -1186,13 +1254,8 @@ const Exchange: React.FC = () => {
                                 />
                             </Box>
                         </GridItem> 
-                        <GridItem colSpan={1} mt={10} ml={20}> 
+                        <GridItem colSpan={1} mt={10} ml={"35px"}> 
                             <Box w="100%" h="auto" /*border={isMobile ? "":"1px solid gray"}*/  pt={8} >
-                              
-                              <Text fontWeight={"bold"} ml={8} color="#a67c00">
-                                  Trade Info 
-                              </Text>
-
                               <TradeSimulationCard 
                                 setQuote={setQuote}
                                 quote={quote}
