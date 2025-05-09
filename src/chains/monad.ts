@@ -9,7 +9,7 @@ export const monad = {
     decimals: 18,
   },
   rpcUrls: {
-    public: {
+    default: {
       http: ['https://testnet-rpc.monad.xyz'],
     },
   },
