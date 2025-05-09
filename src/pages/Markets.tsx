@@ -20,6 +20,7 @@ import {getContractAddress} from "../utils";
 import config from "../config";
 import wethLogo from "../assets/images/weth.svg";
 import bnbLogo from "../assets/images/bnb-logo.png";
+import monadLogo from "../assets/images/monad.png";
 import VaultModal from "../components/VaultModal";
 import { set } from "react-ga";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
@@ -32,7 +33,7 @@ const { formatEther, ZeroAddress } = ethers.utils;
 const {JsonRpcProvider} = ethers.providers;
 
 const localProvider = new JsonRpcProvider(
-  "http://localhost:8545"
+  "https://testnet-rpc.monad.xyz"
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
@@ -44,8 +45,8 @@ const uniswapV3FactoryABI = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
-const uniswapV3FactoryAddress = "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7";
+const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const feeTier = 3000;
 
 const Markets: React.FC = () => {
@@ -68,6 +69,7 @@ const Markets: React.FC = () => {
   const [modalFocus, setModalFocus] = useState<boolean>(false);
   const reserveAssetsMap = {
     "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c": "WBNB",
+    "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701" : "WMON",
   };
 
   const fetchPoolAddress = async (token0: string, token1: string) => {
@@ -99,7 +101,7 @@ const Markets: React.FC = () => {
   };
 
   const labelToLogoMap = {
-    WBNB: bnbLogo,
+    WMON: monadLogo,
   };
 
   // fetch logo for reserve asset
@@ -241,7 +243,12 @@ const Markets: React.FC = () => {
                       try {
                         const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
                         console.log("Vault Description:", vaultDescriptionData);
-        
+                        const tokenSymbol = vaultDescriptionData[1];
+                        // Skip OKS vaults
+                        if (tokenSymbol === "OKS") {
+                          console.log("Skipping OKS vault:", vault.toString());
+                          return null;
+                        }
                         const hasPresale = vaultDescriptionData[7] !== "0x0000000000000000000000000000000000000000";
                         let isPresaleFinalized = false;
                         let expired = false;
@@ -447,7 +454,7 @@ const Markets: React.FC = () => {
           // mb={50}
         >
           <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"}>
-            <Box px={4} mt={isMobile? -60:-450} mb={4} w="100%">
+            <Box px={4} mt={isMobile? -60:-400} mb={4} w="100%">
             <HStack spacing={4} mb={4}>
               <Button
                 onClick={() => handleSetView("all")}
@@ -474,7 +481,7 @@ const Markets: React.FC = () => {
               p={8}
               borderRadius={20}
               w={isMobile ? "auto" : "80%"}
-              h="200px"
+              h="400px"
               backgroundColor="#222831"
             >
               {view === "all" && isAllVaultsLoading ? (
