@@ -143,7 +143,6 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
   return (
     <Box
-      mt={isMobile ? 10 : 5}
       w={isMobile ? "40vh" : "auto"}
       pt={8}
       {...props}
@@ -256,7 +255,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         {/* Display current trade mode */}
         <GridItem colSpan={isMobile ? 2 : 1} mt={isMobile? 0 : -20} ml={isMobile ? 2 : 6}>
         <br />
-        <Text pb={2} ml={2} color="#bf9b30"><b>Controls</b></Text>
+        <Text pb={2} ml={4} color="#bf9b30"><b>Controls</b></Text>
 
           {/* <Flex direction={isMobile? "row" : "column"} align="center" justify="center"> */}
         <RadioGroup 
