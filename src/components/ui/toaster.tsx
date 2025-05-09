@@ -31,7 +31,9 @@ export const Toaster = () => {
             <Stack gap="1" flex="1" maxWidth="100%" p={2} >
               {toast.title && <Toast.Title color={color} fontWeight={"bold"}>{toast.title}</Toast.Title>}
               {toast.description && (
-                <Toast.Description>{toast.description}</Toast.Description>
+                <Toast.Description whiteSpace="pre-wrap">
+                  {toast.description}
+                </Toast.Description>
               )}
             </Stack>
             {toast.action && (
