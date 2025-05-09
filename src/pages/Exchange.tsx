@@ -1023,12 +1023,12 @@ const Exchange: React.FC = () => {
                         />
                       </Box>
                       
-                      <Box width="100%" mb={6}>
-                        <TradeControlsCard 
+                      <Box width="100%" mb={12} pb={8}>
+                        <TradeControlsCard
                           ethBalance={ethBalance}
-                          token0Balance={token0Info?.balance} 
-                          token0Symbol={token0Info?.tokenSymbol} 
-                          token1Symbol={token1Info.tokenSymbol} 
+                          token0Balance={token0Info?.balance}
+                          token0Symbol={token0Info?.tokenSymbol}
+                          token1Symbol={token1Info.tokenSymbol}
                           token1Balance={token1Info?.balance}
                           deposit={deposit}
                           setIsLoading={setIsLoading}
@@ -1041,7 +1041,7 @@ const Exchange: React.FC = () => {
                           setIsLoadingExecuteTrade={setIsLoadingExecuteTrade}
                           amountToBuy={amountToBuy}
                           amountToSell={amountToSell}
-                          setAmountToBuy={setAmountToBuy} 
+                          setAmountToBuy={setAmountToBuy}
                           setAmountToSell={setAmountToSell}
                           refreshParams={refreshParams}
                           useWeth={useWeth}
@@ -1051,12 +1051,12 @@ const Exchange: React.FC = () => {
                           quoteMax={0}
                         />
                       </Box>
-                      
-                      <Box width="100%">
+
+                      <Box width="100%" mt={10} pt={4}>
                         <Text fontWeight="bold" mb={4} color="#a67c00">
-                          Trade Info 
+                          Trade Info
                         </Text>
-                        <TradeSimulationCard 
+                        <TradeSimulationCard
                           setQuote={setQuote}
                           quote={quote}
                           token0Info={token0Info}
