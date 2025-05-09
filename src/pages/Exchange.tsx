@@ -101,7 +101,7 @@ const WETHAbi = [
 const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
 const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const exchangeHelperAddress = getContractAddress(addresses, "10143", "Exchange");
-const quoterAddress = "0x78D78E420Da98ad378D7799bE8f4AF69033EB077";
+const quoterAddress = "0x1b4E313fEF15630AF3e6F2dE550Dbf4cC9D3081d";
 const addressModelHelper = getContractAddress(addresses, "10143", "ModelHelper");
 
 const feeTier = 3000;
@@ -145,6 +145,22 @@ const generateRandomData = () => {
       ],
     };
   }
+
+
+const ExchangeCard: React.FC = ({ children }) => (
+  <Box
+    bg="whiteAlpha.100"               // translucent background
+    backdropFilter="blur(10px)"       // nice glassy look
+    borderRadius="2xl"                // rounded corners
+    boxShadow="lg"                    // drop shadow
+    p={{ base: 4, md: 6 }}            // padding: 4 on mobile, 6 on desktop
+    mx="auto"                         // center horizontally
+    maxW={{ base: "100%", md: "800px" }} // full width on mobile, 800px max on desktop
+    my={{ base: 4, md: 8 }}           // vertical margin
+  >
+    {children}
+  </Box>
+);
 
 const Exchange: React.FC = () => {
   const { address, isConnected } = useAccount();
@@ -913,12 +929,24 @@ const Exchange: React.FC = () => {
 
               <Box mt={8}>
               {isAllVaultsLoading ? (
-                <><HStack><Box><Text>Loading vaults...</Text></Box> <Box><Spinner size="sm" /></Box></HStack></>
-              ) : vaultsSelectData?.items?.length > 0 ? (
+                <>
+                <HStack>
+                  <Box>
+                    <Text fontSize={isMobile ? "13px" : "14px"}>
+                      Loading vaults...
+                    </Text>
+                  </Box> 
                 <Box>
+                  <Spinner size="sm" />
+                </Box>
+                </HStack>
+              </>
+              ) : vaultsSelectData?.items?.length > 0 ? (
+              <Flex direction="column" alignItems="left">
                 <HStack>
                 <Box>
                 <SelectRoot
+                    mt={isMobile ? "-60px" : 0}
                     ml={5}
                     mb={2}
                     collection={vaultsSelectData}
@@ -951,16 +979,16 @@ const Exchange: React.FC = () => {
                 <Box mt={-2} ml={2}>
                     {isMobile ?
                     <VStack alignItems={"left"} ml={5}>
-                    <Box><Text >SPOT PRICE</Text></Box>
+                    <Box><Text color="#a67c00" fontWeight="bold">SPOT PRICE</Text></Box>
                     <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
-                    <Box><Text>{token1Info?.tokenSymbol}/{token0Info?.tokenSymbol}</Text></Box>
+                    <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
                     <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>(+{commifyDecimals(percentageChange, 2)}%)</Text></Box>
                     </VStack>
                     : 
                     <HStack>
-                    <Box><Text >SPOT PRICE</Text></Box> 
+                    <Box><Text color="#a67c00" fontWeight="bold">SPOT PRICE</Text></Box> 
                     <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
-                    <Box><Text>{token1Info?.tokenSymbol}/{token0Info?.tokenSymbol}</Text></Box>
+                    <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`}</Text></Box>
                     <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({commifyDecimals(percentageChange, 2)}%)</Text></Box>
                     </HStack>                    
                     }
@@ -1156,7 +1184,7 @@ const Exchange: React.FC = () => {
                         </GridItem>                             
                     </Grid>
                 }
-                </Box>
+                </Flex>
 
               ) : (
                 <Text>No vaults available.</Text>
