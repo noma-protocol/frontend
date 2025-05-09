@@ -87,7 +87,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
   const handleSliderChange = (e) => {
      if (isTokenInfoLoading) return; // Prevent updates if still loading
 
-     console.log(`Slider value changed to ${e}`);
+    //  console.log(`Slider value changed to ${e}`);
      let newValue = parseFloat(e);
      if (newValue > sliderMax) newValue = sliderMax;
 
@@ -112,12 +112,12 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
     // setContributionAmount(newValue);
 
-    console.log(`Trade mode is ${tradeMode} | New Value ${newValue}`);
+    // console.log(`Trade mode is ${tradeMode} | New Value ${newValue}`);
     if (tradeMode === "BUY") {
-      console.log(`set amount to buy ${newValue}`);
+      // console.log(`set amount to buy ${newValue}`);
       setAmountToBuy(newValue);
     } else if (tradeMode === "SELL") {
-      console.log(`set amount to sell ${newValue}`);
+      // console.log(`set amount to sell ${newValue}`);
       setAmountToSell(newValue);
     }
  
@@ -138,7 +138,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
   const handleSetTradeAsset = (e) => {
     const useWethValue = e.value === "1"; // Convert to boolean
     setUseWeth(useWethValue);
-    console.log(`Set useWeth to ${useWethValue}`);
+    // console.log(`Set useWeth to ${useWethValue}`);
   }
 
   return (
