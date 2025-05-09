@@ -32,8 +32,8 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
     const provider = useMemo(
         () =>
             new JsonRpcProvider(
-                network === "ganache"
-                    ? "http://localhost:8545"
+                network === "monad"
+                    ? "https://testnet-rpc.monad.xyz"
                     : process.env.REACT_APP_PROVIDER_URL
             ),
         [network]
