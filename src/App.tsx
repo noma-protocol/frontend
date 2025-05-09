@@ -57,15 +57,15 @@ function App() {
 
   return (
     <WagmiConfig config={wagmiConfig}>
-      <Provider>
       <LanguageProvider>
       <MenuProvider>
+      <Provider>
         <Header />
         <Outlet />
         <Footer />
+      </Provider>
         </MenuProvider>
       </LanguageProvider>
-      </Provider>
     </WagmiConfig>
   );
 }
