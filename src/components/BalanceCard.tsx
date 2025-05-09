@@ -106,7 +106,7 @@ const BalanceCard: React.FC = ({
             marginLeft = "-70px";
             marginTop = 0;
         } else {
-            marginLeft = 20;
+            marginLeft = -2;
         }
     } else if (withBg) {
         marginLeft = 20;
@@ -120,7 +120,7 @@ const BalanceCard: React.FC = ({
             w={isMobile?"40vh":"450px"} 
             ml={marginLeft} 
             border={withBg ?"none" : "1px solid white"} 
-            // borderColor="gray" 
+            borderColor="gray" 
             pt={4} 
             pl={2} 
             pr={2} 
@@ -161,7 +161,7 @@ const BalanceCard: React.FC = ({
                             h="30px" 
                             mt={1} 
                             ml={2} 
-                            w="100px" 
+                            w={isMobile?"80px":"100px"} 
                             onClick={() => setActionType('wrap')}
                         >
                             {isWrapping ? 
@@ -223,7 +223,7 @@ const BalanceCard: React.FC = ({
                                 h="30px" 
                                 mt={1} 
                                 ml={2} 
-                                w="100px" 
+                                w={isMobile?"80px":"100px"} 
                                 onClick={() => setActionType('unwrap')}
                             >
                                 {isUnwrapping ? <Spinner size="sm" /> : <Text fontSize={isMobile?"12px": "13px"}>Unwrap</Text>}
@@ -312,8 +312,8 @@ const BalanceCard: React.FC = ({
                                 variant="outline" 
                                 h="30px" 
                                 mt={1} 
-                                ml={isMobile?10:2}
-                                w="100px" 
+                                ml={isMobile?4:2}
+                                w={isMobile?"80px":"100px"} 
                                 disabled={token0Balance == 0}
                                 onClick={handleClickBorrow}
                                 fontSize={isMobile?"12px": oversizeEth?"13px":"13px"}
@@ -326,8 +326,8 @@ const BalanceCard: React.FC = ({
                             variant="outline" 
                             h="30px" 
                             mt={1} 
-                            ml={isMobile?10:2}
-                            w="100px" 
+                            ml={isMobile?4:2}
+                            w={isMobile?"80px":"100px"}  
                             disabled={token0Balance == 0}
                             onClick={handleClickStake}
                             fontSize={isMobile?"12px": oversizeEth?"13px":"13px"}
