@@ -21,6 +21,7 @@ import {
   } from "../components/ui/number-input";
 
 const LoadAddCollateral = ({  
+    size,
     token0Symbol, 
     extraCollateral, 
     handleSetCollateral, 
@@ -50,13 +51,15 @@ const LoadAddCollateral = ({
         <DrawerTrigger asChild>
         <Button 
             variant={"outline"}
-            h={8}
+            h={size == "lg" ? 8 : 6}
+            ml={size == "lg" ? 0 : 2}
+            mt={size == "lg" ? 0 : 2}
             // onClick={() => setIsLoading(true)}
             disabled={isTokenInfoLoading || isLoading}
-            w={"120px"}
+            w={size == "lg" ? "120px" : "80px"}
             border="1px solid #f3f7c6"
         >
-        {isLoading ? <Spinner size="sm" /> : <Text color={"#f3f7c6"}>Add </Text>}
+        {isLoading ? <Spinner size="sm" /> : <Text fontSize={size == "lg" ? "14px" : "11px"} color={"#f3f7c6"}>Add </Text>}
         </Button>
         </DrawerTrigger>
         <DrawerBackdrop />

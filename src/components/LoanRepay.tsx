@@ -21,7 +21,7 @@ import {
   } from "../components/ui/number-input";
 import { formatEther, parseEther } from 'viem';
 
-const LoanRepay = ({ token0Symbol, loanAmount, fullCollateral, repayAmount, setRepayAmount, handleClickRepayAmount, isMobile, imv, ltv, isLoading, isRepaying, setIsRepaying, ...props}) => {
+const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount, setRepayAmount, handleClickRepayAmount, isMobile, imv, ltv, isLoading, isRepaying, setIsRepaying, ...props}) => {
 
     const collateral  = repayAmount == 0 ? formatEther(`${fullCollateral}`) : repayAmount / formatEther(`${imv}`);
 
@@ -41,13 +41,15 @@ const LoanRepay = ({ token0Symbol, loanAmount, fullCollateral, repayAmount, setR
         <DrawerTrigger asChild>
         <Button 
             variant={"outline"}
-            h={8}
+            h={size == "lg" ? 8 : 6}
+            ml={size == "lg" ? 0 : 2}
+            mt={size == "lg" ? 0 : 2}
             // onClick={() => setIsRepaying(true)}
             disabled={isRepaying || isLoading}
-            w={"120px"}
+            w={size == "lg" ? "120px" : "80px"}
             border="1px solid #f3f7c6"
         >
-        {isRepaying  ? <Spinner size="sm" /> : <Text color={"#f3f7c6"}>Repay</Text>}
+        {isRepaying  ? <Spinner size="sm" /> : <Text fontSize={size == "lg" ? "14px" : "11px"} color={"#f3f7c6"}>Repay</Text>}
         </Button>
         </DrawerTrigger>
         <DrawerBackdrop />
