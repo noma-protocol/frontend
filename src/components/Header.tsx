@@ -53,7 +53,7 @@ const Header: React.FC = () => {
           {/* Remove mx-auto class and add justify-content-start to align items to the left */}
           <ul className="navbar-nav items justify-content-start " >
           <li className="nav-item" style={{border:window.location.href.indexOf("exchange") > -1 ? "1px solid #a67c00" : "none"}}>
-              <Link className="nav-link" href="/exchange">
+              <Link className="nav-link" href="/">
                   <Text color="#f3f7c6">Exchange</Text>
               </Link>
             </li>
