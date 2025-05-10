@@ -345,10 +345,10 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Box>
               <Text fontSize="13px">WMON</Text>
             </Box>
-            <Box>
+            <Box  ml={isMobile ? 2 : 0}>
               <Radio value={"0"} defaultChecked={useWeth == false}></Radio>
             </Box>
-            <Box>
+            <Box ml={isMobile ? 4 : 0}> 
               <Text fontSize="13px">MON</Text>
             </Box>
           </HStack> 
