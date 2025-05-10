@@ -118,7 +118,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     return (
         <Box mt={-5}>
                                   
-            <Text fontWeight={"bold"} ml={8} color="#a67c00">
+            <Text fontWeight={"bold"} fontSize="sm" ml={8} color="#a67c00">
                 Trade Info 
             </Text>
             

@@ -114,7 +114,7 @@ const BalanceCard = ({
             borderRadius={10} 
             backgroundColor={withBg ? "none" : "#222831"}
         >
-            <Text fontWeight="bold" fontSize={isMobile ? "13px" : "14px"} color="#a67c00" mb={2}>Wallet</Text>
+            <Text fontWeight="bold" fontSize={isMobile ? "sm" : "14px"} color="#a67c00" mb={2}>Wallet</Text>
             
             <SimpleGrid columns={3} spacing={2}>
                 {/* Header Row */}

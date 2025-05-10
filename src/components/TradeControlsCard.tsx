@@ -157,7 +157,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         pb={10}
       >
         <GridItem colSpan={2} h="10px" mt={-5}>
-            <Text fontWeight={"bold"} ml={isMobile?5:10} color="#bf9b30">
+            <Text fontWeight={"bold"} ml={isMobile?5:10} fontSize={isMobile ? "sm" : "md"} color="#a67c00">
                 Trade Amount
             </Text>
         </GridItem>
@@ -255,7 +255,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         {/* Display current trade mode */}
         <GridItem colSpan={isMobile ? 2 : 1} mt={isMobile? 0 : -20} ml={isMobile ? 2 : 6}>
         <br />
-        <Text pb={2} ml={4} color="#bf9b30"><b>Controls</b></Text>
+        <Text pb={2} ml={4} color="#a67c00" fontSize={isMobile ? "sm" : "md"}><b>Controls</b></Text>
 
           {/* <Flex direction={isMobile? "row" : "column"} align="center" justify="center"> */}
         <RadioGroup 
@@ -367,10 +367,10 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 onClick={() => {
                   handleExecuteTrade();
                 }}
-                disabled={isLoadingExecuteTrade || isTokenInfoLoading || (token1Balance == 0 && token0Balance == 0)}
+                disabled={isLoadingExecuteTrade || isTokenInfoLoading || tradeMode === "BUY" ? amountToBuy <= 0 : amountToSell <= 0}
                 border="1px solid #a67c00"
               >
-                {isLoadingExecuteTrade ? <Spinner size="sm" /> : "Execute"}
+                {isLoadingExecuteTrade ? <Spinner size="sm" /> : <Text fontSize="sm">Execute</Text>}
             </Button>
               )}
       </GridItem>
