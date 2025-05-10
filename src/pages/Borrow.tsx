@@ -771,10 +771,121 @@ const Borrow = () => {
                                     </>) : <Box mt={2} mb={2} w="120px"><Text fontSize="xs" ml={2}>No active loan</Text></Box>
                                     }                                
                             </SimpleGrid>
-
-
                         </Box>
-                        
+                            <Box p={2} ml={-5}  mt={5} w="380px"   border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
+                                <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>New Loan</Text>    
+                                <SimpleGrid columns={2} w="350px" mt={-5} fontSize="xs" p={1} backgroundColor={"#222831"} ml={2} mr={2}>
+                                    <Box w="320px"backgroundColor={"#a67c00"} mb={2}>
+                                        <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
+                                    </Box>
+                                    <Box  >
+                                        <Text fontSize="xs" ml="40px">&nbsp;&nbsp;&nbsp;<b>Duration</b></Text>
+                                    </Box>
+                                    <Box w="auto">
+                                        <HStack>
+                                            <Box w="auto">
+                                            <NumberInputRoot
+                                                isMobile={isMobile}
+                                                min={0}
+                                                max={999999999}
+                                                step={0.1}
+                                                onChange={handleSetAmountToBorrow}
+                                                marginRight={"5px"}
+                                                value={borrowAmount}
+                                                setTokenSupply={(() => {})}
+                                                setPrice={setBorrowAmount}
+                                                setFloorPrice={(() => {})}
+                                                height={"30px"}
+                                                mt={1}
+                                            >
+                                                <NumberInputLabel h={"30px"} w={{ base: "", lg: "auto" }} />
+                                                <NumberInputField h={"30px"} w={{ base: "", lg: "200px" }} />
+                                            </NumberInputRoot>
+                                            </Box>
+                                            <Box>
+                                                <Image src={bnbLogo} w="25px"></Image>
+                                            </Box>
+                                        </HStack>
+                                            <br />
+                                            <Box>
+                                                <Text fontSize="xs" fontWeight={"bold"} color="#a67c00">Borrowing</Text>
+                                            </Box>
+                                            <Box>
+                                                <HStack >
+                                                    <Box w="50px" textAlign={"left"}><Text fontSize={isMobile?"xs":"15px"}>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
+                                                    <Box>{token1Info.tokenSymbol}</Box>
+                                                    <Box  w="120px" fontSize={"11px"} mt={"2px"}> <Text fontSize={"xx-small"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
+                                                </HStack>
+                                            </Box>
+                                            <Box mt={5}>
+                                                <Text  fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"xs":"15px"}>Collateral required</Text>
+                                            </Box>
+                                            <Box>
+                                                <Text fontSize={isMobile?"xs":"15px"}>{commify(collateral || 0)} {token0Info.tokenSymbol}</Text>
+                                            </Box>
+                                            <Box mt={5}>
+                                            <HStack>
+                                                <Box> <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"xs":"15px"}>Loan Fees</Text>    </Box>
+                                                <Box><Image src={placeholderLogo} w={15}></Image></Box>
+                                            </HStack>
+                                            </Box>
+                                            <Box>
+                                                <Text fontSize={isMobile?"xs":"15px"}>{commifyDecimals(`${loanFees || 0}`, 4)} {token1Info.tokenSymbol}</Text>
+                                            </Box>
+                                            <Box mt={5}> 
+                                                    <HStack>
+                                                        <Box><Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"xs":"15px"}>IMV</Text> </Box>
+                                                        <Box><Image src={placeholderLogo} w={15}></Image></Box>
+                                                    </HStack>
+                                                <HStack>
+                                                    <Box>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Box>
+                                                    <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info?.tokenSymbol}/{token1Info?.tokenSymbol}</Box>
+                                                </HStack>
+                                            </Box> 
+                                    </Box>
+                                    <Box>
+                                    <SelectRoot
+                                        mt={1}
+                                        ml={isMobile?25:55}
+                                        collection={durationChoices}
+                                        size="xs"
+                                        width={isMobile?"130px":"110px"}
+                                        onChange={handleSetDuration}
+                                        value={duration}
+                                        >
+                                        <SelectTrigger>
+                                            {durationChoices.items.map((data, index) => {
+                                                if (index > 0) return;
+                                                return (
+                                                    <SelectValueText placeholder={data.label}>
+                                                    </SelectValueText>
+                                                );
+                                                })}       
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {durationChoices.items.map((choice) => (
+                                                <SelectItem item={choice} key={choice.value}>
+                                                    {choice.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </SelectRoot>
+                                     <Button 
+                                        mt={4} 
+                                        h={"30px"}  
+                                        borderColor={"#a67c00"} 
+                                        variant="outline" ml={5} 
+                                        onClick={() => handleBorrow()}  
+                                        disabled={isTokenInfoLoading || loanData?.borrowAmount > 0 || borrowAmount == 0} w={"120px"}
+                                        >
+                                            {isBorrowing ? <Spinner size="sm" color="#a67c00"/> :  <Text fontSize="xs" color="#a67c00">Borrow</Text>}
+                                        </Button>
+                                    </Box>
+                                    <Box>
+
+                                    </Box>
+                                </SimpleGrid>
+                            </Box>                        
                         </Flex>
                                                  
                     ) : (
