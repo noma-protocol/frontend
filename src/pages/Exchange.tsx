@@ -1160,7 +1160,7 @@ const Exchange: React.FC = () => {
                     <Box w="90%" h="300px" ml={2}>
 
                     <TradeSimulationCard 
-                        
+                                useWeth={useWeth}
                                 setQuote={setQuote}
                                 quote={quote}
                                 token0Info={token0Info}
