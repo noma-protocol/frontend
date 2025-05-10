@@ -42,7 +42,7 @@ import { ro } from '@faker-js/faker';
 import addresses from "../assets/deployment.json";
 import { size } from 'viem';
 
-const { formatEther, parseEther, isAddress } = ethers.utils;
+const { formatEther, parseEther, isAddress, MaxUint256 } = ethers.utils;
 const { JsonRpcProvider } = ethers.providers;
 
 const localProvider = new JsonRpcProvider("https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW");
@@ -230,10 +230,14 @@ const Borrow = () => {
         functionName: "approve",
         args: [
             vaultAddress,
-            ethers.constants.MaxUint256
+            isAdding ?  parseEther(`${extraCollateral}`) : parseEther(`${collateral}`)
         ],
         onSuccess(data) {
-            borrow();
+            if (isAdding) {
+                addCollateral();
+            } else {
+                borrow();
+            }
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
@@ -256,7 +260,7 @@ const Borrow = () => {
         functionName: "approve",
         args: [
             vaultAddress,
-            ethers.constants.MaxUint256
+            repayAmount == 0 ? loanData?.borrowAmount : parseEther(`${repayAmount}`) 
         ],
         onSuccess(data) {
             payback();
@@ -546,19 +550,21 @@ const Borrow = () => {
             });
             return;
         }
+
+        console.log(`Adding extra: ${extraCollateral} collateral ${collateral}}`);
         setIsAdding(true);
         setIsLoading(true);
-        addCollateral();
+        approve();
     }
 
     const handleClickRepayAmount = () => {
-        if (Number(repayAmount) <= 0) {
-            toaster.create({
-                title: "Error",
-                description: "Please enter a valid repay amount",
-            });
-            return;
-        }
+        // if (Number(repayAmount) <= 0) {
+        //     toaster.create({
+        //         title: "Error",
+        //         description: "Please enter a valid repay amount",
+        //     });
+        //     return;
+        // }
         setIsRepaying(true);
         setIsLoading(true);
         approveToken1();
@@ -821,12 +827,12 @@ const Borrow = () => {
                                                 <Text  fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"xs":"15px"}>Collateral required</Text>
                                             </Box>
                                             <Box>
-                                                <Text fontSize={isMobile?"xs":"15px"}>{commify(collateral || 0)} {token0Info.tokenSymbol}</Text>
+                                                <Text fontSize={isMobile?"xs":"15px"}>{formatNumberPrecise(collateral || 4)} {token0Info.tokenSymbol}</Text>
                                             </Box>
                                             <Box mt={5}>
                                             <HStack>
                                                 <Box> <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"xs":"15px"}>Loan Fees</Text>    </Box>
-                                                <Box><Image src={placeholderLogo} w={15}></Image></Box>
+                                                <Box><Image src={placeholderLogo} w={3}></Image></Box>
                                             </HStack>
                                             </Box>
                                             <Box>
@@ -835,7 +841,7 @@ const Borrow = () => {
                                             <Box mt={5}> 
                                                     <HStack>
                                                         <Box><Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"xs":"15px"}>IMV</Text> </Box>
-                                                        <Box><Image src={placeholderLogo} w={15}></Image></Box>
+                                                        <Box><Image src={placeholderLogo} w={3}></Image></Box>
                                                     </HStack>
                                                 <HStack>
                                                     <Box>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Box>
@@ -872,11 +878,13 @@ const Borrow = () => {
                                     </SelectRoot>
                                      <Button 
                                         mt={4} 
-                                        h={"30px"}  
+                                        w={"90px"}
+                                        h={"25px"}  
                                         borderColor={"#a67c00"} 
-                                        variant="outline" ml={5} 
+                                        variant="outline" 
+                                        ml={12} 
                                         onClick={() => handleBorrow()}  
-                                        disabled={isTokenInfoLoading || loanData?.borrowAmount > 0 || borrowAmount == 0} w={"120px"}
+                                        disabled={isTokenInfoLoading || loanData?.borrowAmount > 0 || borrowAmount == 0} 
                                         >
                                             {isBorrowing ? <Spinner size="sm" color="#a67c00"/> :  <Text fontSize="xs" color="#a67c00">Borrow</Text>}
                                         </Button>
