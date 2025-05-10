@@ -114,17 +114,17 @@ const BalanceCard = ({
             borderRadius={10} 
             backgroundColor={withBg ? "none" : "#222831"}
         >
-            <Text fontWeight="bold" color="#a67c00" mb={2}>Wallet</Text>
+            <Text fontWeight="bold" fontSize={isMobile ? "13px" : "14px"} color="#a67c00" mb={2}>Wallet</Text>
             
             <SimpleGrid columns={3} spacing={2}>
                 {/* Header Row */}
-                <Box color="white" background="#bf9b30"  pl={3}>
+                <Box color="white" background="#a67c00"  pl={3}>
                     <Text>Asset</Text>
                 </Box>
-                <Box  color="white" background="#bf9b30" textAlign="left">
+                <Box  color="white" background="#a67c00" textAlign="left">
                     Balance
                 </Box>
-                <Box color="white" background="#bf9b30" textAlign="center">
+                <Box color="white" background="#a67c00" textAlign="center">
                     Actions
                 </Box>
                 
@@ -146,7 +146,7 @@ const BalanceCard = ({
                                 border="1px solid"
                                 borderColor={actionType === 'wrap' ? "#a67c00" : "gray"}
                                 variant="outline" 
-                                h="30px"
+                                h="25px"
                                 w={buttonSize}
                                 onClick={() => setActionType('wrap')}
                             >
@@ -214,8 +214,9 @@ const BalanceCard = ({
                                 borderColor={actionType === 'unwrap' ? "#a67c00" : "gray"}
                                 disabled={isUnwrapping || token1Balance == 0} 
                                 variant="outline" 
-                                h="30px"
+                                h="25px"
                                 w={buttonSize}
+                                mt={-2}
                                 onClick={() => setActionType('unwrap')}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
@@ -288,11 +289,13 @@ const BalanceCard = ({
                         <VStack spacing={2} align="center">
                             <Button 
                                 variant="outline" 
-                                h="30px"
+                                h="25px"
                                 w={buttonSize}
                                 disabled={token0Balance == 0}
                                 onClick={handleClickBorrow}
                                 fontSize={fontSize}
+                                mt={-2}
+                                mb={1}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Borrow
@@ -300,7 +303,7 @@ const BalanceCard = ({
                             </Button>
                             <Button 
                                 variant="outline" 
-                                h="30px"
+                                h="25px"
                                 w={buttonSize}
                                 disabled={token0Balance == 0}
                                 onClick={handleClickStake}
