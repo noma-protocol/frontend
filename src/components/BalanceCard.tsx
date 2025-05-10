@@ -78,9 +78,6 @@ const BalanceCard = ({
 
     // Format values
     const formattedEthBalance = formatEther(`${ethBalance}`);
-    const oversizeEth = Number(formattedEthBalance) > 1_000_000;
-    const oversizeToken0 = token0Balance > 1_000_000;
-    const oversizeToken1 = token1Balance > 1_000_000;
 
     const withBg = page === "exchange";
 
@@ -106,7 +103,7 @@ const BalanceCard = ({
 
     return (
         <Box 
-            w={cardWidth}
+            w={page == "borrow" ? "380px" : cardWidth}   
             mx="auto"
             border={withBg ? "none" : "1px solid white"} 
             borderColor="gray" 
@@ -121,13 +118,13 @@ const BalanceCard = ({
             
             <SimpleGrid columns={3} spacing={2}>
                 {/* Header Row */}
-                <Box color="white" background="#bf9b30" p={2} pl={3}>
-                    Asset
+                <Box color="white" background="#bf9b30"  pl={3}>
+                    <Text>Asset</Text>
                 </Box>
-                <Box color="white" background="#bf9b30" p={2} textAlign="left">
+                <Box  color="white" background="#bf9b30" textAlign="left">
                     Balance
                 </Box>
-                <Box color="white" background="#bf9b30" p={2} textAlign="center">
+                <Box color="white" background="#bf9b30" textAlign="center">
                     Actions
                 </Box>
                 
@@ -135,11 +132,11 @@ const BalanceCard = ({
                 <Box p={2} height="42px" display="flex" alignItems="center">
                     <HStack spacing={2}>
                         <Image src={monadLogo} w="25px" alt="MON" />
-                        <Text mt={1} ml={2}>MON</Text>
+                        <Text mt={"-2px"} ml={2}>MON</Text>
                     </HStack>
                 </Box>
                 <Box p={2} fontSize={fontSize} textAlign="left" height="42px" display="flex" alignItems="left" justifyContent="left">
-                    {commify(formattedEthBalance)}
+                    <Text fontSize={fontSize}  h={"30px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
                     <DrawerRoot>
