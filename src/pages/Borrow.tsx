@@ -659,119 +659,120 @@ const Borrow = () => {
                                     </Box>
                                     <Box px={2} fontSize="xs" mt={2}> {commifyDecimals(ltv, 2)}</Box>
                                     <Box px={2} fontSize="xs" mt={2}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
-                                    </>) : <><Text size="sm" mt={2}>No Data</Text></>
+                                    <HStack mt={2} ml={2} alignItems="center" justifyContent="space-between" w="90%" pb={2}>
+                                    <Box>
+                                        <LoanAddCollateral
+                                            size="sm"
+                                            token0Symbol={token0Info.tokenSymbol}
+                                            handleSetCollateral={setExtraCollateral}
+                                            extraCollateral={extraCollateral}
+                                            isMobile={isMobile}
+                                            ltv={ltv}
+                                            handleClickAdd={handleClickAdd}
+                                            isAdding={isAdding}
+                                            setIsAdding={setIsAdding}
+                                            isLoading={isLoading}
+                                            setIsLoading={setIsLoading}
+                                            isTokenInfoLoading={isTokenInfoLoading}
+                                        />
+                                    </Box>
+                                    <Box>
+                                        <LoanRepay
+                                            size="sm"
+                                            fullCollateral={loanData?.collateralAmount}
+                                            loanAmount={loanData?.borrowAmount}
+                                            token0Symbol={token0Info.tokenSymbol}
+                                            repayAmount={repayAmount}
+                                            setRepayAmount={setRepayAmount}
+                                            handleClickRepayAmount={handleClickRepayAmount}
+                                            isRepaying={isRepaying}
+                                            setIsRepaying={setIsRepaying}
+                                            isMobile={isMobile}
+                                            imv={IMV}
+                                            ltv={ltv}
+                                            isLoading={isTokenInfoLoading}
+                                        />
+                                    </Box>
+                                    <Box>
+                                        <DrawerRoot >
+                                        <DrawerTrigger asChild>
+                                        <Button
+                                            ml={2}
+                                            mt={2} 
+                                            variant={"outline"}
+                                            h={6}
+                                            // onClick={() => setIsLoading(true)}
+                                            disabled={isRolling || isLoading || isTokenInfoLoading || ltv <= 1}
+                                            w={"80px"}
+                                            border="1px solid #f3f7c6"
+                                        >
+                                        {isLoading ? <Spinner size="sm" /> : <Text fontSize={"11px"} color={"#f3f7c6"}>Roll</Text>}
+                                        </Button>
+                                        </DrawerTrigger>
+                                        <DrawerBackdrop />
+                                        <DrawerContent>
+                                            <Box mt="80%" ml={5}>
+                                            <DrawerHeader>
+                                                <DrawerTitle>
+                                                    <Text as="h3" color="#a67c00">Roll Loan</Text>
+                                                </DrawerTitle>
+                                                <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
+                                                    <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
+                                                </DrawerCloseTrigger>
+                                            </DrawerHeader>
+                                            <DrawerBody>
+                                                {/* <Input
+                                                    placeholder="Amount to roll"
+                                                    // onChange={(e) => setWrapAmount(e.target.value)}
+                                                    w="80%"
+                                                /> */}
+                                            <Box border="1px solid #a67c00" borderRadius="md" p={3} w="90%" >                              
+
+                                                <HStack>
+                                                    <Box w="120px"><Text fontSize="sm" color="#f3f7c6">New Duration:</Text></Box>
+                                                    <Box><Text fontSize="sm" color="white">{duration / 86400} days</Text></Box>
+                                                </HStack>
+                                                <HStack>
+                                                    <Box  w="120px"><Text fontSize="sm" c color="#f3f7c6">Expires On:</Text></Box>
+                                                    <Box><Text fontSize="sm" color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
+                                                </HStack>
+                                                <HStack>
+                                                    <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Amount:</Text></Box>
+                                                    <Box><Text fontSize="sm" color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
+                                                </HStack>
+                                                <HStack>
+                                                    <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Loan Fees:</Text></Box>
+                                                    <Box>
+                                                        <Text color="white" fontSize="sm">
+                                                        {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}&nbsp;
+                                                        {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info.tokenSymbol}
+                                                        </Text></Box>
+                                                </HStack>
+                                            </Box>  
+                                            <Box mt={10}>
+                                            <DrawerActionTrigger asChild>
+                                                    <Button variant="outline"  w="120px" onClick={() => setIsRolling(false)}>
+                                                        Cancel
+                                                    </Button>
+                                                
+                                                </DrawerActionTrigger>
+                                                <Button colorScheme="blue" onClick={handleClickRoll} w="120px" ml={2}>
+                                                    {isRolling ? <Spinner size="sm" /> : "Confirm"}
+                                                </Button>                                
+                                            </Box>                                
+                                            </DrawerBody>
+                                            </Box>
+                                            {/* <DrawerFooter>
+                                            </DrawerFooter> */}
+                                        </DrawerContent>
+                                        </DrawerRoot>
+                                    </Box>
+                                    </HStack>
+                                    </>) : <><Text size="xs" mt={2} ml={2}>No active loan</Text></>
                                     }                                
                             </SimpleGrid>
 
-                            <HStack mt={2} ml={2} alignItems="center" justifyContent="space-between" w="90%" pb={2}>
-                                <Box>
-                                    <LoanAddCollateral
-                                        size="sm"
-                                        token0Symbol={token0Info.tokenSymbol}
-                                        handleSetCollateral={setExtraCollateral}
-                                        extraCollateral={extraCollateral}
-                                        isMobile={isMobile}
-                                        ltv={ltv}
-                                        handleClickAdd={handleClickAdd}
-                                        isAdding={isAdding}
-                                        setIsAdding={setIsAdding}
-                                        isLoading={isLoading}
-                                        setIsLoading={setIsLoading}
-                                        isTokenInfoLoading={isTokenInfoLoading}
-                                    />
-                                </Box>
-                                <Box>
-                                    <LoanRepay
-                                        size="sm"
-                                        fullCollateral={loanData?.collateralAmount}
-                                        loanAmount={loanData?.borrowAmount}
-                                        token0Symbol={token0Info.tokenSymbol}
-                                        repayAmount={repayAmount}
-                                        setRepayAmount={setRepayAmount}
-                                        handleClickRepayAmount={handleClickRepayAmount}
-                                        isRepaying={isRepaying}
-                                        setIsRepaying={setIsRepaying}
-                                        isMobile={isMobile}
-                                        imv={IMV}
-                                        ltv={ltv}
-                                        isLoading={isTokenInfoLoading}
-                                    />
-                                </Box>
-                                <Box>
-                                    <DrawerRoot >
-                                    <DrawerTrigger asChild>
-                                    <Button
-                                        ml={2}
-                                        mt={2} 
-                                        variant={"outline"}
-                                        h={6}
-                                        // onClick={() => setIsLoading(true)}
-                                        disabled={isRolling || isLoading || isTokenInfoLoading || ltv <= 1}
-                                        w={"80px"}
-                                        border="1px solid #f3f7c6"
-                                    >
-                                    {isLoading ? <Spinner size="sm" /> : <Text fontSize={"11px"} color={"#f3f7c6"}>Roll</Text>}
-                                    </Button>
-                                    </DrawerTrigger>
-                                    <DrawerBackdrop />
-                                    <DrawerContent>
-                                        <Box mt="80%" ml={5}>
-                                        <DrawerHeader>
-                                            <DrawerTitle>
-                                                <Text as="h3" color="#a67c00">Roll Loan</Text>
-                                            </DrawerTitle>
-                                            <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
-                                                <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
-                                            </DrawerCloseTrigger>
-                                        </DrawerHeader>
-                                        <DrawerBody>
-                                            {/* <Input
-                                                placeholder="Amount to roll"
-                                                // onChange={(e) => setWrapAmount(e.target.value)}
-                                                w="80%"
-                                            /> */}
-                                        <Box border="1px solid #a67c00" borderRadius="md" p={3} w="90%" >                              
 
-                                            <HStack>
-                                                <Box w="120px"><Text fontSize="sm" color="#f3f7c6">New Duration:</Text></Box>
-                                                <Box><Text fontSize="sm" color="white">{duration / 86400} days</Text></Box>
-                                            </HStack>
-                                            <HStack>
-                                                <Box  w="120px"><Text fontSize="sm" c color="#f3f7c6">Expires On:</Text></Box>
-                                                <Box><Text fontSize="sm" color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
-                                            </HStack>
-                                            <HStack>
-                                                <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Amount:</Text></Box>
-                                                <Box><Text fontSize="sm" color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
-                                            </HStack>
-                                            <HStack>
-                                                <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Loan Fees:</Text></Box>
-                                                <Box>
-                                                    <Text color="white" fontSize="sm">
-                                                    {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}&nbsp;
-                                                    {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info.tokenSymbol}
-                                                    </Text></Box>
-                                            </HStack>
-                                        </Box>  
-                                        <Box mt={10}>
-                                        <DrawerActionTrigger asChild>
-                                                <Button variant="outline"  w="120px" onClick={() => setIsRolling(false)}>
-                                                    Cancel
-                                                </Button>
-                                               
-                                            </DrawerActionTrigger>
-                                            <Button colorScheme="blue" onClick={handleClickRoll} w="120px" ml={2}>
-                                                {isRolling ? <Spinner size="sm" /> : "Confirm"}
-                                            </Button>                                
-                                        </Box>                                
-                                        </DrawerBody>
-                                        </Box>
-                                        {/* <DrawerFooter>
-                                        </DrawerFooter> */}
-                                    </DrawerContent>
-                                    </DrawerRoot>
-                                </Box>
-                            </HStack>
                         </Box>
                         
                         </Flex>
