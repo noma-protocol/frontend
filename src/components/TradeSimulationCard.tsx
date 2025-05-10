@@ -130,7 +130,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             <HStack>
                 <Box  w="160px"><Text fontSize={"13px"} ml={8}>Receiving:</Text></Box>
                 <Box><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy / bidRate) : commify(amountToSell * askRate)}</Text></Box>
-                <Box fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : "MON")} </Box>
+                <Box fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
             </HStack>
             <HStack>
                 <Box w="160px"><Text fontSize={"13px"} ml={8}>Max Slippage:</Text></Box>
