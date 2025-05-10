@@ -123,7 +123,7 @@ const Borrow = () => {
     return () => clearInterval(interval);
     }, [address]);
 
-    const { 
+    const {
         write : deposit,
       } = useContractWrite({
           address: token1,
@@ -132,9 +132,11 @@ const Borrow = () => {
           value: parseEther(`${wrapAmount}`),
           onSuccess(data) {
               setIsWrapping(false);
+              setIsLoading(false);
             },
             onError(error) {
                 setIsWrapping(false);
+                setIsLoading(false);
                 const msg = Number(error.message.toString().indexOf("exceeds")) > -1 ? "Not enough balance" :
                             error.message.indexOf("PresaleEnded") > -1 ? "The presale has ended" :
                             error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
@@ -155,18 +157,20 @@ const Borrow = () => {
         args: [parseEther(`${wrapAmount}`)],
         onSuccess(data) {
             setIsUnwrapping(false);
+            setIsLoading(false);
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
             setIsUnwrapping(false);
+            setIsLoading(false);
             const msg = Number(error.message.toString().indexOf("burn amount exceeds balance")) > -1 ? "Not enough balance" :
                         error.message.indexOf("PresaleEnded") > -1 ? "The presale has ended" :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
                 description: msg,
-            }); 
-            setWrapAmount(0);           
+            });
+            setWrapAmount(0);
         }
     });
 
@@ -229,19 +233,18 @@ const Borrow = () => {
             ethers.constants.MaxUint256
         ],
         onSuccess(data) {
-
             borrow();
-
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
             setIsBorrowing(false);
+            setIsLoading(false);
 
             const msg = Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
                 description: msg,
-            });         
+            });
         }
     });
 
@@ -256,12 +259,12 @@ const Borrow = () => {
             ethers.constants.MaxUint256
         ],
         onSuccess(data) {
-
             payback();
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
             setIsRepaying(false);
+            setIsLoading(false);
 
             const msg = Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
             toaster.create({
@@ -284,16 +287,18 @@ const Borrow = () => {
         ],
         onSuccess(data) {
             setIsBorrowing(false);
+            setIsLoading(false);
             setTimeout(() => {
                 window.location.reload();
-              }, 4000); // 3000ms = 3 seconds         
+              }, 4000); // 4000ms = 4 seconds
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
             setIsBorrowing(false);
+            setIsLoading(false);
 
-            const msg = Number(error.message.toString().indexOf("0x76166401")) > -1 ? "Invalid duration" : 
-                        Number(error.message.toString().indexOf("_deployPosition(2)")) > -1 ? "Trading did not start yet" : 
+            const msg = Number(error.message.toString().indexOf("0x76166401")) > -1 ? "Invalid duration" :
+                        Number(error.message.toString().indexOf("_deployPosition(2)")) > -1 ? "Trading did not start yet" :
                         Number(error.message.toString().indexOf("NoLiquidity")) > -1 ? "Not enough liquidity" :
                         Number(error.message.toString().indexOf("0x31eed5fe")) > -1 ? "Not enough floor liquidity" :
                         Number(error.message.toString().indexOf("0xf16664fd")) > -1 ? "Only one loan per address" :
@@ -302,8 +307,8 @@ const Borrow = () => {
             toaster.create({
                 title: "Error",
                 description: msg,
-            });      
-        
+            });
+
         }
     });
 
@@ -318,10 +323,11 @@ const Borrow = () => {
         ],
         onSuccess(data) {
             setIsRepaying(false);
+            setIsLoading(false);
             setTimeout(() => {
                 window.location.reload();
-              }, 4000); // 3000ms = 3 seconds        
-            
+              }, 4000); // 4000ms = 4 seconds
+
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
@@ -333,8 +339,8 @@ const Borrow = () => {
             toaster.create({
                 title: "Error",
                 description: msg,
-            });  
-        }   
+            });
+        }
     });
 
     const {
@@ -348,13 +354,15 @@ const Borrow = () => {
         ],
         onSuccess(data) {
             setIsRolling(false);
+            setIsLoading(false);
             setTimeout(() => {
                   window.location.reload();
-            }, 4000); // 3000ms = 3 seconds  
+            }, 4000); // 4000ms = 4 seconds
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
             setIsRolling(false);
+            setIsLoading(false);
 
             const msg = Number(error.message.toString().indexOf("0x37218288")) > -1 ? "Shift required" :
                         Number(error.message.toString().indexOf("0x76166401")) > -1 ? "Invalid duration" :
@@ -364,7 +372,7 @@ const Borrow = () => {
             toaster.create({
                 title: "Error",
                 description: msg,
-            });         
+            });
         }
     });
 
@@ -379,16 +387,18 @@ const Borrow = () => {
         ],
         onSuccess(data) {
             setIsAdding(false);
+            setIsLoading(false);
             setTimeout(() => {
                 window.location.reload();
-              }, 4000); // 3000ms = 3 seconds         
+              }, 4000); // 4000ms = 4 seconds
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
             setIsAdding(false);
+            setIsLoading(false);
 
-            const msg = //Number(error.message.toString().indexOf("0x76166401")) > -1 ? "Invalid duration" : 
-                        // Number(error.message.toString().indexOf("_deployPosition(2)")) > -1 ? "Trading did not start yet" : 
+            const msg = //Number(error.message.toString().indexOf("0x76166401")) > -1 ? "Invalid duration" :
+                        // Number(error.message.toString().indexOf("_deployPosition(2)")) > -1 ? "Trading did not start yet" :
                         // Number(error.message.toString().indexOf("NoLiquidity")) > -1 ? "Not enough liquidity" :
                         // Number(error.message.toString().indexOf("0x31eed5fe")) > -1 ? "Not enough floor liquidity" :
                         // Number(error.message.toString().indexOf("0xf16664fd")) > -1 ? "Only one loan per address" :
@@ -396,30 +406,35 @@ const Borrow = () => {
             toaster.create({
                 title: "Error",
                 description: msg,
-            });      
-        
+            });
+
         }
     });
 
     useEffect(() => {
+        if (!vaultAddress) return;
 
         const fetchTokenInfo = async (tokenAddress) => {
-            setIsTokenInfoLoading(true);
+            if (!tokenAddress) return null;
 
-            const tokenContract = new ethers.Contract(
-                tokenAddress,
-                ERC20Abi,
-                localProvider
-            );
+            try {
+                const tokenContract = new ethers.Contract(
+                    tokenAddress,
+                    ERC20Abi,
+                    localProvider
+                );
 
-            const tokenName = await tokenContract.name();
-            const tokenSymbol = await tokenContract.symbol();
-            const tokenDecimals = await tokenContract.decimals();
-            
-            const balance = await tokenContract.balanceOf(address);
+                const tokenName = await tokenContract.name();
+                const tokenSymbol = await tokenContract.symbol();
+                const tokenDecimals = await tokenContract.decimals();
 
-            setIsTokenInfoLoading(false);
-            return { tokenName, tokenSymbol, tokenDecimals, balance };
+                const balance = await tokenContract.balanceOf(address);
+
+                return { tokenName, tokenSymbol, tokenDecimals, balance };
+            } catch (error) {
+                console.error(`Error fetching token info for ${tokenAddress}:`, error);
+                return null;
+            }
         };
 
 
@@ -432,34 +447,41 @@ const Borrow = () => {
         const interval = setInterval(() => {
 
             const fetchVaultInfo = async () => {
-                const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vaultAddress);
+                try {
+                    const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vaultAddress);
 
-                const plainVaultDescription = {
-                    tokenName: vaultDescriptionData[0],
-                    tokenSymbol: vaultDescriptionData[1],
-                    tokenDecimals: Number(vaultDescriptionData[2]), // Convert BigInt to number
-                    token0: vaultDescriptionData[3],
-                    token1: vaultDescriptionData[4],
-                    deployer: vaultDescriptionData[5],
-                    vault: vaultDescriptionData[6],
-                    presaleContract: vaultDescriptionData[7],
-                };
+                    const plainVaultDescription = {
+                        tokenName: vaultDescriptionData[0],
+                        tokenSymbol: vaultDescriptionData[1],
+                        tokenDecimals: Number(vaultDescriptionData[2]), // Convert BigInt to number
+                        token0: vaultDescriptionData[3],
+                        token1: vaultDescriptionData[4],
+                        deployer: vaultDescriptionData[5],
+                        vault: vaultDescriptionData[6],
+                        presaleContract: vaultDescriptionData[7],
+                    };
 
-                fetchTokenInfo(plainVaultDescription.token0).then((data) => {
-                    // console.log({data})
-                    setToken0Info(data);
-                    setToken0(plainVaultDescription.token0);
-                });
-        
-                fetchTokenInfo(plainVaultDescription.token1).then((data) => {
-                    // console.log({data})
-                    setToken1Info(data);
-                    setToken1(plainVaultDescription.token1);
-                });
+                    const token0Data = await fetchTokenInfo(plainVaultDescription.token0);
+                    if (token0Data) {
+                        setToken0Info(token0Data);
+                        setToken0(plainVaultDescription.token0);
+                    }
+
+                    const token1Data = await fetchTokenInfo(plainVaultDescription.token1);
+                    if (token1Data) {
+                        setToken1Info(token1Data);
+                        setToken1(plainVaultDescription.token1);
+                    }
+
+                    // Clear loading state once data is fetched
+                    setIsTokenInfoLoading(false);
+                } catch (error) {
+                    console.error("Error fetching vault info:", error);
+                    setIsTokenInfoLoading(false);
+                }
             }
 
             fetchVaultInfo();
-
             }
         , 3000);
 
@@ -476,6 +498,13 @@ const Borrow = () => {
 
 
     const handleBorrow = () => {
+        if (Number(borrowAmount) <= 0) {
+            toaster.create({
+                title: "Error",
+                description: "Please enter a valid borrow amount",
+            });
+            return;
+        }
         setIsBorrowing(true);
         setIsLoading(true);
         approve();
@@ -488,6 +517,7 @@ const Borrow = () => {
 
     const handleClickRoll = () => {
         setIsRolling(true);
+        setIsLoading(true);
         roll();
     }
 
@@ -509,14 +539,29 @@ const Borrow = () => {
     }, [borrowAmount, IMV]);
 
     const handleClickAdd = () => {
+        if (Number(extraCollateral) <= 0) {
+            toaster.create({
+                title: "Error",
+                description: "Please enter a valid collateral amount",
+            });
+            return;
+        }
         setIsAdding(true);
+        setIsLoading(true);
         addCollateral();
     }
 
     const handleClickRepayAmount = () => {
+        if (Number(repayAmount) <= 0) {
+            toaster.create({
+                title: "Error",
+                description: "Please enter a valid repay amount",
+            });
+            return;
+        }
         setIsRepaying(true);
+        setIsLoading(true);
         approveToken1();
-
     }
 
     const displayedCollateral = Number(formatEther(`${loanData?.collateralAmount || 0}`)) > 1000000 ?
