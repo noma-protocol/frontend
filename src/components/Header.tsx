@@ -160,7 +160,7 @@ const Header: React.FC = () => {
                       data-bs-dismiss="modal"
                       style={{ fontSize: "20px", marginTop:"20px"}}
                     >
-                      <a className="btn ml-lg-auto btn-bordered-white" href="/exchange" >
+                      <a className="btn ml-lg-auto btn-bordered-white" href="/" >
                         Exchange
                       </a>
                     </li>                     
