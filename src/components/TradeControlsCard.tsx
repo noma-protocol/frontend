@@ -181,6 +181,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             //     currencySign: "accounting",
             //   }}
             w={isMobile ? "320px" : "220px"}
+            disabled={isTokenInfoLoading || tradeMode == "BUY" ? token0Balance == 0 : token1Balance == 0}
           >
             <NumberInputLabel h="40px" w={{ base: "", lg: "auto" }} />
             <NumberInputField
