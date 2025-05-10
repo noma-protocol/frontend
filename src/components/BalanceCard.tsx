@@ -119,20 +119,20 @@ const BalanceCard = ({
             <SimpleGrid columns={3} spacing={2}>
                 {/* Header Row */}
                 <Box color="white" background="#a67c00"  pl={3}>
-                    <Text>Asset</Text>
+                    <Text  fontSize="sm">Asset</Text>
                 </Box>
                 <Box  color="white" background="#a67c00" textAlign="left">
-                    Balance
+                    <Text  fontSize="sm">Balance</Text>
                 </Box>
                 <Box color="white" background="#a67c00" textAlign="center">
-                    Actions
+                    <Text  fontSize="sm">Actions</Text>
                 </Box>
                 
                 {/* MON Row */}
                 <Box p={2} height="42px" display="flex" alignItems="center">
                     <HStack spacing={2}>
                         <Image src={monadLogo} w="25px" alt="MON" />
-                        <Text mt={"-2px"} ml={2}>MON</Text>
+                        <Text fontSize="xs" mt={"-2px"} ml={2}>MON</Text>
                     </HStack>
                 </Box>
                 <Box p={2} fontSize={fontSize} textAlign="left" height="42px" display="flex" alignItems="left" justifyContent="left">
@@ -199,7 +199,7 @@ const BalanceCard = ({
                         <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2}>
                             <Image src={monadLogo} w="25px" alt={token1Symbol || 'Token'} />
-                            <Text ml={2} mt={"-2px"}>{token1Symbol || <Spinner size="sm" />}</Text>
+                            <Text fontSize="xs"  ml={2} mt={"-2px"}>{token1Symbol || <Spinner size="sm" />}</Text>
                         </HStack>
                     }
                 </Box>
@@ -276,7 +276,7 @@ const BalanceCard = ({
                             />
                             </Box>
                             <Box>
-                               <Text>&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
+                               <Text  fontSize="xs">&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
                             </Box>
                         </HStack>
                     }
