@@ -623,7 +623,7 @@ const Borrow = () => {
                         </Box>
                         <Box p={2} mt={5} w="380px" ml={-5} border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
                             <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Loan</Text>        
-                           <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"}>
+                           <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={"352px"} ml={2} mr={2}>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> 
@@ -659,7 +659,7 @@ const Borrow = () => {
                                     </Box>
                                     <Box px={2} fontSize="xs" mt={2}> {commifyDecimals(ltv, 2)}</Box>
                                     <Box px={2} fontSize="xs" mt={2}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
-                                    </>) : <></>
+                                    </>) : <><Text size="sm" mt={2}>No Data</Text></>
                                     }                                
                             </SimpleGrid>
 
