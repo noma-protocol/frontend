@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Flex, Badge, HStack, Box, Grid, GridItem, Button, Spinner, Text } from "@chakra-ui/react";
 import { ethers } from 'ethers';
-import { commify } from '../utils';
+import { commify, formatNumberPrecise } from '../utils';
 import { isMobile } from "react-device-detect";
 import { Slider } from "../components/ui/slider";
 import {
@@ -199,7 +199,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Slider
               mt={2}
               // ml={isMobile ? 5 : 10}
-              ml={5}
+              ml={7}
               variant="outline"
               w={"92%"}
               // Scale the contributionAmount for the slider
@@ -260,12 +260,12 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
           {/* <Flex direction={isMobile? "row" : "column"} align="center" justify="center"> */}
         <RadioGroup 
-        id="tradeMode"
+          id="tradeMode"
           value={tradeMode} 
           onValueChange={(e) => setTradeMode(e.value)} 
           ml={5}
         >
-          <Box position="relative" border="1px solid" borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} px={12} w={isMobile ?"320px":"220px"} h="35px" ml={isMobile? -1: -5} mt={-5} borderRadius={5}>
+          <Box position="relative" border="1px solid" borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} px={12} w={isMobile ?"310px":"220px"} h="35px" ml={isMobile? -1: -5} mt={-5} borderRadius={5}>
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -288,7 +288,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
             Type
           </Badge>
-          <HStack gap="4" mt={1} ml={isMobile ? 8 : 2}>
+          <HStack gap="4" mt={1} ml={isMobile ? 10 : 2}>
             
                 <Box>
                   <Radio value="BUY"></Radio>
@@ -316,7 +316,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           w="4px"
           // mt={-2}
         >
-        <Box border="1px solid #a67c00" px={12} w={isMobile ? "320px" : "220px"} h="38px" borderRadius={5} mt={4} ml={isMobile ? 4 : 0}>
+        <Box border="1px solid #a67c00" px={12} w={isMobile ? "310px" : "220px"} h="38px" borderRadius={5} mt={4} ml={isMobile ? 4 : 0}>
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -339,7 +339,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           >
             Asset
           </Badge>
-          <HStack gap="4" mt={2} ml={isMobile ? 8 : 2}>
+          <HStack gap="4" mt={2} ml={isMobile ? 10 : 2}>
             <Box>
               <Radio value={"1"} defaultChecked={useWeth == true} ></Radio>
             </Box>
@@ -349,7 +349,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Box  ml={isMobile ? 2 : 0}>
               <Radio value={"0"} defaultChecked={useWeth == false}></Radio>
             </Box>
-            <Box ml={isMobile ? 4 : 0}> 
+            <Box ml={isMobile ? 2 : 0}> 
               <Text fontSize="13px">MON</Text>
             </Box>
           </HStack> 
@@ -364,7 +364,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 mt={5}
                 variant="subtle"
                 backgroundColor={"#bf9b30"}
-                w={isMobile ? "310px" : "210px"}
+                w={isMobile ? "300px" : "210px"}
                 onClick={() => {
                   handleExecuteTrade();
                 }}

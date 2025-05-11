@@ -302,6 +302,7 @@ const Borrow = () => {
             setIsLoading(false);
 
             const msg = Number(error.message.toString().indexOf("0x76166401")) > -1 ? "Invalid duration" :
+                        Number(error.message.toString().indexOf("0x39218f3b")) > -1 ? "Not permitted before first shift" :
                         Number(error.message.toString().indexOf("_deployPosition(2)")) > -1 ? "Trading did not start yet" :
                         Number(error.message.toString().indexOf("NoLiquidity")) > -1 ? "Not enough liquidity" :
                         Number(error.message.toString().indexOf("0x31eed5fe")) > -1 ? "Not enough floor liquidity" :

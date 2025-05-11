@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 
 import { ethers } from 'ethers';
-import { commify } from '../utils';
+import { commify, formatNumberPrecise } from '../utils';
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 
 import {  DrawerRoot, DrawerTrigger, DrawerContent, DrawerCloseTrigger, DrawerBackdrop, DrawerHeader, DrawerBody, DrawerActionTrigger, DrawerTitle } from "./ui/drawer";
@@ -122,23 +122,23 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                 Trade Info 
             </Text>
             
-            <HStack>
-                <Box  w="160px"><Text fontSize={"13px"} ml={8}>Spending:</Text></Box>
-                <Box><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy) : commify(amountToSell) }</Text></Box>
+            <HStack w="300px">
+                <Box  w="180px"><Text fontSize={"13px"} ml={8}>Spending:</Text></Box>
+                <Box w="120px"><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy) : commify(amountToSell) }</Text></Box>
                 <Box fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
             </HStack>
-            <HStack>
-                <Box  w="160px"><Text fontSize={"13px"} ml={8}>Receiving:</Text></Box>
-                <Box><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy / bidRate) : commify(amountToSell * askRate)}</Text></Box>
-                <Box fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
+            <HStack w="300px">
+                <Box  w="200px"><Text fontSize={"13px"} ml={8}>Receiving:</Text></Box>
+                <Box w="120px" ml={2}><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text></Box>
+                <Box  fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
             </HStack>
-            <HStack>
+           <HStack w="300px">
                 <Box w="160px"><Text fontSize={"13px"} ml={8}>Max Slippage:</Text></Box>
-                <Box><Text fontSize={"13px"} ml={8}>{slippage}%</Text></Box>
+                <Box w="120px"><Text fontSize={"13px"} ml={7}>{slippage}%</Text></Box>
             </HStack>
-            <HStack>
+            <HStack w="300px">
                 <Box w="160px"><Text fontSize={"13px"} ml={8}>Spread:</Text></Box>
-                <Box><Text fontSize={"13px"} ml={8}>{commify(spreadPct, 2)}%</Text></Box>
+                <Box w="120px"><Text fontSize={"13px"} ml={7}>{commify(spreadPct, 2)}%</Text></Box>
             </HStack>
             <DrawerRoot >
             <DrawerTrigger asChild>
