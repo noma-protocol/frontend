@@ -325,6 +325,7 @@ const Borrow = () => {
         args: [
             parseEther(`${repayAmount}`),
         ],
+        gas: 1300_000n, 
         onSuccess(data) {
             setIsRepaying(false);
             setIsLoading(false);
