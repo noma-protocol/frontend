@@ -147,6 +147,7 @@ const BalanceCard = ({
                                 borderColor={actionType === 'wrap' ? "#a67c00" : "gray"}
                                 variant="outline" 
                                 h="25px"
+                                ml={2}
                                 w={buttonSize}
                                 onClick={() => setActionType('wrap')}
                             >
@@ -217,6 +218,7 @@ const BalanceCard = ({
                                 h="25px"
                                 w={buttonSize}
                                 mt={-2}
+                                ml={2}
                                 onClick={() => setActionType('unwrap')}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">

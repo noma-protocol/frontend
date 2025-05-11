@@ -575,7 +575,7 @@ const Borrow = () => {
     const displayedCollateral = Number(formatEther(`${loanData?.collateralAmount || 0}`)) > 1000000 ?
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) :
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) ;
-
+    
     return (
         <Container maxW="container.xl=" py={12} pl={"0%"} ml={"3%"}>
             <Toaster />
@@ -803,7 +803,7 @@ const Borrow = () => {
                                                 setTokenSupply={(() => {})}
                                                 setPrice={setBorrowAmount}
                                                 setFloorPrice={(() => {})}
-                                                height={"30px"}
+                                                height={"25px"}
                                                 mt={1}
                                             >
                                                 <NumberInputLabel h={"30px"} w={{ base: "", lg: "auto" }} />
@@ -854,10 +854,10 @@ const Borrow = () => {
                                     <Box>
                                     <SelectRoot
                                         mt={1}
-                                        ml={isMobile?25:55}
+                                        ml={12}
                                         collection={durationChoices}
                                         size="xs"
-                                        width={isMobile?"130px":"110px"}
+                                        width={"100px"}
                                         onChange={handleSetDuration}
                                         value={duration}
                                         >
@@ -884,11 +884,16 @@ const Borrow = () => {
                                         h={"25px"}  
                                         borderColor={"#a67c00"} 
                                         variant="outline" 
-                                        ml={12} 
+                                        ml={14} 
                                         onClick={() => handleBorrow()}  
-                                        disabled={isTokenInfoLoading || loanData?.borrowAmount > 0 || borrowAmount == 0} 
+                                        disabled={
+                                            isTokenInfoLoading || 
+                                            loanData?.borrowAmount > 0 || 
+                                            borrowAmount == 0 || 
+                                            parseFloat(formatEther(`${token0Info.balance}`)) < parseFloat(`${collateral}`)
+                                        } 
                                         >
-                                            {isBorrowing ? <Spinner size="sm" color="#a67c00"/> :  <Text fontSize="xs" color="#a67c00">Borrow</Text>}
+                                            {isBorrowing ? <Spinner size="xs" color="#a67c00"/> :  <Text fontSize="xs" color="#a67c00">Borrow</Text>}
                                         </Button>
                                     </Box>
                                     <Box>
@@ -1202,7 +1207,12 @@ const Borrow = () => {
                             </Box>
                             <Box>
                             <Button mt={2} h={"30px"}  borderColor={"#a67c00"} variant="outline" ml={5} onClick={() => handleBorrow()}  
-                            disabled={isTokenInfoLoading || loanData?.borrowAmount > 0 || borrowAmount == 0} w={"120px"}>
+                            disabled={
+                                isTokenInfoLoading || 
+                                loanData?.borrowAmount > 0 || 
+                                borrowAmount == 0 || 
+                                parseFloat(formatEther(`${token0Info.balance}`)) < parseFloat(`${collateral}`)
+                            } w={"120px"}>
                                {isBorrowing ? <Spinner size="sm" color="#a67c00"/> :  <Text color="#a67c00">Borrow</Text>}
                             </Button>
                             </Box>

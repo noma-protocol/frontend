@@ -296,7 +296,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 <Box>
                   <Text fontSize="13px">BUY</Text>
                 </Box>
-                <Box ml={isMobile ? 4 : 0}>
+                <Box ml={isMobile ? 4 : 2}>
                   <Radio value="SELL"></Radio>
                 </Box>
                 <Box ml={isMobile ? 2 : 0}>
