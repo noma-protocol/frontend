@@ -19,6 +19,8 @@ import { Toaster } from "../components/ui/toaster";
 import { ethers } from "ethers";
 const { JsonRpcProvider } = ethers.providers;
 import { isMobile } from "react-device-detect";
+import useScreenOrientation from '../hooks/useScreenOrientation';
+import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import {
     SelectContent,
     SelectItem,
@@ -54,6 +56,8 @@ const feeTier = 3000;
 
 const Liquidity: React.FC = () => {
   const { address, isConnected } = useAccount();
+  const screenOrientation = useScreenOrientation();
+  const isLandscape = screenOrientation.includes("landscape");
   const [isAllVaultsLoading, setIsAllVaultsLoading] = useState(true);
   const [vaultDescriptions, setVaultDescriptions] = useState([]);
   const [selectedVault, setSelectedVault] = useState(""); // State to store the selected vault address
@@ -324,6 +328,8 @@ const Liquidity: React.FC = () => {
         >
           <Heading as="h2">Connect your wallet</Heading>
         </Box>
+      ) : isMobile && isLandscape ? (
+        <RotateDeviceMessage />
       ) : (
         <Box
           w="100%"
