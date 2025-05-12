@@ -89,6 +89,9 @@ const Stake = () => {
 
     const [vaultDescription, setVaultDescription] = useState({});
 
+    // Reference to track if component is mounted
+    const isMounted = React.useRef(true);
+
     const {
         data: stakedBalance
     } = useContractRead({
@@ -163,119 +166,25 @@ const Stake = () => {
     // console.log({sNomaBalance});
     // console.log(`${formatEther(`${rebaseIndex || 0}` )}`);
 
+    // Initialize isMounted.current to true
     useEffect(() => {
+        isMounted.current = true;
 
-        const fetchVaultDescription = async () => {
-            const nomaFactoryContract = new ethers.Contract(
-                nomaFactoryAddress,
-                NomaFactoryAbi,
-                localProvider
-            );
-
-            const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vaultAddress);
-
-            const plainVaultDescription = {
-                tokenName: vaultDescriptionData[0],
-                tokenSymbol: vaultDescriptionData[1],
-                tokenDecimals: Number(vaultDescriptionData[2]), // Convert BigInt to number
-                token0: vaultDescriptionData[3],
-                token1: vaultDescriptionData[4],
-                deployer: vaultDescriptionData[5],
-                vault: vaultDescriptionData[6],
-                presaleContract: vaultDescriptionData[7],
-                stakingContract: vaultDescriptionData[8],
-            };
-            
-            setVaultDescription(plainVaultDescription);
-
-            setToken0(plainVaultDescription.token0);
-            setToken1(plainVaultDescription.token1);
-        }
-    
-        fetchVaultDescription();
-    }, [vaultAddress]);
-
-    useEffect(() => {
-        const interval  = setInterval(() => {
-            const fetchEthBalance = async () => {
-                const ethBalance = await localProvider.getBalance(address);
-                setEthBalance(ethBalance);
-            };
-
-            fetchEthBalance();
-        }, 3000);
-
-        return () => clearInterval(interval);
-    }, [address]);
-
-    useEffect(() => {
-        
-        const interval = setInterval(() => {
-            const fetchTokenInfo = async (tokenAddress) => {
-            setIsTokenInfoLoading(true);
-
-            const tokenContract = new ethers.Contract(
-                tokenAddress,
-                ERC20Abi,
-                localProvider
-            );
-
-            const tokenName = await tokenContract.name();
-            const tokenSymbol = await tokenContract.symbol();
-            const tokenDecimals = await tokenContract.decimals();
-            
-            const balance = await tokenContract.balanceOf(address);
-
-            setIsTokenInfoLoading(false);
-            return { tokenName, tokenSymbol, tokenDecimals, balance };
-            };
-
-            fetchTokenInfo(token0).then((data) => {
-                // console.log({data})
-                setToken0Info(data);
-            });
-
-            fetchTokenInfo(token1).then((data) => {
-                // console.log({data})
-                setToken1Info(data);
-            });
-
-        }, 3000);
-
-        return () => clearInterval(interval);    
-    } , [token0, token1]);
-
-    useEffect(() => {
-
-        const fetchTokenInfo = async (tokenAddress) => {
-            setIsTokenInfoLoading(true);
-
-            const tokenContract = new ethers.Contract(
-                tokenAddress,
-                ERC20Abi,
-                localProvider
-            );
-
-            const tokenName = await tokenContract.name();
-            const tokenSymbol = await tokenContract.symbol();
-            const tokenDecimals = await tokenContract.decimals();
-            
-            const balance = await tokenContract.balanceOf(address);
-
-            setIsTokenInfoLoading(false);
-            return { tokenName, tokenSymbol, tokenDecimals, balance };
+        return () => {
+            // Set to false when component unmounts
+            isMounted.current = false;
         };
+    }, []);
 
+    useEffect(() => {
+        const fetchVaultDescription = async () => {
+            try {
+                const nomaFactoryContract = new ethers.Contract(
+                    nomaFactoryAddress,
+                    NomaFactoryAbi,
+                    localProvider
+                );
 
-        const nomaFactoryContract = new ethers.Contract(
-            nomaFactoryAddress,
-            NomaFactoryAbi,
-            localProvider
-        );
-
-        const interval = setInterval(() => {
-
-            const fetchVaultInfo = async () => {
                 const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vaultAddress);
 
                 const plainVaultDescription = {
@@ -287,29 +196,121 @@ const Stake = () => {
                     deployer: vaultDescriptionData[5],
                     vault: vaultDescriptionData[6],
                     presaleContract: vaultDescriptionData[7],
+                    stakingContract: vaultDescriptionData[8],
                 };
 
-                fetchTokenInfo(plainVaultDescription.token0).then((data) => {
-                    // console.log({data})
-                    setToken0Info(data);
+                if (isMounted.current) {
+                    setVaultDescription(plainVaultDescription);
                     setToken0(plainVaultDescription.token0);
-                });
-        
-                fetchTokenInfo(plainVaultDescription.token1).then((data) => {
-                    // console.log({data})
-                    setToken1Info(data);
                     setToken1(plainVaultDescription.token1);
-                });
+                }
+            } catch (error) {
+                console.error("Error fetching vault description:", error);
             }
+        }
 
-            fetchVaultInfo();
+        fetchVaultDescription();
+    }, [vaultAddress]);
 
+    useEffect(() => {
+        if (!address) return;
+
+        const fetchEthBalance = async () => {
+            try {
+                const balance = await localProvider.getBalance(address);
+                if (isMounted.current) {
+                    setEthBalance(balance);
+                }
+            } catch (error) {
+                console.error("Error fetching ETH balance:", error);
             }
-        , 3000);
+        };
+
+        // Fetch immediately
+        fetchEthBalance();
+
+        const interval = setInterval(fetchEthBalance, 3000);
 
         return () => clearInterval(interval);
+    }, [address]);
 
-    }, [vaultAddress]);
+    useEffect(() => {
+        if (!token0 || !token1 || !address) return;
+
+        // Set loading only on initial fetch, not during interval updates
+        let initialFetch = true;
+        if (initialFetch) {
+            setIsTokenInfoLoading(true);
+        }
+
+        const fetchTokenInfo = async (tokenAddress) => {
+            if (!tokenAddress || !ethers.utils.isAddress(tokenAddress)) return null;
+
+            try {
+                const tokenContract = new ethers.Contract(
+                    tokenAddress,
+                    ERC20Abi,
+                    localProvider
+                );
+
+                const [tokenName, tokenSymbol, tokenDecimals, balance] = await Promise.all([
+                    tokenContract.name(),
+                    tokenContract.symbol(),
+                    tokenContract.decimals(),
+                    tokenContract.balanceOf(address)
+                ]);
+
+                return { tokenName, tokenSymbol, tokenDecimals, balance };
+            } catch (error) {
+                console.error(`Error fetching token info for ${tokenAddress}:`, error);
+                return null;
+            }
+        };
+
+        const updateTokenInfo = async () => {
+            try {
+                // Execute both calls in parallel
+                const [token0Data, token1Data] = await Promise.all([
+                    fetchTokenInfo(token0),
+                    fetchTokenInfo(token1)
+                ]);
+
+                if (!isMounted.current) return;
+
+                if (token0Data) setToken0Info(token0Data);
+                if (token1Data) setToken1Info(token1Data);
+
+                // Only set loading to false if this is the initial fetch
+                if (initialFetch) {
+                    setIsTokenInfoLoading(false);
+                    initialFetch = false;
+                }
+            } catch (error) {
+                console.error("Error updating token info:", error);
+                if (initialFetch && isMounted.current) {
+                    setIsTokenInfoLoading(false);
+                    initialFetch = false;
+                }
+            }
+        };
+
+        // Initial fetch
+        updateTokenInfo();
+
+        const interval = setInterval(updateTokenInfo, 3000);
+
+        return () => clearInterval(interval);
+    }, [token0, token1, address]);
+
+    // Remove this useEffect as it's redundant with the other useEffects
+    // and is likely causing the loading state to get stuck in a loop
+    useEffect(() => {
+        // This effect has been consolidated into the previous ones
+        // No need for another interval fetching the same data
+        return () => {
+            // Empty cleanup function for safety
+        };
+    }, []);
 
     const {
         write: approve
@@ -406,7 +407,7 @@ const Stake = () => {
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
-            setIsRepaying(false);
+            setIsUnstaking(false);
 
             const msg = Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
             toaster.create({
@@ -495,27 +496,27 @@ const Stake = () => {
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
-                                <Box px={2} mt={2}> 
-                                    <HStack>
+                                <Box px={2}> 
+                                    <HStack mt={2} >
                                         <Box  fontSize="xs">
-                                        {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
+                                        <Text fontSize="xs">{formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}</Text>
                                         </Box>
-                                        <Box  fontSize="xx-small">
-                                        {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : token0Info.tokenSymbol}
+                                        <Box ml={1} fontSize="xx-small">
+                                        {isTokenInfoLoading ? <Spinner size="xs" /> :  <Text fontSize="xs">{token0Info.tokenSymbol}</Text>}
                                         </Box>
                                     </HStack>
                                 </Box>
                                 <HStack>
                                 <Box px={2}>
-                                    {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 6)}
+                                    <Text fontSize="xs">{formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 6)}</Text>
                                 </Box>
                                 <Box  fontSize="xx-small">
-                                    {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : token0Info.tokenSymbol}
+                                    {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xs" >{token0Info.tokenSymbol}</Text>}
                                 </Box> 
                                 </HStack>                               
-                                <Box px={2} mt={2}>     
+                                <Box px={2} >     
                                     <HStack>
-                                        <Box  fontSize="xs">
+                                        <Box mt={2}  fontSize="xs">
                                         {commify(rewards, 4)}
                                         </Box>
 
@@ -529,10 +530,10 @@ const Stake = () => {
                                     h={"25px"}  
                                     borderColor={"#a67c00"} 
                                     variant="outline" 
-                                    ml={10} 
+                                    ml={5} 
                                     onClick={() => handleUnstake()}  
                                     disabled={isUnstaking} 
-                                    w={"60px"}
+                                    w={"80px"}
                                     
                                 >
                                     {isUnstaking ? <Spinner size="xs" color="#a67c00" /> : <Text fontSize={"xs"} color="#a67c00">Unstake</Text>}
@@ -558,13 +559,13 @@ const Stake = () => {
                         </Box>
 
                         <Box p={2} px={4} mt={5} ml={"-75px"} w="380px"   border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
-                            <Text fontSize={"sm"} fontWeight={"bold"} color="#a67c00">New Position</Text>
+                            <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
                             <SimpleGrid columns={2} w="340px" mt={-5} fontSize={"14px"}>
                                 <Box w="340px" backgroundColor={"#bf9b30"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>
                                 <Box backgroundColor={"#bf9b30"} mb={2}>
-                                    <Text fontSize="xs" ml={5}>Actions</Text>
+                                    <Text fontSize="xs" ml={10}>Actions</Text>
                                 </Box>
                                 <Box w="auto">
                                     <HStack>
@@ -658,7 +659,7 @@ const Stake = () => {
                                         h={"25px"}  
                                         borderColor={"#a67c00"} 
                                         variant="outline" 
-                                        ml={5} 
+                                        ml={10} 
                                         onClick={() => handleStake()}  
                                         disabled={isLoading || stakeAmount == 0} 
                                         w={"120px"}
