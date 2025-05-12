@@ -114,18 +114,18 @@ const BalanceCard = ({
             borderRadius={10} 
             backgroundColor={withBg ? "none" : "#222831"}
         >
-            <Text fontWeight="bold" fontSize={isMobile ? "sm" : "14px"} color="#a67c00" mb={2}>Wallet</Text>
+            <Text fontWeight="bold" fontSize={isMobile ? "xs" : "14px"} color="#a67c00" mb={2}>Wallet</Text>
             
             <SimpleGrid columns={3} spacing={2}>
                 {/* Header Row */}
                 <Box color="white" background="#a67c00"  pl={3}>
-                    <Text  fontSize="sm">Asset</Text>
+                    <Text  fontSize="xs">Asset</Text>
                 </Box>
                 <Box  color="white" background="#a67c00" textAlign="left">
-                    <Text  fontSize="sm">Balance</Text>
+                    <Text  fontSize="xs">Balance</Text>
                 </Box>
                 <Box color="white" background="#a67c00" textAlign="center">
-                    <Text  fontSize="sm">Actions</Text>
+                    <Text  fontSize="xs">Actions</Text>
                 </Box>
                 
                 {/* MON Row */}
