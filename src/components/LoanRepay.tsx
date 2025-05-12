@@ -119,8 +119,7 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                     </Button>
                 </DrawerActionTrigger>
                 <Button colorScheme="blue" onClick={handleClickRepayAmount} w="120px" ml={2}>
-                    {/* {isRepaying ? <Spinner size="sm" /> : "Confirm"} */}
-                    {"Confirm"}
+                     {isRepaying ? <Spinner size="sm" /> : "Confirm"} 
                 </Button>                                
             </Box>                                
             </DrawerBody>
