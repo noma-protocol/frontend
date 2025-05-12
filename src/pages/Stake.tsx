@@ -485,8 +485,8 @@ const Stake = () => {
                                 page="borrow"
                             />
                         </Box>
-                        <Box p={2} mt={5} w="380px" ml={"-75px"} border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
-                        <Text fontSize={"sm"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
+                        <Box p={2} pb={4} mt={5} w="380px" ml={"-75px"} border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
+                        <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
                         <SimpleGrid columns={5} mt={-5} fontSize={"11px"}>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
@@ -497,25 +497,28 @@ const Stake = () => {
                                 <>
                                 <Box px={2} mt={2}> 
                                     <HStack>
-                                        <Box  fontSize="sm">
+                                        <Box  fontSize="xs">
                                         {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
                                         </Box>
                                         <Box  fontSize="xx-small">
-                                        {token0Info.tokenSymbol}
+                                        {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : token0Info.tokenSymbol}
                                         </Box>
                                     </HStack>
                                 </Box>
-                                <Box px={2} mt={2}>
+                                <HStack>
+                                <Box px={2}>
                                     {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 6)}
                                 </Box>
+                                <Box  fontSize="xx-small">
+                                    {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : token0Info.tokenSymbol}
+                                </Box> 
+                                </HStack>                               
                                 <Box px={2} mt={2}>     
                                     <HStack>
-                                        <Box  fontSize="sm">
+                                        <Box  fontSize="xs">
                                         {commify(rewards, 4)}
                                         </Box>
-                                        <Box  fontSize="xx-small">
-                                        {token0Info.tokenSymbol}
-                                        </Box>
+
                                     </HStack>
                                 </Box>
                                 <Box px={2} mt={2}>
@@ -529,10 +532,10 @@ const Stake = () => {
                                     ml={10} 
                                     onClick={() => handleUnstake()}  
                                     disabled={isUnstaking} 
-                                    w={"120px"}
+                                    w={"60px"}
                                     
                                 >
-                                    {isUnstaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"13px"} color="#a67c00">Unstake</Text>}
+                                    {isUnstaking ? <Spinner size="xs" color="#a67c00" /> : <Text fontSize={"xs"} color="#a67c00">Unstake</Text>}
                                 </Button>
                                 </Box>
 
