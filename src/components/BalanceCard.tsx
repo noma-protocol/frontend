@@ -297,6 +297,7 @@ const BalanceCard = ({
                                 onClick={handleClickBorrow}
                                 fontSize={fontSize}
                                 mt={-2}
+                                ml={2}
                                 mb={1}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
@@ -310,6 +311,7 @@ const BalanceCard = ({
                                 disabled={token0Balance == 0}
                                 onClick={handleClickStake}
                                 fontSize={fontSize}
+                                ml={2}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Stake
