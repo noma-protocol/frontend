@@ -453,7 +453,7 @@ const Markets: React.FC = () => {
           // mb={50}
         >
           <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"}>
-            <Box px={4} mt={-60} mb={4} w="100%">
+            <Box px={4} mt={-40} mb={4} w="100%">
             <HStack spacing={4}  ml={4}>
               <Button
                 onClick={() => handleSetView("all")}
@@ -474,7 +474,7 @@ const Markets: React.FC = () => {
 
             {/* Vaults List */}
             <Box
-              mt={isMobile?-40:-350}
+              mt={isMobile?-20:-350}
               ml={isMobile ? 5: 0}
               border="1px solid gray"
               p={8}
