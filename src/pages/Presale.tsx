@@ -63,6 +63,13 @@ const Presale: React.FC = () => {
   const urlReferralCode = searchParams.get("r") || ""; // Fallback to empty string
   const contractAddress = searchParams.get("a") || ""; // Fallback to empty string
 
+  useEffect(() => {
+    if (contractAddress == "0x0000000000000000000000000000000000000000") {
+      window.location.href = "https://oikos.cash"
+    }
+
+  }, [contractAddress]);
+    
   // State for contribution and presale data
   const [timeLeft, setTimeLeft] = useState("00:00:00"); // Example default
 
@@ -78,7 +85,7 @@ const Presale: React.FC = () => {
   const [progressSc, setProgressSc] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const presaleUrl = `${environment == "development" ? "http://localhost:5173":"https://noma.money"}/presale?r=${referralCode}`;
+  const presaleUrl = `${environment == "development" ? "http://localhost:5173":"https://oikos.cash"}/presale?r=${referralCode}`;
   
   const AddToMetaMaskButton = ({ contractAddress, tokenSymbol, tokenDecimals }) => {
     const addTokenToMetaMask = async () => {
