@@ -180,7 +180,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             //     currency: (tradeMode === "BUY" ? (token1Symbol == "WBNB" ? "MON" : token1Symbol || "MON") : "TOK"),
             //     currencySign: "accounting",
             //   }}
-            w={isMobile ? "320px" : "220px"}
+            w={isMobile ? "300px" : "220px"}
             disabled={isTokenInfoLoading || tradeMode == "BUY" ? token0Balance == 0 : token1Balance == 0}
           >
             <NumberInputLabel h="40px" w={{ base: "", lg: "auto" }} />
@@ -201,7 +201,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               // ml={isMobile ? 5 : 10}
               ml={7}
               variant="outline"
-              w={"92%"}
+              w={"90%"}
               // Scale the contributionAmount for the slider
               value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
               onValueChange={(e) => {
