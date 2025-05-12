@@ -486,7 +486,7 @@ const Stake = () => {
                                 page="borrow"
                             />
                         </Box>
-                        <Box p={2} pb={4} mt={5} w="380px" ml={"-75px"} border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
+                        <Box p={4} pb={4} mt={5} w="380px" ml={"-75px"} border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
                         <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
                         <SimpleGrid columns={5} mt={-5} fontSize={"11px"}>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
