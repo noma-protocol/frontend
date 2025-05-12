@@ -3,6 +3,8 @@ import { Input, Image, Flex, Container, Heading, HStack, Box, Grid, GridItem, Bu
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import useScreenOrientation from '../hooks/useScreenOrientation';
+import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import { Toaster, toaster } from "../components/ui/toaster";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import BalanceCard from '../components/BalanceCard';
@@ -72,6 +74,8 @@ const modelHelperAddress = getContractAddress(addresses, "10143", "ModelHelper")
 const Borrow = () => {
     const { address, isConnected } = useAccount();
     const [searchParams] = useSearchParams();
+    const screenOrientation = useScreenOrientation();
+    const isLandscape = screenOrientation.includes("landscape");
     const vaultAddress = searchParams.get("v") || ""; // Fallback to empty string
     const [isLoading, setIsLoading] = useState(false);
 
@@ -590,6 +594,8 @@ const Borrow = () => {
                 >
                 <Heading as="h2">Connect your wallet</Heading>
                 </Box>
+            ) : isMobile && isLandscape ? (
+                <RotateDeviceMessage />
             ) : (
 
                 <Box

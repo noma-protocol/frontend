@@ -17,7 +17,8 @@ import {
   Spinner,
   Grid,
   Checkbox,
-GridItem,
+  GridItem,
+  Center,
 } from "@chakra-ui/react";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { Toaster, toaster } from "../components/ui/toaster";
@@ -25,6 +26,8 @@ import { ethers } from "ethers";
 const { utils } = ethers;
 
 import { isMobile } from "react-device-detect";
+import useScreenOrientation from '../hooks/useScreenOrientation';
+import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import {
     SelectContent,
     SelectItem,
@@ -162,8 +165,43 @@ const ExchangeCard: React.FC = ({ children }) => (
   </Box>
 );
 
+// Custom hook to detect screen orientation
+const useScreenOrientation = () => {
+  const [orientation, setOrientation] = useState(window.screen.orientation?.type ||
+    (window.innerWidth > window.innerHeight ? "landscape" : "portrait"));
+
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      // Check if window.screen.orientation is supported
+      if (window.screen.orientation) {
+        setOrientation(window.screen.orientation.type);
+      } else {
+        // Fallback for browsers that don't support window.screen.orientation
+        setOrientation(window.innerWidth > window.innerHeight ? "landscape" : "portrait");
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener("orientationchange", handleOrientationChange);
+    window.addEventListener("resize", handleOrientationChange);
+
+    // Initial check
+    handleOrientationChange();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("orientationchange", handleOrientationChange);
+      window.removeEventListener("resize", handleOrientationChange);
+    };
+  }, []);
+
+  return orientation;
+};
+
 const Exchange: React.FC = () => {
   const { address, isConnected } = useAccount();
+  const screenOrientation = useScreenOrientation();
+  const isLandscape = screenOrientation.includes("landscape");
 
   const [isAllVaultsLoading, setIsAllVaultsLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -183,7 +221,7 @@ const Exchange: React.FC = () => {
   const [token0Info, setToken0Info] = useState({});
   const [token1Info, setToken1Info] = useState({});
   const [ethBalance, setEthBalance] = useState(0);
-  const [spotPrice, setSpotPrice] = useState(0);  
+  const [spotPrice, setSpotPrice] = useState(0);
   const [allVaultDescriptions, setAllVaultDescriptions] = useState([]);
 
   const [chartData, setChartData] = useState(generateRandomData());
@@ -1008,6 +1046,8 @@ const Exchange: React.FC = () => {
         >
           <Heading as="h2">Connect your wallet</Heading>
         </Box>
+      ) : isMobile && isLandscape ? (
+        <RotateDeviceMessage />
       ) : (
         <Box
           w="100%"
