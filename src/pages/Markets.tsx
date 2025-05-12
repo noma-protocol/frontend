@@ -450,12 +450,12 @@ const Markets: React.FC = () => {
           // justifyContent="center"
           textAlign="left"
           position="relative"
-          // mt={50}
+          mt={isMobile ? 20 : 0}
           // mb={50}
         >
           <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"}>
             <Box px={4} mt={isMobile? -60:-400} mb={4} w="100%">
-            <HStack spacing={4} mb={4}>
+            <HStack spacing={4}  ml={4}>
               <Button
                 onClick={() => handleSetView("all")}
                 colorScheme={view === "all" ? "blue" : "gray"}

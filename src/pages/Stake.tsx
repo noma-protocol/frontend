@@ -360,6 +360,7 @@ const Stake = () => {
                         Number(error.message.toString().indexOf("InvalidParameters")) > -1 ? "Can't stake zero." :
                         Number(error.message.toString().indexOf("CooldownNotElapsed")) > -1 ? "Cooldown not elapsed. Try again later." :
                         Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
+                        
             toaster.create({
                 title: "Error",
                 description: msg,
