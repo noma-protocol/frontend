@@ -265,7 +265,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           onValueChange={(e) => setTradeMode(e.value)} 
           ml={5}
         >
-          <Box position="relative" border="1px solid" borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} px={12} w={isMobile ?"310px":"220px"} h="35px" ml={isMobile? -1: -5} mt={-5} borderRadius={5}>
+          <Box position="relative" border="1px solid" borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} px={12} w={isMobile ?"300px":"220px"} h="35px" ml={isMobile? -1: -5} mt={-5} borderRadius={5}>
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -316,7 +316,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           w="4px"
           // mt={-2}
         >
-        <Box border="1px solid #a67c00" px={12} w={isMobile ? "310px" : "220px"} h="38px" borderRadius={5} mt={4} ml={isMobile ? 4 : 0}>
+        <Box border="1px solid #a67c00" px={12} w={isMobile ? "300px" : "220px"} h="38px" borderRadius={5} mt={4} ml={isMobile ? 4 : 0}>
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -364,7 +364,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 mt={5}
                 variant="subtle"
                 backgroundColor={"#bf9b30"}
-                w={isMobile ? "300px" : "210px"}
+                w={isMobile ? "290px" : "210px"}
                 onClick={() => {
                   handleExecuteTrade();
                 }}
