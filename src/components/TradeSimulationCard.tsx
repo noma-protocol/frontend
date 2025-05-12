@@ -125,20 +125,20 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             <HStack w="300px">
                 <Box  w="180px"><Text fontSize={"13px"} ml={8}>Spending:</Text></Box>
                 <Box w="120px"><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy) : commify(amountToSell) }</Text></Box>
-                <Box fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
+                <Box w="120px" fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
             </HStack>
-            <HStack w="300px">
+            <HStack w="300px" >
                 <Box  w="200px"><Text fontSize={"13px"} ml={8}>Receiving:</Text></Box>
-                <Box w="120px" ml={2}><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text></Box>
-                <Box  fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
+                <Box w="120px" ml={-4}><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text></Box>
+                <Box w="120px" fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
             </HStack>
            <HStack w="300px">
                 <Box w="160px"><Text fontSize={"13px"} ml={8}>Max Slippage:</Text></Box>
-                <Box w="120px"><Text fontSize={"13px"} ml={7}>{slippage}%</Text></Box>
+                <Box w="120px"><Text fontSize={"13px"} ml={-2}>{slippage}%</Text></Box>
             </HStack>
             <HStack w="300px">
                 <Box w="160px"><Text fontSize={"13px"} ml={8}>Spread:</Text></Box>
-                <Box w="120px"><Text fontSize={"13px"} ml={7}>{commify(spreadPct, 2)}%</Text></Box>
+                <Box w="120px"><Text fontSize={"13px"} ml={-2}>{commify(spreadPct, 2)}%</Text></Box>
             </HStack>
             <DrawerRoot >
             <DrawerTrigger asChild>
