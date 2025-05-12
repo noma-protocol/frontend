@@ -234,7 +234,7 @@ const Borrow = () => {
         functionName: "approve",
         args: [
             vaultAddress,
-            isAdding ?  parseEther(`${extraCollateral}`) : parseEther(`${collateral}`)
+            isAdding ?  parseEther(`${extraCollateral + 1}`)  : parseEther(`${collateral + 1}`)
         ],
         onSuccess(data) {
             if (isAdding) {
@@ -311,7 +311,7 @@ const Borrow = () => {
                         Number(error.message.toString().indexOf("NoLiquidity")) > -1 ? "Not enough liquidity" :
                         Number(error.message.toString().indexOf("0x31eed5fe")) > -1 ? "Not enough floor liquidity" :
                         Number(error.message.toString().indexOf("0xf16664fd")) > -1 ? "Only one loan per address" :
-                        Number(error.message.toString().indexOf("0x37218288")) > -1 ? "Borrowing not allowed during floor bootstrap" :
+                        Number(error.message.toString().indexOf("0x37218288")) > -1 ? "Please try again later" :
                         Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -927,7 +927,7 @@ const Borrow = () => {
                         p={4}
                         // border="1px solid yellow"
                     >
-                        <GridItem border={"1px solid white"} p={4} px={6} ml={20} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem border={"1px solid white"} p={4} px={6} ml={40} borderRadius={10} backgroundColor={"#222831"}>
                             <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">Active Loan</Text>
                             <SimpleGrid columns={5} mt={-5}>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
@@ -1109,7 +1109,7 @@ const Borrow = () => {
                                 page="borrow" 
                             />
                         </GridItem>
-                        <GridItem border={"1px solid white"} p={4} px={6} pb={8} ml={20} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem border={"1px solid white"} p={4} px={6} pb={8} ml={40} borderRadius={10} backgroundColor={"#222831"}>
                         <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">New Loan</Text>
                         <SimpleGrid columns={3} w="700px" mt={-5}>
                             <Box w="500px"backgroundColor={"#a67c00"}  mb={2}>

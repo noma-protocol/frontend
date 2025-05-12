@@ -61,7 +61,7 @@ const BalanceCard = ({
     const buttonSize = useBreakpointValue({ base: "80px", md: "100px" });
     const fontSize = useBreakpointValue({ base: "12px", md: "13px" });
     const cardWidth = useBreakpointValue({ 
-        base: "95%", 
+        base: "100%", 
         sm: "95%",
         md: "400px", 
         lg: "450px" 
@@ -103,8 +103,9 @@ const BalanceCard = ({
 
     return (
         <Box 
-            w={page == "borrow" ? "380px" : cardWidth}   
+            w={page == "borrow" && isMobile ? "108%" : cardWidth}   
             mx="auto"
+            ml={isMobile ? 0 : -2}
             border={withBg ? "none" : "1px solid white"} 
             borderColor="gray" 
             p={4}
