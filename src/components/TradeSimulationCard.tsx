@@ -11,6 +11,7 @@ import {
     Image,
     Input,
     Stat,
+    SimpleGrid,
 } from "@chakra-ui/react";
 
 import { ethers } from 'ethers';
@@ -116,12 +117,14 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     //   console.log(`${amountToSell} / ${formatEther(`${quote || 0}`)} * ${amountToSell} = ${realQuote}`);
 
     return (
-        <Box mt={-5}>
-                                  
-            <Text fontWeight={"bold"} fontSize="sm" ml={8} color="#a67c00">
+        <Box mt={-5} >
+               <SimpleGrid columns={2} spacing={2} p={2} >
+            <Box>             
+            <Text fontWeight={"bold"} fontSize="sm" ml={isMobile ? 6 : -2} color="#a67c00">
                 Trade Info 
             </Text>
             
+            <Box ml={isMobile ? -2 : -10} mt={-2}>
             <HStack w="300px">
                 <Box  w="180px"><Text fontSize={"13px"} ml={8}>Spending:</Text></Box>
                 <Box w="120px"><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy) : commify(amountToSell) }</Text></Box>
@@ -140,10 +143,14 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                 <Box w="160px"><Text fontSize={"13px"} ml={8}>Spread:</Text></Box>
                 <Box w="120px"><Text fontSize={"13px"} ml={-2}>{commify(spreadPct, 2)}%</Text></Box>
             </HStack>
+          
+            </Box>         
+            </Box>
+            <Box mt={4}>
             <DrawerRoot >
             <DrawerTrigger asChild>
             <Box ml={8} mt={5}> 
-            <Button variant="outline" h="30px" fontSize={isMobile?"12px": "11px"}>
+            <Button mt={isMobile ? "25vw" : 0} ml={isMobile ? "-40vw" : 0} variant="outline" h="30px" fontSize={isMobile?"12px": "11px"} w="100px">
                 {isRolling ? <Spinner size="sm" /> : "Edit"}
             </Button>
             <br /><br /><br />
@@ -206,8 +213,9 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                 {/* <DrawerFooter>
                 </DrawerFooter> */}
             </DrawerContent>
-            </DrawerRoot>            
-            
+            </DrawerRoot>                         
+            </Box>
+            </SimpleGrid>
         </Box>
     );
     }

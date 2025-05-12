@@ -600,7 +600,7 @@ const Stake = () => {
                                             <Image src={placeholderLogo} w="25px"></Image>
                                         </Box>
                                     </HStack>
-                                        <HStack mt={5}>
+                                        <HStack mt={5} ml={2}>
                                         <Box>
                                             <Text fontSize="xs">Staking:</Text>
                                         </Box>
@@ -813,7 +813,7 @@ const Stake = () => {
                                         <Image src={placeholderLogo} w="25px"></Image>
                                     </Box>
                                 </HStack>
-                                    <HStack mt={5}>
+                                    <HStack mt={5} ml={2}>
                                     <Box>
                                         <Text>Staking:</Text>
                                     </Box>
