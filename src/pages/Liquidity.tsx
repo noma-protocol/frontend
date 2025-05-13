@@ -31,9 +31,14 @@ import {
   } from "../components/ui/select";
 import LiquidityChart from "../components/LiquidityChart";
 // import { set } from "react-ga";
-import addresses from "../assets/deployment.json";
 import {getContractAddress} from "../utils";
 import config from '../config'; 
+import addressesLocal   from "../assets/deployment.json";
+import addressesMonad from "../assets/deployment_monad.json";
+
+const addresses = config.chain === "local"
+  ? addressesLocal
+  : addressesMonad;
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :

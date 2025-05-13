@@ -27,7 +27,12 @@ import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import placeholderLogo from "../assets/images/question.svg";
 import nomaLogo from "../assets/images/noma_logo_transparent.png";
 import oksLogo from "../assets/images/logo_dark.png";
-import addresses from "../assets/deployment.json";
+import addressesLocal   from "../assets/deployment.json";
+import addressesMonad from "../assets/deployment_monad.json";
+
+const addresses = config.chain === "local"
+  ? addressesLocal
+  : addressesMonad;
 
 const { formatEther, ZeroAddress } = ethers.utils;
 const {JsonRpcProvider} = ethers.providers;
@@ -449,8 +454,9 @@ const Markets: React.FC = () => {
           // justifyContent="center"
           textAlign="left"
           position="relative"
-          // mb={50} 
-          mt={isMobile ? "20%" : "-20%"}
+          // mb={50}
+          h="90%" 
+          mt={"-25%"}
         >
           <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"} >
             <Box px={4} mb={4} w="100%">
