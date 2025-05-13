@@ -38,11 +38,15 @@ import {
 } from '../components/ui/drawer'; // Ark UI Drawer components
 import { ro } from '@faker-js/faker';
 import addresses from "../assets/deployment.json";
+import config from '../config'; 
 
 const { formatEther, parseEther, isAddress } = ethers.utils;
 const { JsonRpcProvider } = ethers.providers;
 
-const localProvider = new JsonRpcProvider("https://testnet-rpc.monad.xyz");
+const localProvider = new JsonRpcProvider(
+  config.chain == "local" ? "http://localhost:8545" :
+  "https://testnet-rpc.monad.xyz"
+);
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
 const IWETHAbi = IWETHArtifact.abi;
@@ -60,8 +64,8 @@ const GonsTokenArtifact = await import(`../assets/GonsToken.json`);
 const GonsTokenAbi = GonsTokenArtifact.abi;
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
-const modelHelperAddress = getContractAddress(addresses, "10143", "ModelHelper");
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 const Stake = () => {
     const { address, isConnected } = useAccount();

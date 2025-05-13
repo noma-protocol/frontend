@@ -33,6 +33,7 @@ const { formatEther, ZeroAddress } = ethers.utils;
 const {JsonRpcProvider} = ethers.providers;
 
 const localProvider = new JsonRpcProvider(
+  config.chain == "local" ? "http://localhost:8545" :
   "https://testnet-rpc.monad.xyz"
 );
 
@@ -45,7 +46,7 @@ const uniswapV3FactoryABI = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const feeTier = 3000;
 
@@ -150,8 +151,8 @@ const Markets: React.FC = () => {
           const isFinalized = await presaleContractInstance.finalized();
           const hasExpired = await presaleContractInstance.hasExpired();
 
-          console.log("Presale Finalized:", isFinalized);
-          console.log("Presale Expired:", hasExpired);
+          // console.log("Presale Finalized:", isFinalized);
+          // console.log("Presale Expired:", hasExpired);
 
           return [isFinalized, hasExpired];
         }
@@ -219,7 +220,7 @@ const Markets: React.FC = () => {
               localProvider
             );
       
-            console.log("Deployers Data:", deployersData); // Debug log
+            // console.log("Deployers Data:", deployersData); // Debug log
       
             if (!deployersData || deployersData.length === 0) {
               console.warn("No deployers found.");
@@ -231,7 +232,7 @@ const Markets: React.FC = () => {
               deployersData.map(async (deployer) => {
                 try {
                   const vaultsData = await nomaFactoryContract.getVaults(deployer);
-                  console.log("Vaults for deployer", deployer, ":", vaultsData);
+                  // console.log("Vaults for deployer", deployer, ":", vaultsData);
         
                   if (!vaultsData || vaultsData.length === 0) {
                     console.warn(`No vaults found for deployer ${deployer}`);
@@ -242,7 +243,7 @@ const Markets: React.FC = () => {
                     vaultsData.map(async (vault) => {
                       try {
                         const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
-                        console.log("Vault Description:", vaultDescriptionData);
+                        // console.log("Vault Description:", vaultDescriptionData);
                         const tokenSymbol = vaultDescriptionData[1];
                         // Skip OKS vaults
                         if (tokenSymbol === "OKS") {
@@ -253,7 +254,7 @@ const Markets: React.FC = () => {
                         let isPresaleFinalized = false;
                         let expired = false;
                         
-                        console.log(`Presale Contract: ${hasPresale}`);
+                        // console.log(`Presale Contract: ${hasPresale}`);
                         if (hasPresale) {
                           try {
                             [isPresaleFinalized, expired] = await fetchPresaleDetails({
@@ -295,7 +296,7 @@ const Markets: React.FC = () => {
             );
       
             const flattenedVaults = allVaultDescriptions.flat().filter(Boolean); // Remove null entries
-            console.log("Final Vault Descriptions:", flattenedVaults);
+            // console.log("Final Vault Descriptions:", flattenedVaults);
       
             if (flattenedVaults.length === 0) {
               console.warn("No vaults available.");
@@ -326,10 +327,10 @@ const Markets: React.FC = () => {
                 return;
             }
     
-            console.log("Fetching user vaults for address:", address);
+            // console.log("Fetching user vaults for address:", address);
     
             const vaultsData = await nomaFactoryContract.getVaults(address);
-            console.log("Vaults Data for User:", vaultsData);
+            // console.log("Vaults Data for User:", vaultsData);
     
             if (!vaultsData || vaultsData.length === 0) {
                 console.warn(`No vaults found for user ${address}`);
@@ -342,7 +343,7 @@ const Markets: React.FC = () => {
                 vaultsData.map(async (vault) => {
                     try {
                         const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
-                        console.log("Vault Description Data:", vaultDescriptionData);
+                        // console.log("Vault Description Data:", vaultDescriptionData);
     
                         const hasPresale = vaultDescriptionData[7] !== "0x0000000000000000000000000000000000000000";
                         let isPresaleFinalized = false;
@@ -383,7 +384,7 @@ const Markets: React.FC = () => {
             );
     
             const filteredVaults = userVaultDescriptions.filter(Boolean); // Remove null entries
-            console.log("Final User Vault Descriptions:", filteredVaults);
+            // console.log("Final User Vault Descriptions:", filteredVaults);
     
             setUserVaults(filteredVaults);
             setIsAllVaultsLoading(false);
@@ -453,7 +454,7 @@ const Markets: React.FC = () => {
           // mb={50}
         >
           <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"}>
-            <Box px={4} mt={-40} mb={4} w="100%">
+            <Box px={4} mt={isMobile ? -40 : "-32vh"} mb={4} w="100%">
             <HStack spacing={4}  ml={4}>
               <Button
                 onClick={() => handleSetView("all")}
@@ -480,7 +481,7 @@ const Markets: React.FC = () => {
               p={8}
               borderRadius={20}
               w={isMobile ? "auto" : "80%"}
-              h="400px"
+              h="20vh"
               backgroundColor="#222831"
             >
               {view === "all" && isAllVaultsLoading ? (
@@ -492,16 +493,16 @@ const Markets: React.FC = () => {
               ) : (view == "all" ? vaultsDataArray.length === 0 : userVaults.length === 0) && !isAllVaultsLoading ? (
                 <Text>No vaults found.</Text>
               ) : (
-                <VStack align="start" spacing={4}>
-                  <HStack>
+                <VStack align="start" spacing={6}>
+                  <HStack> 
                     {/* <Box >
                       <Text fontWeight="bold"  color="#bf9b30" ml={2}>Index</Text>
                     </Box> */}
                     <Box>
-                      <Text fontWeight="bold" color="#bf9b30"  ml={10}>{isMobile?"":"Token"} Name</Text>
+                      <Text fontWeight="bold" color="#bf9b30"  ml={2}>{isMobile?"":"Token"} Name</Text>
                     </Box>
                     <Box>
-                      <Text fontWeight="bold"  color="#bf9b30" ml={isMobile?20:10}>{isMobile?"":"Token"} Symbol</Text>
+                      <Text fontWeight="bold"  color="#bf9b30" ml={isMobile?"150px":"60px"} > {isMobile?"":"Token"}  Symbol</Text>
                     </Box>
                     {!isMobile && (
                       <>

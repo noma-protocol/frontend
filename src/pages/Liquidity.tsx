@@ -33,8 +33,12 @@ import LiquidityChart from "../components/LiquidityChart";
 // import { set } from "react-ga";
 import addresses from "../assets/deployment.json";
 import {getContractAddress} from "../utils";
+import config from '../config'; 
 
-const localProvider = new JsonRpcProvider("https://testnet-rpc.monad.xyz");
+const localProvider = new JsonRpcProvider(
+  config.chain == "local" ? "http://localhost:8545" :
+  "https://testnet-rpc.monad.xyz"
+);
 
 // Dynamically import the NomaFactory artifact and extract its ABI
 const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
@@ -50,7 +54,7 @@ const ERC20Abi = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const feeTier = 3000;
 

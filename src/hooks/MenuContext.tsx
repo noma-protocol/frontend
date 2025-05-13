@@ -23,7 +23,7 @@ export const useMenu = () => {
       console.error("useMenu: MenuContext is undefined. Ensure MenuProvider wraps the component.");
       throw new Error("useMenu must be used within a MenuProvider");
     }
-    console.log("useMenu accessed:", context); // Debugging log
+    // console.log("useMenu accessed:", context); // Debugging log
     return context;
   };
   
