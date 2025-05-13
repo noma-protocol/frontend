@@ -972,8 +972,8 @@ const Presale: React.FC = () => {
                         fontStyle="bold" 
                         color="black" 
                         fontSize={isMobile ? "9px" : "10px"}
-                        w={isMobile ? "315px" : "395px"}
-                        ml={isMobile ? '5px' : -75}
+                        w={isMobile ? "295px" : "395px"}
+                        ml={isMobile ? '2px' : -75}
                       >
                         {presaleUrl}
                       </Text>
