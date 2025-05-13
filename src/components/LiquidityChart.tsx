@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { commify, commifyPatched, tickToPrice } from "../utils.tsx";
+import { commify, commifyDecimals, commifyPatched, tickToPrice } from "../utils.tsx";
 import {ethers} from 'ethers';
 import {
   Container,
@@ -82,9 +82,9 @@ return (
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Reserves ({tokenSymbol})</Text></Table.Cell>
-                  <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount0))}</Table.Cell>
-                  <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount0))}</Table.Cell>
-                   <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount0))}</Table.Cell>
+                  <Table.Cell isNumeric>{commifyDecimals(formatEther(data["Floor"]?.amount0), 2)}</Table.Cell>
+                  <Table.Cell isNumeric>{commifyDecimals(formatEther(data["Anchor"]?.amount0), 2)}</Table.Cell>
+                   <Table.Cell isNumeric>{commifyDecimals(formatEther(data["Discovery"]?.amount0), 2)}</Table.Cell>
                   {/*<Table.Cell>{commify(formatEther(underlyingBalances?.token0))}</Table.Cell> */}
                   {/* <Table.Cell isNumeric>
                     {commify(
@@ -188,9 +188,9 @@ return (
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell>Reserves ({tokenSymbol})</Table.Cell>
-                  <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount0))}</Table.Cell>
-                  <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount0))}</Table.Cell>
-                  <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount0))}</Table.Cell>
+                  <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount0), 2)}</Table.Cell>
+                  <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount0), 2)}</Table.Cell>
+                   <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount0), 2)}</Table.Cell>
                   {/* <Table.Cell>{commify(formatEther(underlyingBalances?.token0))}</Table.Cell> */}
                   {/* <Table.Cell isNumeric>
                     {commify(
