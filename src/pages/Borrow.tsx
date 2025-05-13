@@ -672,7 +672,7 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2}> 
+                                    <Box px={2} mt={2} ml={1}> 
                                         <HStack>
                                             <Box  fontSize="xs">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
