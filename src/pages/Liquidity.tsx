@@ -357,13 +357,14 @@ const Liquidity: React.FC = () => {
                 </Text>
               </Heading> */}
 
-              <Box>
+              <Box >
               {isAllVaultsLoading ? (
-                  <><HStack><Box><Text>Loading vaults...</Text></Box> <Box><Spinner size="sm" /></Box></HStack></>
+                  <><HStack><Box mt={10} ml={5}><Text>Loading vaults...</Text></Box> <Box mt={10}><Spinner size="sm" /></Box></HStack></>
               ) : vaultsSelectData?.items?.length > 0 ? (
                 <SelectRoot
                   ml={5}
                   mb={2}
+                  mt={10}
                   collection={vaultsSelectData}
                   size="sm"
                   width={isMobile ? "165px" : "200px"}
@@ -407,7 +408,7 @@ const Liquidity: React.FC = () => {
                       tokenName={vaultDescriptions.find((vault) => vault.vault === selectedVault)?.tokenName}
                       tokenSymbol={vaultDescriptions.find((vault) => vault.vault === selectedVault)?.tokenSymbol}
                 />) : (
-                    <Text>Failed to fetch vault info. Please try again later.</Text>
+                    <Text fontSize="xs" ml={5} w="auto">Failed to fetch vault info. Please try again later.</Text>
                 )}
                 
           </SimpleGrid>
