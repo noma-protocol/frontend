@@ -482,7 +482,7 @@ const Markets: React.FC = () => {
               p={8}
               borderRadius={20}
               w={isMobile ? "auto" : "80%"}
-              h="20vh"
+              h="auto"
               backgroundColor="#222831"
             >
               {view === "all" && isAllVaultsLoading ? (
