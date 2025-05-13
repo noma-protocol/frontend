@@ -85,7 +85,7 @@ const Presale: React.FC = () => {
   const [progressSc, setProgressSc] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const presaleUrl = `${environment == "development" ? "http://localhost:5173":"https://oikos.cash"}/presale?a=${contractAddress}r=${referralCode}`;
+  const presaleUrl = `${environment == "development" ? "http://localhost:5173":"https://presale.oikos.cash"}/presale?a=${contractAddress}r=${referralCode}`;
   
   const AddToMetaMaskButton = ({ contractAddress, tokenSymbol, tokenDecimals }) => {
     const addTokenToMetaMask = async () => {
