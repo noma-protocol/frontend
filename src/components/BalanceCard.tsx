@@ -288,7 +288,7 @@ const BalanceCard = ({
                     {commify(formatEther(`${token0Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center">
-                    {page != "borrow" ?
+                    {page == "exchange" ?
                         <VStack spacing={2} align="center">
                             <Button 
                                 variant="outline" 
