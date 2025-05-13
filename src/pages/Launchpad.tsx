@@ -60,8 +60,8 @@ import config from '../config';
 
 const { environment, presaleContractAddress } = config;
 
-const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
-const NomaFactoryAbi = NomaFactoryArtifact.abi;
+const FactoryArtifact = await import(`../assets/OikosFactory.json`);
+const FactoryAbi = FactoryArtifact.abi;
 const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 
 const Launchpad: React.FC = () => {
@@ -76,7 +76,7 @@ const Launchpad: React.FC = () => {
     const [floorPrice, setFloorPrice] = useState("0");
     const [presalePrice, setPresalePrice] = useState("0");
 
-    const [token1, setToken1] = useState("0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd");
+    const [token1, setToken1] = useState("0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701");
     const [feeTier, setFeeTier] = useState(10);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -94,7 +94,7 @@ const Launchpad: React.FC = () => {
         write: deployVault 
     } = useContractWrite({
         address: nomaFactoryAddress,
-        abi: NomaFactoryAbi,
+        abi: FactoryAbi,
         functionName: "deployVault",
         args: [
             {
@@ -102,15 +102,16 @@ const Launchpad: React.FC = () => {
                 deadline: duration,
             },
             {
-            name: tokenName,
-            symbol: tokenSymbol,
-            decimals: tokenDecimals.toString(),
-            totalSupply: parseEther(`${Number(tokenSupply)}`),
-            IDOPrice: parseEther(`${Number(price)}`),
-            floorPrice: parseEther(`${Number(floorPrice)}`),
-            token1: token1,
-            feeTier: "3000",
-            presale: presale.toString()
+                name: tokenName,
+                symbol: tokenSymbol,
+                decimals: tokenDecimals.toString(),
+                initialSupply: parseEther(`${Number(tokenSupply)}`),
+                maxTotalSupply: parseEther(`${Number(tokenSupply)}`),
+                IDOPrice: parseEther(`${Number(price)}`),
+                floorPrice: parseEther(`${Number(floorPrice)}`),
+                token1: token1,
+                feeTier: "3000",
+                presale: presale.toString()
             },
         ],
         gas: 40000000, // Increase gas limit
@@ -128,6 +129,7 @@ const Launchpad: React.FC = () => {
         onError(error) {
         const msg = error.message.indexOf("TokenAlreadyExists") > -1 ? "Token already exists" : 
                     error.message.indexOf("Already contributed") > -1 ? "Already contributed" : 
+                    error.message.indexOf("0xf4354b39") > -1 ? "Invalid soft cap" :
                     error.message.indexOf("NotAuthorityError") > -1 ? "Permissionless deployment is disabled. Reach out on Discord." :
                     error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
         toaster.create({
@@ -368,13 +370,8 @@ const Launchpad: React.FC = () => {
 
     const assets = createListCollection({
         items: [
-          { label: "WMON", value: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd" }, // WMON
-            { label: "WETH", value: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" }, // WETH
+          { label: "WMON", value: "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701" }, // WMON
             { label: "WBNB", value: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" }, // WBNB
-            { label: "USDT", value: "0xdAC17F958D2ee523a2206206994597C13D831ec7" }, // USDT
-            { label: "USDC", value: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" }, // USDC
-            { label: "DAI", value: "0x6B175474E89094C44Da98b954EedeAC495271d0F" }, // DAI
-            { label: "TUSD", value: "0x0000000000085d4780B73119b644AE5ecd22b376" }, // TUSD
         ],
       })
     
@@ -405,6 +402,33 @@ const Launchpad: React.FC = () => {
         }
         return Number(duration) / 86400;
     }
+
+    const handleClickDeploy = () => {  
+
+        console.log( [
+            {
+                softCap: parseEther(`${softCap}`),
+                deadline: duration,
+            },
+            {
+            name: tokenName,
+            symbol: tokenSymbol,
+            decimals: tokenDecimals.toString(),
+            totalSupply: parseEther(`${Number(tokenSupply)}`),
+            maxTotalSupply: parseEther(`${Number(tokenSupply)}`),
+            IDOPrice: parseEther(`${Number(price)}`),
+            floorPrice: parseEther(`${Number(floorPrice)}`),
+            token1: token1,
+            feeTier: "3000",
+            presale: presale.toString()
+            },
+        ])
+
+        deployVault()
+                
+    }
+
+
 
     return (
         <Container maxW="container.xl" py={12}> 
@@ -539,7 +563,7 @@ const Launchpad: React.FC = () => {
                 </SimpleGrid>
                 ) : deployStep == 1 ? (
                     <>
-                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="350px" backgroundColor="#222831">
+                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="350px" backgroundColor="#222831"  mt={"80px"}>
                         <Heading as={"h4"} color="white" mr={8}>
                             <HStack>
                                 <Text fontSize={"21px"} color="#d6a700">Step 2 - </Text>Pool Info
@@ -656,7 +680,7 @@ const Launchpad: React.FC = () => {
                     </>
                 ) : (deployStep == 2 ? (
                 <>
-                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="350px"  backgroundColor="#222831">
+                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="350px"  backgroundColor="#222831" mt={"80px"}>
                         <Heading as={"h4"} color="white" mr={8}>
                             <HStack>
                                 <Text fontSize={"21px"} color="#d6a700">Step 3 - </Text>Presale Info
@@ -761,7 +785,7 @@ const Launchpad: React.FC = () => {
                 </>
                 ) : 
                     <Box >
-                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="450px" backgroundColor="#222831">
+                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="450px" backgroundColor="#222831" mt={"80px"}>
                         <Heading as={"h4"} color="white" mr={8}>
                             <HStack>
                                 <Text fontSize={"21px"} color="#d6a700">Step {presale == 0 ? "3" : "4"} - </Text>Confirm {isMobile ? "" : "Deploy"}
@@ -864,7 +888,7 @@ const Launchpad: React.FC = () => {
                             disabled={deploying}
                                 onClick={() => {
                                     try {
-                                        deployVault();
+                                        handleClickDeploy();
                                     } catch (error) {
                                         console.error("Failed to contribute:", error);
                                     }
