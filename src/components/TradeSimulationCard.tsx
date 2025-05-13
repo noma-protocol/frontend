@@ -12,6 +12,7 @@ import {
     Input,
     Stat,
     SimpleGrid,
+    VStack,
 } from "@chakra-ui/react";
 
 import { ethers } from 'ethers';
@@ -117,40 +118,76 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     //   console.log(`${amountToSell} / ${formatEther(`${quote || 0}`)} * ${amountToSell} = ${realQuote}`);
 
     return (
-        <Box mt={-5} >
-               <SimpleGrid columns={2} spacing={2} p={2} >
-            <Box>             
-            <Text fontWeight={"bold"} fontSize="sm" ml={isMobile ? 6 : -2} color="#a67c00">
-                Trade Info 
-            </Text>
+        <Box mt={-5} w="100%">
+        <SimpleGrid columns={2} p={2} w="100%">
+            {/* ─── Column 1 ─────────────────────────────────────────────────────── */}
+            <Box>
+            {/* 
+                Remove w="50%" here. 
+                By virtue of being the first child of `SimpleGrid columns={2}`, 
+                this Box already spans half the gray container.
+            */}
             
-            <Box ml={isMobile ? -2 : -10} mt={-2}>
-            <HStack w="300px">
-                <Box  w="180px"><Text fontSize={"13px"} ml={8}>Spending:</Text></Box>
-                <Box w="120px"><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? commify(amountToBuy) : commify(amountToSell) }</Text></Box>
-                <Box w="120px" fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
-            </HStack>
-            <HStack w="300px" >
-                <Box  w="200px"><Text fontSize={"13px"} ml={8}>Receiving:</Text></Box>
-                <Box w="120px" ml={-4}><Text fontSize={"13px"} ml={8}>{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text></Box>
-                <Box w="120px" fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
-            </HStack>
-           <HStack w="300px">
-                <Box w="160px"><Text fontSize={"13px"} ml={8}>Max Slippage:</Text></Box>
-                <Box w="120px"><Text fontSize={"13px"} ml={-2}>{slippage}%</Text></Box>
-            </HStack>
-            <HStack w="300px">
-                <Box w="160px"><Text fontSize={"13px"} ml={8}>Spread:</Text></Box>
-                <Box w="120px"><Text fontSize={"13px"} ml={-2}>{commify(spreadPct, 2)}%</Text></Box>
-            </HStack>
-          
-            </Box>         
+            {/* 
+                Make the <Text> fill 100% of its parent (no extra w="50%").
+                If you omit a width, block <Text> defaults to 100%.
+            */}
+            <Text
+                fontWeight="bold"
+                fontSize="sm"
+                color="#a67c00"
+                w="100%"                 // ensure the red border spans whole column
+                ml={isMobile ? 5 : 0}
+            >
+                Trade Info
+            </Text>
+
+            {/* 
+                This Box now also spans the full column.
+                Remove w="80%"; if you want 80% of the column, set w="80%", 
+                but note that 80% is still relative to the column’s width, 
+                not the screen.
+            */}
+            <Box mt={-2} w="100%">
+                {isMobile ? (
+                    <>
+                    <VStack mt={5} ml={20}>
+                        <HStack >
+                            <Box w="90px" textAlign={"right"} ml={tradeMode == "BUY" ? 0 : 2}><Text fontSize={"xs"} color="#d6a700">Spending</Text></Box>
+                            <Box w="120px"><Text fontSize={"13px"}>{tradeMode == "BUY" ?  formatNumberPrecise(amountToBuy, 4) : formatNumberPrecise(amountToSell, 4) }</Text></Box>
+                            <Box fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
+                        </HStack>
+                        <HStack ml={1}>
+                            <Box w="90px" textAlign={"right"}><Text fontSize={"xs"} color="#d6a700">Receiving</Text></Box>
+                            <Box w="120px"><Text fontSize={"13px"}>{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate, 4) : formatNumberPrecise(amountToSell * askRate, 4)}</Text></Box>
+                            <Box fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
+                        </HStack>                        
+                    </VStack>
+                    </>
+                ) :
+                    <SimpleGrid columns={3} spacing={2} w="98%"   >
+                        <Box mt={5}></Box>
+                        <Box></Box>
+                        <Box></Box>
+                        <Box><Text fontSize={"13px"} color="#d6a700">Spending</Text></Box>
+                        <Box ><Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text></Box>
+                        <Box fontSize={"13px"} textAlign={"right"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
+                        <Box><Text fontSize={"13px"} color="#d6a700">Receiving</Text></Box>
+                        <Box><Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text></Box>
+                        <Box fontSize={"13px"} textAlign={"right"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
+
+                    </SimpleGrid>               
+                }
+
             </Box>
-            <Box mt={4}>
+            </Box>
+
+            {/* ─── Column 2 (e.g. your drawer/edit button) ─────────────────────────── */}
+            <Box>
             <DrawerRoot >
             <DrawerTrigger asChild>
-            <Box ml={8} mt={5}> 
-            <Button mt={isMobile ? "25vw" : 0} ml={isMobile ? "-40vw" : 0} variant="outline" h="30px" fontSize={isMobile?"12px": "11px"} w="100px">
+            <Box > 
+            <Button variant="outline" h="30px" ml={isMobile ? "-180px" : 8} mt={isMobile ? "110px" : "60px"} fontSize={isMobile?"12px": "11px"} w="100px">
                 {isRolling ? <Spinner size="sm" /> : "Edit"}
             </Button>
             <br /><br /><br />
@@ -213,9 +250,72 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                 {/* <DrawerFooter>
                 </DrawerFooter> */}
             </DrawerContent>
-            </DrawerRoot>                         
+            </DrawerRoot>   
             </Box>
-            </SimpleGrid>
+        </SimpleGrid>
+
+            {/* <Box mt={4}>
+            <DrawerRoot >
+            <DrawerTrigger asChild>
+            <Box ml={8} mt={5}> 
+            <Button mt={isMobile ? "25vw" : 0} ml={isMobile ? "-40vw" : 0} variant="outline" h="30px" fontSize={isMobile?"12px": "11px"} w="100px">
+                {isRolling ? <Spinner size="sm" /> : "Edit"}
+            </Button>
+            <br /><br /><br />
+            </Box>
+            </DrawerTrigger>
+            <DrawerBackdrop />
+            <DrawerContent>
+                <Box mt="80%" ml={5} >
+                <DrawerHeader>
+                    <DrawerTitle>
+                        <Grid templateColumns="repeat(2, 1fr)" templateRows={5} gap={4} mt={-8}>
+                            <GridItem colSpan={2}>
+                            <Text as="h4" color="#bf9b30">Set slippage</Text>
+                            </GridItem>
+                            <GridItem colSpan={2}>
+                            <Stat.Root>
+                                <Stat.Label fontSize="sm" mt={12}>Enter your tolerance</Stat.Label>
+                                <Input
+                                    placeholder="Slippage"
+                                    value={slippage}
+                                    onChange={(e) => setSlippage(e.target.value)}
+                                    w="60%"
+                                    fontSize={"sm"}
+                                    h="30px"
+                                    mt={-5}
+                                />
+                            </Stat.Root>
+                            </GridItem>
+
+                            <GridItem colSpan={2}>
+                            <HStack>
+                            <Box>
+                            <Button fontSize={"sm"} variant="outline" size="sm" onClick={() => null}>Cancel</Button>
+                            </Box>
+                            <Box>
+                            <Button fontSize={"sm"} variant="outline" size="sm" onClick={() => null}>Confirm</Button>
+                            </Box>
+                        </HStack>
+                        </GridItem>
+                        <GridItem colSpan={2}>
+                        <Stat.Root mt={-18}>
+                            <Stat.Label fontSize="sm" mt={12}>Recommended value 5%</Stat.Label>
+                        </Stat.Root>
+                        </GridItem>
+                        </Grid>
+                    </DrawerTitle>
+                    <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={() => null}>
+                        <Button variant="ghost" size="sm" onClick={() => null}>×</Button>
+                    </DrawerCloseTrigger>
+                </DrawerHeader>
+                <DrawerBody>
+        
+                </DrawerBody>
+                </Box>
+            </DrawerContent>
+            </DrawerRoot>                         
+            </Box> */}
         </Box>
     );
     }
