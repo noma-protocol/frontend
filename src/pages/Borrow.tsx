@@ -667,7 +667,7 @@ const Borrow = () => {
                                             <Box  fontSize="xs">
                                             {displayedCollateral}
                                             </Box>
-                                            <Box  fontSize="xx-small">
+                                            <Box  fontSize="xx-small" ml={-2}>
                                             {isTokenInfoLoading ? <Spinner size="xs" /> : token0Info.tokenSymbol}
                                             </Box>
                                         </HStack>
@@ -677,7 +677,7 @@ const Borrow = () => {
                                             <Box  fontSize="xs">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
                                             </Box>
-                                            <Box  fontSize="xx-small">
+                                            <Box  fontSize="xx-small" ml={-2}>
                                             {isTokenInfoLoading ? <Spinner size="xs" /> : token1Info.tokenSymbol}
                                             </Box>
                                         </HStack>
