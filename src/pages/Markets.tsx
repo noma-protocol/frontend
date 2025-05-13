@@ -436,7 +436,6 @@ const Markets: React.FC = () => {
           display="flex"
           alignItems="center"
           justifyContent="center"
-          height="100vh"
           color="white"
         >
           <Heading as="h2">Connect your wallet</Heading>
@@ -444,18 +443,17 @@ const Markets: React.FC = () => {
       ) : (
         <Box
           w="100%"
-          h="80vh"
           color="white"
           display="flex"
           alignItems="center"
           // justifyContent="center"
           textAlign="left"
           position="relative"
-          mt={isMobile ? "-10vh" : 0}
-          // mb={50}
+          // mb={50} 
+          mt={isMobile ? "20%" : -480}
         >
-          <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"}>
-            <Box px={4} mt={isMobile ? "-16vh" : "-32vh"} mb={4} w="100%">
+          <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"} >
+            <Box px={4} mb={4} w="100%">
             <HStack spacing={4}  ml={4}>
               <Button
                 onClick={() => handleSetView("all")}
@@ -476,7 +474,6 @@ const Markets: React.FC = () => {
 
             {/* Vaults List */}
             <Box
-              mt={isMobile? "-10vh":-350}
               ml={isMobile ? 5: 0}
               border="1px solid gray"
               p={8}
@@ -630,6 +627,7 @@ const Markets: React.FC = () => {
             </Box>
 
           </SimpleGrid>
+          {isMobile ? (<></>) : <><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></>}
         </Box>
       )}
     </Container>
