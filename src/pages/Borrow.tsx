@@ -41,9 +41,16 @@ import {
     DrawerActionTrigger,
 } from '../components/ui/drawer'; // Ark UI Drawer components
 import { ro } from '@faker-js/faker';
-import addresses from "../assets/deployment.json";
 import { size } from 'viem';
-import config from '../config'; 
+import config from '../config';
+
+import addressesLocal   from "../assets/deployment.json";
+import addressesMonad from "../assets/deployment_monad.json";
+const addresses = config.chain === "local"
+  ? addressesLocal
+  : addressesMonad;
+
+ 
 
 const { formatEther, parseEther, isAddress, MaxUint256 } = ethers.utils;
 const { JsonRpcProvider } = ethers.providers;
