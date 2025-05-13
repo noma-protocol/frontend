@@ -415,7 +415,7 @@ const Presale: React.FC = () => {
       if (!isConnected || !address) return;
 
       try {
-        const response = await fetch(`${environment == "development" ? "http://localhost:3000" : "https://bootstrap.noma.money"}/referral`, {
+        const response = await fetch(`${environment == "development" ? "http://localhost:3000" : "https://referrals.oikos.cash"}/referral`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
