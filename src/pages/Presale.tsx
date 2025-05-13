@@ -548,10 +548,9 @@ const Presale: React.FC = () => {
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2}>
             <Box 
               p={2} 
-              // border="1px solid white"
             >
               <HStack>
-                <Box>
+                <Box >
                   <Text fontSize="lg" color="white" >
                     Welcome
                   </Text>
@@ -562,6 +561,29 @@ const Presale: React.FC = () => {
               </Text>
                 </Box>
               </HStack>
+               {presaleInfo?.deployer == address /*&& hasExpired*/ && !finalized ? (
+                    <Box 
+                      border="1px solid #a67c00" 
+                      p={4} 
+                      mt={5}               
+                      w={"auto"} 
+                      h="150px"
+                      bgColor={"#222831"} borderRadius={10}
+                      >
+                      <Text color="#a67c00"><b>Admin Controls</b></Text>
+                        <HStack>
+                        <Button 
+                        disabled={finalized}
+                        onClick={handleClickFinalize}
+                        variant={"outline"}
+                        border="1px solid white"
+                        borderRadius={10}
+                        fontSize="sm"
+                        w="100px">
+                          {isLoading ? <Spinner size="sm" /> : "Finalize"}
+                        </Button>                           
+                        </HStack>
+                    </Box>): <></>}
             </Box>
             <Box
               textAlign={{ base: "left", md: "right" }}
@@ -607,10 +629,7 @@ const Presale: React.FC = () => {
                   </StatValueText>
                 </StatRoot>
               </Box>
-            </Flex>
-            </Box>
-          </SimpleGrid>
-            <Box w={isMobile?"88%":"auto"} ml={isMobile?5:"52%"} mt={5} >
+            <Box w={isMobile?"88%":"auto"} mt={5} >
               <ProgressRoot value={timeLeft != "00:00:00:00" ? progress : progressSc} max={100}  maxW="sm" size="lg">
                 <HStack gap="5">
                   <Box mt={5} >
@@ -624,10 +643,9 @@ const Presale: React.FC = () => {
               </ProgressRoot>
 
               <Flex  w="400px" mt={3} direction="column">
-
                 <Box>
                   <HStack>
-                  <Box w="80px">
+                  <Box w="80px"  ml={-2}>
                   <Text fontSize="sm" color="#a1a1aa">Hard Cap</Text>
                 </Box>
                   <Box  w="120px">
@@ -647,17 +665,17 @@ const Presale: React.FC = () => {
                 <Box mt={2}>
                 <HStack >
                   <Box  w="80px" >
-                    <Text fontSize="sm" color="#a1a1aa">Soft Cap&nbsp;</Text>
+                    <Text fontSize="sm" color="#a1a1aa" ml={isMobile ? -2 : 0}>Soft Cap&nbsp;</Text>
                   </Box>
-                  <Box  w="120px">
+                  <Box  w="120px" ml={isMobile ? 0 : -2}>
                   <Text fontStyle="italic" color="#f3b500">
-                     &nbsp;<b>{Number(progressSc).toFixed(2)}</b>%
+                     <b>{Number(progressSc).toFixed(2)}</b>%
                   </Text>
                   </Box>
-                  <Box>
+                  <Box ml={2}>
                   {isMobile ? <></>:
                     <Text fontStyle="italic" color="gray" fontSize={"11px"}>
-                    &nbsp;<b>({Number(softCap)} BNB)</b>
+                    <b>({Number(softCap)} BNB)</b>
                   </Text>}
                   </Box>
                   </HStack>
@@ -665,6 +683,10 @@ const Presale: React.FC = () => {
               </Flex>
 
             </Box>
+            </Flex>
+            </Box>
+          </SimpleGrid>
+
 
             <Box mt={10} ></Box>
               <SimpleGrid columns={{ base: 1, md: 2 }}  gap={4}>
@@ -1002,20 +1024,6 @@ const Presale: React.FC = () => {
                       </Box>
                     </Flex>): <>Please login with your wallet</>}
                   </Box>        
-                  {presaleInfo?.deployer == address /*&& hasExpired*/ && !finalized ? (
-                    <Box border="2px solid red" p={4} mt={10} w="300px" bgColor={"#363638"}>
-                      <Text><b>Admin Controls</b></Text>
-                        <HStack>
-                        <Button 
-                        disabled={finalized}
-                        onClick={handleClickFinalize}
-                        w="100px">
-                          {isLoading ? <Spinner size="sm" /> : "Finalize"}
-                        </Button>                           
-                        </HStack>
-                    </Box>): <></>}
-
-
                   </>
                 ):<></>}
               </Box>

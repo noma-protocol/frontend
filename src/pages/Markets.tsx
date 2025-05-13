@@ -450,7 +450,7 @@ const Markets: React.FC = () => {
           textAlign="left"
           position="relative"
           // mb={50} 
-          mt={isMobile ? "20%" : -480}
+          mt={isMobile ? "20%" : "-20%"}
         >
           <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"} >
             <Box px={4} mb={4} w="100%">
