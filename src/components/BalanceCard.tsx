@@ -105,7 +105,7 @@ const BalanceCard = ({
         <Box 
             w={page == "borrow" && isMobile ? "108%" : page == "exchange" && !isMobile ? "80%" : cardWidth}   
             mx="auto"
-            ml={isMobile ? 0 : 0}
+            ml={isMobile ? 0 : 5}
             border={withBg ? "none" : "1px solid white"} 
             borderColor="gray" 
             p={4}
