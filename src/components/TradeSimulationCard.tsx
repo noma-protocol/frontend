@@ -190,7 +190,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             <DrawerRoot >
             <DrawerTrigger asChild>
             <Box > 
-            <Button variant="outline" h="30px" ml={isMobile ? "-170px" : 8} mt={isMobile ? "115px" : "60px"} fontSize={isMobile?"12px": "11px"} w="100px">
+            <Button variant="outline" h="30px" ml={isMobile ? "-160px" : 8} mt={isMobile ? "115px" : "60px"} fontSize={isMobile?"12px": "11px"} w="100px">
                 {isRolling ? <Spinner size="sm" /> : "Edit"}
             </Button>
             <br /><br /><br />
