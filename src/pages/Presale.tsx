@@ -30,7 +30,7 @@ import {
 import { Toaster, toaster } from "../components/ui/toaster"
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
-import { commify, generateBytes32String, getContractAddress } from "../utils";
+import { commify, commifyDecimals, generateBytes32String, getContractAddress } from "../utils";
 import Logo from "../assets/images/noma_logo_transparent.png";
 import { ethers } from "ethers"; // Import ethers.js
 const { formatEther, parseEther } = ethers.utils;
@@ -45,7 +45,7 @@ import config from '../config';
 import bnbLogo from "../assets/images/bnb.png";
 import addresses from "../assets/deployment.json";
 
-const tokenAddress = getContractAddress(addresses, "10143", "Proxy");
+const tokenAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
 
 const { environment, presaleContractAddress } = config;
 
@@ -85,7 +85,7 @@ const Presale: React.FC = () => {
   const [progressSc, setProgressSc] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const presaleUrl = `${environment == "development" ? "http://localhost:5173":"https://oikos.cash"}/presale?r=${referralCode}`;
+  const presaleUrl = `${environment == "development" ? "http://localhost:5173":"https://oikos.cash"}/presale?a=${contractAddress}r=${referralCode}`;
   
   const AddToMetaMaskButton = ({ contractAddress, tokenSymbol, tokenDecimals }) => {
     const addTokenToMetaMask = async () => {
@@ -410,35 +410,35 @@ const Presale: React.FC = () => {
   }
   , [timeLeftInSeconds]);
 
-  // useEffect(() => {
-  //   const fetchReferralCode = async () => {
-  //     if (!isConnected || !address) return;
+  useEffect(() => {
+    const fetchReferralCode = async () => {
+      if (!isConnected || !address) return;
 
-  //     try {
-  //       const response = await fetch(`${environment == "development" ? "http://localhost:3000" : "https://bootstrap.noma.money"}/referral`, {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({ address }),
-  //       });
+      try {
+        const response = await fetch(`${environment == "development" ? "http://localhost:3000" : "https://bootstrap.noma.money"}/referral`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ address }),
+        });
 
-  //       const data = await response.json();
+        const data = await response.json();
 
-  //       if (response.ok) {
-  //         setReferralCode(data.referralCode);
-  //         setErrorMessage('');
-  //       } else {
-  //         setErrorMessage(data.error || 'An error occurred while fetching the referral code.');
-  //       }
-  //     } catch (error) {
-  //       setErrorMessage('Failed to connect to the server. Please try again later.');
-  //       console.error('Error fetching referral code:', error);
-  //     }
-  //   };
+        if (response.ok) {
+          setReferralCode(data.referralCode);
+          setErrorMessage('');
+        } else {
+          setErrorMessage(data.error || 'An error occurred while fetching the referral code.');
+        }
+      } catch (error) {
+        setErrorMessage('Failed to connect to the server. Please try again later.');
+        console.error('Error fetching referral code:', error);
+      }
+    };
 
-  //   fetchReferralCode();
-  // }, [isConnected, address]); // Run whenever isConnected or address changes
+    fetchReferralCode();
+  }, [isConnected, address]); // Run whenever isConnected or address changes
 
   useEffect(() => {
 
@@ -675,7 +675,7 @@ const Presale: React.FC = () => {
                           Contribution Amount
                         </StatLabel>
                         <Text fontSize={13}  fontStyle={"italic"} m={2} mt={-2}>
-                          Choose a contribution amount {isMobile?<br />:<></>} (min {hardCap / 200} max {hardCap / 25} BNB)
+                          Choose a contribution amount {isMobile?<br />:<></>} (min {commifyDecimals(hardCap / 200, 4)} max {commifyDecimals(hardCap / 25, 4)} BNB)
                         </Text>
                       </StatRoot>
                       <HStack spacing={4} align="center" justify="center" mt={2}>
@@ -708,10 +708,10 @@ const Presale: React.FC = () => {
                           defaultValue={[Number(hardCap/200)]}
                           variant="outline"
                           colorPalette={"yellow"}
-                          w={{ base: "140px", sm: "140px", md: "250px", lg: "250px" }} // Responsive widths
+                          w={{ base: "120px", sm: "120px", md: "220px", lg: "220px" }} // Responsive widths
                           marks={[
-                            { value: (hardCap/200), label: (hardCap/200).toString() },
-                            { value: (hardCap/25), label: (hardCap/25).toString() },
+                            { value: (hardCap/200), label: commifyDecimals(hardCap / 200, 4).toString() },
+                            { value: (hardCap/25), label: commifyDecimals(hardCap / 25, 4).toString() },
                           ]}
                           min={Number(hardCap/200)}
                           max={Number(hardCap/25)}
@@ -868,7 +868,7 @@ const Presale: React.FC = () => {
                           {commify(tokensPurchased)}
                       </Text>
                   </Box>
-                  <Box w="auto" ml={1}>
+                  <Box w="auto" border="1px solid white" ml={1}>
                       <Image h={4} src={placeholderLogo} />
                   </Box>
                   <Box w="auto">
@@ -956,39 +956,45 @@ const Presale: React.FC = () => {
                       {Number(commify(formatEther(totalReferred) * 0.03)).toFixed(4)}
                     </Box><b>BNB</b>
                   </HStack>              
-                  <Box w={isMobile?"100%":"55%"} mt={4} ml={1} >
+                  <Box w={isMobile?"100%":"75%"} mt={4} ml={1} >
                     {isConnected ? (
                       <Flex align="left" gap={1} direction={isMobile? "column" : "row"} alignItems="left" justifyContent="space-between">
-                      <Box mt={1}>
+                      <Box w="180px">
                         <Text fontSize={"sm"} >Share referral URL</Text>
                       </Box>
                       <Box>
                       <Text 
+                        borderRadius={"10px"}
                         p={1} 
+                        mt={-4}
+                        h={isMobile ? "40px" : "40px"}
                         backgroundColor="ivory" 
-                        fontStyle="italic" 
+                        fontStyle="bold" 
                         color="black" 
-                        fontSize={"11px"}
-                        height={"25px"}
-                        w={"260px"}
+                        fontSize={isMobile ? "9px" : "10px"}
+                        w={isMobile ? "315px" : "395px"}
+                        ml={isMobile ? '5px' : -75}
                       >
                         {presaleUrl}
                       </Text>
                       </Box>
                       <Box>
                         <Button
-                        h={8}
-                        mt={isMobile?3:-1}
-                        w={"80px"}
-                        borderRadius={10}
-                        onClick={handleCopy}
-                        colorScheme="white"
-                        variant="ghost"
-                        bg="transparent"
-                        border="2px solid"
-                        color="white"
-                        _hover={{ bg: "rgba(0, 0, 255, 0.1)" }}
-                        _active={{ bg: "rgba(0, 0, 255, 0.2)" }}
+                          p={2}
+                          px={2}
+                          ml={isMobile ? "5px" : -55}
+                          h={8}
+                          mt={isMobile?3:1}
+                          w={"120px"}
+                          borderRadius={10}
+                          onClick={handleCopy}
+                          colorScheme="white"
+                          variant="ghost"
+                          bg="transparent"
+                          border="2px solid"
+                          color="white"
+                          _hover={{ bg: "rgba(0, 0, 255, 0.1)" }}
+                          _active={{ bg: "rgba(0, 0, 255, 0.2)" }}
                       >
                         {hasCopied ? "Copied!" : "Copy"}
                       </Button>

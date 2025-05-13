@@ -60,6 +60,7 @@ import {fa, faker} from '@faker-js/faker'
 import PriceData from "../components/PriceData";
 import useUniswapPrice from "../hooks/useUniswapPrice";
 import addresses from "../assets/deployment.json";
+import config from '../config'; 
 
 const { JsonRpcProvider } = ethers.providers;
 
@@ -75,7 +76,10 @@ const ExchangeHelperAbi = ExchangeHelperArtifact.abi;
 const QuoterArtifact = await import(`../assets/QuoterV2.json`);
 const QuoterAbi = QuoterArtifact.abi;
 
-const localProvider = new JsonRpcProvider("https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW");
+const localProvider = new JsonRpcProvider(
+  config.chain == "local" ? "http://localhost:8545" :
+  "https://testnet-rpc.monad.xyz"
+);
 
 // Dynamically import the NomaFactory artifact and extract its ABI
 const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
@@ -101,11 +105,11 @@ const WETHAbi = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
-const exchangeHelperAddress = getContractAddress(addresses, "10143", "Exchange");
+const exchangeHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Exchange");
 const quoterAddress = "0x1b4E313fEF15630AF3e6F2dE550Dbf4cC9D3081d";
-const addressModelHelper = getContractAddress(addresses, "10143", "ModelHelper");
+const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 const feeTier = 3000;
 

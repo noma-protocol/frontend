@@ -43,11 +43,15 @@ import {
 import { ro } from '@faker-js/faker';
 import addresses from "../assets/deployment.json";
 import { size } from 'viem';
+import config from '../config'; 
 
 const { formatEther, parseEther, isAddress, MaxUint256 } = ethers.utils;
 const { JsonRpcProvider } = ethers.providers;
 
-const localProvider = new JsonRpcProvider("https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW");
+const localProvider = new JsonRpcProvider(
+  config.chain == "local" ? "http://localhost:8545" :
+  "https://testnet-rpc.monad.xyz"
+);
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
 const IWETHAbi = IWETHArtifact.abi;
@@ -68,8 +72,8 @@ const ModelHelperArtifact = await import(`../assets/ModelHelper.json`);
 const ModelHelperAbi = ModelHelperArtifact.abi;
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
-const modelHelperAddress = getContractAddress(addresses, "10143", "ModelHelper");
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 const Borrow = () => {
     const { address, isConnected } = useAccount();
@@ -101,7 +105,6 @@ const Borrow = () => {
     const [isAdding, setIsAdding] = useState(false);
     const [repayAmount, setRepayAmount] = useState("0");
 
-
     let loanData ;
 
     const durationChoices = createListCollection({
@@ -113,6 +116,14 @@ const Borrow = () => {
             { label: "1 year",  value: Number((86400 * 365)).toString()},
             ],
     });
+
+
+  useEffect(() => {
+    if (vaultAddress == "0x0000000000000000000000000000000000000000" || vaultAddress == "") {
+      window.location.href = "https://oikos.cash"
+    }
+
+  }, [vaultAddress]);
 
   useEffect(() => {
     const interval  = setInterval(() => {

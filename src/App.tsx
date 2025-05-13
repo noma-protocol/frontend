@@ -6,6 +6,7 @@ import { WagmiConfig } from "wagmi";
 import { bsc, bscTestnet, localhost } from "viem/chains";
 
 import { monad } from './chains/monad';
+import config from './config'; 
 
 // import { ToastContainer } from "react-toastify";
 import { switchNetwork, watchNetwork } from "wagmi/actions";
@@ -32,7 +33,7 @@ function App() {
     icons: ["https://avatars.githubusercontent.com/u/37784886"],
   };
 
-  const chains = [localhost, monad];
+  const chains = [localhost];
   const wagmiConfig = defaultWagmiConfig({
     chains,
     projectId,
@@ -49,7 +50,7 @@ function App() {
     // }
     if (network.chain?.name != "local") {
       await switchNetwork({
-        chainId: 10143,
+        chainId: config.chain == "local" ? 1337 : 10143,
       });
     }
     console.log(`Network is ${network.chain?.name}`)
