@@ -156,14 +156,14 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     <>
                     <VStack mt={5} ml={20}>
                         <HStack >
-                            <Box w="90px" textAlign={"right"} ml={tradeMode == "BUY" ? 0 : 2}><Text fontSize={"xs"} color="#d6a700">{firstContent}</Text></Box>
-                            <Box w="120px"><Text fontSize={"13px"}>{tradeMode == "BUY" ?  formatNumberPrecise(amountToBuy, 4) : formatNumberPrecise(amountToSell, 4) }</Text></Box>
-                            <Box fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
+                            <Box w="90px" textAlign={"right"} ><Text fontSize={"xs"} color="#d6a700">{firstContent}</Text></Box>
+                            <Box w="120px"><Text fontSize={"13px"} >{tradeMode == "BUY" ?  formatNumberPrecise(amountToBuy, 4) : formatNumberPrecise(amountToSell, 4) }</Text></Box>
+                            <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
                         </HStack>
-                        <HStack ml={tradeMode == "BUY" ? 2 : 0} >
-                            <Box w="90px" textAlign={"right"}><Text fontSize={"xs"} color="#d6a700">{secondContent}</Text></Box>
-                            <Box w="120px"><Text fontSize={"13px"}>{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate, 4) : formatNumberPrecise(amountToSell * askRate, 4)}</Text></Box>
-                            <Box fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
+                        <HStack >
+                            <Box w="90px" textAlign={"right"} ><Text fontSize={"xs"} color="#d6a700">{secondContent}</Text></Box>
+                            <Box w="120px" ><Text fontSize={"13px"}>{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate, 4) : formatNumberPrecise(amountToSell * askRate, 4)}</Text></Box>
+                            <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
                         </HStack>                        
                     </VStack>
                     </>
@@ -172,7 +172,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                         <Box mt={5}></Box>
                         <Box></Box>
                         <Box></Box>
-                        <Box><Text fontSize={"13px"} color="#d6a700">Spending</Text></Box>
+                        <Box ><Text fontSize={"13px"} color="#d6a700" >Spending</Text></Box>
                         <Box ><Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text></Box>
                         <Box fontSize={"13px"} textAlign={"right"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
                         <Box><Text fontSize={"13px"} color="#d6a700">Receiving</Text></Box>
