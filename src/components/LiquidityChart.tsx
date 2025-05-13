@@ -27,8 +27,8 @@ return (
           {isConnected ? <SlideControls isConnected /> : <></>}
         </SimpleGrid>*/}
         <SimpleGrid maxWidth={isMobile ? "40%" : "30%"} ml="50vw" columns={2} rows={3} p={2} mt={isMobile ? "-6vh" : 0}  >
-          <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"11px":"14px"}>Circulating</Text></Box>
-          <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"11px":"14px"}>{isMobile ? "L.R." : "Liquidity Ratio"}</Text></Box>
+          <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"10px":"14px"}>Circulating</Text></Box>
+          <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"10px":"14px"}>{isMobile ? "L.R." : "Liquidity Ratio"}</Text></Box>
           <Box w="auto" textAlign="right" fontSize={isMobile?"11px":"14px"}>
             <label>{commify(Number(formatEther(circulatingSupply)).toFixed(6))}</label>
             {/* <Text mt={-2} fontSize={"small"}>(NOMA)</Text> */}
