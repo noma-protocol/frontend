@@ -43,7 +43,13 @@ import metamaskLogo from "../assets/images/metamask.svg";
 import placeholderLogo from "../assets/images/question.svg";
 import config from '../config'; 
 import bnbLogo from "../assets/images/bnb.png";
-import addresses from "../assets/deployment.json";
+
+import addressesLocal   from "../assets/deployment.json";
+import addressesMonad from "../assets/deployment_monad.json";
+
+const addresses = config.chain === "local"
+  ? addressesLocal
+  : addressesMonad;
 
 const tokenAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
 
@@ -149,8 +155,8 @@ const Presale: React.FC = () => {
         border={"1px solid white"}
         w={"150px"}
       >
-        Add to MetaMask
-        <Image src={metamaskLogo} w={15} ml={2} />
+        &nbsp;Add to MetaMask
+        <Image src={metamaskLogo} w={15} mt={-1} />
       </Button>
     );
   };
@@ -561,7 +567,7 @@ const Presale: React.FC = () => {
               </Text>
                 </Box>
               </HStack>
-               {presaleInfo?.deployer == address /*&& hasExpired*/ && !finalized ? (
+               {presaleInfo?.deployer == address && hasExpired && !finalized ? (
                     <Box 
                       border="1px solid #a67c00" 
                       p={4} 
@@ -891,7 +897,7 @@ const Presale: React.FC = () => {
                           {commify(tokensPurchased)}
                       </Text>
                   </Box>
-                  <Box w="auto" border="1px solid white" ml={1}>
+                  <Box w="auto" ml={1}>
                       <Image h={4} src={placeholderLogo} />
                   </Box>
                   <Box w="auto">

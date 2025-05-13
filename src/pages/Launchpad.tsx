@@ -54,9 +54,13 @@ import { set } from "react-ga";
 import placeholderLogo from "../assets/images/question.svg";
 import wethLogo from "../assets/images/weth.svg";
 import bnbLogo from "../assets/images/bnb.png";
-import addresses from "../assets/deployment.json";
-
 import config from '../config';
+import addressesLocal   from "../assets/deployment.json";
+import addressesMonad from "../assets/deployment_monad.json";
+
+const addresses = config.chain === "local"
+  ? addressesLocal
+  : addressesMonad;
 
 const { environment, presaleContractAddress } = config;
 
@@ -364,6 +368,7 @@ const Launchpad: React.FC = () => {
 
         if (event.target.value != "") {
             const targetValue = unCommify(event.target.value);
+            console.log(`Setting soft cap to ${parseEther(`${targetValue}`)}`);
             setSoftCap(targetValue);
         }
     }
@@ -712,7 +717,7 @@ const Launchpad: React.FC = () => {
                                 </Box> 
                             </HStack>
                             <HStack mt={2}>
-                                <Box w={{ base: "180px", lg: "115px" }}>Soft Cap</Box>
+                                <Box w={{ base: "180px", lg: "115px" }}>Soft Cap</Box> 
                                 <Box>
                                     <Input
                                         id="softcap"
@@ -720,8 +725,8 @@ const Launchpad: React.FC = () => {
                                         h="40px"
                                         // isMobile={isMobile}
                                         // marginRight={"5px"}
-                                        defaultValue={((tokenSupply * 10/100) * price) * 25/100}
-                                        min={((tokenSupply * 10/100) * price) * 5/100 } 
+                                        defaultValue={((tokenSupply * 10/100) * price) / 8}
+                                        min={((tokenSupply * 10/100) * price) / 8 } 
                                         max={((tokenSupply * 10/100) * price) * 60/100}
                                         ml={isMobile ? 0 : "25px"}
                                         // setTokenSupply={(()=>{})}

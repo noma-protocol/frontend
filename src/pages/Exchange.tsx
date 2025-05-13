@@ -59,8 +59,13 @@ import { Line } from 'react-chartjs-2';
 import {fa, faker} from '@faker-js/faker'
 import PriceData from "../components/PriceData";
 import useUniswapPrice from "../hooks/useUniswapPrice";
-import addresses from "../assets/deployment.json";
 import config from '../config'; 
+import addressesLocal   from "../assets/deployment.json";
+import addressesMonad from "../assets/deployment_monad.json";
+
+const addresses = config.chain === "local"
+  ? addressesLocal
+  : addressesMonad;
 
 const { JsonRpcProvider } = ethers.providers;
 
