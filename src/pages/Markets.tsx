@@ -451,6 +451,7 @@ const Markets: React.FC = () => {
           // justifyContent="center"
           textAlign="left"
           position="relative"
+          mt={"-10vh"}
           // mb={50}
         >
           <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"}>
@@ -550,7 +551,7 @@ const Markets: React.FC = () => {
                         </Box> */}
   
                         {/* Token Name */}
-                        <Box w={isMobile ? "200px" : "250px"} ml={5}>
+                        <Box w={isMobile ? "200px" : "250px"} ml={isMobile ? 0 : 5}>
                           <Text fontSize={isMobile? "12px" : "14px"}  >{vault.tokenName}</Text>
                         </Box>
   
