@@ -476,7 +476,7 @@ const Markets: React.FC = () => {
 
             {/* Vaults List */}
             <Box
-              mt={isMobile?-20:-350}
+              mt={isMobile? "-10vh":-350}
               ml={isMobile ? 5: 0}
               border="1px solid gray"
               p={8}
@@ -503,7 +503,7 @@ const Markets: React.FC = () => {
                       <Text fontWeight="bold" color="#bf9b30"  ml={2}>{isMobile?"":"Token"} Name</Text>
                     </Box>
                     <Box>
-                      <Text fontWeight="bold"  color="#bf9b30" ml={isMobile?"150px":"60px"} > {isMobile?"":"Token"}  Symbol</Text>
+                      <Text fontWeight="bold"  color="#bf9b30" ml={isMobile?"32vw":"60px"} > {isMobile?"":"Token"}  Symbol</Text>
                     </Box>
                     {!isMobile && (
                       <>
