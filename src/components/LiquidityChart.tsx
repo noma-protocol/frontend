@@ -26,7 +26,7 @@ return (
         {/* <SimpleGrid maxWidth={"60%"} ml="20%" columns={8}>
           {isConnected ? <SlideControls isConnected /> : <></>}
         </SimpleGrid>*/}
-        <SimpleGrid maxWidth={isMobile ? "70%" : "30%"} ml="60%" columns={2} rows={3} p={2} borderRadius="md"  >
+        <SimpleGrid maxWidth={isMobile ? "40%" : "30%"} ml="50vw" columns={2} rows={3} p={2} mt={isMobile ? "-6vh" : 0}  >
           <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"11px":"14px"}>Circulating</Text></Box>
           <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"11px":"14px"}>{isMobile ? "L.R." : "Liquidity Ratio"}</Text></Box>
           <Box w="auto" textAlign="right" fontSize={isMobile?"11px":"14px"}>
@@ -159,9 +159,9 @@ return (
               <Table.Header>
                 <Table.Row>
                   <Table.ColumnHeader></Table.ColumnHeader>
-                  <Table.ColumnHeader isNumeric>Floor</Table.ColumnHeader>
-                  <Table.ColumnHeader isNumeric>Anchor</Table.ColumnHeader>
-                  <Table.ColumnHeader isNumeric>Discovery</Table.ColumnHeader>
+                  <Table.ColumnHeader isNumeric><Text color="#a67c00" fontSize="sm">Floor</Text></Table.ColumnHeader>
+                  <Table.ColumnHeader isNumeric><Text color="#a67c00" fontSize="sm">Anchor</Text></Table.ColumnHeader>
+                  <Table.ColumnHeader isNumeric><Text color="#a67c00" fontSize="sm">Discovery</Text></Table.ColumnHeader>
                   {/* <Table.ColumnHeader isNumeric>Unused</Table.ColumnHeader> */}
                   {/* <Table.ColumnHeader isNumeric>Total</Table.ColumnHeader> */}
                   {/* <Table.ColumnHeader isNumeric>Fees</Table.ColumnHeader> */}
@@ -169,7 +169,7 @@ return (
               </Table.Header>
               <Table.Body style={{ color: "ivory" }}>
                 <Table.Row>
-                  <Table.Cell>Reserves (WMON)</Table.Cell>
+                  <Table.Cell><Text color="#a67c00" fontSize="sm">Reserves (WMON)</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1))}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount1))}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount1))}</Table.Cell>
@@ -187,7 +187,7 @@ return (
                   {/* <Table.Cell isNumeric>{commify(formatEther(accumulatedFees[1]))}</Table.Cell> */}
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell>Reserves ({tokenSymbol})</Table.Cell>
+                  <Table.Cell><Text color="#a67c00" fontSize="sm">Reserves ({tokenSymbol})</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount0), 2)}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount0), 2)}</Table.Cell>
                    <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount0), 2)}</Table.Cell>
@@ -205,7 +205,7 @@ return (
                   {/* <Table.Cell isNumeric>{commify(formatEther(accumulatedFees[0]))}</Table.Cell> */}
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell>Capacity ({tokenSymbol})</Table.Cell>
+                  <Table.Cell><Text color="#a67c00" fontSize="sm">Capacity ({tokenSymbol})</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(capacity?.floor))}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(capacity?.anchor))}</Table.Cell>
                   <Table.Cell isNumeric>{"n/a"}</Table.Cell>
@@ -213,7 +213,7 @@ return (
                   <Table.Cell></Table.Cell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell>Tick Lower</Table.Cell>
+                  <Table.Cell><Text color="#a67c00" fontSize="sm">Tick Lower</Text></Table.Cell>
                   <Table.Cell isNumeric>
                     {commifyPatched(tickToPrice(data["Floor"]?.lowerTick)[0])}
                     <Text color="gray" fontSize="13px">
@@ -235,7 +235,7 @@ return (
                   <Table.Cell></Table.Cell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell>Tick Upper</Table.Cell>
+                  <Table.Cell><Text color="#a67c00" fontSize="sm">Tick Upper</Text></Table.Cell>
                   <Table.Cell isNumeric>
                     {commifyPatched(tickToPrice(data["Floor"]?.upperTick))}
                     <Text color="gray" fontSize="13px">
