@@ -744,7 +744,7 @@ const Presale: React.FC = () => {
                           min={Number(hardCap/200)}
                           max={Number(hardCap/25)}
                           mt="3%"
-                          ml={isMobile ? -6 :0}
+                          ml={isMobile ? -2 :0}
                           value={[contributionAmount > Number(hardCap/200) ? contributionAmount : Number(hardCap/200)]}
                           onValueChange={(e) => {
                             if (e.value < hardCap/200) {
@@ -1021,6 +1021,7 @@ const Presale: React.FC = () => {
                           bg="transparent"
                           border="2px solid"
                           color="white"
+                          fontSize={isMobile ? "xs" : "sm"}
                           _hover={{ bg: "rgba(0, 0, 255, 0.1)" }}
                           _active={{ bg: "rgba(0, 0, 255, 0.2)" }}
                       >
