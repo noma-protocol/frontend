@@ -52,7 +52,6 @@ const uniswapV3FactoryABI = [
 
 // NomaFactory contract address
 const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
-const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const feeTier = 3000;
 
 const Markets: React.FC = () => {
@@ -73,14 +72,15 @@ const Markets: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [modalFocus, setModalFocus] = useState<boolean>(false);
+
   const reserveAssetsMap = {
-    "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c": "WBNB",
-    "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701" : "WMON",
+    [config.protocolAddresses.WBNB] : "WBNB",
+    [config.protocolAddresses.WMON] : "WMON",
   };
 
   const fetchPoolAddress = async (token0: string, token1: string) => {
     const uniswapV3FactoryContract = new ethers.Contract(
-      uniswapV3FactoryAddress,
+      config.protocolAddresses.uniswapV3Factory,
       uniswapV3FactoryABI,
       localProvider
     );
@@ -540,7 +540,7 @@ const Markets: React.FC = () => {
                         key={index}
                         p={4}
                         border="1px solid"
-                        borderColor={isMobile? vault.presaleContract != zeroAddress ? "#54ff36" : "gray" : "gray"}
+                        borderColor={isMobile? vault.presaleContract != zeroAddress ? "#a67c00" : "gray" : "gray"}
                         borderRadius="md"
                         w="100%"
                         cursor="pointer"

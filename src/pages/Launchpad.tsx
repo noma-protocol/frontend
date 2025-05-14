@@ -80,7 +80,7 @@ const Launchpad: React.FC = () => {
     const [floorPrice, setFloorPrice] = useState("0");
     const [presalePrice, setPresalePrice] = useState("0");
 
-    const [token1, setToken1] = useState("0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701");
+    const [token1, setToken1] = useState(config.protocolAddresses.WMON || "0x");
     const [feeTier, setFeeTier] = useState(10);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
