@@ -60,7 +60,6 @@ const ERC20Abi = [
 
 // NomaFactory contract address
 const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
-const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const feeTier = 3000;
 
 const Liquidity: React.FC = () => {
@@ -83,7 +82,7 @@ const Liquidity: React.FC = () => {
 
   const fetchPoolAddress = async (token0: string, token1: string) => {
     const uniswapV3FactoryContract = new ethers.Contract(
-      uniswapV3FactoryAddress,
+      config.protocolAddresses.uniswapV3Factory,
       uniswapV3FactoryABI,
       localProvider
     );

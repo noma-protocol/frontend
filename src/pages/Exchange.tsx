@@ -111,9 +111,7 @@ const WETHAbi = [
 
 // NomaFactory contract address
 const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
-const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const exchangeHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Exchange");
-const quoterAddress = "0x1b4E313fEF15630AF3e6F2dE550Dbf4cC9D3081d";
 const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 const feeTier = 3000;
@@ -261,7 +259,7 @@ const Exchange: React.FC = () => {
 
   const fetchPoolAddress = async (token0: string, token1: string) => {
     const uniswapV3FactoryContract = new ethers.Contract(
-      uniswapV3FactoryAddress,
+      config.protocolAddresses.uniswapV3Factory,
       uniswapV3FactoryABI,
       localProvider
     );
@@ -274,7 +272,11 @@ const Exchange: React.FC = () => {
   const {
     priceData,
     percentageChange
-  } = useUniswapPrice(poolInfo.poolAddress, "https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW");
+  } = useUniswapPrice(
+    poolInfo.poolAddress, 
+    config.chain == "local" ? "http://localhost:8545" :
+    "https://testnet-rpc.monad.xyz"
+  );
   
   /**
    * Fetch all vaults for the "All Markets" view
@@ -1187,7 +1189,7 @@ const Exchange: React.FC = () => {
                                 amountToSell={amountToSell}
                                 tradeMode={tradeMode}
                                 swapPath={swapPath}
-                                quoterAddress={quoterAddress}
+                                quoterAddress={config.protocolAddresses.QuoterV2}
                                 quoterAbi={QuoterAbi}
                                 setTxAmount={setTxAmount}
                                 slippage={slippage}
@@ -1283,7 +1285,7 @@ const Exchange: React.FC = () => {
                                 amountToSell={amountToSell}
                                 tradeMode={tradeMode}
                                 swapPath={swapPath}
-                                quoterAddress={quoterAddress}
+                                quoterAddress={config.protocolAddresses.QuoterV2}
                                 quoterAbi={QuoterAbi}
                                 setTxAmount={setTxAmount}
                                 slippage={slippage}
