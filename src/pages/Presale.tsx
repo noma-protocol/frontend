@@ -708,7 +708,7 @@ const Presale: React.FC = () => {
                       </StatRoot>
                       <HStack spacing={4} align="center" justify="center" mt={2}>
                       <VStack>
-                        <Box ml={isMobile ? -12 : 0}>
+                        <Box ml={isMobile ? -6 : 0}>
                           <NumberInputRoot 
                             mt={5}
                             w={isMobile ? "140px": 60}
@@ -743,9 +743,8 @@ const Presale: React.FC = () => {
                           ]}
                           min={Number(hardCap/200)}
                           max={Number(hardCap/25)}
-                          ml={isMobile? 4 : 2}
                           mt="3%"
-                          ml={isMobile ? -12 :0}
+                          ml={isMobile ? -6 :0}
                           value={[contributionAmount > Number(hardCap/200) ? contributionAmount : Number(hardCap/200)]}
                           onValueChange={(e) => {
                             if (e.value < hardCap/200) {
