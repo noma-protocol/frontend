@@ -11,7 +11,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 <Box w={isMobile ? "100px" : "150px"}>
                     <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>Balance</Text>
                 </Box>
-                <Box w={"150px"} 
+                <Box w={isMobile ? "100px" : "150px"} 
                 // ml={isMobile ? 0 : -2} 
                 // border="1px solid white"
                 >
@@ -37,7 +37,8 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                     <Text 
                     fontWeight="bold" 
                     // ml={isMobile ? -4 : -6}
-                     fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}>
+                    fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
+                     >
                         {isMobile ? "" : <>&nbsp;</>}BNB
                     </Text>
                 </Box>
@@ -50,7 +51,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 >
                     <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>Token price</Text>
                 </Box>
-                <Box  w={"150px"}
+                <Box  w={isMobile ? "100px" : "150px"}
                   // border="1px solid white"
                 >
                     <Text
@@ -73,7 +74,10 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                   w="40px" 
                   // border="1px solid white"
                 >
-                    <Text fontWeight="bold" fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}>
+                    <Text 
+                        fontWeight="bold" 
+                        fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
+                    >
                         {isMobile ? "" : <>&nbsp;</>}BNB
                     </Text>
                 </Box>
@@ -86,14 +90,14 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 >
                     <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>{contributions > 0 ? "Contributed" : "Contributing"}</Text>
                 </Box>
-                <Box w={"150px"} 
+                <Box w={isMobile ? "100px" : "150px"} 
                 // border="1px solid white"
                 >
                     <Text
                         //  ml={-2}
                         color="#f3b500"
                         fontWeight="bold"
-                        fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
+                        fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
                     >
                         {contributions > 0 ?  contributions : (isNaN(contributionAmount) ? 0 : commifyDecimals(contributionAmount, 6))}
                     </Text>
@@ -115,7 +119,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                     <Text 
                       fontWeight="bold" 
                       // ml={isMobile ? -4 : -2} 
-                      fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
+                        fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
                     >
                         {isMobile ? "" : <>&nbsp;</>}BNB
                     </Text>
@@ -124,7 +128,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
 
             <HStack mt={3} spacing={4} >
                 <Box 
-                w={isMobile ? "110px" : "150px"} 
+                w={isMobile ? "105px" : "150px"} 
                 // border="1px solid white"
                 >
                   <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>
@@ -132,14 +136,14 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                   </Text>
                 </Box>
                 <Box  
-                w={isMobile ? "160px" : "150px"} 
+                w={isMobile ? "100px" : "150px"} 
                 // border="1px solid white"
                 >
                     <Text
                         // ml={isMobile ? "3px" : -1}
                         color="#f3b500"
                         fontWeight="bold"
-                        fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
+                        fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
                     >
                         {formatNumberPrecise(tokensPurchased, 2)}
                     </Text>
