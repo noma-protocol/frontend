@@ -251,10 +251,10 @@ const Markets: React.FC = () => {
                         // console.log("Vault Description:", vaultDescriptionData);
                         const tokenSymbol = vaultDescriptionData[1];
                         // Skip OKS vaults
-                        // if (tokenSymbol === "OKS") {
-                        //   console.log("Skipping OKS vault:", vault.toString());
-                        //   return null;
-                        // }
+                        if (tokenSymbol != "OKS") {
+                          // console.log("Skipping OKS vault:", vault.toString());
+                          return null; // Skip this vault
+                        }
                         const hasPresale = vaultDescriptionData[7] !== "0x0000000000000000000000000000000000000000";
                         let isPresaleFinalized = false;
                         let expired = false;

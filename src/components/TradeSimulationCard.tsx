@@ -120,7 +120,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     const secondContent = tradeMode == "BUY" ? "Receiving" : "Spending";
 
     return (
-        <Box mt={-5} w="100%">
+        <Box mt={isMobile ? 5 : -5} w="100%">
         <SimpleGrid columns={2} p={2} w="100%">
             {/* ─── Column 1 ─────────────────────────────────────────────────────── */}
             <Box>
@@ -136,7 +136,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             */}
             <Text
                 fontWeight="bold"
-                fontSize="sm"
+                fontSize="xs"
                 color="#a67c00"
                 w="100%"                 // ensure the red border spans whole column
                 ml={isMobile ? 5 : 0}

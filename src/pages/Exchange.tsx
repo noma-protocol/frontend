@@ -67,6 +67,9 @@ const addresses = config.chain === "local"
   ? addressesLocal
   : addressesMonad;
 
+  console.log(`Config chain is ${config.chain}`);
+  console.log(`Addresses are ${JSON.stringify(addresses)}`);
+
 const { JsonRpcProvider } = ethers.providers;
 
 const ERC20Artifact = await import(`../assets/ERC20.json`);
@@ -442,10 +445,10 @@ const Exchange: React.FC = () => {
                   stakingContract: vaultDescriptionData[8],
                 };
 
-                // if (plainVaultDescription.tokenSymbol === "OKS" || plainVaultDescription.tokenSymbol === "TST") {
-                //   // console.log("Skipping OKS vault:", vault.toString());
-                //   continue;
-                // }
+                if (plainVaultDescription.tokenSymbol != "OKS") {
+                  // console.log("Skipping OKS vault:", vault.toString());
+                  continue;
+                }
 
                 const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
