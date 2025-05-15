@@ -48,8 +48,8 @@ return (
         {/* <center> */}
           <Chart positions={data} isMobile={isMobile} />
           {!isMobile ? (
-            <Box pl={5}>
-            <Table.Root style={{ marginTop: "20px" }} variant="simple" maxWidth={"70vh"} backgroundColor="#222831" borderRadius={"md"} >
+            <Box pl={5} ml={"5%"}>
+            <Table.Root style={{ marginTop: "20px" }} variant="simple" maxWidth={"80%"} backgroundColor="#222831" borderRadius={"md"} >
               <Table.Header>
                 <Table.Row style={{marginLeft:"120px"}}>
                   <Table.ColumnHeader></Table.ColumnHeader>
