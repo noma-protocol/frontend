@@ -251,10 +251,10 @@ const Markets: React.FC = () => {
                         // console.log("Vault Description:", vaultDescriptionData);
                         const tokenSymbol = vaultDescriptionData[1];
                         // Skip OKS vaults
-                        if (tokenSymbol === "OKS") {
-                          console.log("Skipping OKS vault:", vault.toString());
-                          return null;
-                        }
+                        // if (tokenSymbol === "OKS") {
+                        //   console.log("Skipping OKS vault:", vault.toString());
+                        //   return null;
+                        // }
                         const hasPresale = vaultDescriptionData[7] !== "0x0000000000000000000000000000000000000000";
                         let isPresaleFinalized = false;
                         let expired = false;
@@ -457,6 +457,7 @@ const Markets: React.FC = () => {
           // mb={50}
           h="90%" 
           mt={isMobile ? "18%" : "-25%"}
+          // mb={"90%"}
         >
           <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"} >
             <Box px={4} mb={4} w="100%">
@@ -485,7 +486,7 @@ const Markets: React.FC = () => {
               p={8}
               borderRadius={20}
               w={isMobile ? "auto" : "80%"}
-              h="auto"
+              h="100%"
               backgroundColor="#222831"
             >
               {view === "all" && isAllVaultsLoading ? (
@@ -495,7 +496,7 @@ const Markets: React.FC = () => {
               ) : isAllVaultsError || error ? (
                 <Text color="red">Error fetching vaults</Text>
               ) : (view == "all" ? vaultsDataArray.length === 0 : userVaults.length === 0) && !isAllVaultsLoading ? (
-                <Text>No vaults found.</Text>
+                <Text>No vaults found.<br /><br /><br /><br /><br /><br /><br /><br /></Text>
               ) : (
                 <VStack align="start" spacing={6}>
                   <HStack> 
@@ -633,7 +634,7 @@ const Markets: React.FC = () => {
             </Box>
 
           </SimpleGrid>
-          {isMobile ? (<></>) : <><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></>}
+          {isMobile ? (<></>) : <><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></>} 
         </Box>
       )}
     </Container>

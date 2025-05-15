@@ -274,7 +274,8 @@ const Exchange: React.FC = () => {
     percentageChange
   } = useUniswapPrice(
     poolInfo.poolAddress, 
-    config.chain == "local" ? "http://localhost:8545" :
+    config.chain == "local" ? 
+     "http://localhost:8545" :
     "https://testnet-rpc.monad.xyz"
   );
   
@@ -441,10 +442,10 @@ const Exchange: React.FC = () => {
                   stakingContract: vaultDescriptionData[8],
                 };
 
-                if (plainVaultDescription.tokenSymbol === "OKS" || plainVaultDescription.tokenSymbol === "TST") {
-                  // console.log("Skipping OKS vault:", vault.toString());
-                  continue;
-                }
+                // if (plainVaultDescription.tokenSymbol === "OKS" || plainVaultDescription.tokenSymbol === "TST") {
+                //   // console.log("Skipping OKS vault:", vault.toString());
+                //   continue;
+                // }
 
                 const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
