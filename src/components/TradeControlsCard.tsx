@@ -196,6 +196,8 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             />
           </NumberInputRoot>
           {isMobile && (
+            <>
+            <Text ml={7} fontSize="xs" color="#a67c00" >Slide to select</Text>
             <Slider
               mt={2}
               // ml={isMobile ? 5 : 10}
@@ -203,6 +205,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               variant="outline"
               w={"90%"}
               // Scale the contributionAmount for the slider
+              defaultValue={[1]} 
               value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
               onValueChange={(e) => {
                   const scaledValue = e.value[0] / 100; // Convert back to decimal
@@ -213,7 +216,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               thumbAlignment="center"
               disabled={isTokenInfoLoading} // Disable slider while token info is loading
               />
-                
+              </>  
                 )}
             {/* {isMobile && (
               <Button
@@ -381,6 +384,8 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           <HStack>
             <Box w="60%">
             {!isMobile && (
+              <>
+            <Text ml={5} fontSize="xs" color="#a67c00" >Slide to select</Text>
             <Slider
               mt={2}
               // ml={isMobile ? 5 : 10}
@@ -398,6 +403,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               thumbAlignment="center"
               disabled={isTokenInfoLoading} // Disable slider while token info is loading
               />
+              </>
                 )}
             </Box>
             <Box>
