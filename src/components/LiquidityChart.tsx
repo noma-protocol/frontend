@@ -29,7 +29,7 @@ return (
         <SimpleGrid maxWidth={isMobile ? "40%" : "30%"} ml={isMobile ? "50vw" : "40vw"} columns={2} rows={3} p={2} mt={isMobile ? "-6vh" : "-100px"}  >
           <Box w="120px" textAlign="left"><Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>Circulating</Text></Box>
           <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>{isMobile ? "L.R." : "Liquidity Ratio"}</Text></Box>
-          <Box w="auto" textAlign="right" fontSize={isMobile?"xs":"14px"}>
+          <Box w="auto" textAlign={isMobile ? "right" : "left"} fontSize={isMobile?"xs":"14px"}>
             <label>{commify(Number(formatEther(circulatingSupply)).toFixed(6))}</label>
             {/* <Text mt={-2} fontSize={"small"}>(NOMA)</Text> */}
           </Box>
