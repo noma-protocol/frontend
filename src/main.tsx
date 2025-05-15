@@ -12,6 +12,7 @@ import Liquidity from "./pages/Liquidity";
 import Exchange from "./pages/Exchange";
 import Borrow from "./pages/Borrow";
 import Stake from "./pages/Stake";
+import Migrate from "./pages/Migrate";
 
 const router = createBrowserRouter([
   {
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
       {
         path: "/stake",
         element: <Stake  />,
+      },
+      {
+        path: "/migrate",
+        element: <Migrate  />,
       },
     ],
   },
