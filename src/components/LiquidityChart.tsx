@@ -27,26 +27,26 @@ return (
           {isConnected ? <SlideControls isConnected /> : <></>}
         </SimpleGrid>*/}
         <SimpleGrid maxWidth={isMobile ? "40%" : "30%"} ml={isMobile ? "50vw" : "40vw"} columns={2} rows={3} p={2} mt={isMobile ? "-6vh" : "-100px"}  >
-          <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"10px":"14px"}>Circulating</Text></Box>
-          <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"10px":"14px"}>{isMobile ? "L.R." : "Liquidity Ratio"}</Text></Box>
-          <Box w="auto" textAlign="right" fontSize={isMobile?"11px":"14px"}>
+          <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>Circulating</Text></Box>
+          <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>{isMobile ? "L.R." : "Liquidity Ratio"}</Text></Box>
+          <Box w="auto" textAlign="right" fontSize={isMobile?"xs":"14px"}>
             <label>{commify(Number(formatEther(circulatingSupply)).toFixed(6))}</label>
             {/* <Text mt={-2} fontSize={"small"}>(NOMA)</Text> */}
           </Box>
-          <Box w="auto" textAlign="right" fontSize={isMobile?"11px":"14px"}>
-            <label>{commifyPatched(formatEther(liquidityRatio))}</label>
+          <Box w="auto" textAlign="right" fontSize={isMobile?"xs":"14px"}>
+            <label>{commifyPatched(formatEther(liquidityRatio), 2)}</label>
           </Box>
 
           <Box w="auto" textAlign="right" mt={2}>
-              <Text color="#a67c00" fontSize={isMobile?"11px":"14px"}>Spot</Text>
-              <Box mt={-6} fontSize={isMobile?"11px":"14px"}>
+              <Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>Spot</Text>
+              <Box mt={-6} fontSize={isMobile?"xs":"14px"}>
               <label>{commifyPatched(formatEther(spotPrice))}</label>
               <Text mt={isMobile ? 0 : -2} fontSize={"small"} fontSize={isMobile?"8px":"14px"}>(WMON/{tokenSymbol})</Text>
               </Box>
             </Box>
         </SimpleGrid>
         {/* <center> */}
-          <Chart positions={data} isMobile={isMobile} />
+          <Box ml={isMobile ? "25px" : 0}><Chart positions={data} isMobile={isMobile} /></Box>
           {!isMobile ? (
             <Box pl={5} ml={"5%"}>
             <Table.Root style={{ marginTop: "20px" }} variant="simple" maxWidth={"80%"} backgroundColor="#222831" borderRadius={"md"} >
@@ -155,7 +155,7 @@ return (
             </Box>
           ) : (
             <Box pl={25}>
-              <Table.Root style={{ marginTop: "20px" }} variant="simple" maxWidth={"30vh"} fontSize={"11px"} backgroundColor="#393E46"  borderRadius={"md"}>
+              <Table.Root style={{ marginTop: "20px" }} variant="simple" maxWidth={"360px"} fontSize={"xs"} backgroundColor="#393E46"  borderRadius={"md"}>
               <Table.Header>
                 <Table.Row>
                   <Table.ColumnHeader></Table.ColumnHeader>
