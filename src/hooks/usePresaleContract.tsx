@@ -7,7 +7,8 @@ import { generateBytes32String } from "../utils";
 const { formatEther } = ethers.utils;
 
 const usePresaleContract = (network, userAddress, presaleContractAddress, referralCode) => {
-
+    console.log(`Referral Code: ${referralCode}`);
+    
     const [presaleData, setPresaleData] = useState({
         totalRaised: "0",
         participantCount: "0",
@@ -34,7 +35,7 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
             new JsonRpcProvider(
                 network === "monad"
                     ? "https://testnet-rpc.monad.xyz"
-                    : process.env.REACT_APP_PROVIDER_URL
+                    : "http://localhost:8545"
             ),
         [network]
     );
