@@ -155,7 +155,7 @@ return (
             </Box>
           ) : (
             <Box pl={25}>
-              <Table.Root style={{ marginTop: "20px" }} variant="simple" maxWidth={"130px"} fontSize={"xs"} backgroundColor="#393E46"  borderRadius={"md"}>
+              <Table.Root style={{ marginTop: "20px" }} variant="simple" ml={"-5px"} maxWidth={"130px"} fontSize={"xs"} backgroundColor="#393E46"  borderRadius={"md"}>
               <Table.Header>
                 <Table.Row>
                   <Table.ColumnHeader></Table.ColumnHeader>
