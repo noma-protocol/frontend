@@ -77,14 +77,14 @@ export const commifyDecimals = (number, decimals = 4) => {
   return Number(decimalPart ? `${integerPart}.${decimalPart}` : integerPart).toFixed(decimals);
 };
 
-export const commifyPatched = (number) => {
+export const commifyPatched = (number, decimals = 6) => {
   if (number === undefined) return "";
     let numStr = number.toString();
     let [integerPart, decimalPart] = numStr.split(".");
     integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");     
     decimalPart = String(decimalPart).indexOf(",") > -1 ? decimalPart.split(",")[0] : decimalPart;
     let retValue = decimalPart ? `${integerPart}.${decimalPart}` : integerPart;
-    return Number(retValue).toFixed(6);
+    return Number(retValue).toFixed(decimals);
   }
 
 // Generate a bytes32 string
