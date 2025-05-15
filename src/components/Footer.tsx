@@ -13,10 +13,15 @@ import {
 import Logo from "../assets/images/oikos-type.svg";
 import { isMobile } from "react-device-detect";
 
-const Footer: React.FC = () => { 
+const Footer: React.FC = (
+  page = "home" // Default value for page prop, can be overridden when used
+) => { 
+
+   const isLiquidityPage = window.location.href.includes("liquidity")
+
   return (
     <>
-  { !isMobile ? (    
+  { !isMobile && !isLiquidityPage ? (    
     <footer className="footer" 
     style={{ 
         position:  "relative",
