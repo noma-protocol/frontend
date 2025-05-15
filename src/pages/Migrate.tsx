@@ -61,7 +61,7 @@ const ERC20Abi = ERC20Artifact.abi;
 // NomaFactory contract address
 // const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const oldOKSTokenAddress = "0x18aCf236eB40c0d4824Fb8f2582EBbEcD325Ef6a";
-const migrationContractAddress = "0xb57304C81AA38Ca654e7Bd2639102CaB78C93Ecc";
+const migrationContractAddress = "0xcdD4C6387E3f1F6b911d0830B94D9Ab00c6fE5F2";
 // const feeTier = 3000;
 
 const Migrate: React.FC = () => {
