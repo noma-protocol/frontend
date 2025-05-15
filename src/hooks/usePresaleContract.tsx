@@ -33,9 +33,10 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
     const provider = useMemo(
         () =>
             new JsonRpcProvider(
-                network === "monad"
-                    ? "https://testnet-rpc.monad.xyz"
-                    : "http://localhost:8545"
+                "https://testnet-rpc.monad.xyz"
+                // network === "monad"
+                    //? "https://testnet-rpc.monad.xyz"
+                    // : "http://localhost:8545"
             ),
         [network]
     );
