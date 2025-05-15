@@ -17,11 +17,11 @@ const Footer: React.FC = (
   page = "home" // Default value for page prop, can be overridden when used
 ) => { 
 
-   const isLiquidityPage = window.location.href.includes("liquidity")
+   const isFilteredPage = window.location.href.includes("liquidity") || window.location.href.includes("markets");
 
   return (
     <>
-  { !isMobile && !isLiquidityPage ? (    
+  { !isMobile && !isFilteredPage ? (    
     <footer className="footer" 
     style={{ 
         position:  "relative",

@@ -455,8 +455,8 @@ const Markets: React.FC = () => {
           textAlign="left"
           position="relative"
           // mb={50}
-          h="90%" 
-          mt={isMobile ? "18%" : "-25%"}
+          h="20%" 
+          mt={isMobile ? "18%" : "100px"}
           // mb={"90%"}
         >
           <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"} >
@@ -634,7 +634,7 @@ const Markets: React.FC = () => {
             </Box>
 
           </SimpleGrid>
-          {isMobile ? (<></>) : <><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></>} 
+          {/* {isMobile ? (<></>) : <><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></>}  */}
         </Box>
       )}
     </Container>
