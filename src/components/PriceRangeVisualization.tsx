@@ -110,11 +110,11 @@ const PriceRangeVisualization = ({ data, width, height }) => {
             );
           })}
           {/* Render the Axis only if it's not a mobile screen */}
-          {!isMobile && (
+          {/* {!isMobile && ( */}
             <AxisBottom
               top={yMax}
               scale={priceScale}
-              numTicks={width > 520 ? 10 : 5}
+              numTicks={width > 520 ? 5 : 3}
               stroke={'#ffffff'}
               tickStroke={'#ffffff'}
               tickLabelProps={() => ({
@@ -123,7 +123,7 @@ const PriceRangeVisualization = ({ data, width, height }) => {
                 textAnchor: 'middle',
               })}
             />
-          )}
+          {/* )} */}
         </Group>
       </svg>
       {tooltipOpen && (
