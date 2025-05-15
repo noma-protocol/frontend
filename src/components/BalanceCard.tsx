@@ -273,13 +273,14 @@ const BalanceCard = ({
                             <Box >
                              <Image
                                 src={token0Symbol == "OKS" ? oksLogo : placeHolder}
-                                w={token0Symbol == "OKS" ? "35px" : "25px"}
+                                w={token0Symbol == "OKS" ? "55px" : "25px"}
+                                ml={token0Symbol == "OKS" ? "-10px" : 0}
                                 alt={token0Symbol || 'Token'}
                                 
                             />
                             </Box>
                             <Box>
-                               <Text  fontSize="xs">&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
+                               <Text ml={token0Symbol == "OKS" ? "-20px" : 0} fontSize="xs">&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
                             </Box>
                         </HStack>
                     }

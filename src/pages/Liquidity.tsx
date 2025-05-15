@@ -140,10 +140,10 @@ const Liquidity: React.FC = () => {
                   presaleContract: vaultDescriptionData[7],
                 };
 
-                if (plainVaultDescription.tokenSymbol === "OKS" || plainVaultDescription.tokenSymbol === "TST") {
-                  console.log("Skipping OKS vault:", vault.toString());
-                  continue;
-                }
+                // if (plainVaultDescription.tokenSymbol === "OKS" || plainVaultDescription.tokenSymbol === "TST") {
+                //   console.log("Skipping OKS vault:", vault.toString());
+                //   continue;
+                // }
                 
                 const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 

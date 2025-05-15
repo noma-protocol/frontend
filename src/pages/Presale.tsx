@@ -30,14 +30,12 @@ import {
 import { Toaster, toaster } from "../components/ui/toaster"
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
-import { commify, commifyDecimals, generateBytes32String, getContractAddress } from "../utils";
+import { commify, commifyDecimals, generateBytes32String, getContractAddress, generateReferralCode } from "../utils";
 import Logo from "../assets/images/noma_logo_transparent.png";
 import { ethers } from "ethers"; // Import ethers.js
-const { formatEther, parseEther } = ethers.utils;
 import { ProgressLabel, ProgressBar, ProgressRoot, ProgressValueText } from "../components/ui/progress"
 import PresaleDetails from "../components/PresaleDetails";
 import usePresaleContract from '../hooks/usePresaleContract';
-import { set } from "react-ga";
 
 import metamaskLogo from "../assets/images/metamask.svg";
 import placeholderLogo from "../assets/images/question.svg";
@@ -47,6 +45,8 @@ import bnbLogo from "../assets/images/bnb.png";
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
 
+const { formatEther, parseEther } = ethers.utils;
+
 const addresses = config.chain === "local"
   ? addressesLocal
   : addressesMonad;
@@ -54,7 +54,6 @@ const addresses = config.chain === "local"
 const tokenAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
 
 const { environment, presaleContractAddress } = config;
-
 
 const PresaleArtifact = await import(`../assets/Presale.json`);
 const PresaleAbi = PresaleArtifact.abi;
@@ -68,6 +67,8 @@ const Presale: React.FC = () => {
   const [searchParams] = useSearchParams();
   const urlReferralCode = searchParams.get("r") || ""; // Fallback to empty string
   const contractAddress = searchParams.get("a") || ""; // Fallback to empty string
+
+  console.log(`Referral code from URL: ${urlReferralCode}`);
 
   useEffect(() => {
     if (contractAddress == "0x0000000000000000000000000000000000000000") {
@@ -91,8 +92,11 @@ const Presale: React.FC = () => {
   const [progressSc, setProgressSc] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const presaleUrl = `${environment == "development" ? "http://localhost:5173":"https://presale.oikos.cash"}/presale?a=${contractAddress}r=${referralCode}`;
+  const presaleUrl = `${environment == "development" ? 
+    `http://localhost:5173/presale?a=${contractAddress}r=${referralCode}`:
+    "https://presale.oikos.cash"}/presale?a=${contractAddress}r=${referralCode}`;
   
+
   const AddToMetaMaskButton = ({ contractAddress, tokenSymbol, tokenDecimals }) => {
     const addTokenToMetaMask = async () => {
       try {
@@ -195,7 +199,7 @@ const Presale: React.FC = () => {
       watch: true,
     });
 
-    console.log(`Token balance in presale contract is ${tokenBalancePresale}`);
+    // console.log(`Token balance in presale contract is ${tokenBalancePresale}`);
     
     const {
       data: presaleInfo
@@ -205,7 +209,7 @@ const Presale: React.FC = () => {
       functionName: "getPresaleParams",
     });
 
-    console.log(presaleInfo);
+    // console.log(presaleInfo);
 
   const {
     data: tokenBalance, refetch: refetchTokenBalance
@@ -235,7 +239,7 @@ const Presale: React.FC = () => {
     args: [],
   });
 
-  console.log(`Token balance is ${tokenBalance} token name is ${tokenName} token symbol is ${tokenSymbol}`);
+  // console.log(`Token balance is ${tokenBalance} token name is ${tokenName} token symbol is ${tokenSymbol}`);
 
   let { 
     totalRaised,
@@ -256,31 +260,32 @@ const Presale: React.FC = () => {
     "ganache",
     address,
     contractAddress,
-    referralCode
+    urlReferralCode
   );
 
-  console.log(`Initial price is ${initialPrice} hasExpired ${hasExpired} currentTimestamp ${currentTimestamp}`);
-  console.log(`Token balance is ${tokenBalance} token name is ${tokenName} token symbol is ${tokenSymbol} timeLeft ${timeLeftInSeconds}`);
+  // console.log(`Initial price is ${initialPrice} hasExpired ${hasExpired} currentTimestamp ${currentTimestamp}`);
+  // console.log(`Token balance is ${tokenBalance} token name is ${tokenName} token symbol is ${tokenSymbol} timeLeft ${timeLeftInSeconds}`);
 
-  const { refetch: fetchPresaleInfo } = usePresaleContract(
+  const { refetch: fetchPresaleInfo } = 
+  usePresaleContract(
     "ganache",
     address,
     urlReferralCode
   );
 
    contributions = Number(formatEther(contributions)).toFixed(4);
-    console.log(`Contributions is ${contributions}`);
+    // console.log(`Contributions is ${contributions}`);
 
-   console.log({ 
-    totalRaised, 
-    participantCount, 
-    finalized, 
-    softCapReached, 
-    contributions, 
-    totalReferred, 
-    referralCount, 
-    progress 
-  });
+  //  console.log({ 
+  //   totalRaised, 
+  //   participantCount, 
+  //   finalized, 
+  //   softCapReached, 
+  //   contributions, 
+  //   totalReferred, 
+  //   referralCount, 
+  //   progress 
+  // });
 
   const balance =  useBalance({
     address: address,
@@ -308,7 +313,8 @@ const Presale: React.FC = () => {
     address: contractAddress,
     abi: PresaleAbi,
     functionName: "deposit",
-    args: [generateBytes32String(urlReferralCode)],
+    args: [generateBytes32String("0")],
+    value: contributionAmount > 0 ? parseEther(contributionAmount.toString()) : undefined,
     onSuccess(data) {
       console.log(`transaction successful: ${data.hash} referral code: ${urlReferralCode}`);
       refetchBalance();
@@ -360,6 +366,7 @@ const Presale: React.FC = () => {
                     error.message.indexOf("InvalidParameters") > -1 ? "Invalid parameters" :
                     error.message.indexOf("HardCapExceeded") > -1 ? "Hard cap exceeded" :
                     error.message.indexOf("SoftCapNotMet") > -1 ? "Soft cap not met" :
+                    error.message.indexOf("PresaleOngoing") > -1 ? "Presale not yet ended" :
                     error.message.indexOf("AlreadyFinalized") > -1 ? "Presale already finalized" : error.message;
         toaster.create({
           title: "Error",
@@ -411,40 +418,47 @@ const Presale: React.FC = () => {
     const newTimestamp = now + Number(timeLeftInSeconds) * 1000; // Add 30 days in milliseconds
     const newDate = new Date(newTimestamp);
 
-    console.log(newDate.toISOString()); // Outputs the new date in ISO format
+    // console.log(newDate.toISOString()); // Outputs the new date in ISO format
     setTargetDate(newDate.toISOString());
   }
   , [timeLeftInSeconds]);
 
-  useEffect(() => {
-    const fetchReferralCode = async () => {
-      if (!isConnected || !address) return;
+  // useEffect(() => {
+  //   // const fetchReferralCode = async () => {
+  //   //   if (!isConnected || !address) return;
 
-      try {
-        const response = await fetch(`${environment == "development" ? "http://localhost:3000" : "https://referrals.oikos.cash"}/referral`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ address }),
-        });
+  //   //   try {
+  //   //     const response = await fetch(`${environment == "development" ? "http://localhost:3000" : "https://referrals.oikos.cash"}/referral`, {
+  //   //       method: 'POST',
+  //   //       headers: {
+  //   //         'Content-Type': 'application/json',
+  //   //       },
+  //   //       body: JSON.stringify({ address }),
+  //   //     });
 
-        const data = await response.json();
+  //   //     const data = await response.json();
 
-        if (response.ok) {
-          setReferralCode(data.referralCode);
-          setErrorMessage('');
-        } else {
-          setErrorMessage(data.error || 'An error occurred while fetching the referral code.');
-        }
-      } catch (error) {
-        setErrorMessage('Failed to connect to the server. Please try again later.');
-        console.error('Error fetching referral code:', error);
-      }
-    };
+  //   //     if (response.ok) {
+  //   //       setReferralCode(data.referralCode);
+  //   //       setErrorMessage('');
+  //   //     } else {
+  //   //       setErrorMessage(data.error || 'An error occurred while fetching the referral code.');
+  //   //     }
+  //   //   } catch (error) {
+  //   //     setErrorMessage('Failed to connect to the server. Please try again later.');
+  //   //     console.error('Error fetching referral code:', error);
+  //   //   }
+  //   // };
 
-    fetchReferralCode();
-  }, [isConnected, address]); // Run whenever isConnected or address changes
+  //   // fetchReferralCode();
+
+  //   const referralCode = generateReferralCode(address);
+
+  //   console.log(`Referral code is ${referralCode}`)
+
+  //   setReferralCode(referralCode?.slice(0, 16)[0]);  
+
+  // }, [isConnected, address]); // Run whenever isConnected or address changes 
 
   useEffect(() => {
 
@@ -507,7 +521,7 @@ const Presale: React.FC = () => {
     }
   };
 
- console.log(`Contract address ${contractAddress}`)
+//  console.log(`Contract address ${contractAddress}`)
 
   const handleWithdraw = async () => {
     setIsLoading(true);
@@ -518,6 +532,22 @@ const Presale: React.FC = () => {
       console.error("Failed to withdraw:", error);
     }
   }
+
+    const handleSetContributionAmount = (e) => {
+      const value = e.target.value;
+      if (value === "") {
+        setContributionAmount(0);
+      } else {
+        const parsedValue = parseFloat(value);
+        if (!isNaN(parsedValue) && parsedValue >= 0) {
+          setContributionAmount(parsedValue.toFixed(4));
+        }
+      }
+    }
+
+  const handleClickDeposit = async () => {
+      deposit()
+    }
 
   return (
     <Container maxW="container.xl" p={2}>
@@ -567,7 +597,7 @@ const Presale: React.FC = () => {
               </Text>
                 </Box>
               </HStack>
-               {presaleInfo?.deployer == address && hasExpired && !finalized ? (
+               {presaleInfo?.deployer == address /*&& hasExpired*/ && !finalized ? (
                     <Box 
                       border="1px solid #a67c00" 
                       p={4} 
@@ -579,13 +609,13 @@ const Presale: React.FC = () => {
                       <Text color="#a67c00"><b>Admin Controls</b></Text>
                         <HStack>
                         <Button 
-                        disabled={finalized}
-                        onClick={handleClickFinalize}
-                        variant={"outline"}
-                        border="1px solid white"
-                        borderRadius={10}
-                        fontSize="sm"
-                        w="100px">
+                          disabled={finalized}
+                          onClick={handleClickFinalize}
+                          variant={"outline"}
+                          border="1px solid white"
+                          borderRadius={10}
+                          fontSize="sm"
+                          w="100px">
                           {isLoading ? <Spinner size="sm" /> : "Finalize"}
                         </Button>                           
                         </HStack>
@@ -597,12 +627,13 @@ const Presale: React.FC = () => {
               // border="1px solid white"
               display="flex"
               flexDirection="column"
-              gap={0}
+              gap={5}
               pr={10}
               pl={5}
+              ml={"5%"}
             >
-            <Flex flexWrap="wrap" justifyContent="space-between" gap={4} mt={isMobile? 5:0}>
-              <Box>
+            <Flex flexWrap="wrap" justifyContent="space-between" gap={4} mt={isMobile? 5:0} >
+              <Box >
                 <StatRoot>
                   <StatLabel fontSize="sm" lineHeight="5px">
                     Contributed
@@ -681,7 +712,7 @@ const Presale: React.FC = () => {
                   <Box ml={2}>
                   {isMobile ? <></>:
                     <Text fontStyle="italic" color="gray" fontSize={"11px"}>
-                    <b>({Number(softCap)} BNB)</b>
+                    <b>({Number(softCap).toFixed(2)} BNB)</b>
                   </Text>}
                   </Box>
                   </HStack>
@@ -699,7 +730,7 @@ const Presale: React.FC = () => {
                   {contributions == 0 && !finalized ? (
                       <Box bg="#222831" border="1px solid white" p={2}  borderRadius={10}>
                       <StatRoot>
-                        <StatLabel fontSize="md" lineHeight="5px" ml={2} color="#f3b500">
+                        <StatLabel fontSize="sm" lineHeight="5px" ml={2} color="#f3b500">
                           Contribution Amount
                         </StatLabel>
                         <Text fontSize={13}  fontStyle={"italic"} m={2} mt={-2}>
@@ -722,9 +753,9 @@ const Presale: React.FC = () => {
                           >
                             <NumberInputField
                               h={'40px'}
-                              defaultValue={hardCap/200}
+                              defaultValue={hardCap}
                               onChange={(e) => {
-                                  return setContributionAmount(e.target.value);
+                                  return handleSetContributionAmount(e);
                                 }
                               }
                             />
@@ -733,7 +764,7 @@ const Presale: React.FC = () => {
                         <Box>
                         <Slider
                           step={(hardCap/200)/100}
-                          defaultValue={[Number(hardCap/200)]}
+                          defaultValue={[Number(hardCap)]}
                           variant="outline"
                           colorPalette={"yellow"}
                           w={{ base: "120px", sm: "120px", md: "220px", lg: "220px" }} // Responsive widths
@@ -798,15 +829,7 @@ const Presale: React.FC = () => {
                             //   return;
                             // }
                             setErrorMessage(""); // Clear any previous error
-                            try {
-                              deposit({
-                                args: [generateBytes32String(urlReferralCode)],
-                                from: address,
-                                value: parseEther(contributionAmount.toString()),
-                              });
-                            } catch (error) {
-                              console.error("Failed to contribute:", error);
-                            }
+                            handleClickDeposit();
                           }}
                         >
                         {contributing ? <Spinner size="sm" /> : "Deposit"}
@@ -854,7 +877,7 @@ const Presale: React.FC = () => {
                 
                 {contributions > 0 ? (
                   <StatRoot mb={10}>
-                  <StatLabel fontSize="md" lineHeight="5px" color="#f3b500">
+                  <StatLabel fontSize="sm" lineHeight="5px" color="#f3b500">
                     Contribution Details
                   </StatLabel>
                   <Box bg="#222831"  p={4}>
@@ -957,7 +980,7 @@ const Presale: React.FC = () => {
                 ) : <></>}
                 {!finalized ? (
                   <StatRoot>
-                  <StatLabel fontSize="md" lineHeight="5px" color="#f3b500">
+                  <StatLabel fontSize="sm" lineHeight="5px" color="#f3b500">
                     Referral Program
                   </StatLabel>
                 <Text fontSize={isMobile ? "11px" : "14px"} fontStyle={"italic"} mt={-2}>
