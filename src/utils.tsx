@@ -7,6 +7,10 @@
 //   return decimalPart ? `${integerPart}.${decimalPart}` : integerPart;
 // };
 
+import { ethers } from "ethers";
+
+const HEX_SYMBOLS = "0123456789abcdef";
+
 export function unCommify(value) {
   if (value === null || value === undefined) return "0";
 
@@ -155,4 +159,61 @@ export function formatNumberPrecise(value, sigDigits = 4) {
     .replace(/\.?0+$/, '');
 
   return sign + str + suffixes[idx];
+}
+
+/**
+ * @param {string} userAddress  An Ethereum address (e.g. "0xAbC123...").
+ * @returns {string}            A 32‐byte hex string: first 8 bytes are ASCII hex chars, rest zero.
+ *
+ * This matches Solidity's:
+ *   bytes32 hash = keccak256(abi.encodePacked(user));
+ *   // take hash[0..3], convert each byte to two ASCII hex chars ⇒ 8 ASCII bytes
+ *   // pack into bytes32 (left‐aligned), leaving remaining 24 bytes = 0x00
+ */
+export function generateReferralCode(userAddress) {
+  console.debug("generateReferralCode", userAddress);
+  if (userAddress == "" || typeof userAddress !== "string" ) return;
+
+  // 1) Compute keccak256 of the address (packed)
+  //    ethers.utils.keccak256 expects a bytes‐like value, so we can pass the address directly.
+  const hash = ethers.utils.keccak256(userAddress);
+  // `hash` is a 0x‐prefixed 64‐hex‐char string (32 bytes)
+
+  // 2) Remove "0x", so we have 64 hex characters
+  const hexHash = hash.slice(2); // e.g. "3af1...<total 64 chars>"
+
+  // 3) Build an 8‐character ASCII string by converting the first 4 bytes of hexHash to two hex‐digits each
+  let ascii8 = "";
+  for (let i = 0; i < 4; i++) {
+    // Extract the i‐th byte (two hex chars) from hexHash
+    const twoHex = hexHash.slice(i * 2, i * 2 + 2);
+    const byteVal = parseInt(twoHex, 16); // 0 .. 255
+
+    // High nibble → one hex character
+    const highNibble = (byteVal >> 4) & 0x0f;      // 0 .. 15
+    // Low nibble → one hex character
+    const lowNibble = byteVal & 0x0f;              // 0 .. 15
+
+    // Append their ASCII‐hex representation
+    ascii8 += HEX_SYMBOLS[highNibble]; // e.g. '3'
+    ascii8 += HEX_SYMBOLS[lowNibble];  // e.g. 'a'
+  }
+  // Now ascii8 is exactly 8 characters long (each '0'..'9','a'..'f')
+
+  // 4) Convert that ASCII string into its byte‐level hex form:
+  //    e.g. ascii8 = "3af108c3" → asciiHex = "33 61 66 31 30 38 63 33"
+  let asciiHex = "";
+  for (let i = 0; i < ascii8.length; i++) {
+    // Get ASCII code of that character (e.g. '3' → 0x33, 'a' → 0x61)
+    const code = ascii8.charCodeAt(i);
+    // Convert to two‐digit hex
+    asciiHex += code.toString(16).padStart(2, "0");
+  }
+  // asciiHex is now 16 hex chars long (8 bytes)
+
+  // 5) Pad the remaining bytes (32 total minus 8 used) with zeros
+  const zeroPad = "0".repeat(64 - asciiHex.length); // 64 total hex chars for 32 bytes
+  const fullHex = "0x" + asciiHex + zeroPad;
+
+  return fullHex;
 }
