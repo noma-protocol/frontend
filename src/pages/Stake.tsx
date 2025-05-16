@@ -510,27 +510,29 @@ const Stake = () => {
                                 <Box px={2}> 
                                     <HStack mt={2} >
                                         <Box  fontSize="xs">
-                                        <Text fontSize="xs">{formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}</Text>
+                                        <Text fontSize="xs">{formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 2)}</Text>
                                         </Box>
-                                        <Box ml={1} fontSize="xx-small">
+                                        <Box ml={-1} fontSize="xx-small">
                                         {isTokenInfoLoading ? <Spinner size="xs" /> :  <Text fontSize="xs">{token0Info.tokenSymbol}</Text>}
                                         </Box>
                                     </HStack>
                                 </Box>
                                 <HStack>
                                 <Box px={2}>
-                                    <Text fontSize="xs">{formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 6)}</Text>
+                                    <Text fontSize="xs">{formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 2)}</Text>
                                 </Box>
-                                <Box  fontSize="xx-small">
-                                    {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xs" >{token0Info.tokenSymbol}</Text>}
+                                <Box  fontSize="xx-small" ml={-3}>
+                                    {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xs" >s{token0Info.tokenSymbol}</Text>}
                                 </Box> 
                                 </HStack>                               
                                 <Box px={2} >     
                                     <HStack>
                                         <Box mt={2}  fontSize="xs">
-                                        {commify(rewards, 4)}
+                                        {commify(rewards, 2)}
                                         </Box>
-
+                                        <Box  fontSize="xx-small" ml={-2} mt={2}>
+                                            {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xs" >&nbsp;{token0Info.tokenSymbol}</Text>}
+                                        </Box> 
                                     </HStack>
                                 </Box>
                                 <Box px={2} mt={2}>
