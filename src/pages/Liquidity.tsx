@@ -375,7 +375,10 @@ const Liquidity: React.FC = () => {
                   value={selectedVault} // Bind the selected value to the state
                 >
                   <SelectTrigger>
-                  {vaultsSelectData.items.map((vaultData, index) => {
+                  {vaultsSelectData.items
+                    .slice()          // make a shallow copy
+                    .reverse()        // reverse the copy 
+                    .map((vaultData, index) => {
                     if (index > 0) return;
                       return (
                         <SelectValueText placeholder={vaultData.label}>
