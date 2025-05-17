@@ -67,8 +67,8 @@ const addresses = config.chain === "local"
   ? addressesLocal
   : addressesMonad;
 
-  console.log(`Config chain is ${config.chain}`);
-  console.log(`Addresses are ${JSON.stringify(addresses)}`);
+  // console.log(`Config chain is ${config.chain}`);
+  // console.log(`Addresses are ${JSON.stringify(addresses)}`);
 
 const { JsonRpcProvider } = ethers.providers;
 
@@ -426,7 +426,7 @@ const Exchange: React.FC = () => {
             // Iterate over deployers
             for (const deployer of deployersData) {
               const vaultsData = await nomaFactoryContract.getVaults(deployer);
-
+               
               // Iterate over vaults for each deployer
               for (const vault of vaultsData) {
                 const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
@@ -445,10 +445,10 @@ const Exchange: React.FC = () => {
                   stakingContract: vaultDescriptionData[8],
                 };
 
-                if (plainVaultDescription.tokenSymbol != "OKS") {
-                  // console.log("Skipping OKS vault:", vault.toString());
-                  continue;
-                }
+                // if (plainVaultDescription.tokenSymbol != "OKS") {
+                //   // console.log("Skipping OKS vault:", vault.toString());
+                //   continue;
+                // }
 
                 const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
@@ -1017,7 +1017,7 @@ const Exchange: React.FC = () => {
     }
 
   return (
-    <Container maxW="container.xl" py={12} minH="1100px" >
+    <Container maxW="container.xl" py={12} minH="1100px">
       <Toaster />
 
       {!isConnected ? (
@@ -1042,8 +1042,9 @@ const Exchange: React.FC = () => {
           textAlign="left"
           position="relative"
           mt={"50px"}
+          ml={"5px"}
         >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20vw"}>
+          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20%"}>
             <Box px={4}>
               {/* Header Section */}
               {/* <Heading as="h3">
@@ -1102,20 +1103,20 @@ const Exchange: React.FC = () => {
                     </SelectContent>
                 </SelectRoot>
                 </Box>
-                <Box mt={-2} ml={2}>
+                <Box mt={-2} ml={isMobile? 10 : 2}>
                     {isMobile ?
                     <VStack alignItems={"left"} ml={5}>
-                    <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT PRICE</Text></Box>
-                    <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
-                    <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
-                    <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>(+{commifyDecimals(percentageChange, 2)}%)</Text></Box>
+                      <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT PRICE</Text></Box>
+                      <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
+                      <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
+                      <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>(+{commifyDecimals(percentageChange, 2)}%)</Text></Box>
                     </VStack>
                     : 
                     <HStack>
-                    <Box><Text color="#a67c00" fontWeight="bold">SPOT PRICE</Text></Box> 
-                    <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
-                    <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`}</Text></Box>
-                    <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({commifyDecimals(percentageChange, 2)}%)</Text></Box>
+                      <Box><Text color="#a67c00" fontWeight="bold">SPOT PRICE</Text></Box> 
+                      <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
+                      <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`}</Text></Box>
+                      <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({commifyDecimals(percentageChange, 2)}%)</Text></Box>
                     </HStack>                    
                     }
                 </Box>
@@ -1133,73 +1134,74 @@ const Exchange: React.FC = () => {
                         />
                     </Box>
                     <BalanceCard
-                        ethBalance={ethBalance}
-                        token0Balance={token0Info?.balance}
-                        token0Symbol={token0Info?.tokenSymbol}
-                        token1Symbol={token1Info.tokenSymbol}
-                        token1Balance={token1Info?.balance}
-                        deposit={deposit}
-                        withdraw={withdraw}
-                        setIsLoading={setIsLoading}
-                        isLoading={isLoading}
-                        isTokenInfoLoading={isTokenInfoLoading}
-                        isRefreshingTokenInfo={isRefreshingTokenInfo}
-                        isWrapping={isWrapping}
-                        setIsWrapping={setIsWrapping}
-                        isUnwrapping={isUnwrapping}
-                        setIsUnwrapping={setIsUnwrapping}
-                        setWrapAmount={setWrapAmount}
-                        wrapAmount={wrapAmount}
-                        vaultAddress={selectedVault}
-                        page="exchange"
+                      ethBalance={ethBalance}
+                      token0Balance={token0Info?.balance}
+                      token0Symbol={token0Info?.tokenSymbol}
+                      token1Symbol={token1Info.tokenSymbol}
+                      token1Balance={token1Info?.balance}
+                      deposit={deposit}
+                      withdraw={withdraw}
+                      setIsLoading={setIsLoading}
+                      isLoading={isLoading}
+                      isTokenInfoLoading={isTokenInfoLoading}
+                      isRefreshingTokenInfo={isRefreshingTokenInfo}
+                      isWrapping={isWrapping}
+                      setIsWrapping={setIsWrapping}
+                      isUnwrapping={isUnwrapping}
+                      setIsUnwrapping={setIsUnwrapping}
+                      setWrapAmount={setWrapAmount}
+                      wrapAmount={wrapAmount}
+                      vaultAddress={selectedVault}
+                      page="exchange"
                     />
                     <Box w="90%" h="440px" ml={2} border={isMobile ? 0 : "1px solid gray"}>
-                        <TradeControlsCard  
-                            ethBalance={ethBalance}
-                            token0Balance={token0Info?.balance} 
-                            token0Symbol={token0Info?.tokenSymbol} 
-                            token1Symbol={token1Info.tokenSymbol} 
-                            token1Balance={token1Info?.balance}
-                            deposit={deposit}
-                            setIsLoading={setIsLoading}
-                            isLoading={isLoading}
-                            isTokenInfoLoading={isTokenInfoLoading}
-                            buyTokens={handleBuyTokens}
-                            sellTokens={handleSellTokens}
-                            spotPrice={spotPrice}
-                            isLoadingExecuteTrade={isLoadingExecuteTrade}
-                            setIsLoadingExecuteTrade={setIsLoadingExecuteTrade}
-                            amountToBuy={amountToBuy}
-                            amountToSell={amountToSell}
-                            setAmountToBuy={setAmountToBuy} 
-                            setAmountToSell={setAmountToSell}
-                            refreshParams={refreshParams}
-                            useWeth={useWeth}
-                            tradeMode={tradeMode}
-                            setTradeMode={setTradeMode}
-                            setUseWeth={handleSetWeth}
-                            quoteMax={0}
-                            />
+                      <TradeControlsCard  
+                          ethBalance={ethBalance}
+                          token0Balance={token0Info?.balance} 
+                          token0Symbol={token0Info?.tokenSymbol} 
+                          token1Symbol={token1Info.tokenSymbol} 
+                          token1Balance={token1Info?.balance}
+                          deposit={deposit}
+                          setIsLoading={setIsLoading}
+                          isLoading={isLoading}
+                          isTokenInfoLoading={isTokenInfoLoading}
+                          buyTokens={handleBuyTokens}
+                          sellTokens={handleSellTokens}
+                          spotPrice={spotPrice}
+                          isLoadingExecuteTrade={isLoadingExecuteTrade}
+                          setIsLoadingExecuteTrade={setIsLoadingExecuteTrade}
+                          amountToBuy={amountToBuy}
+                          amountToSell={amountToSell}
+                          setAmountToBuy={setAmountToBuy} 
+                          setAmountToSell={setAmountToSell}
+                          refreshParams={refreshParams}
+                          useWeth={useWeth}
+                          tradeMode={tradeMode}
+                          setTradeMode={setTradeMode}
+                          setUseWeth={handleSetWeth}
+                          quoteMax={0}
+                        />
                     </Box>
                     <Box w="90%" h="300px" ml={2}>
 
                     <TradeSimulationCard 
-                                useWeth={useWeth}
-                                setQuote={setQuote}
-                                quote={quote}
-                                token0Info={token0Info}
-                                token1Info={token1Info}
-                                amountToBuy={amountToBuy}
-                                amountToSell={amountToSell}
-                                tradeMode={tradeMode}
-                                swapPath={swapPath}
-                                quoterAddress={config.protocolAddresses.QuoterV2}
-                                quoterAbi={QuoterAbi}
-                                setTxAmount={setTxAmount}
-                                slippage={slippage}
-                                setSlippage={setSlippage}
-                                isMobile={isMobile}
-                              />
+                        useWeth={useWeth}
+                        setQuote={setQuote}
+                        quote={quote}
+                        token0Info={token0Info}
+                        token1Info={token1Info}
+                        amountToBuy={amountToBuy}
+                        amountToSell={amountToSell}
+                        tradeMode={tradeMode}
+                        swapPath={swapPath}
+                        quoterAddress={config.protocolAddresses.QuoterV2}
+                        quoterAbi={QuoterAbi}
+                        setTxAmount={setTxAmount}
+                        slippage={slippage}
+                        setSlippage={setSlippage}
+                        isMobile={isMobile}
+                        isLoading={isTokenInfoLoading}
+                      />
                     </Box>
                     </Flex>
                 </Box> : 
@@ -1295,6 +1297,7 @@ const Exchange: React.FC = () => {
                                 slippage={slippage}
                                 setSlippage={setSlippage}
                                 isMobile={isMobile}
+                                isLoading={isTokenInfoLoading}
                               />
                             </Box>
                             

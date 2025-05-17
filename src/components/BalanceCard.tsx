@@ -60,12 +60,6 @@ const BalanceCard = ({
     const isMobile = useBreakpointValue({ base: true, md: false });
     const buttonSize = useBreakpointValue({ base: "80px", md: "100px" });
     const fontSize = useBreakpointValue({ base: "12px", md: "13px" });
-    const cardWidth = useBreakpointValue({ 
-        base: "100%", 
-        sm: "95%",
-        md: "400px", 
-        lg: "450px" 
-    });
     
     // Listen for window resize events
     useEffect(() => {
@@ -101,19 +95,39 @@ const BalanceCard = ({
         window.location.href = `/stake?v=${vaultAddress}`;
     }
 
-    return (
+    let cardWidth = "94"; // Default width
+    let marginLeft = isMobile ? -3 : 10;
+    
+    if (page === "exchange") {
+        cardWidth = isMobile ? "98%" : "auto";
+        marginLeft = isMobile ? 0 : marginLeft; // Adjust margin for mobile
+    } else if (page === "borrow") {
+        if (isMobile) {
+            cardWidth = "94%";
+            marginLeft = 0;
+        } else {
+            cardWidth = "90%"; 
+        }
+    } else if (page === "stake") {
+        cardWidth = isMobile ? "90%" : "80%"; 
+        if (isMobile) {
+            marginLeft = -6;
+        }
+    }
+
+     return (
         <Box 
-            w={page == "borrow" && isMobile ? "108%" : page == "exchange" && !isMobile ? "80%" : cardWidth}   
+            w={cardWidth}   
             mx="auto"
-            ml={isMobile ? 0 : 5}
-            border={withBg ? "none" : "1px solid white"} 
-            borderColor="gray" 
+            ml={marginLeft}
+            border={"1px solid white"} 
+            borderColor="ivory" 
             p={4}
             {...props} 
             h={{ base: "auto", md: "280px" }}
             minH="auto"
-            borderRadius={10} 
-            backgroundColor={withBg ? "none" : "#222831"}
+            borderRadius={5} 
+            backgroundColor={"#222831"}
         >
             <Text fontWeight="bold" fontSize={isMobile ? "xs" : "14px"} color="#a67c00" mb={2}>Wallet</Text>
             
@@ -136,7 +150,7 @@ const BalanceCard = ({
                         <Text fontSize="xs" mt={"-2px"} ml={2}>MON</Text>
                     </HStack>
                 </Box>
-                <Box p={2} fontSize={fontSize} textAlign="left" height="42px" display="flex" alignItems="left" justifyContent="left">
+                <Box w="250px" p={2} fontSize={fontSize} textAlign="left" height="42px" display="flex" alignItems="left" justifyContent="left">
                     <Text fontSize={fontSize}  h={"30px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
@@ -301,6 +315,7 @@ const BalanceCard = ({
                                 mt={-2}
                                 ml={2}
                                 mb={1}
+                                borderColor={withBg ? "gray" : "none"}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Borrow
@@ -314,6 +329,7 @@ const BalanceCard = ({
                                 onClick={handleClickStake}
                                 fontSize={fontSize}
                                 ml={2}
+                                borderColor={withBg ? "gray" : "none"}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Stake

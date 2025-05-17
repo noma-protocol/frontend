@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import Chart from "react-apexcharts";
-import { Box } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { abi as IUniswapV3PoolABI } from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
 import { isMobile } from "react-device-detect";
@@ -154,11 +154,11 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   };
 
   return (
-    <Box>
+    <Box ml={isMobile ? -5 : 0}>
       {series[0].data.length === 0 ? (
-        <p>Loading price data...</p>
+        <Text fontSize="sm" ml={isMobile ? 5 : 0} mb={isMobile ? 2 : 0}>Loading price data...</Text>
       ) : (
-        <Chart options={chartOptions} series={series} type="area" height={isMobile ? 250 : 300} />
+        <Chart options={chartOptions} series={series} type="area" height={isMobile ? 250 : 300} w={isMobile ? "200px": "auto"} />
       )}
     </Box>
   );

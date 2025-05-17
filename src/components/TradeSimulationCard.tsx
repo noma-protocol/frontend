@@ -37,7 +37,8 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     useWeth,
     setSlippage,
     slippage,
-    isMobile
+    isMobile,
+    isLoading
 }: TradeSimulationCardProps) => {
     const isRolling = false;
 
@@ -120,7 +121,17 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     const secondContent = tradeMode == "BUY" ? "Receiving" : "Spending";
 
     return (
-        <Box mt={isMobile ? 5 : -5} w="100%">
+        <Box 
+            mt={isMobile ? 5 : -12} 
+            w={isMobile ? "395px" : "100%"}
+            border="1px solid ivory"
+            backgroundColor={"#222831"}
+            borderRadius={5}
+            px={isMobile ? 1 : 2}  
+            py={2}    
+            h={isMobile ? "150px" : "300px"}  
+            ml={isMobile ? -2 : 0}
+        >
         <SimpleGrid columns={2} p={2} w="100%">
             {/* ─── Column 1 ─────────────────────────────────────────────────────── */}
             <Box>
@@ -136,10 +147,10 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             */}
             <Text
                 fontWeight="bold"
-                fontSize="xs"
+                fontSize={isMobile ? "xs" : "sm"}
                 color="#a67c00"
                 w="100%"                 // ensure the red border spans whole column
-                ml={isMobile ? 5 : 0}
+                ml={isMobile ? 2 : 0}
             >
                 Trade Info
             </Text>
@@ -151,7 +162,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                 not the screen.
             */}
 
-            <Box mt={-2} w="100%" ml={isMobile ? 10 : 0}>
+            <Box mt={-2} w="100%" ml={isMobile ? 5 : 0}>
                 {isMobile ? (
                     <>
                     <VStack mt={5} ml={20}>
@@ -168,19 +179,64 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     </VStack>
                     </>
                 ) :
-                    <SimpleGrid columns={3} spacing={2} w="98%"   >
-                        <Box mt={5}></Box>
-                        <Box></Box>
-                        <Box></Box>
-                        <Box ><Text fontSize={"13px"} color="#d6a700" >Spending</Text></Box>
-                        <Box ><Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text></Box>
-                        <Box fontSize={"13px"} textAlign={"right"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
-                        <Box><Text fontSize={"13px"} color="#d6a700">Receiving</Text></Box>
-                        <Box><Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text></Box>
-                        <Box fontSize={"13px"} textAlign={"right"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
+                    // <SimpleGrid columns={2} w="250px"   >
+                    //     <Box  w="250px" border="1px solid yellow" >
+                    //         <Text fontSize={"13px"} color="#d6a700" >Spending</Text>
+                    //     </Box>
+                    //     <Box w="350px" border="1px solid white">
+                    //         <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
+                    //     </Box>
+                    //     <Box fontSize={"13px"} textAlign={"right"}>
+                    //         {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} 
+                    //     </Box>
+                    //     {/* <Box w="110px" >
+                    //         <Text fontSize={"13px"} color="#d6a700">Receiving</Text>
+                    //     </Box>
+                    //     <Box>
+                    //         <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text>
+                    //     </Box>
+                    //     <Box fontSize={"13px"} textAlign={"right"}>
+                    //         {tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} 
+                    //     </Box> */}
 
-                    </SimpleGrid>               
-                }
+                    // </SimpleGrid>             
+                    <Grid
+                        h="200px"
+                        templateRows="repeat(4, 1fr)"
+                        templateColumns="repeat(2, 1fr)"
+                        gap={4}
+                        mb={20}
+                        pb={10}
+                        border="1px solid #444"
+                    >     
+                    <GridItem colSpan={2} >
+                        <HStack>
+                            <Box w="220px">                                
+                                <Text fontSize={"13px"} color="#d6a700" >Spending</Text>
+                            </Box>
+                            <Box w="220px">
+                                    <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
+                            </Box>
+                            <Box fontSize={"13px"} textAlign={"right"} w="110px">
+                                {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} 
+                            </Box>
+                        </HStack>
+                    </GridItem>
+                    <GridItem colSpan={2} mt={-4}>
+                        <HStack>
+                            <Box  w="220px">                                
+                                <Text fontSize={"13px"} color="#d6a700">Receiving</Text>
+                            </Box>
+                            <Box w="220px">
+                                <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text>
+                            </Box>
+                            <Box fontSize={"13px"} textAlign={"right"}  w="110px">
+                                {isLoading ? <Spinner size="sm" /> : tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} 
+                            </Box>
+                        </HStack>
+                    </GridItem>
+                    </Grid>  
+        }
 
             </Box>
             </Box>
@@ -190,9 +246,9 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             <DrawerRoot >
             <DrawerTrigger asChild>
             <Box > 
-            <Button variant="outline" h="30px" ml={isMobile ? "-140px" : 8} mt={isMobile ? "115px" : "60px"} fontSize={isMobile?"12px": "11px"} w="100px">
+            {/* <Button variant="outline" h="30px" ml={isMobile ? "-140px" : 8} mt={isMobile ? "115px" : "60px"} fontSize={isMobile?"12px": "11px"} w="100px">
                 {isRolling ? <Spinner size="sm" /> : "Edit"}
-            </Button>
+            </Button> */}
             <br /><br /><br />
             </Box>
             </DrawerTrigger>

@@ -453,7 +453,7 @@ const Stake = () => {
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
-                    height="100vh"
+                    height="100%"
                     color="white"
                 >
                 <Heading as="h2">Connect your wallet</Heading>
@@ -477,7 +477,7 @@ const Stake = () => {
                  {isAddress(vaultAddress) ? (
                     isMobile ? (
                         <Flex direction="column">
-                        <Box mt={10} ml={-20}>
+                        <Box mt={10} ml={isMobile ? 0 : -20}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
@@ -497,7 +497,7 @@ const Stake = () => {
                                 page="stake"
                             />
                         </Box>
-                        <Box p={4} pb={4} mt={5} w="380px" ml={"-75px"} border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
+                        <Box p={4} pb={4} mt={5} w="380px"   border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
                         <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
                         <SimpleGrid columns={5} mt={-5} fontSize={"11px"}>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
@@ -571,7 +571,7 @@ const Stake = () => {
                         </SimpleGrid>                         
                         </Box>
 
-                        <Box p={2} px={4} mt={5} ml={"-75px"} w="380px"   border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
+                        <Box p={2} px={4} mt={5} w="380px"   border="1px solid gray" borderRadius={10} backgroundColor={"#222831"} >
                             <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
                             <SimpleGrid columns={2} w="340px" mt={-5} fontSize={"14px"}>
                                 <Box w="340px" backgroundColor={"#bf9b30"}  mb={2}>
@@ -782,7 +782,7 @@ const Stake = () => {
                                 setWrapAmount={setWrapAmount}
                                 wrapAmount={wrapAmount}
                                 vaultAddress={vaultAddress}
-                                page="borrow" 
+                                page="stake" 
                             />
                         </GridItem>
                         <GridItem border={"1px solid white"} p={4} ml={20}  backgroundColor={"#222831"} borderRadius={10}>
