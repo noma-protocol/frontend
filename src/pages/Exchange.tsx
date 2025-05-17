@@ -1182,8 +1182,7 @@ const Exchange: React.FC = () => {
                           quoteMax={0}
                         />
                     {/* </Box> */}
-                    <Box w="90%" h="300px" ml={2}>
-
+ 
                     <TradeSimulationCard 
                         useWeth={useWeth}
                         setQuote={setQuote}
@@ -1202,8 +1201,7 @@ const Exchange: React.FC = () => {
                         isMobile={isMobile}
                         isLoading={isTokenInfoLoading}
                       />
-                    </Box>
-                    </Flex>
+                     </Flex>
                 </Box> : 
                     <Grid
                         h="200px"
