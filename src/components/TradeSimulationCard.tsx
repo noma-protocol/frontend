@@ -122,15 +122,15 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
 
     return (
         <Box 
-            mt={isMobile ? 5 : -12} 
-            w={isMobile ? "90%" : "100%"}
+            mt={isMobile ? 4 : -12} 
+            w={isMobile ? "98%" : "100%"}
             border="1px solid ivory"
             backgroundColor={"#222831"}
             borderRadius={5}
             px={isMobile ? 1 : 2}  
             py={2}    
             h={isMobile ? "150px" : "300px"}  
-            ml={isMobile ? -2 : 0}
+            // ml={isMobile ? 1 : 0}
         >
         <SimpleGrid columns={2} p={2} w="100%">
             {/* ─── Column 1 ─────────────────────────────────────────────────────── */}
