@@ -387,7 +387,10 @@ const Liquidity: React.FC = () => {
                     })}                  
                     </SelectTrigger>
                   <SelectContent>
-                    {vaultsSelectData.items.map((vaultData) => {
+                    {vaultsSelectData.items
+                    .slice()          // make a shallow copy
+                    .reverse()        // reverse the copy 
+                    .map((vaultData) => {
                       return (
                         <SelectItem item={vaultData} key={vaultData.value}>
                           {vaultData.label}
