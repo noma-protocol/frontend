@@ -123,7 +123,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     return (
         <Box 
             mt={isMobile ? 5 : -12} 
-            w={isMobile ? "395px" : "100%"}
+            w={isMobile ? "90%" : "100%"}
             border="1px solid ivory"
             backgroundColor={"#222831"}
             borderRadius={5}
