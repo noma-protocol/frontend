@@ -189,7 +189,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             //     currency: (tradeMode === "BUY" ? (token1Symbol == "WBNB" ? "MON" : token1Symbol || "MON") : "TOK"),
             //     currencySign: "accounting",
             //   }}
-            w={isMobile ? "330px" : "220px"}
+            w={isMobile ? "300px" : "220px"}
             disabled={isTokenInfoLoading || tradeMode == "BUY" ? token0Balance == 0 : token1Balance == 0}
           >
             <NumberInputLabel h="40px" w={{ base: "", lg: "auto" }} />
@@ -210,9 +210,9 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Slider
               mt={2}
               // ml={isMobile ? 5 : 10}
-              ml={8}
+              ml={10}
               variant="outline"
-              w={"85%"}
+              w={"80%"}
               // Scale the contributionAmount for the slider
               defaultValue={[1]} 
               value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
@@ -293,7 +293,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             borderColor={tradeMode =="BUY" ? "green" : "#BF4040"}
             borderRadius="0" // No rounded corners
             fontSize="9px"
-            w={isMobile ? "80px" : "auto"}
+            w={isMobile ? "70px" : "auto"}
             h="10px"
             
           > 
@@ -345,7 +345,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             borderColor="#bf9b30"
             borderRadius="0" // No rounded corners
             fontSize="9px"
-            w={isMobile ? "80px" : "auto"}
+            w={isMobile ? "70px" : "auto"}
             h="10px"
             
           >
@@ -376,7 +376,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 mt={6}
                 variant="subtle"
                 backgroundColor={"#bf9b30"}
-                w={isMobile ? "315px" : "210px"}
+                w={isMobile ? "300px" : "210px"}
                 onClick={() => {
                   handleExecuteTrade();
                 }}
