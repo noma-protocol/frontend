@@ -143,7 +143,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
   return (
     <Box
-      w={isMobile ? "100%" : "560px"}
+      w={isMobile ? "98%" : "560px"}
       pt={8}
       {...props}
       h={isMobile ? "420px" : "300px"}
@@ -153,7 +153,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
       mt={isMobile ? 4 : -4}
       // px={isMobile ? -1 : "-100px"}
       py={isMobile ? 4 : 4}
-      ml={isMobile ?-2 : 0}
+      // ml={isMobile ?-2 : 0}
     >
       <Grid
         h="250px"

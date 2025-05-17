@@ -1154,7 +1154,7 @@ const Exchange: React.FC = () => {
                       vaultAddress={selectedVault}
                       page="exchange"
                     />
-                    <Box w="90%" h="440px" ml={2} border={isMobile ? 0 : "1px solid gray"}>
+                    {/* <Box w="90%" h="440px" ml={2} border={isMobile ? 0 : "1px solid gray"}> */}
                       <TradeControlsCard  
                           ethBalance={ethBalance}
                           token0Balance={token0Info?.balance} 
@@ -1181,7 +1181,7 @@ const Exchange: React.FC = () => {
                           setUseWeth={handleSetWeth}
                           quoteMax={0}
                         />
-                    </Box>
+                    {/* </Box> */}
                     <Box w="90%" h="300px" ml={2}>
 
                     <TradeSimulationCard 
@@ -1251,7 +1251,7 @@ const Exchange: React.FC = () => {
                             </Box>
                         </GridItem>
                         <GridItem colSpan={1} mt={10}> 
-                            <Box w="100%" h="300px" /*border={isMobile ? "":"1px solid gray"}*/>
+                            {/* <Box w="100%" h="300px" border={isMobile ? "":"1px solid gray"}> */}
                             <TradeControlsCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
@@ -1278,7 +1278,7 @@ const Exchange: React.FC = () => {
                                 setUseWeth={handleSetWeth}
                                 quoteMax={0}                            
                                 />
-                            </Box>
+                            {/* </Box> */}
                         </GridItem> 
                         <GridItem colSpan={1} mt={10} ml={"35px"}> 
                             <Box w="100%" h="auto" /*border={isMobile ? "":"1px solid gray"}*/  pt={8} >
