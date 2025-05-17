@@ -28,15 +28,14 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    console.log(`Network: ${network}`);
     // Setup Provider
     const provider = useMemo(
         () =>
             new JsonRpcProvider(
-                "https://testnet-rpc.monad.xyz"
-                // network === "monad"
-                    //? "https://testnet-rpc.monad.xyz"
-                    // : "http://localhost:8545"
+                network === "ganache"
+                    ? "http://localhost:8545"
+                    : "https://testnet-rpc.monad.xyz"
             ),
         [network]
     );
