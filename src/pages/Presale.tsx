@@ -366,7 +366,7 @@ const Presale: React.FC = () => {
                     error.message.indexOf("InvalidParameters") > -1 ? "Invalid parameters" :
                     error.message.indexOf("HardCapExceeded") > -1 ? "Hard cap exceeded" :
                     error.message.indexOf("SoftCapNotMet") > -1 ? "Soft cap not met" :
-                    error.message.indexOf("PresaleOngoing") > -1 ? "Presale not yet ended" :
+                    error.message.indexOf("PresaleOngoing()") > -1 ? "Presale not yet ended" :
                     error.message.indexOf("AlreadyFinalized") > -1 ? "Presale already finalized" : error.message;
         toaster.create({
           title: "Error",
@@ -1076,6 +1076,7 @@ const Presale: React.FC = () => {
           <Text as="h2">Expired!</Text>
            </>*/}
       </Box>
+    <Toaster />
     </Container>
   );
 };

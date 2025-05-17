@@ -48,7 +48,7 @@ const Migration = await import(`../assets/Migration.json`);
 // Extract the ABI from the Migration artifact
 const MigrationAbi = Migration.abi;
 
-console.log("Whitelisted Addresses:", whitelistedAddresses);    
+// console.log("Whitelisted Addresses:", whitelistedAddresses);    
 const tokenAddress = "0x156b1AaCEa9c1707F8102C86313b46FBa35485Cf" //getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
 
 const ERC20Artifact = await import(`../assets/ERC20.json`);

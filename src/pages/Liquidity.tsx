@@ -140,10 +140,10 @@ const Liquidity: React.FC = () => {
                   presaleContract: vaultDescriptionData[7],
                 };
 
-                if (plainVaultDescription.tokenSymbol != "OKS") {
-                  // console.log("Skipping OKS vault:", vault.toString());
-                  continue;
-                }
+                // if (plainVaultDescription.tokenSymbol != "OKS") {
+                //   // console.log("Skipping OKS vault:", vault.toString());
+                //   continue;
+                // }
                 
                 const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
@@ -333,6 +333,7 @@ const Liquidity: React.FC = () => {
           justifyContent="center"
           height="100%"
           color="white"
+          backgroundColor={"blackAlpha.800"}
         >
           <Heading as="h2">Connect your wallet</Heading>
         </Box>
@@ -348,9 +349,7 @@ const Liquidity: React.FC = () => {
           textAlign="left"
           position="relative"
           mt={"10px"}
-          // mt={"50px"}
-          
-
+          backgroundColor={"blackAlpha.800"}
         >
           <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20vw"} mt={"15vh"}>
               {/* Header Section */}

@@ -143,10 +143,17 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
   return (
     <Box
-      w={isMobile ? "40vh" : "auto"}
+      w={isMobile ? "400px" : "560px"}
       pt={8}
       {...props}
-      h="300px"
+      h={isMobile ? "420px" : "300px"}
+      border="1px solid ivory"
+      backgroundColor={"#222831"}
+      borderRadius={5}
+      mt={isMobile ? 4 : -4}
+      // px={isMobile ? -1 : "-100px"}
+      py={isMobile ? 4 : 4}
+      ml={isMobile ?-2 : 0}
     >
       <Grid
         h="250px"
@@ -155,14 +162,16 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         gap={4}
         mb={20}
         pb={10}
+        ml={isMobile ? 0 : -4}
       >
-        <GridItem colSpan={2} h="10px" mt={-5}>
-            <Text fontWeight={"bold"} ml={isMobile?5:10} fontSize={isMobile ? "xs" : "sm"} color="#a67c00">
-                Trade Amount
-            </Text>
-        </GridItem>
+        {/* <GridItem colSpan={2} h="10px" mt={-5}  >
+
+        </GridItem> */}
         {/* Numeric Input */}
         <GridItem>
+          <Text fontWeight={"bold"} ml={isMobile?5:10} fontSize={isMobile ? "xs" : "sm"} color="#a67c00">
+                Trade Amount
+            </Text>
           <NumberInputRoot
             isMobile={isMobile}
             marginRight="22px"
@@ -180,7 +189,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             //     currency: (tradeMode === "BUY" ? (token1Symbol == "WBNB" ? "MON" : token1Symbol || "MON") : "TOK"),
             //     currencySign: "accounting",
             //   }}
-            w={isMobile ? "300px" : "220px"}
+            w={isMobile ? "350px" : "220px"}
             disabled={isTokenInfoLoading || tradeMode == "BUY" ? token0Balance == 0 : token1Balance == 0}
           >
             <NumberInputLabel h="40px" w={{ base: "", lg: "auto" }} />
@@ -203,7 +212,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               // ml={isMobile ? 5 : 10}
               ml={7}
               variant="outline"
-              w={"90%"}
+              w={"85%"}
               // Scale the contributionAmount for the slider
               defaultValue={[1]} 
               value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
@@ -214,6 +223,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               max={sliderMax * 100} // Scale the max value as well
               colorPalette="yellow"
               thumbAlignment="center"
+              min={[1]} // Set minimum value based on token balance
               disabled={isTokenInfoLoading} // Disable slider while token info is loading
               />
               </>  
@@ -257,9 +267,8 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         </GridItem>
 
         {/* Display current trade mode */}
-        <GridItem colSpan={isMobile ? 2 : 1} mt={isMobile? 0 : -20} ml={isMobile ? 2 : 6}>
-        <br />
-        <Text pb={2} ml={4} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text>
+        <GridItem colSpan={isMobile ? 2 : 1} ml={isMobile ? 2 : 6}>
+        <Text pb={2} ml={isMobile ? 4 : 0} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text>
 
           {/* <Flex direction={isMobile? "row" : "column"} align="center" justify="center"> */}
         <RadioGroup 
@@ -268,7 +277,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           onValueChange={(e) => setTradeMode(e.value)} 
           ml={5}
         >
-          <Box position="relative" border="1px solid" borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} px={12} w={isMobile ?"300px":"220px"} h="35px" ml={isMobile? -1: -5} mt={-5} borderRadius={5}>
+          <Box position="relative" border="1px solid" borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} px={12} w={isMobile ?"340px":"230px"} h="35px" ml={isMobile? -1: -5} mt={-5} borderRadius={5}>
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -284,25 +293,25 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             borderColor={tradeMode =="BUY" ? "green" : "#BF4040"}
             borderRadius="0" // No rounded corners
             fontSize="9px"
-            w="auto"
+            w={isMobile ? "80px" : "auto"}
             h="10px"
             
           > 
 
-            Type
+            {isMobile ? "Trade Type" : "Type"}
           </Badge>
-          <HStack gap="4" mt={1} ml={isMobile ? 10 : 2}>
+          <HStack gap="4" mt={1} ml={isMobile ? "60px" : 4}>
             
                 <Box>
                   <Radio value="BUY"></Radio>
                 </Box>
-                <Box>
+                <Box ml={isMobile ? 0 : -2}>
                   <Text fontSize="13px">BUY</Text>
-                </Box>
-                <Box ml={isMobile ? 4 : 2}>
+                </Box>&nbsp;
+                <Box ml={isMobile ? 4 : -1}>
                   <Radio value="SELL"></Radio>
                 </Box>
-                <Box ml={isMobile ? 2 : 0}>
+                <Box ml={isMobile ? 0 : -2}>
                   <Text fontSize="13px">SELL</Text>
                 </Box>
               </HStack>  
@@ -319,7 +328,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           w="4px"
           // mt={-2}
         >
-        <Box border="1px solid #a67c00" px={12} w={isMobile ? "300px" : "220px"} h="38px" borderRadius={5} mt={4} ml={isMobile ? 4 : 0}>
+        <Box border="1px solid #a67c00" px={12} w={isMobile ? "340px" : "230px"} h="38px" borderRadius={5} mt={4} ml={isMobile ? 4 : 0}>
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -336,23 +345,23 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             borderColor="#bf9b30"
             borderRadius="0" // No rounded corners
             fontSize="9px"
-            w="auto"
+            w={isMobile ? "80px" : "auto"}
             h="10px"
             
           >
             Asset
           </Badge>
-          <HStack gap="4" mt={2} ml={isMobile ? 10 : 2}>
+          <HStack gap="4" mt={2} ml={isMobile ? "60px" : 4}>
             <Box>
               <Radio value={"1"} defaultChecked={useWeth == true} ></Radio>
             </Box>
-            <Box>
+            <Box ml={isMobile ? 0 : -2}> 
               <Text fontSize="13px">WMON</Text>
-            </Box>
-            <Box  ml={isMobile ? 2 : 0}>
+            </Box>&nbsp;
+            <Box  ml={isMobile ? 3 : -2}>
               <Radio value={"0"} defaultChecked={useWeth == false}></Radio>
             </Box>
-            <Box ml={isMobile ? 2 : 0}> 
+            <Box ml={isMobile ? 0 : "-5px"}> 
               <Text fontSize="13px">MON</Text>
             </Box>
           </HStack> 
@@ -363,11 +372,11 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         {/* </Flex> */}
           {isMobile && (
             <Button
-                ml={5}
-                mt={5}
+                ml={isMobile ? 6 : 5}
+                mt={6}
                 variant="subtle"
                 backgroundColor={"#bf9b30"}
-                w={isMobile ? "290px" : "210px"}
+                w={isMobile ? "325px" : "210px"}
                 onClick={() => {
                   handleExecuteTrade();
                 }}
@@ -382,22 +391,23 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         {/* Slider */}
         <GridItem colSpan={2} mt={5} ml={5}>
           <HStack>
-            <Box w="60%">
+            <Box w="60%" mt={-2}>
             {!isMobile && (
               <>
             <Text ml={5} fontSize="xs" color="#a67c00" >Slide to select</Text>
             <Slider
               mt={2}
               // ml={isMobile ? 5 : 10}
-              ml={5}
+              ml={8}
               variant="outline"
-              w={"83%"}
+              w={"80%"}
               // Scale the contributionAmount for the slider
               value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
               onValueChange={(e) => {
                   const scaledValue = e.value[0] / 100; // Convert back to decimal
                   handleSliderChange(scaledValue); // Pass the decimal value to the handler
               }}
+              min={[1]}
               max={sliderMax * 100} // Scale the max value as well
               colorPalette="yellow"
               thumbAlignment="center"
