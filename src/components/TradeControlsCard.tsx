@@ -143,7 +143,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
   return (
     <Box
-      w={isMobile ? "380px" : "560px"}
+      w={isMobile ? "100%" : "560px"}
       pt={8}
       {...props}
       h={isMobile ? "420px" : "300px"}
