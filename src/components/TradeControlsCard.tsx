@@ -143,7 +143,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
   return (
     <Box
-      w={isMobile ? "400px" : "560px"}
+      w={isMobile ? "380px" : "560px"}
       pt={8}
       {...props}
       h={isMobile ? "420px" : "300px"}
@@ -189,7 +189,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             //     currency: (tradeMode === "BUY" ? (token1Symbol == "WBNB" ? "MON" : token1Symbol || "MON") : "TOK"),
             //     currencySign: "accounting",
             //   }}
-            w={isMobile ? "350px" : "220px"}
+            w={isMobile ? "330px" : "220px"}
             disabled={isTokenInfoLoading || tradeMode == "BUY" ? token0Balance == 0 : token1Balance == 0}
           >
             <NumberInputLabel h="40px" w={{ base: "", lg: "auto" }} />
@@ -210,7 +210,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Slider
               mt={2}
               // ml={isMobile ? 5 : 10}
-              ml={7}
+              ml={8}
               variant="outline"
               w={"85%"}
               // Scale the contributionAmount for the slider
@@ -277,7 +277,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           onValueChange={(e) => setTradeMode(e.value)} 
           ml={5}
         >
-          <Box position="relative" border="1px solid" borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} px={12} w={isMobile ?"340px":"230px"} h="35px" ml={isMobile? -1: -5} mt={-5} borderRadius={5}>
+          <Box position="relative" border="1px solid" borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} px={12} w={isMobile ?"320px":"230px"} h="35px" ml={isMobile? -1: -5} mt={-5} borderRadius={5}>
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -328,7 +328,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           w="4px"
           // mt={-2}
         >
-        <Box border="1px solid #a67c00" px={12} w={isMobile ? "340px" : "230px"} h="38px" borderRadius={5} mt={4} ml={isMobile ? 4 : 0}>
+        <Box border="1px solid #a67c00" px={12} w={isMobile ? "320px" : "230px"} h="38px" borderRadius={5} mt={4} ml={isMobile ? 4 : 0}>
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -376,7 +376,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 mt={6}
                 variant="subtle"
                 backgroundColor={"#bf9b30"}
-                w={isMobile ? "325px" : "210px"}
+                w={isMobile ? "315px" : "210px"}
                 onClick={() => {
                   handleExecuteTrade();
                 }}
