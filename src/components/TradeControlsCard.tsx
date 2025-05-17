@@ -282,7 +282,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           border="1px solid" 
           borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} 
           px={12} 
-          w={isMobile ?"90%":"100%"} 
+          w={isMobile ?"70vw":"100%"} 
           h="35px" 
           ml={isMobile? -2: -5} 
           mt={-5} 
@@ -341,7 +341,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         <Box 
           border="1px solid #a67c00" 
           px={12}
-          w={isMobile ? "85%" : "92%"} 
+          w={isMobile ? "70vw" : "92%"} 
           h="38px" 
           borderRadius={5} 
           mt={4} 
