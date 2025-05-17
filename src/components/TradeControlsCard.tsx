@@ -318,10 +318,10 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 <Box ml={isMobile ? 0 : -2}>
                   <Text fontSize="13px">BUY</Text>
                 </Box>&nbsp;
-                <Box ml={isMobile ? 4 : -1}>
+                <Box ml={isMobile ? 2 : -1}>
                   <Radio value="SELL"></Radio>
                 </Box>
-                <Box ml={isMobile ? 0 : -2}>
+                <Box ml={isMobile ?-1 : -2}>
                   <Text fontSize="13px">SELL</Text>
                 </Box>
               </HStack>  
@@ -376,10 +376,10 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Box ml={isMobile ? 0 : -2}> 
               <Text fontSize="13px">WMON</Text>
             </Box>&nbsp;
-            <Box  ml={isMobile ? 3 : -2}>
+            <Box  ml={isMobile ? "-1px" : -2}>
               <Radio value={"0"} defaultChecked={useWeth == false}></Radio>
             </Box>
-            <Box ml={isMobile ? 0 : "-5px"}> 
+            <Box ml={isMobile ? -1 : "-5px"}> 
               <Text fontSize="13px">MON</Text>
             </Box>
           </HStack> 
@@ -394,7 +394,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 mt={6}
                 variant="subtle"
                 backgroundColor={"#bf9b30"}
-                w={isMobile ? "80%" : "210px"}
+                w={isMobile ? "85%" : "210px"}
                 onClick={() => {
                   handleExecuteTrade();
                 }}
