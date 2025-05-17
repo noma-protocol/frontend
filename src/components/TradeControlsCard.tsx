@@ -158,7 +158,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
       <Grid
         h="250px"
         templateRows="repeat(4, 1fr)"
-        templateColumns="repeat(2, 1fr)"
+        templateColumns="repeat(1, 1fr)"
         gap={4}
         mb={20}
         pb={10}
@@ -168,7 +168,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
         </GridItem> */}
         {/* Numeric Input */}
-        <GridItem>
+        <GridItem border="1px solid yellow" w="100%" ml={5}>
           <Text fontWeight={"bold"} ml={isMobile?5:10} fontSize={isMobile ? "xs" : "sm"} color="#a67c00">
                 Trade Amount
             </Text>
@@ -189,7 +189,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             //     currency: (tradeMode === "BUY" ? (token1Symbol == "WBNB" ? "MON" : token1Symbol || "MON") : "TOK"),
             //     currencySign: "accounting",
             //   }}
-            w={isMobile ? "300px" : "220px"}
+            w={isMobile ? "80%" : "220px"}
             disabled={isTokenInfoLoading || tradeMode == "BUY" ? token0Balance == 0 : token1Balance == 0}
           >
             <NumberInputLabel h="40px" w={{ base: "", lg: "auto" }} />
@@ -267,7 +267,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         </GridItem>
 
         {/* Display current trade mode */}
-        <GridItem colSpan={isMobile ? 2 : 1} ml={isMobile ? 2 : 6}>
+        <GridItem  border="1px solid yellow" w="90%" colSpan={isMobile ? 2 : 1} ml={isMobile ? 4 : 6}>
         <Text pb={2} ml={isMobile ? 4 : 0} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text>
 
           {/* <Flex direction={isMobile? "row" : "column"} align="center" justify="center"> */}
@@ -277,7 +277,17 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           onValueChange={(e) => setTradeMode(e.value)} 
           ml={5}
         >
-          <Box position="relative" border="1px solid" borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} px={12} w={isMobile ?"320px":"230px"} h="35px" ml={isMobile? -1: -5} mt={-5} borderRadius={5}>
+        <Box 
+          position="relative" 
+          border="1px solid" 
+          borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} 
+          px={12} 
+          w={isMobile ?"90%":"100%"} 
+          h="35px" 
+          ml={isMobile? -2: -5} 
+          mt={-5} 
+          borderRadius={5}
+        >
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -293,7 +303,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             borderColor={tradeMode =="BUY" ? "green" : "#BF4040"}
             borderRadius="0" // No rounded corners
             fontSize="9px"
-            w={isMobile ? "70px" : "auto"}
+            w={isMobile ? "25%" : "auto"}
             h="10px"
             
           > 
@@ -325,10 +335,18 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           value={`${useWeth}`} 
           onValueChange={(e) => setUseWeth(e.value)} 
           fontSize="11px"
-          w="4px"
+          // w="4px"
           // mt={-2}
         >
-        <Box border="1px solid #a67c00" px={12} w={isMobile ? "320px" : "230px"} h="38px" borderRadius={5} mt={4} ml={isMobile ? 4 : 0}>
+        <Box 
+          border="1px solid #a67c00" 
+          px={12}
+          w={isMobile ? "85%" : "92%"} 
+          h="38px" 
+          borderRadius={5} 
+          mt={4} 
+          ml={isMobile ? 4 : 0}
+        >
           {/* Top-Left Square Badge */}
           <Badge 
             position="absolute" 
@@ -345,7 +363,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             borderColor="#bf9b30"
             borderRadius="0" // No rounded corners
             fontSize="9px"
-            w={isMobile ? "70px" : "auto"}
+            w={isMobile ? "22%" : "auto"}
             h="10px"
             
           >
