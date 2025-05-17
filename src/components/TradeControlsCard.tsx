@@ -390,11 +390,11 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         {/* </Flex> */}
           {isMobile && (
             <Button
-                ml={isMobile ? 6 : 5}
+                ml={isMobile ? 4 : 5}
                 mt={6}
                 variant="subtle"
                 backgroundColor={"#bf9b30"}
-                w={isMobile ? "300px" : "210px"}
+                w={isMobile ? "80%" : "210px"}
                 onClick={() => {
                   handleExecuteTrade();
                 }}
