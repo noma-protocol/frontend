@@ -129,7 +129,9 @@ const Markets: React.FC = () => {
   });
 
   useEffect(() => {
+    // Set loading state true whenever deployersData changes (either loads initially or refreshes)
     if (typeof deployersData != "undefined") {
+      setIsAllVaultsLoading(true);
 
       const nomaFactoryContract = new ethers.Contract(
         nomaFactoryAddress,
@@ -216,20 +218,18 @@ const Markets: React.FC = () => {
         //     } 
         //   };
         const fetchVaults = async () => {
-          setIsAllVaultsLoading(true);
-        
           try {
             const nomaFactoryContract = new ethers.Contract(
               nomaFactoryAddress,
               NomaFactoryAbi,
               localProvider
             );
-      
+
             // console.log("Deployers Data:", deployersData); // Debug log
-      
+
             if (!deployersData || deployersData.length === 0) {
               console.warn("No deployers found.");
-              setIsAllVaultsLoading(false);
+              setVaultDescriptions([]);
               return;
             }
       
@@ -308,27 +308,24 @@ const Markets: React.FC = () => {
             }
       
             setVaultDescriptions(flattenedVaults);
-            setIsAllVaultsLoading(false);
-      
+
           } catch (error) {
             console.error("Error fetching vaults:", error);
-            setIsAllVaultsLoading(false);
+            setVaultDescriptions([]); // Set empty array on error
           }
       };
       
       const fetchUserVaults = async () => {
-        setIsAllVaultsLoading(true);
-    
         try {
             const nomaFactoryContract = new ethers.Contract(
                 nomaFactoryAddress,
                 NomaFactoryAbi,
                 localProvider
             );
-    
+
             if (!address) {
                 console.warn("No user address found. Skipping user vaults fetch.");
-                setIsAllVaultsLoading(false);
+                setUserVaults([]);
                 return;
             }
     
@@ -340,7 +337,6 @@ const Markets: React.FC = () => {
             if (!vaultsData || vaultsData.length === 0) {
                 console.warn(`No vaults found for user ${address}`);
                 setUserVaults([]); // Ensure state updates even if empty
-                setIsAllVaultsLoading(false);
                 return;
             }
     
@@ -392,18 +388,26 @@ const Markets: React.FC = () => {
             // console.log("Final User Vault Descriptions:", filteredVaults);
     
             setUserVaults(filteredVaults);
-            setIsAllVaultsLoading(false);
-    
+
         } catch (error) {
             console.error("Error fetching user vaults:", error);
-            setIsAllVaultsLoading(false);
+            setUserVaults([]); // Set empty array on error
         }
     };
     
           
-          fetchVaults();
-          fetchUserVaults();  
-
+          // Run both fetch operations in parallel
+          Promise.all([
+            fetchVaults(),
+            fetchUserVaults()
+          ])
+          .catch(error => {
+            console.error("Error fetching data:", error);
+          })
+          .finally(() => {
+            // Set loading to false only after both operations complete
+            setIsAllVaultsLoading(false);
+          });
 
       }, 3000);
       // return () => clearInterval(interval);
@@ -489,13 +493,14 @@ const Markets: React.FC = () => {
               h="100%"
               backgroundColor="#222831"
             >
-              {view === "all" && isAllVaultsLoading ? (
-                <Spinner size="sm" />
-              ) : view === "my" && isAllVaultsLoading ? (
-                 <Spinner size="sm" />
+              {isAllVaultsLoading ? (
+                <Box textAlign="center" w="100%" p={10}>
+                  <Spinner size="md" color="#bf9b30" thickness="3px" />
+                  <Text mt={3} color="#bf9b30">Loading markets...</Text>
+                </Box>
               ) : isAllVaultsError || error ? (
                 <Text color="red">Error fetching vaults</Text>
-              ) : (view == "all" ? vaultsDataArray.length === 0 : userVaults.length === 0) && !isAllVaultsLoading ? (
+              ) : (view === "all" ? vaultDescriptions.length === 0 : userVaults.length === 0) ? (
                 <Text>No vaults found.<br /><br /><br /><br /><br /><br /><br /><br /></Text>
               ) : (
                 <VStack align="start" spacing={6}>
