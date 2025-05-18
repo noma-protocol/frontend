@@ -157,26 +157,29 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
 
 
-  const [marks, setMarks] = useState([]);
-
-   useEffect(() => {
-    const interval = setTimeout(() => {
-      // Scale the marks for the slider (since the slider is scaled by 100)
-      const newMarks = [
-        { value: 0, label: "0%" },
-        { value: (sliderMax * 50), label: "50%" },
-        { value: (sliderMax * 100), label: "100%" },
-      ];
-      const emptyMarks = [
+  // Calculate slider marks directly without useState/useEffect
+  // This ensures marks are always in sync with the current sliderMax
+  const marks = React.useMemo(() => {
+    // If still loading, use empty labels for first mark
+    if (isTokenInfoLoading) {
+      return [
         { value: 0, label: "" },
-        { value: (sliderMax * 50), label: "50%" },
-        { value: (sliderMax * 100), label: "100%" },
-      ]
+        { value: 25, label: "25%" },
+        { value: 50, label: "50%" },
+        { value: 75, label: "75%" },
+        { value: 100, label: "100%" }
+      ];
+    }
 
-      setMarks(isTokenInfoLoading ? emptyMarks : newMarks);
-    }, 1000); // Delay to ensure token info is loaded
-    return () => clearTimeout(interval);
-  }, [isTokenInfoLoading, sliderMax, token0Balance, token1Balance, ethBalance, tradeMode, useWeth]);
+    // When data is loaded, show percentage labels
+    return [
+      { value: 0, label: "0%" },
+      { value: 25, label: "25%" },
+      { value: 50, label: "50%" },
+      { value: 75, label: "75%" },
+      { value: 100, label: "100%" }
+    ];
+  }, [isTokenInfoLoading]);
 
   return (
     <Box
@@ -246,21 +249,20 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Text ml={7} fontSize="xs" color="#a67c00" >Slide to select</Text>
             <Slider
                 mt={2}
-                // ml={isMobile ? 5 : 10}
                 ml={10}
                 variant="outline"
                 w={"82%"}
-                // Scale the contributionAmount for the slider
-                defaultValue={[1]} 
-                value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
+                defaultValue={[1]}
+                value={[sliderMax > 0 ? (contributionAmount * 100 / sliderMax) : 0]} // Convert to percentage (0-100)
                 onValueChange={(e) => {
-                    const scaledValue = e.value[0] / 100; // Convert back to decimal
-                    handleSliderChange(scaledValue); // Pass the decimal value to the handler
+                    // Convert percentage back to actual value
+                    const actualValue = (e.value[0] * sliderMax) / 100;
+                    handleSliderChange(actualValue);
                 }}
-                max={sliderMax * 100} // Scale the max value as well
+                max={100} // Max is always 100%
                 colorPalette="yellow"
                 thumbAlignment="center"
-                disabled={isTokenInfoLoading} // Disable slider while token info is loading
+                disabled={isTokenInfoLoading}
                 marks={marks}
               />
               </>  
@@ -479,21 +481,20 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Text ml={5} fontSize="xs" color="#a67c00" >Slide to select</Text>
             <Slider
               mt={2}
-              // ml={isMobile ? 5 : 10}
               ml={8}
               variant="outline"
               w={"80%"}
-              // Scale the contributionAmount for the slider
-              value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
+              value={[sliderMax > 0 ? (contributionAmount * 100 / sliderMax) : 0]} // Convert to percentage (0-100)
               onValueChange={(e) => {
-                  const scaledValue = e.value[0] / 100; // Convert back to decimal
-                  handleSliderChange(scaledValue); // Pass the decimal value to the handler
+                  // Convert percentage back to actual value
+                  const actualValue = (e.value[0] * sliderMax) / 100;
+                  handleSliderChange(actualValue);
               }}
               min={[1]}
-              max={sliderMax * 100} // Scale the max value as well
+              max={100} // Max is always 100%
               colorPalette="yellow"
               thumbAlignment="center"
-              disabled={isTokenInfoLoading} // Disable slider while token info is loading
+              disabled={isTokenInfoLoading}
               marks={marks}
               />
               </>
