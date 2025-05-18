@@ -139,12 +139,14 @@ const Liquidity: React.FC = () => {
                   vault: vaultDescriptionData[6],
                   presaleContract: vaultDescriptionData[7],
                 };
-
-                // if (plainVaultDescription.tokenSymbol != "OKS") {
-                //   // console.log("Skipping OKS vault:", vault.toString());
-                //   continue;
-                // }
                 
+                if (config.environment != "dev") {
+                  if (plainVaultDescription.tokenSymbol != "OKS") {
+                    // console.log("Skipping OKS vault:", vault.toString());
+                    continue;
+                  }
+                }
+
                 const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
                 // Create a new object with the additional poolAddress property
