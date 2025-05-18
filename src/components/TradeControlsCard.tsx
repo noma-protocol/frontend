@@ -168,7 +168,10 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
         </GridItem> */}
         {/* Numeric Input */}
-        <GridItem border="1px solid yellow" w="100%" ml={5}>
+        <GridItem 
+         w="100%" 
+         ml={5}
+        >
           <Text fontWeight={"bold"} ml={isMobile?5:10} fontSize={isMobile ? "xs" : "sm"} color="#a67c00">
                 Trade Amount
             </Text>
@@ -189,7 +192,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             //     currency: (tradeMode === "BUY" ? (token1Symbol == "WBNB" ? "MON" : token1Symbol || "MON") : "TOK"),
             //     currencySign: "accounting",
             //   }}
-            w={isMobile ? "80%" : "220px"}
+            w={isMobile ? "84%" : "220px"}
             disabled={isTokenInfoLoading || tradeMode == "BUY" ? token0Balance == 0 : token1Balance == 0}
           >
             <NumberInputLabel h="40px" w={{ base: "", lg: "auto" }} />
@@ -212,7 +215,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               // ml={isMobile ? 5 : 10}
               ml={10}
               variant="outline"
-              w={"80%"}
+              w={"78%"}
               // Scale the contributionAmount for the slider
               defaultValue={[1]} 
               value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
@@ -267,7 +270,11 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         </GridItem>
 
         {/* Display current trade mode */}
-        <GridItem  border="1px solid yellow" w="90%" colSpan={isMobile ? 2 : 1} ml={isMobile ? 4 : 6}>
+        <GridItem 
+          w="90%" 
+          colSpan={isMobile ? 2 : 1} 
+          ml={isMobile ? 4 : 6}
+         >
         <Text pb={2} ml={isMobile ? 4 : 0} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text>
 
           {/* <Flex direction={isMobile? "row" : "column"} align="center" justify="center"> */}
