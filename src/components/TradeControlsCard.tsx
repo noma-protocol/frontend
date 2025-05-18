@@ -335,65 +335,68 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         </Box>
         
         </RadioGroup>
-        <HStack>
-          
-        <RadioGroup 
-          id="useWeth"
-          value={`${useWeth}`} 
-          onValueChange={(e) => setUseWeth(e.value)} 
-          fontSize="11px"
-          // w="4px"
-          // mt={-2}
-        >
-        <Box 
-          border="1px solid #a67c00" 
-          px={12}
-          w={isMobile ? "70vw" : "92%"} 
-          h="38px" 
-          borderRadius={5} 
-          mt={4} 
-          ml={isMobile ? "16px" : 0}
-        >
-          {/* Top-Left Square Badge */}
-          <Badge 
-            position="absolute" 
-            top="4"
-            ml={isMobile ? 4 : 0}
-            left="1px" 
-            bg={"#a67c00"}  
-            color="white" 
-            px={2} 
-            py={1} 
-            fontSize="xs" 
-            borderRight="2px solid" 
-            borderBottom="2px solid" 
-            borderColor="#bf9b30"
-            borderRadius="0" // No rounded corners
-            fontSize="9px"
-            w={isMobile ? "22%" : "auto"}
-            h="10px"
+        <Box w="100%" mt={2} mb={isMobile ? 0 : 4}>
+          <HStack>
             
+          <RadioGroup 
+            id="useWeth"
+            value={`${useWeth}`} 
+            onValueChange={(e) => setUseWeth(e.value)} 
+            fontSize="11px"
+            // w="4px"
+            // mt={-2}
           >
-            Asset
-          </Badge>
-          <HStack gap="4" mt={2} ml={isMobile ? "60px" : 4}>
-            <Box>
-              <Radio value={"1"} defaultChecked={useWeth == true} ></Radio>
+          <Box 
+            border="1px solid #a67c00" 
+            px={12}
+            w={isMobile ? "70vw" : "92%"} 
+            h="38px" 
+            borderRadius={5} 
+            mt={4} 
+            ml={isMobile ? "16px" : 0}
+          >
+            {/* Top-Left Square Badge */}
+            <Badge 
+              position="absolute" 
+              top="4"
+              ml={isMobile ? 4 : 0}
+              left="1px" 
+              bg={"#a67c00"}  
+              color="white" 
+              px={2} 
+              py={1} 
+              fontSize="xs" 
+              borderRight="2px solid" 
+              borderBottom="2px solid" 
+              borderColor="#bf9b30"
+              borderRadius="0" // No rounded corners
+              borderTopLeftRadius="4px"    // override just top‐left
+              fontSize="9px"
+              w={isMobile ? "25%" : "auto"}
+              h="10px"
+              
+            >
+              Asset
+            </Badge>
+            <HStack gap="4" mt={2} ml={isMobile ? "60px" : 4}>
+              <Box>
+                <Radio value={"1"} defaultChecked={useWeth == true} ></Radio>
+              </Box>
+              <Box ml={isMobile ? 0 : -2}> 
+                <Text fontSize="13px">WMON</Text>
+              </Box>&nbsp;
+              <Box  ml={isMobile ? "-1px" : -2}>
+                <Radio value={"0"} defaultChecked={useWeth == false}></Radio>
+              </Box>
+              <Box ml={isMobile ? -1 : "-5px"}> 
+                <Text fontSize="13px">MON</Text>
+              </Box>
+            </HStack> 
             </Box>
-            <Box ml={isMobile ? 0 : -2}> 
-              <Text fontSize="13px">WMON</Text>
-            </Box>&nbsp;
-            <Box  ml={isMobile ? "-1px" : -2}>
-              <Radio value={"0"} defaultChecked={useWeth == false}></Radio>
-            </Box>
-            <Box ml={isMobile ? -1 : "-5px"}> 
-              <Text fontSize="13px">MON</Text>
-            </Box>
-          </HStack> 
+          
+          </RadioGroup>
+          </HStack>            
           </Box>
-         
-        </RadioGroup>
-        </HStack>
         {/* </Flex> */}
           {isMobile && (
             <Button
