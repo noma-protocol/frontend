@@ -48,7 +48,7 @@ const CustomRadio = (props) => {
       px={3}
       py={1}
       h={"25px"}
-      w={isMobile ? "90px" : "60px"}
+      w={isMobile ? "80px" : "60px"}
       mt={-1}
       variant="outline"
       fontSize="13px"
