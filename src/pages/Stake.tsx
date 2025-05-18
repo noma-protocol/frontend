@@ -503,7 +503,7 @@ const Stake = () => {
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
-                            <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> APR</Box>
+                            <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}></Box>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
@@ -536,7 +536,6 @@ const Stake = () => {
                                     </HStack>
                                 </Box>
                                 <Box px={2} mt={2}>
-                                    {0}%
                                 </Box>
                                 <Box px={2}  mt={2} ml={-10}> 
                                 <Button 
