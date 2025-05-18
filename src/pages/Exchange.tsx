@@ -444,11 +444,13 @@ const Exchange: React.FC = () => {
                   presaleContract: vaultDescriptionData[7],
                   stakingContract: vaultDescriptionData[8],
                 };
-
-                // if (plainVaultDescription.tokenSymbol != "OKS") {
-                //   // console.log("Skipping OKS vault:", vault.toString());
-                //   continue;
-                // }
+                
+                if (config.environment != "dev") {
+                  if (plainVaultDescription.tokenSymbol != "OKS") {
+                    // console.log("Skipping OKS vault:", vault.toString());
+                    continue;
+                  }
+                }
 
                 const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
