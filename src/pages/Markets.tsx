@@ -250,11 +250,11 @@ const Markets: React.FC = () => {
                         const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
                         // console.log("Vault Description:", vaultDescriptionData);
                         const tokenSymbol = vaultDescriptionData[1];
-                        // Skip OKS vaults
-                        if (tokenSymbol != "OKS") {
-                          // console.log("Skipping OKS vault:", vault.toString());
-                          return null; // Skip this vault
-                        }
+                        // Include all vaults regardless of symbol
+                        // Comment out filter to display all vaults
+                        // if (tokenSymbol != "OKS") {
+                        //   return null; // Skip this vault
+                        // }
                         const hasPresale = vaultDescriptionData[7] !== "0x0000000000000000000000000000000000000000";
                         let isPresaleFinalized = false;
                         let expired = false;
@@ -492,6 +492,7 @@ const Markets: React.FC = () => {
               w={isMobile ? "auto" : "80%"}
               h="100%"
               backgroundColor="#222831"
+              key={`vaults-container-${isAllVaultsLoading ? 'loading' : 'loaded'}`} // Force re-render on loading state change
             >
               {isAllVaultsLoading ? (
                 <Box textAlign="center" w="100%" p={10}>
