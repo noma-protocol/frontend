@@ -654,9 +654,9 @@ const Borrow = () => {
                             page="borrow"
                             />
                         </Box>
-                        <Box p={2} mt={5} w={isMobile ? "90%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
+                        <Box p={2} mt={5} w={isMobile ? "94%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
                             <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Loan</Text>        
-                           <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={isMobile ? "400px" : "352px"} ml={2} mr={2}>
+                           <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> 
@@ -692,7 +692,10 @@ const Borrow = () => {
                                     </Box>
                                     <Box px={2} fontSize="xs" mt={2}> {commifyDecimals(ltv, 2)}</Box>
                                     <Box px={2} fontSize="xs" mt={2}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
-                                    <HStack mt={2} ml={2} alignItems="center" justifyContent="space-between" w="360px" pb={2}>
+                                    <VStack w="100%">
+                                        <Box ml={-8} mt={4}><Text fontWeight="bold" fontSize="xs" color="#a67c00">Actions</Text></Box>
+                                    <Box >                              
+                                    <HStack alignItems="center" justifyContent="space-between" w="100%" pb={2} ml={isMobile ? "35%" : 0}>
                                     <Box>
                                         <LoanAddCollateral
                                             size="sm"
@@ -801,13 +804,15 @@ const Borrow = () => {
                                         </DrawerRoot>
                                     </Box>
                                     </HStack>
+                                    </Box>
+                                    </VStack>
                                     </>) : <Box mt={2} mb={2} w="120px"><Text fontSize="xs" ml={2}>No active loan</Text></Box>
                                     }                                
                             </SimpleGrid>
                         </Box>
-                            <Box p={2} ml={-5}  mt={5}  w={isMobile ? "435px" : "98%"}   border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
+                            <Box p={2} ml={-5}  mt={5}  w={isMobile ? "94%" : "98%"}   border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
                                 <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>New Loan</Text>    
-                                <SimpleGrid columns={2} w={isMobile ? "415px" : "352px"}  mt={-5} fontSize="xs" p={1} backgroundColor={"#222831"} ml={2} mr={2}>
+                                <SimpleGrid columns={2} w={isMobile ? "80%" : "352px"}  mt={-5} fontSize="xs" p={1} backgroundColor={"#222831"} ml={2} mr={2}>
                                     <Box w={isMobile ? "400px" : "352px"} backgroundColor={"#a67c00"} mb={2}>
                                         <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                     </Box>
