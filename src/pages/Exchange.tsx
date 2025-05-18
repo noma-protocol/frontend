@@ -1106,7 +1106,7 @@ const Exchange: React.FC = () => {
                     </SelectContent>
                 </SelectRoot>
                 </Box>
-                <Box mt={-2} ml={isMobile? 10 : 2}>
+                <Box mt={-2} ml={isMobile? 8 : 2}>
                     {isMobile ?
                     <VStack alignItems={"left"} ml={5}>
                       <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT PRICE</Text></Box>
