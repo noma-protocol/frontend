@@ -170,7 +170,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         {/* Numeric Input */}
         <GridItem 
          w="100%" 
-         ml={5}
+        //  ml={5}
         >
           <Text fontWeight={"bold"} ml={isMobile?5:10} fontSize={isMobile ? "xs" : "sm"} color="#a67c00">
                 Trade Amount
@@ -273,7 +273,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         <GridItem 
           w="90%" 
           colSpan={isMobile ? 2 : 1} 
-          ml={isMobile ? 4 : 6}
+          ml={isMobile ? 2 : 6}
          >
         <Text pb={2} ml={isMobile ? 4 : 0} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text>
 
@@ -291,7 +291,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           px={12} 
           w={isMobile ?"70vw":"100%"} 
           h="35px" 
-          ml={isMobile? -2: -5} 
+          ml={isMobile? 0: -5} 
           mt={-5} 
           borderRadius={5}
         >
@@ -352,7 +352,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           h="38px" 
           borderRadius={5} 
           mt={4} 
-          ml={isMobile ? 4 : 0}
+          ml={isMobile ? "16px" : 0}
         >
           {/* Top-Left Square Badge */}
           <Badge 
@@ -397,7 +397,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         {/* </Flex> */}
           {isMobile && (
             <Button
-                ml={5}
+                ml={7}
                 mt={6}
                 variant="subtle"
                 backgroundColor={"#bf9b30"}
