@@ -10,6 +10,7 @@ import {
   NumberInputField,
 } from "../components/ui/number-input";
 import { Radio, RadioGroup } from "../components/ui/radio"
+import CustomRadio from "../components/ui/CustomRadio";
 
 const { formatEther } = ethers.utils;
 
@@ -80,7 +81,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
   
 //   console.log(`SliderMax = ${token0Balance}`);
   // Set an initial contribution value
-  const initialContribution = (sliderMax / 10);
+  const initialContribution = 1 // (sliderMax / 10);
   const [contributionAmount, setContributionAmount] = useState<number>(initialContribution);
   // Slider change handler – only update if token info is loaded.
 
@@ -226,7 +227,6 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               max={sliderMax * 100} // Scale the max value as well
               colorPalette="yellow"
               thumbAlignment="center"
-              min={[1]} // Set minimum value based on token balance
               disabled={isTokenInfoLoading} // Disable slider while token info is loading
               />
               </>  
@@ -287,12 +287,16 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           position="relative" 
           border="1px solid" 
           borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} 
+          borderLeft={0}
+          borderRight={0}
+          borderBottom={0}
+          borderTopRadius={0}
           px={12} 
           w={isMobile ?"70vw":"100%"} 
           h="35px" 
           ml={isMobile? 0: -5} 
           // mt={-5} 
-          borderRadius={5}
+          borderRadius={0}
         >
           {/* Top-Left Square Badge */}
           <Badge 
@@ -316,21 +320,26 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
             {isMobile ? "Trade Type" : "Type"}
           </Badge>
-          <HStack gap="4" mt={1} ml={isMobile ? "60px" : 4}>
-            
-                <Box>
-                  <Radio value="BUY"></Radio>
-                </Box>
-                <Box ml={isMobile ? 0 : -2}>
-                  <Text fontSize="13px">BUY</Text>
-                </Box>&nbsp;
-                <Box ml={isMobile ? 2 : -1}>
-                  <Radio value="SELL"></Radio>
-                </Box>
-                <Box ml={isMobile ?-1 : -2}>
-                  <Text fontSize="13px">SELL</Text>
-                </Box>
-              </HStack>  
+            <HStack gap="4" mt={3} ml={isMobile ? "60px" : 4}>
+              <CustomRadio
+                tradeMode={tradeMode}
+                value="BUY"
+                name="tradeModeBuy"
+                isChecked={tradeMode == "BUY"}
+                onChange={() => setTradeMode("BUY")}
+              >
+                <b>BUY</b>
+              </CustomRadio>
+              <CustomRadio
+                tradeMode={tradeMode}
+                value="SELL"
+                name="tradeModeSell"
+                isChecked={tradeMode == "SELL"}
+                onChange={() => setTradeMode("SELL")}
+              >
+                <b>SELL</b>
+              </CustomRadio>
+            </HStack> 
         </Box>
         
         </RadioGroup>          
@@ -339,85 +348,66 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         <Box w="100%" mt={2} mb={isMobile ? 0 : 4}>
           <HStack>
             
-          <RadioGroup 
+          <RadioGroup
             id="useWeth"
-            value={`${useWeth}`} 
-            onValueChange={(e) => setUseWeth(e.value)} 
+            value={useWeth ? "1" : "0"}
+            onValueChange={(e) => {
+              console.log("Radio value changed:", e.value);
+              setUseWeth(e.value === "1");
+            }}
             fontSize="11px"
-            // w="4px"
-            // mt={-2}
           >
-          <Box 
-            position="relative" 
-            border="1px solid" 
-            borderColor={"#a67c00"} 
-            px={12} 
-            w={isMobile ?"70vw":"100%"} 
-            h="35px" 
-            ml={isMobile? 0: -5} 
-            // mt={-5} 
-            borderRadius={5}
+          <Box
+            position="relative"
+            border="1px solid"
+            borderColor={"#a67c00"}
+            px={12}
+            w={isMobile ?"70vw":"100%"}
+            h="35px"
+            ml={isMobile? 0: -5}
+            borderLeft={0}
+            borderRight={0}
+            borderBottom={0}
+            borderTopRadius={0}
           >
-            {/* Top-Left Square Badge */}
-            {/* <Badge 
-              position="absolute" 
-              top="4"
-              // ml={isMobile ? 4 : 0}
-              left="1px" 
-              bg={"#a67c00"}  
-              color="white" 
-              // px={2} 
-              py={1} 
-              fontSize="xs" 
-              borderRight="2px solid" 
-              borderBottom="2px solid" 
-              borderColor="#bf9b30"
-              borderRadius="0" // No rounded corners
-              borderTopLeftRadius="4px"    // override just top‐left
-              fontSize="9px"
-              w={isMobile ? "22%" : "auto"}
-              h="10px"
-              
-            >
-              Asset
-            </Badge> */}
-          <Badge 
-            position="absolute" 
-            top="0" 
-            left="0" 
-             bg={"#a67c00"}  
-            color="white" 
-            px={2} 
-            py={1} 
-            fontSize="xs" 
-            borderRight="2px solid" 
-            borderBottom="2px solid" 
+          <Badge
+            position="absolute"
+            top="0"
+            left="0"
+            bg={"#a67c00"}
+            color="white"
+            px={2}
+            py={1}
+            fontSize="xs"
+            borderRight="2px solid"
+            borderBottom="2px solid"
             borderColor={"#bf9b30"}
-            borderRadius="0" // No rounded corners
+            borderRadius="0"
             fontSize="9px"
             w={isMobile ? "25%" : "auto"}
             h="10px"
-            
-          > 
-
+          >
             Asset
-          </Badge>            
-            <HStack gap="4" mt={2} ml={isMobile ? "60px" : 4}>
-              <Box>
-                <Radio value={"1"} defaultChecked={useWeth == true} ></Radio>
-              </Box>
-              <Box ml={isMobile ? 0 : -2}> 
-                <Text fontSize="13px">WMON</Text>
-              </Box>&nbsp;
-              <Box  ml={isMobile ? "-1px" : -2}>
-                <Radio value={"0"} defaultChecked={useWeth == false}></Radio>
-              </Box>
-              <Box ml={isMobile ? -1 : "-5px"}> 
-                <Text fontSize="13px">MON</Text>
-              </Box>
-            </HStack> 
+          </Badge>
+            <HStack gap="4" mt={3} ml={isMobile ? "60px" : 4}>
+              <CustomRadio
+                value="1"
+                name="useWeth"
+                isChecked={useWeth === true}
+                onChange={() => setUseWeth(true)}
+              >
+                <b>WMON</b>
+              </CustomRadio>
+              <CustomRadio
+                value="0"
+                name="useWeth"
+                isChecked={useWeth === false}
+                onChange={() => setUseWeth(false)}
+              >
+                <b>MON</b>
+              </CustomRadio>
+            </HStack>
             </Box>
-          
           </RadioGroup>
           </HStack>            
           </Box>        
