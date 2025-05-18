@@ -106,22 +106,35 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
   const handleTradeAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isTokenInfoLoading) return;
-    if (e.target.value === "")  return; // Prevent NaN values
-    let newValue = parseFloat(e.target.value);
 
-    // if (newValue > sliderMax) newValue = sliderMax;
+    // Handle empty input
+    if (e.target.value === "") {
+      if (tradeMode === "BUY") {
+        setAmountToBuy(0);
+      } else {
+        setAmountToSell(0);
+      }
+      return;
+    }
 
-    // setContributionAmount(newValue);
+    // Remove any leading zeros before a non-zero digit
+    const cleanedValue = e.target.value.replace(/^0+(?=\d)/, '');
 
-    // console.log(`Trade mode is ${tradeMode} | New Value ${newValue}`);
+    // Parse the cleaned value
+    let newValue = parseFloat(cleanedValue);
+
+    if (isNaN(newValue)) return;
+
+    // Update the corresponding state
     if (tradeMode === "BUY") {
-      // console.log(`set amount to buy ${newValue}`);
       setAmountToBuy(newValue);
     } else if (tradeMode === "SELL") {
-      // console.log(`set amount to sell ${newValue}`);
       setAmountToSell(newValue);
     }
- 
+
+    // Update the contribution amount for the slider
+    setContributionAmount(newValue);
+
     refreshParams();
   }
 
@@ -141,6 +154,29 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
     setUseWeth(useWethValue);
     // console.log(`Set useWeth to ${useWethValue}`);
   }
+
+
+
+  const [marks, setMarks] = useState([]);
+
+   useEffect(() => {
+    const interval = setTimeout(() => {
+      // Scale the marks for the slider (since the slider is scaled by 100)
+      const newMarks = [
+        { value: 0, label: "0%" },
+        { value: (sliderMax * 50), label: "50%" },
+        { value: (sliderMax * 100), label: "100%" },
+      ];
+      const emptyMarks = [
+        { value: 0, label: "" },
+        { value: (sliderMax * 50), label: "50%" },
+        { value: (sliderMax * 100), label: "100%" },
+      ]
+
+      setMarks(isTokenInfoLoading ? emptyMarks : newMarks);
+    }, 1000); // Delay to ensure token info is loaded
+    return () => clearTimeout(interval);
+  }, [isTokenInfoLoading, sliderMax, token0Balance, token1Balance, ethBalance, tradeMode, useWeth]);
 
   return (
     <Box
@@ -180,20 +216,17 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             isMobile={isMobile}
             marginRight="22px"
             max={sliderMax}
-            min={0.001}
-            ml={isMobile ? 5 : 10}
+            min={0}
+            ml={isMobile ? 7 : 10}
             type="price"
             setTokenSupply={() => {}}
             onChange={handleTradeAmountChange}
-            // Only pass a numeric value when not loading.
-            value={`${tradeMode === "BUY" ? amountToBuy : amountToSell}`}
-            // targetValue={`${contributionAmount}`}
-            // formatOptions={{
-            //     style: "currency",
-            //     currency: (tradeMode === "BUY" ? (token1Symbol == "WBNB" ? "MON" : token1Symbol || "MON") : "TOK"),
-            //     currencySign: "accounting",
-            //   }}
-            w={isMobile ? "84%" : "220px"}
+            value={tradeMode === "BUY"
+              ? (amountToBuy === 0 ? "" : String(amountToBuy))
+              : (amountToSell === 0 ? "" : String(amountToSell))
+            }
+            mt={-2}
+            w={isMobile ? "90%" : "220px"}
             disabled={isTokenInfoLoading || tradeMode == "BUY" ? token0Balance == 0 : token1Balance == 0}
           >
             <NumberInputLabel h="40px" w={{ base: "", lg: "auto" }} />
@@ -212,22 +245,23 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <>
             <Text ml={7} fontSize="xs" color="#a67c00" >Slide to select</Text>
             <Slider
-              mt={2}
-              // ml={isMobile ? 5 : 10}
-              ml={10}
-              variant="outline"
-              w={"78%"}
-              // Scale the contributionAmount for the slider
-              defaultValue={[1]} 
-              value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
-              onValueChange={(e) => {
-                  const scaledValue = e.value[0] / 100; // Convert back to decimal
-                  handleSliderChange(scaledValue); // Pass the decimal value to the handler
-              }}
-              max={sliderMax * 100} // Scale the max value as well
-              colorPalette="yellow"
-              thumbAlignment="center"
-              disabled={isTokenInfoLoading} // Disable slider while token info is loading
+                mt={2}
+                // ml={isMobile ? 5 : 10}
+                ml={10}
+                variant="outline"
+                w={"82%"}
+                // Scale the contributionAmount for the slider
+                defaultValue={[1]} 
+                value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
+                onValueChange={(e) => {
+                    const scaledValue = e.value[0] / 100; // Convert back to decimal
+                    handleSliderChange(scaledValue); // Pass the decimal value to the handler
+                }}
+                max={sliderMax * 100} // Scale the max value as well
+                colorPalette="yellow"
+                thumbAlignment="center"
+                disabled={isTokenInfoLoading} // Disable slider while token info is loading
+                marks={marks}
               />
               </>  
                 )}
@@ -275,7 +309,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           colSpan={isMobile ? 2 : 1} 
           ml={isMobile ? 2 : 6}
          >
-        <VStack w="100%" alignItems={"left"} px={5}>
+        <VStack w="100%" alignItems={"left"} px={5} mt={isMobile ? 4 : 0}>
           <Box><Text pb={2} ml={isMobile ? 0 : -4} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text></Box>
          <Box>
         <RadioGroup 
@@ -297,6 +331,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           ml={isMobile? 0: -5} 
           // mt={-5} 
           borderRadius={0}
+          mt={-2}
         >
           {/* Top-Left Square Badge */}
           <Badge 
@@ -320,7 +355,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
             {isMobile ? "Trade Type" : "Type"}
           </Badge>
-            <HStack gap="4" mt={3} ml={isMobile ? "60px" : 4}>
+            <HStack gap="4" mt={3} ml={isMobile ? "70px" : 4}>
               <CustomRadio
                 tradeMode={tradeMode}
                 value="BUY"
@@ -389,7 +424,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           >
             Asset
           </Badge>
-            <HStack gap="4" mt={3} ml={isMobile ? "60px" : 4}>
+            <HStack gap="4" mt={3} ml={isMobile ? "70px" : 4}>
               <CustomRadio
                 value="1"
                 name="useWeth"
@@ -418,18 +453,19 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         {/* </Flex> */}
           {isMobile && (
             <Button
-                ml={7}
-                mt={4}
-                variant="subtle"
-                backgroundColor={"#bf9b30"}
-                w={isMobile ? "85%" : "210px"}
-                onClick={() => {
-                  handleExecuteTrade();
-                }}
-                disabled={isLoadingExecuteTrade || isTokenInfoLoading || tradeMode === "BUY" ? amountToBuy <= 0 : amountToSell <= 0}
-                border="1px solid #a67c00"
-              >
-                {isLoadingExecuteTrade ? <Spinner size="sm" /> : <Text fontSize="sm">Execute</Text>}
+              ml={isMobile ? 5 : 7}
+              mt={6}
+              variant="subtle"
+              backgroundColor={"#bf9b30"}
+              w={isMobile ? "90%" : "210px"}
+              onClick={() => {
+                handleExecuteTrade();
+              }}
+              h={"30px"}
+              disabled={isLoadingExecuteTrade || isTokenInfoLoading || tradeMode === "BUY" ? amountToBuy <= 0 : amountToSell <= 0}
+              border="1px solid ivory"
+            >
+              {isLoadingExecuteTrade ? <Spinner size="sm" /> : <Text fontSize="sm">Execute</Text>}
             </Button>
               )}
       </GridItem>
@@ -458,6 +494,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               colorPalette="yellow"
               thumbAlignment="center"
               disabled={isTokenInfoLoading} // Disable slider while token info is loading
+              marks={marks}
               />
               </>
                 )}

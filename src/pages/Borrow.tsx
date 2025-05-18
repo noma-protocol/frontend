@@ -518,12 +518,15 @@ const Borrow = () => {
     }, [vaultAddress]);
 
     const handleSetAmountToBorrow = (e) => {
-        const value = e.target.value;
-        if (isNaN(value) || value == '') return // Ignore if the value is not a number
-
-        setBorrowAmount(value);
-    }
-
+        let value = e.target.value.trim();
+        if (!/^\d*\.?\d*$/.test(value)) {
+            setBorrowAmount(0);
+            return;
+        }
+        if (value.startsWith('.')) value = '0' + value;
+        value = value.replace(/^0+(\d)/, '$1');
+        setBorrowAmount(value || '0');
+    };
 
     const handleBorrow = () => {
         if (Number(borrowAmount) <= 0) {
@@ -837,7 +840,7 @@ const Borrow = () => {
                                                 step={0.1}
                                                 onChange={handleSetAmountToBorrow}
                                                 marginRight={"5px"}
-                                                value={borrowAmount}
+                                                value={borrowAmount === '0' ? '' : borrowAmount}
                                                 setTokenSupply={(() => {})}
                                                 setPrice={setBorrowAmount}
                                                 setFloorPrice={(() => {})}
@@ -1163,7 +1166,7 @@ const Borrow = () => {
                                         step={0.1}
                                         onChange={handleSetAmountToBorrow}
                                         marginRight={"5px"}
-                                        value={borrowAmount}
+                                        value={borrowAmount === '0' ? '' : borrowAmount}
                                         setTokenSupply={(() => {})}
                                         setPrice={setBorrowAmount}
                                         setFloorPrice={(() => {})}
