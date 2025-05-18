@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Badge, HStack, Box, Grid, GridItem, Button, Spinner, Text } from "@chakra-ui/react";
+import { Flex, Badge, HStack, Box, Grid, GridItem, Button, Spinner, Text, VStack } from "@chakra-ui/react";
 import { ethers } from 'ethers';
 import { commify, formatNumberPrecise } from '../utils';
 import { isMobile } from "react-device-detect";
@@ -275,14 +275,13 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           colSpan={isMobile ? 2 : 1} 
           ml={isMobile ? 2 : 6}
          >
-        <Text pb={2} ml={isMobile ? 4 : 0} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text>
-
-          {/* <Flex direction={isMobile? "row" : "column"} align="center" justify="center"> */}
+        <VStack w="100%" alignItems={"left"} px={5}>
+          <Box><Text pb={2} ml={isMobile ? 0 : -4} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text></Box>
+         <Box>
         <RadioGroup 
           id="tradeMode"
           value={tradeMode} 
           onValueChange={(e) => setTradeMode(e.value)} 
-          ml={5}
         >
         <Box 
           position="relative" 
@@ -292,7 +291,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           w={isMobile ?"70vw":"100%"} 
           h="35px" 
           ml={isMobile? 0: -5} 
-          mt={-5} 
+          // mt={-5} 
           borderRadius={5}
         >
           {/* Top-Left Square Badge */}
@@ -334,7 +333,9 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               </HStack>  
         </Box>
         
-        </RadioGroup>
+        </RadioGroup>          
+         </Box>
+
         <Box w="100%" mt={2} mb={isMobile ? 0 : 4}>
           <HStack>
             
@@ -347,23 +348,25 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             // mt={-2}
           >
           <Box 
-            border="1px solid #a67c00" 
-            px={12}
-            w={isMobile ? "70vw" : "92%"} 
-            h="38px" 
-            borderRadius={5} 
-            mt={4} 
-            ml={isMobile ? "16px" : 0}
+            position="relative" 
+            border="1px solid" 
+            borderColor={"#a67c00"} 
+            px={12} 
+            w={isMobile ?"70vw":"100%"} 
+            h="35px" 
+            ml={isMobile? 0: -5} 
+            // mt={-5} 
+            borderRadius={5}
           >
             {/* Top-Left Square Badge */}
-            <Badge 
+            {/* <Badge 
               position="absolute" 
               top="4"
-              ml={isMobile ? 4 : 0}
+              // ml={isMobile ? 4 : 0}
               left="1px" 
               bg={"#a67c00"}  
               color="white" 
-              px={2} 
+              // px={2} 
               py={1} 
               fontSize="xs" 
               borderRight="2px solid" 
@@ -372,12 +375,33 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               borderRadius="0" // No rounded corners
               borderTopLeftRadius="4px"    // override just top‐left
               fontSize="9px"
-              w={isMobile ? "25%" : "auto"}
+              w={isMobile ? "22%" : "auto"}
               h="10px"
               
             >
               Asset
-            </Badge>
+            </Badge> */}
+          <Badge 
+            position="absolute" 
+            top="0" 
+            left="0" 
+             bg={"#a67c00"}  
+            color="white" 
+            px={2} 
+            py={1} 
+            fontSize="xs" 
+            borderRight="2px solid" 
+            borderBottom="2px solid" 
+            borderColor={"#bf9b30"}
+            borderRadius="0" // No rounded corners
+            fontSize="9px"
+            w={isMobile ? "25%" : "auto"}
+            h="10px"
+            
+          > 
+
+            Asset
+          </Badge>            
             <HStack gap="4" mt={2} ml={isMobile ? "60px" : 4}>
               <Box>
                 <Radio value={"1"} defaultChecked={useWeth == true} ></Radio>
@@ -396,12 +420,16 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           
           </RadioGroup>
           </HStack>            
-          </Box>
+          </Box>        
+        </VStack>
+
+          {/* <Flex direction={isMobile? "row" : "column"} align="center" justify="center"> */}
+
         {/* </Flex> */}
           {isMobile && (
             <Button
                 ml={7}
-                mt={6}
+                mt={4}
                 variant="subtle"
                 backgroundColor={"#bf9b30"}
                 w={isMobile ? "85%" : "210px"}
