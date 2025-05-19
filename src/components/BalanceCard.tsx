@@ -316,7 +316,7 @@ const BalanceCard = ({
                                 ml={2}
                                 mb={1}
                                 borderColor={withBg ? "gray" : "none"}
-                                fontColor="white"
+                                color="white"
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Borrow
@@ -331,7 +331,7 @@ const BalanceCard = ({
                                 fontSize={fontSize}
                                 ml={2}
                                 borderColor={withBg ? "gray" : "none"}
-                                fontColor="white"
+                                color="white"
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Stake
