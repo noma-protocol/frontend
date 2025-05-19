@@ -165,6 +165,7 @@ const BalanceCard = ({
                                 ml={2}
                                 w={buttonSize}
                                 onClick={() => setActionType('wrap')}
+                                color="white"
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     {isWrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Wrap</Text>}
@@ -235,6 +236,7 @@ const BalanceCard = ({
                                 mt={-2}
                                 ml={2}
                                 onClick={() => setActionType('unwrap')}
+                                color="white"
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     {isUnwrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Unwrap</Text>}
