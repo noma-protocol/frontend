@@ -26,7 +26,14 @@ return (
         {/* <SimpleGrid maxWidth={"60%"} ml="20%" columns={8}>
           {isConnected ? <SlideControls isConnected /> : <></>}
         </SimpleGrid>*/}
-        <SimpleGrid maxWidth={isMobile ? "40%" : "30%"} ml={isMobile ? "50vw" : "40vw"} columns={2} rows={3} p={2} mt={isMobile ? "-6vh" : "-100px"}  >
+        <SimpleGrid 
+          maxWidth={isMobile ? "40%" : "20%"} 
+          ml={isMobile ? "50vw" : "40vw"} 
+          mt={isMobile ? "-6vh" : "-100px"} 
+          columns={2} 
+          rows={3} 
+          p={2}   
+        >
           <Box w="120px" textAlign="left"><Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>Circulating</Text></Box>
           <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>{isMobile ? "L.R." : "Liquidity Ratio"}</Text></Box>
           <Box w="auto" textAlign={isMobile ? "right" : "left"} fontSize={isMobile?"xs":"14px"}>
