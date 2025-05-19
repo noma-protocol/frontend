@@ -164,9 +164,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
     if (isTokenInfoLoading) {
       return [
         { value: 0, label: "" },
-        { value: 25, label: "25%" },
         { value: 50, label: "50%" },
-        { value: 75, label: "75%" },
         { value: 100, label: "100%" }
       ];
     }
@@ -174,9 +172,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
     // When data is loaded, show percentage labels
     return [
       { value: 0, label: "0%" },
-      { value: 25, label: "25%" },
       { value: 50, label: "50%" },
-      { value: 75, label: "75%" },
       { value: 100, label: "100%" }
     ];
   }, [isTokenInfoLoading]);
@@ -503,7 +499,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Box>
               {!isMobile && (
                 <Button
-                    ml={5}
+                    ml={4}
                     mt={2}
                     variant="subtle"
                     backgroundColor={"#bf9b30"}

@@ -217,3 +217,68 @@ export function generateReferralCode(userAddress) {
 
   return fullHex;
 }
+
+export const toDate = ts => {
+  // coerce to number & guess units by length
+  const n = Number(ts);
+  const ms = String(Math.trunc(n)).length === 10 ? n * 1000 : n;
+  return new Date(ms);
+};
+
+export function formatTime(diff) {
+  const dayMs  = 24 * 60 * 60 * 1000;
+  const hrMs   = 60 * 60 * 1000;
+  const minMs  = 60 * 1000;
+  const secMs  = 1000;
+
+  const days    = Math.floor(diff / dayMs);
+  diff %= dayMs;
+
+  const hours   = Math.floor(diff / hrMs);
+  diff %= hrMs;
+
+  const minutes = Math.floor(diff / minMs);
+  diff %= minMs;
+
+  const seconds = Math.floor(diff / secMs);
+
+  const parts = [];
+  if (days)    parts.push(`${days}d`);
+  if (hours)   parts.push(`${hours}h`);
+  if (minutes) parts.push(`${minutes}m`);
+  parts.push(`${seconds}s`);
+
+  return parts.join(" ");
+}
+
+export function getTimeLeft(startTs, intervalDays) {
+  // 1) coerce inputs
+  const rawStart = Number(startTs);
+  const days     = Number(intervalDays);
+
+  // 2) validation
+  if (Number.isNaN(rawStart) || Number.isNaN(days)) {
+    return 0;
+  }
+
+  // 3) detect seconds vs ms
+  const digits  = String(Math.trunc(rawStart)).length;
+  const startMs = digits === 10
+    ? rawStart * 1000
+    : rawStart;
+
+  // 4) compute target timestamp (ms)
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const targetMs   = startMs + days * MS_PER_DAY;
+
+  // 5) diff in ms
+  const diffMs = targetMs - Date.now();
+
+  // 6) if expired or negative, return 0
+  if (diffMs <= 0) {
+    return 0;
+  }
+
+  // 7) convert to whole seconds
+  return Math.floor(diffMs / 1000);
+}
