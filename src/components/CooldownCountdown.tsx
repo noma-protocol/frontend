@@ -8,26 +8,30 @@ function CountdownTimer({ startTsMs, intervalDays }) {
 
   useEffect(() => {
     // Validate inputs
-    if (!startTsMs || isNaN(Number(startTsMs)) || !intervalDays || isNaN(Number(intervalDays))) {
+    if (
+      !startTsMs ||
+      isNaN(Number(startTsMs)) ||
+      intervalDays == null ||
+      isNaN(Number(intervalDays))
+    ) {
       setTimeLeft("Invalid input");
       return;
     }
 
-    // Ensure we're working with numbers
-    const start = Number(startTsMs);
+    const start    = Number(startTsMs);
     const interval = Number(intervalDays);
+    const target   = start + interval * 24 * 60 * 60 * 1000;
 
-    // Calculate target timestamp (cooldown end)
-    const target = start + interval * 24 * 60 * 60 * 1000;
-
-    // For debugging only
     console.log(`Countdown from: ${new Date(start).toLocaleString()}`);
     console.log(`Countdown target: ${new Date(target).toLocaleString()}`);
     console.log(`Countdown interval: ${interval} days`);
 
+    // **Declare the timer reference here** so it's in scope inside `update()`
+    let timer;
+
     function update() {
       try {
-        const now = Date.now();
+        const now  = Date.now();
         const diff = target - now;
 
         if (diff <= 0) {
@@ -43,8 +47,9 @@ function CountdownTimer({ startTsMs, intervalDays }) {
       }
     }
 
-    update();
-    const timer = setInterval(update, 1000);
+    update();                    // run immediately
+    timer = setInterval(update, 1000);
+
     return () => clearInterval(timer);
   }, [startTsMs, intervalDays]);
 
@@ -54,7 +59,7 @@ function CountdownTimer({ startTsMs, intervalDays }) {
         {timeLeft}
       </Text>
     </Box>
-    )
+  );
 }
 
 export default CountdownTimer;
