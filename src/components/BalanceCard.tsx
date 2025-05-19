@@ -154,7 +154,8 @@ const BalanceCard = ({
                     <Text fontSize={fontSize}  h={"30px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
-                    <DrawerRoot>
+                    <Box>
+                    <DrawerRoot >
                         <DrawerTrigger asChild>
                             <Button 
                                 disabled={isWrapping}
@@ -174,7 +175,7 @@ const BalanceCard = ({
                         </DrawerTrigger>
                         <DrawerBackdrop />
                         <DrawerContent>
-                            <Box p={4} mt={{ base: "50%", md: "80%" }}>
+                            <Box p={4} mt={{ base: "50%", md: "80%" }} >
                                 <DrawerHeader>
                                     <DrawerTitle>
                                         <Text as="h3" color="#bf9b30">Wrap MON</Text>
@@ -190,16 +191,16 @@ const BalanceCard = ({
                                         w="100%"
                                         mb={4}
                                     />
-                                    <HStack mt={4} spacing={3} justifyContent="center">
+                                    <HStack mt={4} spacing={3} justifyContent="left" ml={2}>
                                         <DrawerActionTrigger asChild>
-                                            <Button variant="outline" onClick={() => setWrapAmount('0')}>
-                                                <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
+                                            <Button  w="45%" colorScheme="blue" onClick={() => setWrapAmount('0')} border="1px solid gray">
+                                                <Box minH="20px" display="flex" alignItems="center" justifyContent="center" color="black">
                                                     Cancel
                                                 </Box>
                                             </Button>
                                         </DrawerActionTrigger>
-                                        <Button colorScheme="blue" onClick={handleAction}>
-                                            <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
+                                        <Button  w="45%" variant="outline" onClick={handleAction} border="1px solid gray">
+                                            <Box minH="20px" display="flex" alignItems="center" justifyContent="center" color="white">
                                                 {isWrapping ? <Spinner size="sm" /> : "Confirm"}
                                             </Box>
                                         </Button>
@@ -208,6 +209,7 @@ const BalanceCard = ({
                             </Box>
                         </DrawerContent>
                     </DrawerRoot>
+                    </Box>
                 </Box>
                 
                 {/* WMON Row */}
@@ -261,16 +263,16 @@ const BalanceCard = ({
                                         w="100%"
                                         mb={4}
                                     />
-                                    <HStack mt={4} spacing={3} justifyContent="center">
+                                    <HStack mt={4} spacing={3} justifyContent="left" ml={2}>
                                         <DrawerActionTrigger asChild>
-                                            <Button variant="outline" onClick={() => setWrapAmount('0')}>
+                                            <Button w="45%"  colorScheme="blue"  onClick={() => setWrapAmount('0')} border="1px solid gray" color="black">
                                                 <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
                                                     Cancel
                                                 </Box>
                                             </Button>
                                         </DrawerActionTrigger>
-                                        <Button colorScheme="blue" onClick={handleAction}>
-                                            <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
+                                        <Button w="45%" variant="outline" onClick={handleAction} border="1px solid gray" color="white">
+                                            <Box minH="20px" display="flex" alignItems="center" justifyContent="center" >
                                                 {isUnwrapping ? <Spinner size="sm" /> : "Confirm"}
                                             </Box>
                                         </Button>
