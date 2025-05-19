@@ -18,7 +18,7 @@ import {
     SelectTrigger,
     SelectValueText,
   } from "../components/ui/select";
-import { formatNumberPrecise, commify, commifyDecimals, getDaysLeft, calculateExpiryDate, getContractAddress } from '../utils';
+import { formatNumberPrecise, commify, commifyDecimals, getDaysLeft, calculateExpiryDate, getContractAddress, toDate, getTimeLeft } from '../utils';
 import {
     NumberInputRoot,
     NumberInputLabel,
@@ -36,6 +36,8 @@ import {
     DrawerFooter,
     DrawerActionTrigger,
 } from '../components/ui/drawer'; // Ark UI Drawer components
+
+import CountdownTimer from '../components/CooldownCountdown';
 import { ro } from '@faker-js/faker';
 import addresses from "../assets/deployment.json";
 import config from '../config'; 
@@ -157,14 +159,17 @@ const Stake = () => {
         watch: true
     });
 
-    // const {
-    //     data: rebaseIndex
-    // } = useContractRead({
-    //     address: sNomaToken,
-    //     abi: GonsTokenAbi,
-    //     functionName: "rebaseIndex",
-    //     watch: true
-    // });
+    const {
+        data: lastOperationTimestamp
+    } = useContractRead({
+        address: vaultDescription.stakingContract,
+        abi: StakingContractAbi,
+        functionName: "lastOperationTimestamp",
+        args: [address],
+        watch: true
+    });
+
+    // console.log(`Last Operation Timestamp: ${lastOperationTimestamp}`, typeof lastOperationTimestamp, lastOperationTimestamp && String(lastOperationTimestamp).length);
 
     let APR_30_DAYS = (((formatEther(`${sNomaTotalSupply || 0}`) ) - formatEther(`${sNomaBalance || 0}`)) / formatEther(`${totalStaked || 0}`) ) * (365 / 30) * 100;
     APR_30_DAYS = isNaN(APR_30_DAYS) ? 0 : APR_30_DAYS;
@@ -442,8 +447,10 @@ const Stake = () => {
         approveSnoma();
     }
 
-    console.log(`sNoma Balance: ${sNomaBalance} stakedBalance: ${stakedBalance}`);
+    // console.log(`sNoma Balance: ${sNomaBalance} stakedBalance: ${stakedBalance}`);
     const rewards = formatEther(`${sNomaBalance || 0}`) - formatEther(`${stakedBalance || 0}`);
+
+    console.log(`Get time left ${getTimeLeft(lastOperationTimestamp, 3)}`);
     return (
         <Container maxW="container.xl" py={12} pl={"0%"} ml={"10%"}>
             <Toaster />
@@ -544,7 +551,7 @@ const Stake = () => {
                                     variant="outline" 
                                     ml={5} 
                                     onClick={() => handleUnstake()}  
-                                    disabled={isUnstaking} 
+                                    disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
                                     w={"80px"}
                                     
                                 >
@@ -605,7 +612,7 @@ const Stake = () => {
                                             <Image src={placeholderLogo} w="25px"></Image>
                                         </Box>
                                     </HStack>
-                                        <HStack mt={5} ml={2}>
+                                        <HStack mt={5}>
                                         <Box>
                                             <Text fontSize="xs">Staking:</Text>
                                         </Box>
@@ -614,8 +621,29 @@ const Stake = () => {
                                                 <Box w="auto"><Text fontSize="xs">{formatNumberPrecise(stakeAmount, 4)} </Text></Box>
                                                 <Box fontSize="xs">{isTokenInfoLoading ? <Spinner size="xs" /> : token0Info.tokenSymbol}</Box>
                                             </HStack>
+                                        </Box>                                    
+                                        </HStack>
+                                        <HStack w="400px">
+                                        <Box> <Text fontSize="xs"> To cooldown:</Text> </Box>
+                                        <Box>
+                                            {lastOperationTimestamp ? (
+                                                <CountdownTimer
+                                                    startTsMs={Number(lastOperationTimestamp) * 1000}
+                                                    intervalDays={3}
+                                                />
+                                            ) : (
+                                                <Text fontSize="xs" color="gray">N/A</Text>
+                                            )}
                                         </Box>
                                         </HStack>
+                                        <HStack w="400px">
+                                        <Box> <Text fontSize="xs"> Last operation:</Text> </Box>
+                                        <Box>
+                                            <Text fontSize="xs" color="gray">
+                                                {lastOperationTimestamp ? new Date(Number(lastOperationTimestamp) * 1000).toLocaleString() : "N/A"}
+                                            </Text>
+                                        </Box>
+                                        </HStack>                                        
                                         {/* <Box mt={5}>
                                             <Text fontWeight={"bold"} color="gray">Collateral required</Text>
                                         </Box>
@@ -737,7 +765,7 @@ const Stake = () => {
                                         variant="outline" 
                                         ml={10} 
                                         onClick={() => handleUnstake()}  
-                                        disabled={isUnstaking} 
+                                    disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
                                         w={"120px"}
                                         
                                     >
@@ -818,17 +846,40 @@ const Stake = () => {
                                         <Image src={placeholderLogo} w="25px"></Image>
                                     </Box>
                                 </HStack>
-                                    <HStack mt={5} ml={2}>
+                                <VStack alignItems={"left"}>
+                                     <HStack mt={10} ml={2}>
                                     <Box>
                                         <Text>Staking:</Text>
                                     </Box>
                                     <Box>
-                                        <HStack>
+                                    <HStack>
                                             <Box w="auto"><Text>{formatNumberPrecise(stakeAmount, 4)} </Text></Box>
                                             <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info.tokenSymbol}</Box>
-                                        </HStack>
-                                    </Box>
                                     </HStack>
+                                    </Box>
+                                    {/* <Box> <Text> Last operation:</Text> </Box>
+                                    <Box>
+                                        <Text fontSize="xs" color="gray">
+                                            {lastOperationTimestamp ? new Date(Number(lastOperationTimestamp) * 1000).toLocaleTimeString() : "N/A"}
+                                        </Text>
+                                    </Box> */}
+
+                                    </HStack>
+                                    <HStack w="400px" ml={2}>
+                                        <Box> <Text> To cooldown:</Text> </Box>
+                                        <Box>
+                                            {lastOperationTimestamp && lastOperationTimestamp > 0 ? (
+                                                <CountdownTimer
+                                                    startTsMs={Number(lastOperationTimestamp) * 1000}
+                                                    intervalDays={3}
+                                                />
+                                            ) : (
+                                                <Text fontSize="xs" color="#a67c00">N/A</Text>
+                                            )}
+                                        </Box>
+                                    </HStack>
+                                </VStack>
+
                                     {/* <Box mt={5}>
                                         <Text fontWeight={"bold"} color="gray">Collateral required</Text>
                                     </Box>
