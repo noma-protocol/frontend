@@ -181,7 +181,7 @@ const BalanceCard = ({
                                         <Text as="h3" color="#bf9b30">Wrap MON</Text>
                                     </DrawerTitle>
                                     <DrawerCloseTrigger asChild>
-                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2}>×</Button>
+                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada">×</Button>
                                     </DrawerCloseTrigger>
                                 </DrawerHeader>
                                 <DrawerBody>
@@ -193,7 +193,7 @@ const BalanceCard = ({
                                     />
                                     <HStack mt={4} spacing={3} justifyContent="left" ml={2}>
                                         <DrawerActionTrigger asChild>
-                                            <Button  w="45%" colorScheme="blue" onClick={() => setWrapAmount('0')} border="1px solid gray">
+                                            <Button  w="45%" colorScheme="blue" onClick={() => setWrapAmount('0')} border="1px solid gray" color="black" backgroundColor={"#dadada"}>
                                                 <Box minH="20px" display="flex" alignItems="center" justifyContent="center" color="black">
                                                     Cancel
                                                 </Box>
@@ -253,7 +253,7 @@ const BalanceCard = ({
                                         <Text as="h3" color="#bf9b30">Unwrap {token1Symbol}</Text>
                                     </DrawerTitle>
                                     <DrawerCloseTrigger asChild>
-                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2}>×</Button>
+                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada">×</Button>
                                     </DrawerCloseTrigger>
                                 </DrawerHeader>
                                 <DrawerBody>
@@ -265,7 +265,7 @@ const BalanceCard = ({
                                     />
                                     <HStack mt={4} spacing={3} justifyContent="left" ml={2}>
                                         <DrawerActionTrigger asChild>
-                                            <Button w="45%"  colorScheme="blue"  onClick={() => setWrapAmount('0')} border="1px solid gray" color="black">
+                                            <Button w="45%"  colorScheme="blue"  onClick={() => setWrapAmount('0')} border="1px solid gray" color="black" backgroundColor={"#dadada"}>
                                                 <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
                                                     Cancel
                                                 </Box>
