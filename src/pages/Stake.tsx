@@ -82,7 +82,7 @@ const Stake = () => {
     const [isStaking, setIsStaking] = useState(false);
     const [isUnstaking, setIsUnstaking] = useState(false);
 
-    const [stakeAmount, setStakeAmount] = useState("0");
+    const [stakeAmount, setStakeAmount] = useState("");
 
     const [isTokenInfoLoading, setIsTokenInfoLoading] = useState(true);
     const [isWrapping, setIsWrapping] = useState(false);
@@ -431,10 +431,17 @@ const Stake = () => {
         }
     });
     
-    const handleSetAmountToStake = (e) => {
-        const value = e.target.value;
-        if (isNaN(value) || value === "") return;
-        setStakeAmount(e.target.value);
+    const handleSetAmountToStake = (valueOrEvent) => {
+        // Handle both direct values and event objects
+        const value = valueOrEvent && valueOrEvent.target
+            ? valueOrEvent.target.value
+            : valueOrEvent;
+
+        // If the input is not a number (excluding empty string which is handled separately), return early
+        if (value !== "" && isNaN(Number(value))) return;
+
+        // Set the value directly without modification
+        setStakeAmount(value);
     }
 
     const handleStake = async () => {
@@ -694,14 +701,14 @@ const Stake = () => {
                                         ))}
                                     </SelectContent>
                                 </SelectRoot> */}
-                                    <Button 
-                                        mt={1} 
-                                        h={"25px"}  
-                                        borderColor={"#a67c00"} 
-                                        variant="outline" 
-                                        ml={10} 
-                                        onClick={() => handleStake()}  
-                                        disabled={isLoading || stakeAmount == 0} 
+                                    <Button
+                                        mt={1}
+                                        h={"25px"}
+                                        borderColor={"#a67c00"}
+                                        variant="outline"
+                                        ml={10}
+                                        onClick={() => handleStake()}
+                                        disabled={isLoading || !stakeAmount || Number(stakeAmount) <= 0}
                                         w={"120px"}
                                     >
                                         {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"13px"} color="#a67c00">Stake</Text>}
@@ -930,12 +937,12 @@ const Stake = () => {
                                     ))}
                                 </SelectContent>
                             </SelectRoot> */}
-                                <Button 
-                                    mt={1} h={"30px"}  
-                                    borderColor={"#a67c00"} 
-                                    variant="outline" ml={5} 
-                                    onClick={() => handleStake()}  
-                                    disabled={isLoading || stakeAmount == 0} w={"120px"}
+                                <Button
+                                    mt={1} h={"30px"}
+                                    borderColor={"#a67c00"}
+                                    variant="outline" ml={5}
+                                    onClick={() => handleStake()}
+                                    disabled={isLoading || !stakeAmount || Number(stakeAmount) <= 0} w={"120px"}
                                 >
                                     {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"13px"} color="#a67c00">Stake</Text>}
                                 </Button>
