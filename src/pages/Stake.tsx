@@ -82,7 +82,7 @@ const Stake = () => {
     const [isStaking, setIsStaking] = useState(false);
     const [isUnstaking, setIsUnstaking] = useState(false);
 
-    const [stakeAmount, setStakeAmount] = useState("");
+    const [stakeAmount, setStakeAmount] = useState("0");
 
     const [isTokenInfoLoading, setIsTokenInfoLoading] = useState(true);
     const [isWrapping, setIsWrapping] = useState(false);
@@ -360,7 +360,7 @@ const Stake = () => {
         functionName: "stake",
         args: [
             // address,
-            parseEther(`${stakeAmount}`)
+            parseEther(stakeAmount || "0")
         ],
         onSuccess(data) {
             setIsStaking(false);
@@ -440,8 +440,8 @@ const Stake = () => {
         // If the input is not a number (excluding empty string which is handled separately), return early
         if (value !== "" && isNaN(Number(value))) return;
 
-        // Set the value directly without modification
-        setStakeAmount(value);
+        // Set the value, defaulting to "0" for empty strings to prevent ethers.js errors
+        setStakeAmount(value === "" ? "0" : value);
     }
 
     const handleStake = async () => {
@@ -625,7 +625,7 @@ const Stake = () => {
                                         </Box>
                                         <Box>
                                             <HStack>
-                                                <Box w="auto"><Text fontSize="xs">{formatNumberPrecise(stakeAmount, 4)} </Text></Box>
+                                                <Box w="auto"><Text fontSize="xs">{formatNumberPrecise(stakeAmount || "0", 4)} </Text></Box>
                                                 <Box fontSize="xs">{isTokenInfoLoading ? <Spinner size="xs" /> : token0Info.tokenSymbol}</Box>
                                             </HStack>
                                         </Box>                                    
@@ -860,7 +860,7 @@ const Stake = () => {
                                     </Box>
                                     <Box>
                                     <HStack>
-                                            <Box w="auto"><Text>{formatNumberPrecise(stakeAmount, 4)} </Text></Box>
+                                            <Box w="auto"><Text>{formatNumberPrecise(stakeAmount || "0", 4)} </Text></Box>
                                             <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info.tokenSymbol}</Box>
                                     </HStack>
                                     </Box>
