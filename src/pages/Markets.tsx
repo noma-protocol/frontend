@@ -446,6 +446,7 @@ const Markets: React.FC = () => {
           alignItems="center"
           justifyContent="center"
           color="white"
+          mt={"20%"}
         >
           <Heading as="h2">Connect your wallet</Heading>
         </Box>
