@@ -42,9 +42,22 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
+
       const data = await response.json();
-      // Ensure we return a number
-      return typeof data.price === 'number' ? data.price : parseFloat(data.price);
+
+      // Check if data has a price property
+      if (!data || typeof data.price === 'undefined') {
+        console.error("Invalid price data format:", data);
+        return null;
+      }
+
+      // Ensure we return a number or null if conversion fails
+      try {
+        return typeof data.price === 'number' ? data.price : parseFloat(data.price);
+      } catch (err) {
+        console.error("Error parsing price value:", err);
+        return null;
+      }
     } catch (error) {
       console.error("Error fetching latest price:", error);
       return null;
@@ -57,17 +70,34 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
-      const responseJson  = await response.json();
 
-      const data = responseJson.map((item: PriceData) => ({
-        timestamp: item.timestamp * 1000, // Convert to milliseconds
-        price: item.price,
-      }));
+      const responseJson = await response.json();
 
-      return data.map(item => [
-        Number(item.timestamp),
-        typeof item.price === 'number' ? item.price : parseFloat(item.price)
-      ] as [number, number]);
+      // Check if the response is an array
+      if (!Array.isArray(responseJson)) {
+        console.error("API response is not an array:", responseJson);
+        return [];
+      }
+
+      // Check if array is empty
+      if (responseJson.length === 0) {
+        return [];
+      }
+
+      try {
+        const data = responseJson.map((item: PriceData) => ({
+          timestamp: item.timestamp * 1000, // Convert to milliseconds
+          price: item.price,
+        }));
+
+        return data.map(item => [
+          Number(item.timestamp),
+          typeof item.price === 'number' ? item.price : parseFloat(item.price)
+        ] as [number, number]);
+      } catch (err) {
+        console.error("Error processing price data:", err, "Raw response:", responseJson);
+        return [];
+      }
     } catch (error) {
       console.error("Error fetching price history:", error);
       return [];
