@@ -483,7 +483,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               mt={2}
               ml={8}
               variant="outline"
-              w={"80%"}
+              w={"70%"}
               value={[contributionAmount]} // Direct token value
               onValueChange={(e) => {
                   // Use actual value directly
@@ -502,7 +502,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Box>
               {!isMobile && (
                 <Button
-                    ml={4}
+                    ml={-2}
                     mt={2}
                     variant="outline"
                     // backgroundColor={"#bf9b30"}
