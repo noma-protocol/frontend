@@ -187,7 +187,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
       w={isMobile ? "98%" : "560px"}
       pt={8}
       {...props}
-      h={isMobile ? "420px" : "300px"}
+      h={isMobile ? "440px" : "300px"}
       border="1px solid ivory"
       backgroundColor={"#222831"}
       borderRadius={5}
@@ -454,21 +454,26 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
         {/* </Flex> */}
           {isMobile && (
+            <>
             <Button
               ml={isMobile ? 5 : 7}
               mt={6}
+              mb={20}
               variant="outline"
-              // backgroundColor={"#bf9b30"}
+              backgroundColor={isLoadingExecuteTrade ? "#a67c00" : "transparent"}
               w={isMobile ? "90%" : "210px"}
               onClick={() => {
                 handleExecuteTrade();
               }}
-              h={"30px"}
+              h={"40px"}
               disabled={isLoadingExecuteTrade || isTokenInfoLoading || tradeMode === "BUY" ? amountToBuy <= 0 : amountToSell <= 0}
-              border="1px solid ivory"
+              border="1px solid #a67c00"
+              _hover={{ backgroundColor: isLoadingExecuteTrade ? "#a67c00" : "#a67c0020" }}
             >
-              {isLoadingExecuteTrade ? <Spinner size="sm" /> : <Text fontSize="sm">Execute</Text>}
+              {isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#a67c00">Execute</Text>}
             </Button>
+            <br />       <br />       <br />            
+            </>
               )}
       </GridItem>
 
@@ -504,16 +509,18 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 <Button
                     ml={-2}
                     mt={2}
+                    mb={2}
                     variant="outline"
-                    // backgroundColor={"#bf9b30"}
+                    backgroundColor={isLoadingExecuteTrade ? "#a67c00" : "transparent"}
                     w={isMobile ? "140px" : "160px"}
                     onClick={() => {
                       handleExecuteTrade();
                     }}
-                    disabled={isLoadingExecuteTrade || isLoading  }
+                    disabled={isLoadingExecuteTrade || isLoading}
                     border="1px solid #a67c00"
+                    _hover={{ backgroundColor: isLoadingExecuteTrade ? "#a67c00" : "#a67c0020" }}
                   >
-                    {isLoadingExecuteTrade ? <Spinner size="sm" /> : <Text fontSize="sm" color="#a67c00">Execute</Text>}
+                    {isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#a67c00">Execute</Text>}
                 </Button>
                 )}
 
