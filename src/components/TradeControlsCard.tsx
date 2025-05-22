@@ -453,8 +453,8 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Button
               ml={isMobile ? 5 : 7}
               mt={6}
-              variant="subtle"
-              backgroundColor={"#bf9b30"}
+              variant="outline"
+              // backgroundColor={"#bf9b30"}
               w={isMobile ? "90%" : "210px"}
               onClick={() => {
                 handleExecuteTrade();
@@ -501,8 +501,8 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 <Button
                     ml={4}
                     mt={2}
-                    variant="subtle"
-                    backgroundColor={"#bf9b30"}
+                    variant="outline"
+                    // backgroundColor={"#bf9b30"}
                     w={isMobile ? "140px" : "160px"}
                     onClick={() => {
                       handleExecuteTrade();
@@ -510,7 +510,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                     disabled={isLoadingExecuteTrade || isLoading  }
                     border="1px solid #a67c00"
                   >
-                    {isLoadingExecuteTrade ? <Spinner size="sm" /> : "Execute"}
+                    {isLoadingExecuteTrade ? <Spinner size="sm" /> : <Text fontSize="sm" color="#a67c00">Execute</Text>}
                 </Button>
                 )}
 
