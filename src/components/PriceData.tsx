@@ -88,17 +88,12 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
         lastPrice.current = latestPrice;
         setSpotPrice(latestPrice);
 
-        // If we have history data, use it; otherwise create some placeholder data
+        // Only display actual price history data, no placeholder random data
         if (historyData.length > 0) {
           setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
         } else {
-          const now = Date.now();
-          const initialData = Array.from({ length: 10 }, (_, i) => [
-            now - (9 - i) * 5000,
-            latestPrice * (1 + (Math.random() - 0.5) * 0.02),
-          ]) as [number, number][];
-
-          setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: initialData }]);
+          // Set empty data array when no history is available
+          setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: [] }]);
         }
       }
 
