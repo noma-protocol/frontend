@@ -157,25 +157,30 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
 
 
-  // Calculate slider marks directly without useState/useEffect
+  // Calculate slider marks with percentage labels
   // This ensures marks are always in sync with the current sliderMax
   const marks = React.useMemo(() => {
     // If still loading, use empty labels for first mark
     if (isTokenInfoLoading) {
       return [
         { value: 0, label: "" },
-        { value: 50, label: "50%" },
-        { value: 100, label: "100%" }
+        { value: sliderMax / 2, label: "50%" },
+        { value: sliderMax, label: "100%" }
       ];
     }
+
+    // Calculate evenly spaced values
+    const quarter = sliderMax / 4;
+    const half = sliderMax / 2;
+    const threeQuarters = (sliderMax * 3) / 4;
 
     // When data is loaded, show percentage labels
     return [
       { value: 0, label: "0%" },
-      { value: 50, label: "50%" },
-      { value: 100, label: "100%" }
+      { value: half, label: "50%" },
+      { value: sliderMax, label: "100%" }
     ];
-  }, [isTokenInfoLoading]);
+  }, [isTokenInfoLoading, sliderMax]);
 
   return (
     <Box
@@ -249,13 +254,12 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 variant="outline"
                 w={"82%"}
                 defaultValue={[1]}
-                value={[sliderMax > 0 ? (contributionAmount * 100 / sliderMax) : 0]} // Convert to percentage (0-100)
+                value={[contributionAmount]} // Direct token value
                 onValueChange={(e) => {
-                    // Convert percentage back to actual value
-                    const actualValue = (e.value[0] * sliderMax) / 100;
-                    handleSliderChange(actualValue);
+                    // Use actual value directly
+                    handleSliderChange(e.value[0]);
                 }}
-                max={100} // Max is always 100%
+                max={sliderMax} // Use actual token maximum
                 colorPalette="yellow"
                 thumbAlignment="center"
                 disabled={isTokenInfoLoading}
@@ -480,14 +484,13 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               ml={8}
               variant="outline"
               w={"80%"}
-              value={[sliderMax > 0 ? (contributionAmount * 100 / sliderMax) : 0]} // Convert to percentage (0-100)
+              value={[contributionAmount]} // Direct token value
               onValueChange={(e) => {
-                  // Convert percentage back to actual value
-                  const actualValue = (e.value[0] * sliderMax) / 100;
-                  handleSliderChange(actualValue);
+                  // Use actual value directly
+                  handleSliderChange(e.value[0]);
               }}
-              min={[1]}
-              max={100} // Max is always 100%
+              min={0}
+              max={sliderMax} // Use actual token maximum
               colorPalette="yellow"
               thumbAlignment="center"
               disabled={isTokenInfoLoading}

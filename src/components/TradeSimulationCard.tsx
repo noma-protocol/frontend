@@ -18,6 +18,8 @@ import {
 import { ethers } from 'ethers';
 import { commify, formatNumberPrecise } from '../utils';
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import bnbLogo from "../assets/images/bnb.png";
+import oksLogo from "../assets/images/logo.svg";
 
 import {  DrawerRoot, DrawerTrigger, DrawerContent, DrawerCloseTrigger, DrawerBackdrop, DrawerHeader, DrawerBody, DrawerActionTrigger, DrawerTitle } from "./ui/drawer";
 const { formatEther, parseEther } = ethers.utils;
@@ -205,15 +207,15 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     <Grid
                         h="200px"
                         templateRows="repeat(4, 1fr)"
-                        templateColumns="repeat(2, 1fr)"
+                        templateColumns="repeat(3, 1fr)"
                         gap={4}
                         mb={20}
                         pb={10}
                     >     
-                    <GridItem colSpan={2} ml={2} >
-                        <HStack>
+                    <GridItem colSpan={3} ml={2} >
+                        <HStack h="30px">
                             <Box w="220px">                                
-                                <Text fontSize={"13px"} color="#d6a700" >Spending</Text>
+                                <Text fontSize={"13px"} color="#d6a700" >Spending&nbsp;</Text>
                             </Box>
                             <Box w="220px">
                                     <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
@@ -221,10 +223,13 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                             <Box fontSize={"13px"} textAlign={"right"} w="110px">
                                 {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "BNB"): token0Info.tokenSymbol} 
                             </Box>
+                            <Box h="auto" >
+                                <Image w="85px" src={tradeMode == "BUY" ? bnbLogo : oksLogo } alt="Token Logo" />
+                            </Box>
                         </HStack>
                     </GridItem>
-                    <GridItem colSpan={2} mt={-4} ml={2}>
-                        <HStack>
+                    <GridItem colSpan={3} mt={-4} ml={2}>
+                        <HStack h="30px">
                             <Box  w="220px">                                
                                 <Text fontSize={"13px"} color="#d6a700">Receiving</Text>
                             </Box>
@@ -235,6 +240,9 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                             </Box>
                             <Box fontSize={"13px"} textAlign={"right"}  w="110px">
                                 {isLoading ? <Spinner size="sm" /> : tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "BNB" : "WBNB")} 
+                            </Box>
+                            <Box h="auto" >
+                                <Image w="85px" src={tradeMode == "BUY" ? oksLogo : bnbLogo } alt="Token Logo" />
                             </Box>
                         </HStack>
                     </GridItem>
