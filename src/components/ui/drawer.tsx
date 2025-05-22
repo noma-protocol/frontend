@@ -16,7 +16,7 @@ export const DrawerContent = React.forwardRef<
   const { children, portalled = true, portalRef, offset, ...rest } = props
   return (
     <Portal disabled={!portalled} container={portalRef}>
-      <ChakraDrawer.Positioner padding={offset}>
+      <ChakraDrawer.Positioner padding={offset} zIndex={3000}>
         <ChakraDrawer.Content ref={ref} {...rest} asChild={false} backgroundColor={"#222831"}>
           {children}
         </ChakraDrawer.Content>
@@ -49,7 +49,9 @@ export const DrawerRoot = ChakraDrawer.Root
 export const DrawerFooter = ChakraDrawer.Footer
 export const DrawerHeader = ChakraDrawer.Header
 export const DrawerBody = ChakraDrawer.Body
-export const DrawerBackdrop = ChakraDrawer.Backdrop
+export const DrawerBackdrop = (props: any) => (
+  <ChakraDrawer.Backdrop {...props} zIndex={2900} />
+)
 export const DrawerDescription = ChakraDrawer.Description
 export const DrawerTitle = ChakraDrawer.Title
 export const DrawerActionTrigger = ChakraDrawer.ActionTrigger
