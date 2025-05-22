@@ -34,7 +34,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   const [selectedInterval, setSelectedInterval] = useState<string>(interval);
   const [apiError, setApiError] = useState<boolean>(false);
   const lastPrice = useRef<number | null>(null);
-  const API_BASE_URL = "http://localhost:3000"; // Local API endpoint
+  const API_BASE_URL = "https://prices.oikos.cash";
 
   const fetchLatestPrice = async () => {
     try {
@@ -57,7 +57,13 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
-      const data: PriceData[] = await response.json();
+      const responseJson  = await response.json();
+
+      const data = responseJson.map((item: PriceData) => ({
+        timestamp: item.timestamp * 1000, // Convert to milliseconds
+        price: item.price,
+      }));
+
       return data.map(item => [
         Number(item.timestamp),
         typeof item.price === 'number' ? item.price : parseFloat(item.price)
