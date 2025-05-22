@@ -45,15 +45,26 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
 
       const data = await response.json();
 
-      // Check if data has a price property
-      if (!data || typeof data.price === 'undefined') {
+      // Extract price from different possible API response formats
+      let priceValue;
+
+      if (typeof data.price !== 'undefined') {
+        // Direct price property
+        priceValue = data.price;
+      } else if (data.data && typeof data.data.price !== 'undefined') {
+        // Nested data object with price
+        priceValue = data.data.price;
+      } else if (Array.isArray(data.data) && data.data.length > 0 && typeof data.data[data.data.length-1].price !== 'undefined') {
+        // Array of price data, take the latest entry
+        priceValue = data.data[data.data.length-1].price;
+      } else {
         console.error("Invalid price data format:", data);
         return null;
       }
 
       // Ensure we return a number or null if conversion fails
       try {
-        return typeof data.price === 'number' ? data.price : parseFloat(data.price);
+        return typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
       } catch (err) {
         console.error("Error parsing price value:", err);
         return null;
@@ -73,19 +84,30 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
 
       const responseJson = await response.json();
 
-      // Check if the response is an array
-      if (!Array.isArray(responseJson)) {
-        console.error("API response is not an array:", responseJson);
+      // Extract the price data array
+      // The API might return either an array directly or an object with a data property
+      let priceDataArray;
+
+      if (Array.isArray(responseJson)) {
+        // If the response is already an array, use it directly
+        priceDataArray = responseJson;
+      } else if (responseJson && typeof responseJson === 'object' && Array.isArray(responseJson.data)) {
+        // If the response is an object with a data array property, use that
+        priceDataArray = responseJson.data;
+        console.log(`Found ${priceDataArray.length} price points for ${responseJson.pair} at ${intervalMinutes} minute interval`);
+      } else {
+        // Neither format is valid
+        console.error("API response doesn't contain valid price data:", responseJson);
         return [];
       }
 
       // Check if array is empty
-      if (responseJson.length === 0) {
+      if (priceDataArray.length === 0) {
         return [];
       }
 
       try {
-        const data = responseJson.map((item: PriceData) => ({
+        const data = priceDataArray.map((item: PriceData) => ({
           timestamp: item.timestamp * 1000, // Convert to milliseconds
           price: item.price,
         }));
@@ -95,7 +117,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
           typeof item.price === 'number' ? item.price : parseFloat(item.price)
         ] as [number, number]);
       } catch (err) {
-        console.error("Error processing price data:", err, "Raw response:", responseJson);
+        console.error("Error processing price data:", err, "Raw data array:", priceDataArray);
         return [];
       }
     } catch (error) {
