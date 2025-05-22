@@ -602,7 +602,7 @@ const Borrow = () => {
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) ;
     
     return (
-        <Container maxW="container.xl=" py={12} pl={"0%"} ml={"3%"}>
+        <Container maxW="container.xl=" py={12} pl={"0%"} ml={isMobile ? "3%" : "8%"}>
             <Toaster />
 
             {!isConnected ? (

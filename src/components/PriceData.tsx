@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import Chart from "react-apexcharts";
 import { Box, Text } from "@chakra-ui/react";
 import { ethers } from "ethers";
-import { abi as IUniswapV3PoolABI } from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
 import { isMobile } from "react-device-detect";
 const { formatEther } = ethers.utils;
 
@@ -12,6 +11,13 @@ type UniswapPriceChartProps = {
   token0Symbol: string;
   token1Symbol: string;
   imv: string;
+  interval?: string; // Optional interval parameter
+};
+
+// Price data type from API
+type PriceData = {
+  timestamp: number;
+  price: number;
 };
 
 const PriceData: React.FC<UniswapPriceChartProps> = ({
@@ -20,63 +26,95 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   token0Symbol,
   token1Symbol,
   imv,
+  interval = "5", // Default to 5 minutes interval
 }) => {
   const [series, setSeries] = useState([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: [] }]);
   const [spotPrice, setSpotPrice] = useState<number | null>(null);
+  const [availableIntervals, setAvailableIntervals] = useState<string[]>([]);
+  const [selectedInterval, setSelectedInterval] = useState<string>(interval);
+  const [apiError, setApiError] = useState<boolean>(false);
   const lastPrice = useRef<number | null>(null);
+  const API_BASE_URL = "http://localhost:3000"; // Local API endpoint
 
   const fetchLatestPrice = async () => {
     try {
-      const provider = new ethers.providers.JsonRpcProvider(providerUrl);
-      const poolContract = new ethers.Contract(poolAddress, IUniswapV3PoolABI, provider);
-      const slot0 = await poolContract.slot0();
-      const sqrtPriceX96 = slot0.sqrtPriceX96;
-      const price = (Number(sqrtPriceX96) ** 2) / 2 ** 192;
-      // console.log("Fetched price:", price);
-      return price;
-    } catch (error) { 
-      console.error("Error fetching price:", error);
+      const response = await fetch(`${API_BASE_URL}/price/latest`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      const data = await response.json();
+      // Ensure we return a number
+      return typeof data.price === 'number' ? data.price : parseFloat(data.price);
+    } catch (error) {
+      console.error("Error fetching latest price:", error);
       return null;
     }
   };
 
+  const fetchPriceHistory = async (intervalMinutes: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/prices/${intervalMinutes}`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      const data: PriceData[] = await response.json();
+      return data.map(item => [
+        Number(item.timestamp),
+        typeof item.price === 'number' ? item.price : parseFloat(item.price)
+      ] as [number, number]);
+    } catch (error) {
+      console.error("Error fetching price history:", error);
+      return [];
+    }
+  };
+
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let pollInterval: NodeJS.Timeout;
 
     const startFetching = async () => {
-      // console.log("Starting price updates...");
-      const initialPrice = await fetchLatestPrice();
-      if (initialPrice === null) return;
-      lastPrice.current = initialPrice;
-      setSpotPrice(initialPrice);
+      // Fetch the initial price history
+      const historyData = await fetchPriceHistory(selectedInterval);
 
-      const now = Date.now();
-      const initialData = Array.from({ length: 10 }, (_, i) => [
-        now - (9 - i) * 5000,
-        initialPrice * (1 + (Math.random() - 0.5) * 0.02),
-      ]) as [number, number][];
+      // Fetch the latest price
+      const latestPrice = await fetchLatestPrice();
 
-      setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: initialData }]);
-      // console.log("Initial data:", initialData);
+      if (latestPrice !== null) {
+        lastPrice.current = latestPrice;
+        setSpotPrice(latestPrice);
 
-      interval = setInterval(async () => {
+        // If we have history data, use it; otherwise create some placeholder data
+        if (historyData.length > 0) {
+          setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
+        } else {
+          const now = Date.now();
+          const initialData = Array.from({ length: 10 }, (_, i) => [
+            now - (9 - i) * 5000,
+            latestPrice * (1 + (Math.random() - 0.5) * 0.02),
+          ]) as [number, number][];
+
+          setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: initialData }]);
+        }
+      }
+
+      // Set up polling for price updates
+      pollInterval = setInterval(async () => {
         const newPrice = await fetchLatestPrice();
         if (newPrice !== null && newPrice !== lastPrice.current) {
           lastPrice.current = newPrice;
           setSpotPrice(newPrice);
           setSeries((prevSeries) => {
             const newData = [...prevSeries[0].data, [Date.now(), newPrice]];
-            if (newData.length > 10) newData.shift();
-            // console.log("Updated series:", JSON.stringify(newData, null, 2));
+            // Limit the number of data points to keep the chart performant
+            if (newData.length > 100) newData.shift();
             return [{ ...prevSeries[0], data: newData }];
           });
         }
-      }, 5000);
+      }, 5000); // Poll every 5 seconds
     };
 
     startFetching();
-    return () => clearInterval(interval);
-  }, [poolAddress, providerUrl, token0Symbol, token1Symbol]);
+    return () => clearInterval(pollInterval);
+  }, [poolAddress, providerUrl, token0Symbol, token1Symbol, selectedInterval]);
 
   // Compute the minimum y value from your series data
   const computedMinY =
@@ -131,7 +169,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
                   color: "#fff",
                   background: "#FF4560",
                 },
-                text: `Spot Price: ${spotPrice.toFixed(6)} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
+                text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00'} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
               },
             },
             {
@@ -144,7 +182,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
                   color: "#fff",
                   background: "black",
                 },
-                text: `IMV: ${Number(formatEther(`${imv}`)).toFixed(6)}`,
+                text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(6) : '0.00'}`,
                 offsetY: -10, // Adjust offset if needed
               },
             },
@@ -153,12 +191,123 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
     },
   };
 
+  useEffect(() => {
+    // Use predefined intervals instead of fetching from API
+    setAvailableIntervals(predefinedIntervals);
+
+    // Optionally, you can still fetch from API and merge with predefined intervals
+    /*
+    const fetchIntervals = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/intervals`);
+        if (response.ok) {
+          const data = await response.json();
+          // Filter out any intervals that might conflict with predefined ones
+          const apiIntervals = data.filter(i => !predefinedIntervals.includes(i));
+          setAvailableIntervals([...predefinedIntervals, ...apiIntervals]);
+        }
+      } catch (error) {
+        console.error("Error fetching intervals:", error);
+        // Fall back to predefined intervals if API fails
+        setAvailableIntervals(predefinedIntervals);
+      }
+    };
+
+    fetchIntervals();
+    */
+  }, []);
+
+  const handleIntervalChange = async (newInterval: string) => {
+    setSelectedInterval(newInterval);
+
+    // Fetch new price history data immediately when interval changes
+    const historyData = await fetchPriceHistory(newInterval);
+    if (historyData.length > 0) {
+      setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
+    }
+  };
+
+  // Define predefined time intervals
+  const predefinedIntervals = ["5", "15", "30", "60", "1440"]; // 5m, 15m, 30m, 1h, 24h in minutes
+
+  // Convert numeric interval to display format
+  const formatIntervalDisplay = (interval: string) => {
+    const num = parseInt(interval, 10);
+    if (num < 60) return `${num}m`;
+    if (num === 60) return `1h`;
+    if (num === 1440) return `24h`;
+    return `${num / 60}h`;
+  };
+
+  // Update error handlers
+  useEffect(() => {
+    const checkApiConnection = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/`);
+        setApiError(!response.ok);
+      } catch (error) {
+        console.error("API connection error:", error);
+        setApiError(true);
+      }
+    };
+
+    checkApiConnection();
+    const connectionCheck = setInterval(checkApiConnection, 10000); // Check connection every 10 seconds
+
+    return () => clearInterval(connectionCheck);
+  }, []);
+
   return (
     <Box ml={isMobile ? -5 : 0}>
-      {series[0].data.length === 0 ? (
-        <Text fontSize="sm" ml={isMobile ? 5 : 0} mb={isMobile ? 2 : 0}>Loading price data...</Text>
+      {apiError ? (
+        <Box h="30px" bg="red.800" p={2} borderRadius="md">
+          <Text fontSize="sm" color="white">API connection error. Please check that the price API is running on port 3000.</Text>
+        </Box>
+      ) : series[0].data.length === 0 ? (
+        <Box h="30px"><Text fontSize="sm" ml={isMobile ? 5 : 0}>Loading price data... </Text></Box>
       ) : (
-        <Chart options={chartOptions} series={series} type="area" height={isMobile ? 250 : 300} w={isMobile ? "200px": "auto"} />
+        <>
+          <Box
+            display="flex"
+            justifyContent="left"
+            mt={-4}
+            ml={isMobile ? 2 : 0}
+            p={2}
+            borderRadius="md"
+            boxShadow="md"
+            h="40px"
+          >
+            {availableIntervals.length > 0 && (
+              <Box display="flex" gap={3} alignItems="left">
+                {availableIntervals.map((int) => (
+                  <Box
+                    key={int}
+                    px={3}
+                    py={1}
+                    borderRadius="md"
+                    bg={selectedInterval === int ? "#00ffc0" : "gray.700"}
+                    cursor="pointer"
+                    onClick={() => handleIntervalChange(int)}
+                    _hover={{ bg: selectedInterval === int ? "cyan.600" : "gray.600" }}
+                    transition="all 0.2s"
+                  >
+                    <Text
+                      mt={-4}
+                      fontSize="xs"
+                      fontWeight={selectedInterval === int ? "bold" : "normal"}
+                      color={selectedInterval === int ? "black" : "white"}
+                    >
+                      {formatIntervalDisplay(int)}
+                    </Text>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+          <Box mt={-5}>
+            <Chart options={chartOptions} series={series} type="area" height={isMobile ? 250 : 300} w={isMobile ? "200px": "auto"} />
+          </Box>
+        </>
       )}
     </Box>
   );

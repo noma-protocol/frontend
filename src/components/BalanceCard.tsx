@@ -24,7 +24,8 @@ import {
 } from '../components/ui/drawer';
 import { ethers } from 'ethers';
 import { commify } from '../utils';
-import monadLogo from '../assets/images/monad.png';
+// import monadLogo from '../assets/images/monad.png';
+import bnbLogo from '../assets/images/bnb.png';
 import oksLogo from '../assets/images/logo_dark.png';
 import placeHolder from '../assets/images/question.svg';
 
@@ -131,23 +132,24 @@ const BalanceCard = ({
         >
             <Text fontWeight="bold" fontSize={isMobile ? "xs" : "14px"} color="#a67c00" mb={2}>Wallet</Text>
             
-            <SimpleGrid columns={3} spacing={2}>
+            <SimpleGrid columns={3} w="auto">
                 {/* Header Row */}
                 <Box color="white" background="#a67c00"  pl={3}>
                     <Text  fontSize="xs">Asset</Text>
                 </Box>
-                <Box  color="white" background="#a67c00" textAlign="left">
-                    <Text  fontSize="xs">Balance</Text>
+                <Box  color="white" background="#a67c00" textAlign="left" >
+                    <Text  fontSize="xs">Balance</Text> 
                 </Box>
-                <Box color="white" background="#a67c00" textAlign="center">
+                
+                <Box color="white" background="#a67c00" textAlign="center"> 
                     <Text  fontSize="xs">Actions</Text>
                 </Box>
                 
-                {/* MON Row */}
+                {/* BNB Row */}
                 <Box p={2} height="42px" display="flex" alignItems="center">
                     <HStack spacing={2}>
-                        <Image src={monadLogo} w="25px" alt="MON" />
-                        <Text fontSize="xs" mt={"-2px"} ml={2}>MON</Text>
+                        <Image src={bnbLogo} w="40px" alt="BNB" ml={-2} />
+                        <Text fontSize="xs" mt={"-2px"} ml={2}>BNB</Text>
                     </HStack>
                 </Box>
                 <Box w="250px" p={2} fontSize={fontSize} textAlign="left" height="42px" display="flex" alignItems="left" justifyContent="left">
@@ -178,10 +180,10 @@ const BalanceCard = ({
                             <Box p={4} mt={{ base: "50%", md: "80%" }} >
                                 <DrawerHeader>
                                     <DrawerTitle>
-                                        <Text as="h3" color="#bf9b30">Wrap MON</Text>
+                                        <Text as="h3" color="#bf9b30">Wrap BNB</Text>
                                     </DrawerTitle>
                                     <DrawerCloseTrigger asChild>
-                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada">×</Button>
+                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada"><Text color="#dadada">×</Text></Button>
                                     </DrawerCloseTrigger>
                                 </DrawerHeader>
                                 <DrawerBody>
@@ -212,12 +214,12 @@ const BalanceCard = ({
                     </Box>
                 </Box>
                 
-                {/* WMON Row */}
+                {/* WBNB Row */}
                 <Box p={2} height="42px" display="flex" alignItems="center">
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
                         <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2}>
-                            <Image src={monadLogo} w="25px" alt={token1Symbol || 'Token'} />
+                            <Image src={bnbLogo} w="40px" alt={token1Symbol || 'Token'} ml={-2} />
                             <Text fontSize="xs"  ml={2} mt={"-2px"}>{token1Symbol || <Spinner size="sm" />}</Text>
                         </HStack>
                     }
@@ -253,7 +255,7 @@ const BalanceCard = ({
                                         <Text as="h3" color="#bf9b30">Unwrap {token1Symbol}</Text>
                                     </DrawerTitle>
                                     <DrawerCloseTrigger asChild>
-                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada">×</Button>
+                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada"><Text color="#dadada">×</Text></Button>
                                     </DrawerCloseTrigger>
                                 </DrawerHeader>
                                 <DrawerBody>
@@ -297,7 +299,7 @@ const BalanceCard = ({
                                 
                             />
                             </Box>
-                            <Box>
+                            <Box ml={2}>
                                <Text ml={token0Symbol == "OKS" ? "-20px" : 0} fontSize="xs">&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
                             </Box>
                         </HStack>

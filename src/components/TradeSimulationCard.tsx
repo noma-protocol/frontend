@@ -68,13 +68,13 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     const askQuote = _askQuote ? parseFloat(formatEther(_askQuote[0])) : null;
 
     // 1) Compute per-token rates:
-    const bidRate = (bidQuote && amountToBuy && amountToBuy !== 0) ? bidQuote / amountToBuy : 0;   // e.g. 1.00420996 MON/TOK
-    const askRate = (askQuote && amountToSell && amountToSell !== 0) ? askQuote / amountToSell : 0;   // e.g. 0.91337       MON/TOK
+    const bidRate = (bidQuote && amountToBuy && amountToBuy !== 0) ? bidQuote / amountToBuy : 0;   // e.g. 1.00420996 BNB/TOK
+    const askRate = (askQuote && amountToSell && amountToSell !== 0) ? askQuote / amountToSell : 0;   // e.g. 0.91337       BNB/TOK
 
     // 2) Mid-price:
     const midRate = (bidRate && askRate) ? (bidRate + askRate) / 2 : 0;     // ~1.000605
 
-    // 3) Absolute spread in MON/TOK:
+    // 3) Absolute spread in BNB/TOK:
     const absSpread = (bidRate && askRate) ? askRate - bidRate : 0;        // negative if bid>ask
 
     // 4) Percent spread relative to mid-price:
@@ -84,10 +84,10 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     // console.log("Trade Mode:",       tradeMode);
     // console.log("Amount to Buy:",    amountToBuy);
     // console.log("Amount to Sell:",   amountToSell);
-    // console.log("Bid Price (MON/TOK):", bidRate.toFixed(6));
-    // console.log("Ask Price (MON/TOK):", askRate.toFixed(6));
+    // console.log("Bid Price (BNB/TOK):", bidRate.toFixed(6));
+    // console.log("Ask Price (BNB/TOK):", askRate.toFixed(6));
     // console.log("Mid Price:",           midRate.toFixed(6));
-    // console.log("Spread (MON/TOK):",    absSpread.toFixed(6));
+    // console.log("Spread (BNB/TOK):",    absSpread.toFixed(6));
     // console.log("Spread (%):",          spreadPct.toFixed(2));
 
     // console.log(`Dummy Quote Bid: ${quoteBid}`);
@@ -169,14 +169,14 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                         <HStack >
                             <Box w="90px" textAlign={"left"} ><Text fontSize={"xs"} color="#d6a700">{firstContent}</Text></Box>
                             <Box w="120px"><Text fontSize={"13px"} >{tradeMode == "BUY" ?  formatNumberPrecise(amountToBuy, 4) : formatNumberPrecise(amountToSell, 4) }</Text></Box>
-                            <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
+                            <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "BNB"): token0Info.tokenSymbol} </Box>
                         </HStack>
                         <HStack >
                             <Box w="90px" textAlign={"left"} ><Text fontSize={"xs"} color="#d6a700">{secondContent}</Text></Box>
                             <Box w="120px" ><Text fontSize={"13px"}>{tradeMode == "BUY" ?
                                 (bidRate && bidRate !== 0 ? formatNumberPrecise(amountToBuy / bidRate, 4) : "0") :
                                 (askRate ? formatNumberPrecise(amountToSell * askRate, 4) : "0")}</Text></Box>
-                            <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
+                            <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "BNB" : "WBNB")} </Box>
                         </HStack>                        
                     </VStack>
                     </>
@@ -189,7 +189,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     //         <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
                     //     </Box>
                     //     <Box fontSize={"13px"} textAlign={"right"}>
-                    //         {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} 
+                    //         {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "BNB"): token0Info.tokenSymbol} 
                     //     </Box>
                     //     {/* <Box w="110px" >
                     //         <Text fontSize={"13px"} color="#d6a700">Receiving</Text>
@@ -198,7 +198,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     //         <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text>
                     //     </Box>
                     //     <Box fontSize={"13px"} textAlign={"right"}>
-                    //         {tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} 
+                    //         {tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "BNB" : "WBNB")} 
                     //     </Box> */}
 
                     // </SimpleGrid>             
@@ -209,7 +209,6 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                         gap={4}
                         mb={20}
                         pb={10}
-                        border="1px solid #444"
                     >     
                     <GridItem colSpan={2} ml={2} >
                         <HStack>
@@ -220,7 +219,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                                     <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
                             </Box>
                             <Box fontSize={"13px"} textAlign={"right"} w="110px">
-                                {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} 
+                                {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "BNB"): token0Info.tokenSymbol} 
                             </Box>
                         </HStack>
                     </GridItem>
@@ -235,7 +234,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                                     (askRate ? formatNumberPrecise(amountToSell * askRate) : "0")}</Text>
                             </Box>
                             <Box fontSize={"13px"} textAlign={"right"}  w="110px">
-                                {isLoading ? <Spinner size="sm" /> : tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} 
+                                {isLoading ? <Spinner size="sm" /> : tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "BNB" : "WBNB")} 
                             </Box>
                         </HStack>
                     </GridItem>
