@@ -62,11 +62,11 @@ const Header: React.FC = () => {
             <Text color="#f3f7c6">Markets</Text>
               </Link>
             </li>
-            <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("launchpad") > -1 ? "1px solid #a67c00" : "none"}}>
+            {/* <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("launchpad") > -1 ? "1px solid #a67c00" : "none"}}>
             <Link className="nav-link" href="/launchpad">
                   <Text color="#f3f7c6">Launchpad</Text>
               </Link>
-            </li>
+            </li> */}
           {/* <li className="nav-item">
               <Link className="nav-link" href="/bootstrap">
                   Bootstrap
@@ -164,7 +164,7 @@ const Header: React.FC = () => {
                         Exchange
                       </a>
                     </li>                     
-                    <li
+                    {/* <li
                       className="nav-item"
                       data-bs-dismiss="modal"
                       style={{ fontSize: "20px", marginTop:"20px"}}
@@ -172,7 +172,7 @@ const Header: React.FC = () => {
                       <a className="btn ml-lg-auto btn-bordered-white" href="/launchpad" >
                         Launchpad
                       </a>
-                    </li>                
+                    </li>                 */}
                     <li className="nav-item" style={{ fontSize: "20px", marginTop:"20px"}}>
                       <a className="btn ml-lg-auto btn-bordered-white" href="/markets">
                         Markets
