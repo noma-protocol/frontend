@@ -27,10 +27,10 @@ const router = createBrowserRouter([
         path: "/presale",
         element: <Presale  />,
       },
-      {
-        path: "/launchpad",
-        element: <Launchpad  />,
-      },
+      // {
+      //   path: "/launchpad",
+      //   element: <Launchpad  />,
+      // },
       {
         path: "/markets",
         element: <Markets  />,
