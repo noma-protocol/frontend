@@ -168,17 +168,23 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                 {isMobile ? (
                     <>
                     <VStack mt={5} ml={20}>
-                        <HStack >
+                        <HStack h="30px">
                             <Box w="90px" textAlign={"left"} ><Text fontSize={"xs"} color="#d6a700">{firstContent}</Text></Box>
                             <Box w="120px"><Text fontSize={"13px"} >{tradeMode == "BUY" ?  formatNumberPrecise(amountToBuy, 4) : formatNumberPrecise(amountToSell, 4) }</Text></Box>
                             <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "BNB"): token0Info.tokenSymbol} </Box>
+                            <Box h="auto" >
+                                <Image w="35px" src={tradeMode == "BUY" ? bnbLogo : oksLogo } alt="Token Logo" />
+                            </Box>
                         </HStack>
-                        <HStack >
+                        <HStack h="30px">
                             <Box w="90px" textAlign={"left"} ><Text fontSize={"xs"} color="#d6a700">{secondContent}</Text></Box>
                             <Box w="120px" ><Text fontSize={"13px"}>{tradeMode == "BUY" ?
                                 (bidRate && bidRate !== 0 ? formatNumberPrecise(amountToBuy / bidRate, 4) : "0") :
                                 (askRate ? formatNumberPrecise(amountToSell * askRate, 4) : "0")}</Text></Box>
                             <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "BNB" : "WBNB")} </Box>
+                            <Box h="auto" >
+                                <Image w="35px" src={tradeMode == "BUY" ? oksLogo : bnbLogo } alt="Token Logo" />
+                            </Box>
                         </HStack>                        
                     </VStack>
                     </>
