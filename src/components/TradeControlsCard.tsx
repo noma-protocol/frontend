@@ -66,7 +66,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 }) => {
 
   // console.log(`Token0Balance = ${token0Balance} | Token1Balance = ${token1Balance}`);
-  // Format the MON balance (and avoid oversize values)
+  // Format the BNB balance (and avoid oversize values)
   let formattedEthBalance = formatEther(`${ethBalance}`);
   if (Number(formattedEthBalance) > 1_000_000) {
     formattedEthBalance = commify(999999.9999);
@@ -429,7 +429,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 isChecked={useWeth === true}
                 onChange={() => setUseWeth(true)}
               >
-                <b>WMON</b>
+                <b>WBNB</b>
               </CustomRadio>
               <CustomRadio
                 value="0"
@@ -437,7 +437,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 isChecked={useWeth === false}
                 onChange={() => setUseWeth(false)}
               >
-                <b>MON</b>
+                <b>BNB</b>
               </CustomRadio>
             </HStack>
             </Box>
