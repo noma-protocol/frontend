@@ -155,12 +155,27 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
         if (newPrice !== null && newPrice !== lastPrice.current) {
           lastPrice.current = newPrice;
           setSpotPrice(newPrice);
-          setSeries((prevSeries) => {
-            const newData = [...prevSeries[0].data, [Date.now(), newPrice]];
-            // Limit the number of data points to keep the chart performant
-            if (newData.length > 100) newData.shift();
-            return [{ ...prevSeries[0], data: newData }];
-          });
+
+          // Only append new price points if we're using the 5-minute interval
+          // For other intervals, we should refetch the complete data set
+          if (selectedInterval === "5") {
+            setSeries((prevSeries) => {
+              // Create a copy of the existing data
+              const newData = [...prevSeries[0].data];
+
+              // Add the new data point with current timestamp
+              newData.push([Date.now(), newPrice]);
+
+              // Limit the number of data points to keep the chart performant
+              if (newData.length > 100) newData.shift();
+
+              return [{ ...prevSeries[0], data: newData }];
+            });
+          } else {
+            // For other intervals, do a complete refresh of the data
+            // but only update the spot price to avoid unnecessary API calls
+            console.log(`Updating spot price only for ${selectedInterval} minute interval`);
+          }
         }
       }, 5000); // Poll every 5 seconds
     };
@@ -271,13 +286,27 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   }, []);
 
   const handleIntervalChange = async (newInterval: string) => {
+    console.log(`Changing interval from ${selectedInterval} to ${newInterval}`);
+
+    // Only proceed if the interval is actually changing
+    if (newInterval === selectedInterval) {
+      return;
+    }
+
+    // Update the selected interval state
     setSelectedInterval(newInterval);
 
     // Fetch new price history data immediately when interval changes
     const historyData = await fetchPriceHistory(newInterval);
-    if (historyData.length > 0) {
-      setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
-    }
+
+    // Always update the series, even if empty (to clear any existing data)
+    setSeries([{
+      name: `Price ${token0Symbol}/${token1Symbol}`,
+      data: historyData
+    }]);
+
+    // Log what we're setting
+    console.log(`Updated chart with ${historyData.length} data points for ${newInterval} minute interval`);
   };
 
   // Define predefined time intervals
