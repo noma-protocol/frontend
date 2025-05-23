@@ -215,21 +215,6 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       ? Math.min(...series[0].data.map((item: [number, number]) => item[1]))
       : 0;
 
-  // Calculate if spot price and IMV are too close to each other
-  const isAnnotationsOverlapping = () => {
-    if (!spotPrice || !imv) return false;
-
-    const imvValue = Number(formatEther(`${imv}`));
-    const priceDifference = Math.abs(spotPrice - imvValue);
-    const chartRange = series[0].data.length > 0
-      ? Math.max(...series[0].data.map((item: [number, number]) => item[1])) -
-        Math.min(...series[0].data.map((item: [number, number]) => item[1]))
-      : 0;
-
-    // Consider them overlapping if they're within 10% of the chart range
-    return chartRange > 0 && priceDifference < (chartRange * 0.1);
-  };
-
   const chartOptions = {
     chart: {
       type: "area",
@@ -265,42 +250,40 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
     grid: { show: false },
     dataLabels: { enabled: false },
     annotations: {
-      yaxis: spotPrice && imv
-        ? [
-            {
-              y: spotPrice,
-              borderColor: "#FF4560",
-              strokeDashArray: 4,
-              label: {
-                borderColor: "#FF4560",
-                style: {
-                  color: "#fff",
-                  background: "#FF4560",
-                },
-                text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00'} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
-                position: isAnnotationsOverlapping() ? 'right' : 'left',
-                offsetX: isAnnotationsOverlapping() ? 10 : -10,
-                offsetY: 0,
-              },
+      yaxis: [
+        {
+          y: spotPrice,
+          borderColor: "#FF4560",
+          strokeDashArray: 4,
+          label: {
+            borderColor: "#FF4560",
+            style: {
+              color: "#fff",
+              background: "#FF4560",
             },
-            {
-              y: Number(formatEther(`${imv || 0}`)), // Use actual IMV value
-              borderColor: "yellow",
-              strokeDashArray: 4,
-              label: {
-                borderColor: "yellow",
-                style: {
-                  color: "#fff",
-                  background: "black",
-                },
-                text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(6) : '0.00'}`,
-                position: isAnnotationsOverlapping() ? 'left' : 'right',
-                offsetX: isAnnotationsOverlapping() ? -10 : 10,
-                offsetY: isAnnotationsOverlapping() ? -30 : -10,
-              },
+            text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00'} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
+            position: 'left',
+            offsetX: 0,
+            offsetY: 0,
+          },
+        },
+        imv ? {
+          y: parseFloat(formatEther(imv)),
+          borderColor: "yellow",
+          strokeDashArray: 4,
+          label: {
+            borderColor: "yellow",
+            style: {
+              color: "#fff",
+              background: "black",
             },
-          ]
-        : [],
+            text: `IMV: ${imv ? parseFloat(formatEther(imv)).toFixed(6) : '0.00'}`,
+            position: 'right',
+            offsetX: 0,
+            offsetY: -5,
+          },
+        } : null,
+      ].filter(Boolean),
     },
   };
 
