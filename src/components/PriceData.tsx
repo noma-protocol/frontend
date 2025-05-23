@@ -3,6 +3,7 @@ import Chart from "react-apexcharts";
 import { Box, Text } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { isMobile } from "react-device-detect";
+import { isWithinPercentageDifference } from "../utils";
 const { formatEther } = ethers.utils;
 
 type UniswapPriceChartProps = {
@@ -22,6 +23,7 @@ type PriceData = {
 
 // Add onPercentChange callback to props
 interface ExtendedPriceChartProps extends UniswapPriceChartProps {
+  setPercentChange?: (percent: number) => void; // Optional callback to set percent change
   onPercentChange?: (percent: number) => void;
 }
 
@@ -32,6 +34,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   token1Symbol,
   imv,
   interval = "60", // Default to 1 hour interval
+  setPercentChange = () => {}, // Default no-op function
   onPercentChange,
 }) => {
   const [series, setSeries] = useState([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: [] }]);
@@ -39,9 +42,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   const [availableIntervals, setAvailableIntervals] = useState<string[]>([]);
   const [selectedInterval, setSelectedInterval] = useState<string>(interval);
   const [apiError, setApiError] = useState<boolean>(false);
-  const [percentChange, setPercentChange] = useState<number>(0);
+  // const [percentChange, setPercentChange] = useState<number>(0);
   const lastPrice = useRef<number | null>(null);
   const lastRefreshTime = useRef<number | null>(null);
+  // Store interval price data to check if prices are the same
+  const [intervalPriceData, setIntervalPriceData] = useState<Record<string, [number, number][]>>({});
+  // Track which intervals have static prices
+  const [staticIntervals, setStaticIntervals] = useState<Record<string, boolean>>({});
   const API_BASE_URL = "https://prices.oikos.cash"; // Replace with your actual API base URL
 
   const fetchLatestPrice = async () => {
@@ -170,12 +177,47 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     return change;
   };
 
+  /**
+   * Check if prices are static (all within a small percentage difference)
+   * Returns true if the last 10 prices are all within 0.1% of each other,
+   * which indicates that the prices are essentially static for this interval.
+   * This is used to disable interval buttons when there's no meaningful price movement.
+   */
+  const checkStaticPrices = (historyData: [number, number][]) => {
+    if (!historyData || historyData.length < 10) return false;
+
+    // Take the last 10 price points
+    const last10Prices = historyData.slice(-10).map(item => item[1]);
+
+    // Check if all prices are within 0.1% of each other
+    for (let i = 1; i < last10Prices.length; i++) {
+      if (!isWithinPercentageDifference(last10Prices[0], last10Prices[i], 0.1)) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   useEffect(() => {
     let pollInterval: NodeJS.Timeout;
 
     const startFetching = async () => {
       // Fetch the initial price history
       const historyData = await fetchPriceHistory(selectedInterval);
+
+      // Update interval price data
+      setIntervalPriceData(prevData => ({
+        ...prevData,
+        [selectedInterval]: historyData
+      }));
+
+      // Check if prices are static for the current interval
+      const isStatic = checkStaticPrices(historyData);
+      setStaticIntervals(prev => ({
+        ...prev,
+        [selectedInterval]: isStatic
+      }));
 
       // Fetch the latest price
       const latestPrice = await fetchLatestPrice();
@@ -229,22 +271,62 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
           if (shouldRefreshAll) {
             console.log(`Refreshing price data for ${selectedInterval} interval`);
-            fetchPriceHistory(selectedInterval).then(historyData => {
-              if (historyData.length > 0) {
-                setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
 
-                // Recalculate percentage change with new data
-                const change = calculatePercentChange(historyData);
-                setPercentChange(change);
+            // Fetch price history for the current interval
+            const historyData = await fetchPriceHistory(selectedInterval);
 
-                // Notify parent component if callback provided
-                if (onPercentChange) {
-                  onPercentChange(change);
+            // Update interval price data
+            setIntervalPriceData(prevData => ({
+              ...prevData,
+              [selectedInterval]: historyData
+            }));
+
+            // Check if prices are static
+            const isStatic = checkStaticPrices(historyData);
+            setStaticIntervals(prev => ({
+              ...prev,
+              [selectedInterval]: isStatic
+            }));
+
+            // Fetch all available intervals data to determine which ones have static prices
+            const fetchAllIntervalData = async () => {
+              for (const int of predefinedIntervals) {
+                if (int !== selectedInterval) {
+                  const data = await fetchPriceHistory(int);
+
+                  // Update interval price data
+                  setIntervalPriceData(prevData => ({
+                    ...prevData,
+                    [int]: data
+                  }));
+
+                  // Check if prices are static
+                  const isStatic = checkStaticPrices(data);
+                  setStaticIntervals(prev => ({
+                    ...prev,
+                    [int]: isStatic
+                  }));
                 }
-
-                lastRefreshTime.current = now;
               }
-            });
+            };
+
+            // Fetch all intervals in the background
+            fetchAllIntervalData();
+
+            if (historyData.length > 0) {
+              setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
+
+              // Recalculate percentage change with new data
+              const change = calculatePercentChange(historyData);
+              setPercentChange(change);
+
+              // Notify parent component if callback provided
+              if (onPercentChange) {
+                onPercentChange(change);
+              }
+
+              lastRefreshTime.current = now;
+            }
           }
         }
       }, 5000); // Poll every 5 seconds
@@ -307,7 +389,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   color: "#fff",
                   background: "#FF4560",
                 },
-                text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00'} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
+                text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'} `, //${token1Symbol || '--'}/${token0Symbol || '--'}
+                offsetY: -45, // Fixed 10 pixel offset
               },
             },
             {
@@ -320,8 +403,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   color: "#fff",
                   background: "black",
                 },
-                text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(6) : '0.00'}`,
-                offsetY: -20, // Adjust offset if needed
+                text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
+                offsetY: isWithinPercentageDifference(spotPrice, Number(formatEther(`${imv}`)), 1) ? (-45 + 30) : -20, // Fixed 10 pixel offset 
               },
             },
           ]
@@ -409,31 +492,48 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
           >
             {availableIntervals.length > 0 && (
               <Box display="flex" gap={3} alignItems="left">
-                {availableIntervals.map((int) => (
-                  <Box
-                    key={int}
-                    px={3}
-                    py={1}
-                    borderRadius="md"
-                    bg={selectedInterval === int ? "#00ffc0" : "gray.700"}
-                    cursor="pointer"
-                    onClick={() => handleIntervalChange(int)}
-                    _hover={{ bg: selectedInterval === int ? "cyan.600" : "gray.600" }}
-                    transition="all 0.2s"
-                  >
-                    <Text
-                      mt={-4}
-                      fontSize="xs"
-                      fontWeight={selectedInterval === int ? "bold" : "normal"}
-                      color={selectedInterval === int ? "black" : "white"}
+                {availableIntervals.map((int) => {
+                  const isStatic = staticIntervals[int] || false;
+                  return (
+                    <Box
+                      key={int}
+                      px={3}
+                      py={1}
+                      borderRadius="md"
+                      bg={selectedInterval === int ? "#00ffc0" : isStatic ? "gray.500" : "gray.700"}
+                      cursor={isStatic && selectedInterval !== int ? "not-allowed" : "pointer"}
+                      onClick={() => !isStatic || selectedInterval === int ? handleIntervalChange(int) : null}
+                      _hover={{ bg: selectedInterval === int ? "cyan.600" : isStatic ? "gray.500" : "gray.600" }}
+                      transition="all 0.2s"
+                      opacity={isStatic && selectedInterval !== int ? 0.6 : 1}
+                      position="relative"
+                      title={isStatic && selectedInterval !== int ? "Disabled: Prices are static for this interval" : ""}
                     >
-                      {formatIntervalDisplay(int)}
-                    </Text>
-                  </Box>
-                ))}
+                      <Text
+                        mt={-4}
+                        fontSize="xs"
+                        fontWeight={selectedInterval === int ? "bold" : "normal"}
+                        color={selectedInterval === int ? "black" : "white"}
+                      >
+                        {formatIntervalDisplay(int)}
+                      </Text>
+                      {isStatic && selectedInterval !== int && (
+                        <Box
+                          position="absolute"
+                          top="50%"
+                          left="50%"
+                          transform="translate(-50%, -50%)"
+                          width="80%"
+                          height="1px"
+                          bg="red.400"
+                        />
+                      )}
+                    </Box>
+                  );
+                })}
               </Box>
             )}
-            <Box
+            {/* <Box
               display="flex"
               alignItems="center"
               px={3}
@@ -448,7 +548,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               >
                 {percentChange > 0 ? "+" : ""}{percentChange.toFixed(2)}%
               </Text>
-            </Box>
+            </Box> */}
           </Box>
           <Box mt={-5}>
             <Chart options={chartOptions} series={series} type="area" height={isMobile ? 250 : 300} w={isMobile ? "200px": "auto"} />
