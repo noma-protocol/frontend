@@ -258,34 +258,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   const computedMinY =
     series[0].data.length > 0
       ? Math.min(...series[0].data.map((item: [number, number]) => item[1]))
-      : 0;
-
-  // Calculate IMV offset Y based on price values
-  const calculateImvOffsetY = () => {
-    if (!spotPrice || !imv) return -20; // Default value
-
-    const imvValue = Number(formatEther(`${imv}`));
-
-    // Calculate the difference between IMV and spot price
-    const priceDifference = Math.abs(spotPrice - imvValue);
-    const percentDifference = (priceDifference / spotPrice) * 100;
-
-    // Log values for debugging
-    console.log('IMV Annotation positioning:', {
-      spotPrice,
-      imvValue,
-      priceDifference,
-      percentDifference: percentDifference.toFixed(2) + '%',
-      offsetY: priceDifference < 0.1 * spotPrice ? -40 : -20
-    });
-
-    // If IMV and spot price are close, move IMV label further up to avoid overlap
-    if (priceDifference < 0.1 * spotPrice) { // Within 10% of spot price
-      return -40; // Move further away
-    } else {
-      return -20; // Default offset
-    }
-  };
+      : 0; 
 
   const chartOptions = {
     chart: {
@@ -338,7 +311,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               },
             },
             {
-              y: imv ? Number(formatEther(`${imv}`)) : computedMinY, // Use actual IMV value when available
+              y: computedMinY, // Always uses the computed minimum from your series
               borderColor: "yellow",
               strokeDashArray: 4,
               label: {
@@ -348,7 +321,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   background: "black",
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(6) : '0.00'}`,
-                offsetY: calculateImvOffsetY() // Dynamic offset based on price difference
+                offsetY: -20, // Adjust offset if needed
               },
             },
           ]
