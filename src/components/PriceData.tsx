@@ -56,6 +56,11 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
         priceValue = data.price;
         console.log("Found direct price:", priceValue);
       }
+      // Check for 'latest' property - new format
+      else if (typeof data.latest !== 'undefined') {
+        priceValue = data.latest;
+        console.log("Found latest price:", priceValue);
+      }
       // Check for dataPoints array (new format)
       else if (Array.isArray(data.dataPoints) && data.dataPoints.length > 0) {
         const latestPoint = data.dataPoints[data.dataPoints.length - 1];
@@ -115,7 +120,11 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
 
   const fetchPriceHistory = async (intervalMinutes: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/price/${intervalMinutes}`);
+      // Try to format the interval to match API expectations
+      const formattedInterval = intervalMinutes.includes('m') ? intervalMinutes : `${intervalMinutes}m`;
+      console.log(`Fetching price history for interval: ${formattedInterval}`);
+
+      const response = await fetch(`${API_BASE_URL}/api/price/${formattedInterval}`);
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -441,8 +450,10 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   useEffect(() => {
     const checkApiConnection = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/`);
+        // Check connection using the latest price endpoint since root path might not exist
+        const response = await fetch(`${API_BASE_URL}/api/price/latest`);
         setApiError(!response.ok);
+        console.log("API connection check:", response.ok ? "Success" : "Failed");
       } catch (error) {
         console.error("API connection error:", error);
         setApiError(true);
@@ -450,7 +461,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
     };
 
     checkApiConnection();
-    const connectionCheck = setInterval(checkApiConnection, 10000); // Check connection every 10 seconds
+    const connectionCheck = setInterval(checkApiConnection, 30000); // Check connection every 30 seconds
 
     return () => clearInterval(connectionCheck);
   }, []);
