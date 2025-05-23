@@ -35,7 +35,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   const [apiError, setApiError] = useState<boolean>(false);
   const lastPrice = useRef<number | null>(null);
   const lastRefreshTime = useRef<number | null>(null);
-  const API_BASE_URL = "http://localhost:3000";
+  const API_BASE_URL = "https://prices.oikos.cash"; // Replace with your actual API base URL
 
   const fetchLatestPrice = async () => {
     try {
