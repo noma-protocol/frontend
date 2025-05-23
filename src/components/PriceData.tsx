@@ -260,6 +260,79 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       ? Math.min(...series[0].data.map((item: [number, number]) => item[1]))
       : 0; 
 
+  // Calculate the position of labels based on spot price and chart range
+  const calculateAnnotationPositions = () => {
+    // If there's no price data yet, use default positions
+    if (series[0].data.length === 0) {
+      return {
+        spotPriceOffsetY: -10, // Default offset above the line
+        imvOffsetY: 20,        // Default offset below the line
+      };
+    }
+
+    // Get the minimum and maximum prices from the chart data
+    const allPrices = series[0].data.map((item: [number, number]) => item[1]);
+    const minPrice = Math.min(...allPrices);
+    const maxPrice = Math.max(...allPrices);
+    const priceRange = maxPrice - minPrice;
+
+    // Get IMV value from the props
+    const imvValue = imv ? Number(formatEther(`${imv}`)) : 0;
+
+    // Calculate relative positions in the chart (0 to 1)
+    const spotPricePosition = spotPrice ? (spotPrice - minPrice) / priceRange : 0.5;
+    const imvPosition = imvValue ? (imvValue - minPrice) / priceRange : 0;
+
+    // Determine offsets based on relative positions and make them more dynamic
+    // Adjust offsets based on both position in chart and relation to each other
+    let spotPriceOffsetY, imvOffsetY;
+
+    // Calculate relative distance between spot price and IMV
+    const priceDifference = Math.abs(spotPrice - imvValue);
+    const normalizedDifference = priceDifference / priceRange;
+
+    // If they're very close (within 5% of chart range), force them to opposite sides
+    if (normalizedDifference < 0.05) {
+      // Force spot price above, IMV below regardless of position
+      spotPriceOffsetY = -25;
+      imvOffsetY = 25;
+    } else {
+      // When spot price is in the top half of the chart, place label below the line
+      // When spot price is in the bottom half, place label above the line
+      spotPriceOffsetY = spotPricePosition > 0.5 ? 20 : -20;
+
+      // For IMV, determine position based on its location in the chart
+      // but avoid same side as spot price when they're somewhat close
+      if (normalizedDifference < 0.2) {
+        // If somewhat close but not extremely close, put on opposite sides
+        imvOffsetY = spotPriceOffsetY > 0 ? -20 : 20;
+      } else {
+        // If far apart, just place based on position in chart
+        imvOffsetY = imvPosition < 0.5 ? 20 : -20;
+      }
+    }
+
+    // Log positions for debugging
+    console.log('Chart positions:', {
+      spotPrice,
+      imvValue,
+      minPrice,
+      maxPrice,
+      priceRange,
+      priceDifference,
+      normalizedDifference,
+      spotPricePosition,
+      imvPosition,
+      spotPriceOffsetY,
+      imvOffsetY
+    });
+
+    return { spotPriceOffsetY, imvOffsetY };
+  };
+
+  // Get the calculated positions
+  const { spotPriceOffsetY, imvOffsetY } = calculateAnnotationPositions();
+
   const chartOptions = {
     chart: {
       type: "area",
@@ -306,12 +379,22 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 style: {
                   color: "#fff",
                   background: "#FF4560",
+                  padding: {
+                    left: 10,
+                    right: 10,
+                    top: 1,
+                    bottom: 1,
+                  },
                 },
                 text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00'} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
+                position: 'left',
+                textAnchor: 'start',
+                offsetX: 5,
+                offsetY: spotPriceOffsetY, // Dynamic offset based on price position
               },
             },
             {
-              y: computedMinY, // Always uses the computed minimum from your series
+              y: imv ? Number(formatEther(`${imv}`)) : computedMinY, // Use actual IMV value when available
               borderColor: "yellow",
               strokeDashArray: 4,
               label: {
@@ -319,9 +402,18 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 style: {
                   color: "#fff",
                   background: "black",
+                  padding: {
+                    left: 10,
+                    right: 10,
+                    top: 1,
+                    bottom: 1,
+                  },
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(6) : '0.00'}`,
-                offsetY: -20, // Adjust offset if needed
+                position: 'right',
+                textAnchor: 'end',
+                offsetX: -5,
+                offsetY: imvOffsetY, // Dynamic offset based on price position
               },
             },
           ]
