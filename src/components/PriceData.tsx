@@ -26,7 +26,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   token0Symbol,
   token1Symbol,
   imv,
-  interval = "5", // Default to 5 minutes interval
+  interval = "60", // Default to 1 hour interval
 }) => {
   const [series, setSeries] = useState([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: [] }]);
   const [spotPrice, setSpotPrice] = useState<number | null>(null);
@@ -213,7 +213,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   const computedMinY =
     series[0].data.length > 0
       ? Math.min(...series[0].data.map((item: [number, number]) => item[1]))
-      : 0;
+      : 0; 
 
   const chartOptions = {
     chart: {
@@ -249,6 +249,39 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
     tooltip: { enabled: false },
     grid: { show: false },
     dataLabels: { enabled: false },
+    annotations: {
+      yaxis: spotPrice && imv
+        ? [
+            {
+              y: spotPrice,
+              borderColor: "#FF4560",
+              strokeDashArray: 4,
+              label: {
+                borderColor: "#FF4560",
+                style: {
+                  color: "#fff",
+                  background: "#FF4560",
+                },
+                text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00'} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
+              },
+            },
+            {
+              y: computedMinY, // Always uses the computed minimum from your series
+              borderColor: "yellow",
+              strokeDashArray: 4,
+              label: {
+                borderColor: "yellow",
+                style: {
+                  color: "#fff",
+                  background: "black",
+                },
+                text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(6) : '0.00'}`,
+                offsetY: -20, // Adjust offset if needed
+              },
+            },
+          ]
+        : [],
+    },
   };
 
   useEffect(() => {
@@ -308,10 +341,6 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
     return () => clearInterval(connectionCheck);
   }, []);
 
-  // Format the IMV value for display
-  const imvValue = imv ? parseFloat(formatEther(imv)).toFixed(6) : '0.00';
-  const spotPriceFormatted = typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00';
-
   return (
     <Box ml={isMobile ? -5 : 0}>
       {apiError ? (
@@ -359,20 +388,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
               </Box>
             )}
           </Box>
-          
-          {/* Price Information Display */}
-          <Box display="flex" justifyContent="space-between" mt={2} mb={-2} px={2}>
-            <Text fontSize="xs" color="#FF4560">
-              <strong>Spot Price:</strong> {spotPriceFormatted} {token1Symbol}/{token0Symbol}
-            </Text>
-            {imv && (
-              <Text fontSize="xs" color="yellow">
-                <strong>IMV:</strong> {imvValue}
-              </Text>
-            )}
-          </Box>
-          
-          <Box mt={1}>
+          <Box mt={-5}>
             <Chart options={chartOptions} series={series} type="area" height={isMobile ? 250 : 300} w={isMobile ? "200px": "auto"} />
           </Box>
         </>
