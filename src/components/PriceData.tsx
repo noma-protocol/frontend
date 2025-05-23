@@ -39,9 +39,22 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
 
   const fetchLatestPrice = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/price/latest`);
+      // Try different API endpoint formats for latest price
+      let apiUrl = `${API_BASE_URL}/api/price/latest`;
+      console.log(`Trying to fetch latest price from: ${apiUrl}`);
+
+      let response = await fetch(apiUrl);
+
+      // If that fails, try without the /api prefix
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        apiUrl = `${API_BASE_URL}/price/latest`;
+        console.log(`First latest price attempt failed, trying: ${apiUrl}`);
+        response = await fetch(apiUrl);
+      }
+
+      // If all attempts failed, throw an error
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} - Could not fetch latest price`);
       }
 
       const data = await response.json();
@@ -120,13 +133,32 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
 
   const fetchPriceHistory = async (intervalMinutes: string) => {
     try {
-      // Try to format the interval to match API expectations
-      const formattedInterval = intervalMinutes.includes('m') ? intervalMinutes : `${intervalMinutes}m`;
-      console.log(`Fetching price history for interval: ${formattedInterval}`);
+      // Try different API endpoint formats until we find the one that works
+      // First try with explicit interval parameter
+      let apiUrl = `${API_BASE_URL}/api/price/history?interval=${intervalMinutes}`;
+      console.log(`Trying to fetch price history from: ${apiUrl}`);
 
-      const response = await fetch(`${API_BASE_URL}/api/price/${formattedInterval}`);
+      let response = await fetch(apiUrl);
+
+      // If that fails, try the older endpoint format
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        // Format interval according to API expectations (with 'm' suffix if needed)
+        const formattedInterval = intervalMinutes.includes('m') ? intervalMinutes : `${intervalMinutes}m`;
+        apiUrl = `${API_BASE_URL}/api/price/${formattedInterval}`;
+        console.log(`First attempt failed, trying: ${apiUrl}`);
+        response = await fetch(apiUrl);
+
+        // If that also fails, try without the /api prefix
+        if (!response.ok) {
+          apiUrl = `${API_BASE_URL}/price/${formattedInterval}`;
+          console.log(`Second attempt failed, trying: ${apiUrl}`);
+          response = await fetch(apiUrl);
+        }
+      }
+
+      // If all attempts failed, throw an error
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} - All endpoint attempts failed`);
       }
 
       const responseJson = await response.json();
@@ -450,12 +482,41 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   useEffect(() => {
     const checkApiConnection = async () => {
       try {
-        // Check connection using the latest price endpoint since root path might not exist
-        const response = await fetch(`${API_BASE_URL}/api/price/latest`);
-        setApiError(!response.ok);
-        console.log("API connection check:", response.ok ? "Success" : "Failed");
+        // Try multiple endpoints to check API connection
+        let isConnected = false;
+
+        // Try first endpoint
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/price/latest`);
+          if (response.ok) {
+            isConnected = true;
+            console.log("API connection check successful with /api/price/latest");
+          }
+        } catch (e) {
+          console.log("First API connection check failed, trying alternate endpoint");
+        }
+
+        // If first check failed, try alternate endpoint
+        if (!isConnected) {
+          try {
+            const response = await fetch(`${API_BASE_URL}/price/latest`);
+            if (response.ok) {
+              isConnected = true;
+              console.log("API connection check successful with /price/latest");
+            }
+          } catch (e) {
+            console.log("Second API connection check failed");
+          }
+        }
+
+        // Update the error state based on our connection checks
+        setApiError(!isConnected);
+
+        if (!isConnected) {
+          console.error("All API connection checks failed");
+        }
       } catch (error) {
-        console.error("API connection error:", error);
+        console.error("Unexpected API connection error:", error);
         setApiError(true);
       }
     };
