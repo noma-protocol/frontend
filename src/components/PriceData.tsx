@@ -501,13 +501,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                       py={1}
                       borderRadius="md"
                       bg={selectedInterval === int ? "#00ffc0" : isStatic ? "gray.500" : "gray.700"}
-                      cursor="pointer"
-                      onClick={() => handleIntervalChange(int)}
-                      _hover={{ bg: selectedInterval === int ? "cyan.600" : "gray.600" }}
+                      cursor={isStatic && selectedInterval !== int ? "not-allowed" : "pointer"}
+                      onClick={() => !isStatic || selectedInterval === int ? handleIntervalChange(int) : null}
+                      _hover={{ bg: selectedInterval === int ? "cyan.600" : isStatic ? "gray.500" : "gray.600" }}
                       transition="all 0.2s"
                       opacity={isStatic && selectedInterval !== int ? 0.6 : 1}
                       position="relative"
-                      title={isStatic && selectedInterval !== int ? "Low price volatility in this interval" : ""}
+                      title={isStatic && selectedInterval !== int ? "Disabled: Prices are static for this interval" : ""}
                     >
                       <Text
                         mt={-4}
