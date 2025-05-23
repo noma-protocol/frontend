@@ -215,6 +215,21 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       ? Math.min(...series[0].data.map((item: [number, number]) => item[1]))
       : 0;
 
+  // Calculate if spot price and IMV are too close to each other
+  const isAnnotationsOverlapping = () => {
+    if (!spotPrice || !imv) return false;
+
+    const imvValue = Number(formatEther(`${imv}`));
+    const priceDifference = Math.abs(spotPrice - imvValue);
+    const chartRange = series[0].data.length > 0
+      ? Math.max(...series[0].data.map((item: [number, number]) => item[1])) -
+        Math.min(...series[0].data.map((item: [number, number]) => item[1]))
+      : 0;
+
+    // Consider them overlapping if they're within 10% of the chart range
+    return chartRange > 0 && priceDifference < (chartRange * 0.1);
+  };
+
   const chartOptions = {
     chart: {
       type: "area",
@@ -263,10 +278,13 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
                   background: "#FF4560",
                 },
                 text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00'} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
+                position: isAnnotationsOverlapping() ? 'right' : 'left',
+                offsetX: isAnnotationsOverlapping() ? 10 : -10,
+                offsetY: 0,
               },
             },
             {
-              y: computedMinY, // Always uses the computed minimum from your series
+              y: Number(formatEther(`${imv || 0}`)), // Use actual IMV value
               borderColor: "yellow",
               strokeDashArray: 4,
               label: {
@@ -276,7 +294,9 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
                   background: "black",
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(6) : '0.00'}`,
-                offsetY: -10, // Adjust offset if needed
+                position: isAnnotationsOverlapping() ? 'left' : 'right',
+                offsetX: isAnnotationsOverlapping() ? -10 : 10,
+                offsetY: isAnnotationsOverlapping() ? -30 : -10,
               },
             },
           ]
