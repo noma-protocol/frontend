@@ -311,7 +311,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               },
             },
             {
-              y: computedMinY, // Always uses the computed minimum from your series
+              y: imv ? Number(formatEther(`${imv}`)) : computedMinY, // Use actual IMV value
               borderColor: "yellow",
               strokeDashArray: 4,
               label: {
@@ -321,7 +321,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   background: "black",
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(6) : '0.00'}`,
-                offsetY: -20, // Adjust offset if needed
+                offsetY: spotPrice && imv && Math.abs(spotPrice - Number(formatEther(`${imv}`))) < 0.1 * spotPrice ? -40 : -20 // Adjust offset when close to spot price
               },
             },
           ]
