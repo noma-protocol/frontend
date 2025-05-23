@@ -34,11 +34,12 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   const [selectedInterval, setSelectedInterval] = useState<string>(interval);
   const [apiError, setApiError] = useState<boolean>(false);
   const lastPrice = useRef<number | null>(null);
-  const API_BASE_URL = "https://prices.oikos.cash";
+  const lastRefreshTime = useRef<number | null>(null); // For tracking when we last refreshed data
+  const API_BASE_URL = "http://localhost:3000"; //"https://prices.oikos.cash";
 
   const fetchLatestPrice = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/price/latest`);
+      const response = await fetch(`${API_BASE_URL}/api/price/latest`);
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -48,16 +49,53 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       // Extract price from different possible API response formats
       let priceValue;
 
+      console.log("Latest price data:", data);
+
       if (typeof data.price !== 'undefined') {
         // Direct price property
         priceValue = data.price;
-      } else if (data.data && typeof data.data.price !== 'undefined') {
+        console.log("Found direct price:", priceValue);
+      }
+      // Check for dataPoints array (new format)
+      else if (Array.isArray(data.dataPoints) && data.dataPoints.length > 0) {
+        const latestPoint = data.dataPoints[data.dataPoints.length - 1];
+
+        // Check what format the data point has
+        if (typeof latestPoint.price !== 'undefined') {
+          priceValue = latestPoint.price;
+        } else if (typeof latestPoint.value !== 'undefined') {
+          priceValue = latestPoint.value;
+        } else if (Array.isArray(latestPoint) && latestPoint.length >= 2) {
+          priceValue = latestPoint[1]; // Assuming [timestamp, price] format
+        }
+        console.log("Found price in dataPoints:", priceValue);
+      }
+      // Check for data property with nested price
+      else if (data.data && typeof data.data.price !== 'undefined') {
         // Nested data object with price
         priceValue = data.data.price;
-      } else if (Array.isArray(data.data) && data.data.length > 0 && typeof data.data[data.data.length-1].price !== 'undefined') {
-        // Array of price data, take the latest entry
-        priceValue = data.data[data.data.length-1].price;
-      } else {
+        console.log("Found nested price:", priceValue);
+      }
+      // Check for data array
+      else if (Array.isArray(data.data) && data.data.length > 0) {
+        const latestEntry = data.data[data.data.length-1];
+
+        // Check what properties the entry has
+        if (typeof latestEntry.price !== 'undefined') {
+          priceValue = latestEntry.price;
+        } else if (typeof latestEntry.value !== 'undefined') {
+          priceValue = latestEntry.value;
+        } else if (Array.isArray(latestEntry) && latestEntry.length >= 2) {
+          priceValue = latestEntry[1]; // Assuming [timestamp, price] format
+        }
+        console.log("Found price in data array:", priceValue);
+      }
+      // Check stats object for average price
+      else if (data.stats && typeof data.stats.avg !== 'undefined') {
+        priceValue = data.stats.avg;
+        console.log("Using average price from stats:", priceValue);
+      }
+      else {
         console.error("Invalid price data format:", data);
         return null;
       }
@@ -77,7 +115,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
 
   const fetchPriceHistory = async (intervalMinutes: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/prices/${intervalMinutes}`);
+      const response = await fetch(`${API_BASE_URL}/api/price/${intervalMinutes}`);
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -91,13 +129,22 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       if (Array.isArray(responseJson)) {
         // If the response is already an array, use it directly
         priceDataArray = responseJson;
-      } else if (responseJson && typeof responseJson === 'object' && Array.isArray(responseJson.data)) {
-        // If the response is an object with a data array property, use that
-        priceDataArray = responseJson.data;
-        console.log(`Found ${priceDataArray.length} price points for ${responseJson.pair} at ${intervalMinutes} minute interval`);
+      } else if (responseJson && typeof responseJson === 'object') {
+        // Check for different possible property names for the data array
+        if (Array.isArray(responseJson.data)) {
+          priceDataArray = responseJson.data;
+          console.log(`Found ${priceDataArray.length} price points from data array at ${intervalMinutes} minute interval`);
+        } else if (Array.isArray(responseJson.dataPoints)) {
+          priceDataArray = responseJson.dataPoints;
+          console.log(`Found ${priceDataArray.length} price points from dataPoints array at ${intervalMinutes} minute interval`);
+        } else {
+          // Neither format is valid
+          console.error("API response doesn't contain valid price data array:", responseJson);
+          return [];
+        }
       } else {
-        // Neither format is valid
-        console.error("API response doesn't contain valid price data:", responseJson);
+        // Not a valid format at all
+        console.error("API response is not in a recognized format:", responseJson);
         return [];
       }
 
@@ -107,15 +154,55 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       }
 
       try {
-        const data = priceDataArray.map((item: PriceData) => ({
-          timestamp: item.timestamp * 1000, // Convert to milliseconds
-          price: item.price,
-        }));
+        // Check the structure of the first item to determine the format
+        if (priceDataArray.length > 0) {
+          const firstItem = priceDataArray[0];
+          console.log("Sample data point:", firstItem);
 
-        return data.map(item => [
-          Number(item.timestamp),
-          typeof item.price === 'number' ? item.price : parseFloat(item.price)
-        ] as [number, number]);
+          // Process based on the structure we find
+          if (typeof firstItem.timestamp !== 'undefined' && typeof firstItem.price !== 'undefined') {
+            // Standard format with timestamp and price fields
+            const data = priceDataArray.map((item) => ({
+              timestamp: typeof item.timestamp === 'number' && item.timestamp > 1000000000000
+                ? item.timestamp  // Already in milliseconds
+                : item.timestamp * 1000, // Convert to milliseconds
+              price: item.price,
+            }));
+
+            return data.map(item => [
+              Number(item.timestamp),
+              typeof item.price === 'number' ? item.price : parseFloat(item.price)
+            ] as [number, number]);
+          }
+          else if (typeof firstItem.time !== 'undefined' && typeof firstItem.value !== 'undefined') {
+            // Alternative format with time and value fields
+            const data = priceDataArray.map((item) => ({
+              timestamp: typeof item.time === 'number' && item.time > 1000000000000
+                ? item.time  // Already in milliseconds
+                : item.time * 1000, // Convert to milliseconds
+              price: item.value,
+            }));
+
+            return data.map(item => [
+              Number(item.timestamp),
+              typeof item.price === 'number' ? item.price : parseFloat(item.price)
+            ] as [number, number]);
+          }
+          else if (Array.isArray(firstItem) && firstItem.length === 2) {
+            // Already in [timestamp, price] format
+            return priceDataArray.map(item => [
+              Number(item[0]),
+              typeof item[1] === 'number' ? item[1] : parseFloat(item[1])
+            ] as [number, number]);
+          }
+          else {
+            // Unrecognized format - log and return empty
+            console.error("Unrecognized data point format:", firstItem);
+            return [];
+          }
+        }
+
+        return [];
       } catch (err) {
         console.error("Error processing price data:", err, "Raw data array:", priceDataArray);
         return [];
@@ -151,30 +238,56 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
 
       // Set up polling for price updates
       pollInterval = setInterval(async () => {
+        const now = Date.now();
+        console.log(`Polling for price updates at ${new Date(now).toISOString()}`);
+
+        // Always fetch the latest price
         const newPrice = await fetchLatestPrice();
-        if (newPrice !== null && newPrice !== lastPrice.current) {
+        console.log(`Current price=${lastPrice.current}, New price=${newPrice}`);
+
+        // Even if price is the same, we periodically refresh all data
+        const refreshInterval = 30000; // 30 seconds
+        const shouldRefreshAll = !lastRefreshTime.current || (now - lastRefreshTime.current > refreshInterval);
+
+        // Update the price if we got a valid value
+        if (newPrice !== null) {
+          // If price has changed, log it
+          if (lastPrice.current !== newPrice) {
+            console.log(`Price changed from ${lastPrice.current} to ${newPrice}`);
+          }
+
+          // Always update the latest price reference and UI state
           lastPrice.current = newPrice;
           setSpotPrice(newPrice);
 
-          // Only append new price points if we're using the 5-minute interval
-          // For other intervals, we should refetch the complete data set
-          if (selectedInterval === "5") {
+          // For 5-minute interval, we can append to the existing chart data
+          if (selectedInterval === "5" && !shouldRefreshAll) {
             setSeries((prevSeries) => {
               // Create a copy of the existing data
               const newData = [...prevSeries[0].data];
 
               // Add the new data point with current timestamp
-              newData.push([Date.now(), newPrice]);
+              newData.push([now, newPrice]);
+              console.log(`Added new data point: [${new Date(now).toISOString()}, ${newPrice}]`);
 
               // Limit the number of data points to keep the chart performant
               if (newData.length > 100) newData.shift();
 
               return [{ ...prevSeries[0], data: newData }];
             });
-          } else {
-            // For other intervals, do a complete refresh of the data
-            // but only update the spot price to avoid unnecessary API calls
-            console.log(`Updating spot price only for ${selectedInterval} minute interval`);
+          }
+          // For any interval, we should occasionally refresh the complete dataset
+          else if (shouldRefreshAll) {
+            console.log(`Full data refresh for ${selectedInterval} minute interval`);
+            fetchPriceHistory(selectedInterval).then(historyData => {
+              if (historyData.length > 0) {
+                console.log(`Refreshed chart with ${historyData.length} data points`);
+                setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
+                lastRefreshTime.current = now;
+              } else {
+                console.warn(`No data returned during refresh for ${selectedInterval} minute interval`);
+              }
+            });
           }
         }
       }, 5000); // Poll every 5 seconds
@@ -304,6 +417,9 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       name: `Price ${token0Symbol}/${token1Symbol}`,
       data: historyData
     }]);
+
+    // Update the last refresh time
+    lastRefreshTime.current = Date.now();
 
     // Log what we're setting
     console.log(`Updated chart with ${historyData.length} data points for ${newInterval} minute interval`);
