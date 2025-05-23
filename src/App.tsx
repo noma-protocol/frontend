@@ -86,10 +86,11 @@ function App() {
   const TRACKING_ID = "UA-XXXXX-X"; // OUR_TRACKING_ID
   ReactGA.initialize(TRACKING_ID);
 
-  // Clear any existing Web3 connection data
-  useEffect(() => {
-    clearWeb3LocalStorage();
-  }, []);
+  // We don't want to clear web3 localStorage on initial load
+  // as that would disconnect existing sessions
+  // useEffect(() => {
+  //   clearWeb3LocalStorage();
+  // }, []);
 
   const projectId = "7820402434e60ca8c323d77ae01be61d";
   const metadata = {
@@ -104,21 +105,17 @@ function App() {
     chains,
     projectId,
     metadata,
-    // Explicitly disable auto-connect behavior
-    autoConnect: false,
-    ssr: true, // Disable client-side rendering for session persistence
-    storage: {
-      getItem: () => null, // Disable reading from storage
-      setItem: () => null, // Disable writing to storage
-      removeItem: () => null, // Disable removing from storage
-    },
+    // Enable auto-connect to persist wallet sessions
+    autoConnect: true,
+    // Enable client-side rendering for the connected wallet
+    ssr: false
+    // Use default localStorage behavior instead of disabling storage
   });
 
   createWeb3Modal({
     wagmiConfig,
     projectId,
     chains,
-    // Prevent auto-connect in modal config
     themeMode: 'dark',
     includeWalletIds: [],
     enableAnalytics: false,
@@ -128,6 +125,10 @@ function App() {
     enableEmail: false,
     enableExplorer: false,
     defaultChain: monad,
+    // These options help with connection persistence
+    explorerRecommendedWalletIds: 'all',
+    mobileWallets: [],
+    desktopWallets: [],
   });
 
   return (
