@@ -282,3 +282,22 @@ export function getTimeLeft(startTs, intervalDays) {
   // 7) convert to whole seconds
   return Math.floor(diffMs / 1000);
 }
+
+/**
+ * Checks if two numbers are within a specified percentage difference of each other
+ * @param a First number to compare
+ * @param b Second number to compare
+ * @param percent Maximum percentage difference allowed (e.g., 0.1 for 0.1%)
+ * @returns true if the numbers are within the specified percentage difference
+ */
+export function isWithinPercentageDifference(a, b, percent) {
+  if (a === undefined || b === undefined || a === null || b === null) return false;
+
+  const diff = Math.abs(a - b);
+  const average = (Math.abs(a) + Math.abs(b)) / 2;
+
+  // Avoid division by zero
+  if (average === 0) return diff === 0;
+
+  return (diff / average) * 100 <= percent;
+}
