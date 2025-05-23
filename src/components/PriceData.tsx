@@ -34,91 +34,33 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   const [selectedInterval, setSelectedInterval] = useState<string>(interval);
   const [apiError, setApiError] = useState<boolean>(false);
   const lastPrice = useRef<number | null>(null);
-  const lastRefreshTime = useRef<number | null>(null); // For tracking when we last refreshed data
-  const API_BASE_URL = "http://localhost:3000"; //"https://prices.oikos.cash";
+  const lastRefreshTime = useRef<number | null>(null);
+  const API_BASE_URL = "http://localhost:3000";
 
   const fetchLatestPrice = async () => {
     try {
-      // Try different API endpoint formats for latest price
-      let apiUrl = `${API_BASE_URL}/api/price/latest`;
-      console.log(`Trying to fetch latest price from: ${apiUrl}`);
-
-      let response = await fetch(apiUrl);
-
-      // If that fails, try without the /api prefix
+      const response = await fetch(`${API_BASE_URL}/api/price/latest`);
       if (!response.ok) {
-        apiUrl = `${API_BASE_URL}/price/latest`;
-        console.log(`First latest price attempt failed, trying: ${apiUrl}`);
-        response = await fetch(apiUrl);
-      }
-
-      // If all attempts failed, throw an error
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} - Could not fetch latest price`);
+        throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-
+      
       // Extract price from different possible API response formats
       let priceValue;
 
-      console.log("Latest price data:", data);
-
-      if (typeof data.price !== 'undefined') {
+      if (typeof data.latest !== 'undefined') {
+        // New format with 'latest' property
+        priceValue = data.latest;
+      } else if (typeof data.price !== 'undefined') {
         // Direct price property
         priceValue = data.price;
-        console.log("Found direct price:", priceValue);
-      }
-      // Check for 'latest' property - new format
-      else if (typeof data.latest !== 'undefined') {
-        priceValue = data.latest;
-        console.log("Found latest price:", priceValue);
-      }
-      // Check for dataPoints array (new format)
-      else if (Array.isArray(data.dataPoints) && data.dataPoints.length > 0) {
-        const latestPoint = data.dataPoints[data.dataPoints.length - 1];
-
-        // Check what format the data point has
-        if (typeof latestPoint.price !== 'undefined') {
-          priceValue = latestPoint.price;
-        } else if (typeof latestPoint.value !== 'undefined') {
-          priceValue = latestPoint.value;
-        } else if (Array.isArray(latestPoint) && latestPoint.length >= 2) {
-          priceValue = latestPoint[1]; // Assuming [timestamp, price] format
-        }
-        console.log("Found price in dataPoints:", priceValue);
-      }
-      // Check for data property with nested price
-      else if (data.data && typeof data.data.price !== 'undefined') {
-        // Nested data object with price
-        priceValue = data.data.price;
-        console.log("Found nested price:", priceValue);
-      }
-      // Check for data array
-      else if (Array.isArray(data.data) && data.data.length > 0) {
-        const latestEntry = data.data[data.data.length-1];
-
-        // Check what properties the entry has
-        if (typeof latestEntry.price !== 'undefined') {
-          priceValue = latestEntry.price;
-        } else if (typeof latestEntry.value !== 'undefined') {
-          priceValue = latestEntry.value;
-        } else if (Array.isArray(latestEntry) && latestEntry.length >= 2) {
-          priceValue = latestEntry[1]; // Assuming [timestamp, price] format
-        }
-        console.log("Found price in data array:", priceValue);
-      }
-      // Check stats object for average price
-      else if (data.stats && typeof data.stats.avg !== 'undefined') {
-        priceValue = data.stats.avg;
-        console.log("Using average price from stats:", priceValue);
-      }
-      else {
+      } else {
         console.error("Invalid price data format:", data);
         return null;
       }
 
-      // Ensure we return a number or null if conversion fails
+      // Ensure we return a number
       try {
         return typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
       } catch (err) {
@@ -133,59 +75,25 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
 
   const fetchPriceHistory = async (intervalMinutes: string) => {
     try {
-      // Try different API endpoint formats until we find the one that works
-      // First try with explicit interval parameter
-      let apiUrl = `${API_BASE_URL}/api/price/history?interval=${intervalMinutes}`;
-      console.log(`Trying to fetch price history from: ${apiUrl}`);
-
-      let response = await fetch(apiUrl);
-
-      // If that fails, try the older endpoint format
+      // Use the correct endpoint
+      const response = await fetch(`${API_BASE_URL}/api/price/${intervalMinutes}`);
       if (!response.ok) {
-        // Format interval according to API expectations (with 'm' suffix if needed)
-        const formattedInterval = intervalMinutes.includes('m') ? intervalMinutes : `${intervalMinutes}m`;
-        apiUrl = `${API_BASE_URL}/api/price/${formattedInterval}`;
-        console.log(`First attempt failed, trying: ${apiUrl}`);
-        response = await fetch(apiUrl);
-
-        // If that also fails, try without the /api prefix
-        if (!response.ok) {
-          apiUrl = `${API_BASE_URL}/price/${formattedInterval}`;
-          console.log(`Second attempt failed, trying: ${apiUrl}`);
-          response = await fetch(apiUrl);
-        }
-      }
-
-      // If all attempts failed, throw an error
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} - All endpoint attempts failed`);
+        throw new Error(`API error: ${response.status}`);
       }
 
       const responseJson = await response.json();
 
       // Extract the price data array
-      // The API might return either an array directly or an object with a data property
       let priceDataArray;
-
+      
       if (Array.isArray(responseJson)) {
         // If the response is already an array, use it directly
         priceDataArray = responseJson;
-      } else if (responseJson && typeof responseJson === 'object') {
-        // Check for different possible property names for the data array
-        if (Array.isArray(responseJson.data)) {
-          priceDataArray = responseJson.data;
-          console.log(`Found ${priceDataArray.length} price points from data array at ${intervalMinutes} minute interval`);
-        } else if (Array.isArray(responseJson.dataPoints)) {
-          priceDataArray = responseJson.dataPoints;
-          console.log(`Found ${priceDataArray.length} price points from dataPoints array at ${intervalMinutes} minute interval`);
-        } else {
-          // Neither format is valid
-          console.error("API response doesn't contain valid price data array:", responseJson);
-          return [];
-        }
+      } else if (responseJson && typeof responseJson === 'object' && Array.isArray(responseJson.dataPoints)) {
+        // If the response has dataPoints array
+        priceDataArray = responseJson.dataPoints;
       } else {
-        // Not a valid format at all
-        console.error("API response is not in a recognized format:", responseJson);
+        console.error("API response doesn't contain valid price data:", responseJson);
         return [];
       }
 
@@ -198,35 +106,24 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
         // Check the structure of the first item to determine the format
         if (priceDataArray.length > 0) {
           const firstItem = priceDataArray[0];
-          console.log("Sample data point:", firstItem);
-
+          
           // Process based on the structure we find
           if (typeof firstItem.timestamp !== 'undefined' && typeof firstItem.price !== 'undefined') {
             // Standard format with timestamp and price fields
-            const data = priceDataArray.map((item) => ({
-              timestamp: typeof item.timestamp === 'number' && item.timestamp > 1000000000000
+            return priceDataArray.map(item => [
+              typeof item.timestamp === 'number' && item.timestamp > 1000000000000
                 ? item.timestamp  // Already in milliseconds
                 : item.timestamp * 1000, // Convert to milliseconds
-              price: item.price,
-            }));
-
-            return data.map(item => [
-              Number(item.timestamp),
               typeof item.price === 'number' ? item.price : parseFloat(item.price)
             ] as [number, number]);
-          }
+          } 
           else if (typeof firstItem.time !== 'undefined' && typeof firstItem.value !== 'undefined') {
             // Alternative format with time and value fields
-            const data = priceDataArray.map((item) => ({
-              timestamp: typeof item.time === 'number' && item.time > 1000000000000
+            return priceDataArray.map(item => [
+              typeof item.time === 'number' && item.time > 1000000000000
                 ? item.time  // Already in milliseconds
                 : item.time * 1000, // Convert to milliseconds
-              price: item.value,
-            }));
-
-            return data.map(item => [
-              Number(item.timestamp),
-              typeof item.price === 'number' ? item.price : parseFloat(item.price)
+              typeof item.value === 'number' ? item.value : parseFloat(item.value)
             ] as [number, number]);
           }
           else if (Array.isArray(firstItem) && firstItem.length === 2) {
@@ -237,15 +134,14 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
             ] as [number, number]);
           }
           else {
-            // Unrecognized format - log and return empty
             console.error("Unrecognized data point format:", firstItem);
             return [];
           }
         }
-
+        
         return [];
       } catch (err) {
-        console.error("Error processing price data:", err, "Raw data array:", priceDataArray);
+        console.error("Error processing price data:", err);
         return [];
       }
     } catch (error) {
@@ -268,7 +164,7 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
         lastPrice.current = latestPrice;
         setSpotPrice(latestPrice);
 
-        // Only display actual price history data, no placeholder random data
+        // Only display actual price history data
         if (historyData.length > 0) {
           setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
         } else {
@@ -280,53 +176,28 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
       // Set up polling for price updates
       pollInterval = setInterval(async () => {
         const now = Date.now();
-        console.log(`Polling for price updates at ${new Date(now).toISOString()}`);
-
-        // Always fetch the latest price
+        
+        // Fetch the latest price
         const newPrice = await fetchLatestPrice();
-        console.log(`Current price=${lastPrice.current}, New price=${newPrice}`);
-
-        // Even if price is the same, we periodically refresh all data
-        const refreshInterval = 30000; // 30 seconds
-        const shouldRefreshAll = !lastRefreshTime.current || (now - lastRefreshTime.current > refreshInterval);
-
+        
         // Update the price if we got a valid value
         if (newPrice !== null) {
-          // If price has changed, log it
+          // If price has changed, update it
           if (lastPrice.current !== newPrice) {
-            console.log(`Price changed from ${lastPrice.current} to ${newPrice}`);
+            lastPrice.current = newPrice;
+            setSpotPrice(newPrice);
           }
-
-          // Always update the latest price reference and UI state
-          lastPrice.current = newPrice;
-          setSpotPrice(newPrice);
-
-          // For 5-minute interval, we can append to the existing chart data
-          if (selectedInterval === "5" && !shouldRefreshAll) {
-            setSeries((prevSeries) => {
-              // Create a copy of the existing data
-              const newData = [...prevSeries[0].data];
-
-              // Add the new data point with current timestamp
-              newData.push([now, newPrice]);
-              console.log(`Added new data point: [${new Date(now).toISOString()}, ${newPrice}]`);
-
-              // Limit the number of data points to keep the chart performant
-              if (newData.length > 100) newData.shift();
-
-              return [{ ...prevSeries[0], data: newData }];
-            });
-          }
-          // For any interval, we should occasionally refresh the complete dataset
-          else if (shouldRefreshAll) {
-            console.log(`Full data refresh for ${selectedInterval} minute interval`);
+          
+          // Periodically refresh the complete dataset
+          const refreshInterval = 30000; // 30 seconds
+          const shouldRefreshAll = !lastRefreshTime.current || (now - lastRefreshTime.current > refreshInterval);
+          
+          if (shouldRefreshAll) {
+            console.log(`Refreshing price data for ${selectedInterval} interval`);
             fetchPriceHistory(selectedInterval).then(historyData => {
               if (historyData.length > 0) {
-                console.log(`Refreshed chart with ${historyData.length} data points`);
                 setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
                 lastRefreshTime.current = now;
-              } else {
-                console.warn(`No data returned during refresh for ${selectedInterval} minute interval`);
               }
             });
           }
@@ -416,54 +287,28 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   useEffect(() => {
     // Use predefined intervals instead of fetching from API
     setAvailableIntervals(predefinedIntervals);
-
-    // Optionally, you can still fetch from API and merge with predefined intervals
-    /*
-    const fetchIntervals = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/intervals`);
-        if (response.ok) {
-          const data = await response.json();
-          // Filter out any intervals that might conflict with predefined ones
-          const apiIntervals = data.filter(i => !predefinedIntervals.includes(i));
-          setAvailableIntervals([...predefinedIntervals, ...apiIntervals]);
-        }
-      } catch (error) {
-        console.error("Error fetching intervals:", error);
-        // Fall back to predefined intervals if API fails
-        setAvailableIntervals(predefinedIntervals);
-      }
-    };
-
-    fetchIntervals();
-    */
   }, []);
 
   const handleIntervalChange = async (newInterval: string) => {
-    console.log(`Changing interval from ${selectedInterval} to ${newInterval}`);
-
     // Only proceed if the interval is actually changing
     if (newInterval === selectedInterval) {
       return;
     }
-
+    
     // Update the selected interval state
     setSelectedInterval(newInterval);
-
+    
     // Fetch new price history data immediately when interval changes
     const historyData = await fetchPriceHistory(newInterval);
-
-    // Always update the series, even if empty (to clear any existing data)
+    
+    // Always update the series, even if empty
     setSeries([{
       name: `Price ${token0Symbol}/${token1Symbol}`,
       data: historyData
     }]);
-
+    
     // Update the last refresh time
     lastRefreshTime.current = Date.now();
-
-    // Log what we're setting
-    console.log(`Updated chart with ${historyData.length} data points for ${newInterval} minute interval`);
   };
 
   // Define predefined time intervals
@@ -482,41 +327,10 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
   useEffect(() => {
     const checkApiConnection = async () => {
       try {
-        // Try multiple endpoints to check API connection
-        let isConnected = false;
-
-        // Try first endpoint
-        try {
-          const response = await fetch(`${API_BASE_URL}/api/price/latest`);
-          if (response.ok) {
-            isConnected = true;
-            console.log("API connection check successful with /api/price/latest");
-          }
-        } catch (e) {
-          console.log("First API connection check failed, trying alternate endpoint");
-        }
-
-        // If first check failed, try alternate endpoint
-        if (!isConnected) {
-          try {
-            const response = await fetch(`${API_BASE_URL}/price/latest`);
-            if (response.ok) {
-              isConnected = true;
-              console.log("API connection check successful with /price/latest");
-            }
-          } catch (e) {
-            console.log("Second API connection check failed");
-          }
-        }
-
-        // Update the error state based on our connection checks
-        setApiError(!isConnected);
-
-        if (!isConnected) {
-          console.error("All API connection checks failed");
-        }
+        const response = await fetch(`${API_BASE_URL}/api/price/latest`);
+        setApiError(!response.ok);
       } catch (error) {
-        console.error("Unexpected API connection error:", error);
+        console.error("API connection error:", error);
         setApiError(true);
       }
     };
