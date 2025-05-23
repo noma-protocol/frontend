@@ -249,42 +249,6 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
     tooltip: { enabled: false },
     grid: { show: false },
     dataLabels: { enabled: false },
-    annotations: {
-      yaxis: [
-        {
-          y: spotPrice,
-          borderColor: "#FF4560",
-          strokeDashArray: 4,
-          label: {
-            borderColor: "#FF4560",
-            style: {
-              color: "#fff",
-              background: "#FF4560",
-            },
-            text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00'} ${token1Symbol || '--'}/${token0Symbol || '--'}`,
-            position: 'left',
-            offsetX: 0,
-            offsetY: 0,
-          },
-        },
-        imv ? {
-          y: parseFloat(formatEther(imv)),
-          borderColor: "yellow",
-          strokeDashArray: 4,
-          label: {
-            borderColor: "yellow",
-            style: {
-              color: "#fff",
-              background: "black",
-            },
-            text: `IMV: ${imv ? parseFloat(formatEther(imv)).toFixed(6) : '0.00'}`,
-            position: 'right',
-            offsetX: 0,
-            offsetY: -5,
-          },
-        } : null,
-      ].filter(Boolean),
-    },
   };
 
   useEffect(() => {
@@ -344,6 +308,10 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
     return () => clearInterval(connectionCheck);
   }, []);
 
+  // Format the IMV value for display
+  const imvValue = imv ? parseFloat(formatEther(imv)).toFixed(6) : '0.00';
+  const spotPriceFormatted = typeof spotPrice === 'number' ? spotPrice.toFixed(6) : '0.00';
+
   return (
     <Box ml={isMobile ? -5 : 0}>
       {apiError ? (
@@ -391,7 +359,20 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
               </Box>
             )}
           </Box>
-          <Box mt={-5}>
+          
+          {/* Price Information Display */}
+          <Box display="flex" justifyContent="space-between" mt={2} mb={-2} px={2}>
+            <Text fontSize="xs" color="#FF4560">
+              <strong>Spot Price:</strong> {spotPriceFormatted} {token1Symbol}/{token0Symbol}
+            </Text>
+            {imv && (
+              <Text fontSize="xs" color="yellow">
+                <strong>IMV:</strong> {imvValue}
+              </Text>
+            )}
+          </Box>
+          
+          <Box mt={1}>
             <Chart options={chartOptions} series={series} type="area" height={isMobile ? 250 : 300} w={isMobile ? "200px": "auto"} />
           </Box>
         </>
