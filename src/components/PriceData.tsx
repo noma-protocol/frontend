@@ -20,19 +20,26 @@ type PriceData = {
   price: number;
 };
 
-const PriceData: React.FC<UniswapPriceChartProps> = ({
+// Add onPercentChange callback to props
+interface ExtendedPriceChartProps extends UniswapPriceChartProps {
+  onPercentChange?: (percent: number) => void;
+}
+
+const PriceData: React.FC<ExtendedPriceChartProps> = ({
   poolAddress,
   providerUrl,
   token0Symbol,
   token1Symbol,
   imv,
   interval = "60", // Default to 1 hour interval
+  onPercentChange,
 }) => {
   const [series, setSeries] = useState([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: [] }]);
   const [spotPrice, setSpotPrice] = useState<number | null>(null);
   const [availableIntervals, setAvailableIntervals] = useState<string[]>([]);
   const [selectedInterval, setSelectedInterval] = useState<string>(interval);
   const [apiError, setApiError] = useState<boolean>(false);
+  const [percentChange, setPercentChange] = useState<number>(0);
   const lastPrice = useRef<number | null>(null);
   const lastRefreshTime = useRef<number | null>(null);
   const API_BASE_URL = "https://prices.oikos.cash"; // Replace with your actual API base URL
@@ -150,6 +157,19 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
     }
   };
 
+  // Calculate percentage change based on history data
+  const calculatePercentChange = (historyData: [number, number][]) => {
+    if (!historyData || historyData.length < 2) return 0;
+
+    // Get first and last price points
+    const firstPrice = historyData[0][1];
+    const lastPrice = historyData[historyData.length - 1][1];
+
+    // Calculate percentage change
+    const change = ((lastPrice - firstPrice) / firstPrice) * 100;
+    return change;
+  };
+
   useEffect(() => {
     let pollInterval: NodeJS.Timeout;
 
@@ -167,19 +187,34 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
         // Only display actual price history data
         if (historyData.length > 0) {
           setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
+
+          // Calculate and set percentage change
+          const change = calculatePercentChange(historyData);
+          setPercentChange(change);
+
+          // Notify parent component if callback provided
+          if (onPercentChange) {
+            onPercentChange(change);
+          }
         } else {
           // Set empty data array when no history is available
           setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: [] }]);
+          setPercentChange(0);
+
+          // Notify parent with zero change
+          if (onPercentChange) {
+            onPercentChange(0);
+          }
         }
       }
 
       // Set up polling for price updates
       pollInterval = setInterval(async () => {
         const now = Date.now();
-        
+
         // Fetch the latest price
         const newPrice = await fetchLatestPrice();
-        
+
         // Update the price if we got a valid value
         if (newPrice !== null) {
           // If price has changed, update it
@@ -187,16 +222,26 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
             lastPrice.current = newPrice;
             setSpotPrice(newPrice);
           }
-          
+
           // Periodically refresh the complete dataset
           const refreshInterval = 30000; // 30 seconds
           const shouldRefreshAll = !lastRefreshTime.current || (now - lastRefreshTime.current > refreshInterval);
-          
+
           if (shouldRefreshAll) {
             console.log(`Refreshing price data for ${selectedInterval} interval`);
             fetchPriceHistory(selectedInterval).then(historyData => {
               if (historyData.length > 0) {
                 setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
+
+                // Recalculate percentage change with new data
+                const change = calculatePercentChange(historyData);
+                setPercentChange(change);
+
+                // Notify parent component if callback provided
+                if (onPercentChange) {
+                  onPercentChange(change);
+                }
+
                 lastRefreshTime.current = now;
               }
             });
@@ -353,13 +398,14 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
         <>
           <Box
             display="flex"
-            justifyContent="left"
+            justifyContent="space-between"
             mt={-4}
             ml={isMobile ? 2 : 0}
             p={2}
             borderRadius="md"
             boxShadow="md"
             h="40px"
+            w="100%"
           >
             {availableIntervals.length > 0 && (
               <Box display="flex" gap={3} alignItems="left">
@@ -387,6 +433,22 @@ const PriceData: React.FC<UniswapPriceChartProps> = ({
                 ))}
               </Box>
             )}
+            <Box
+              display="flex"
+              alignItems="center"
+              px={3}
+              mr={2}
+              borderRadius="md"
+              bg={percentChange > 0 ? "green.700" : percentChange < 0 ? "red.700" : "gray.700"}
+            >
+              <Text
+                fontSize="xs"
+                fontWeight="bold"
+                color="white"
+              >
+                {percentChange > 0 ? "+" : ""}{percentChange.toFixed(2)}%
+              </Text>
+            </Box>
           </Box>
           <Box mt={-5}>
             <Chart options={chartOptions} series={series} type="area" height={isMobile ? 250 : 300} w={isMobile ? "200px": "auto"} />
