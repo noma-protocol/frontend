@@ -1,0 +1,103 @@
+body {
+  background-color: black;
+}
+
+a {
+  color: #a67c00 !important;
+}
+.nomalogo {
+  font-size: 25px;
+  color: #fff;
+  font-weight: 600;
+}
+.navbar-fixed-top {
+  backdrop-filter: blur(5px);
+}
+h3 {
+  font-size: 25px;
+}
+.balance {
+  font-size: 15px !important;
+}
+label {
+  color: white;
+}
+.row {
+  margin-left: -15px;
+  margin-right: -15px;
+}
+li {
+  color: white;
+}
+input {
+  border-color: #f7f7f7e6 !important;
+  color: #f7f7f7e6;
+}
+
+@media screen and (max-width: 600px) {
+  li {
+    font-size: 14px !important;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  table {
+    width: 830px !important
+  }
+  .hero-content h1 {
+    font-size: 2.2rem;
+  }
+  .hero-content p {
+    font-size: 0.8rem;
+  }
+
+  .content-icon span i {
+    font-size: 25px !important;
+  }
+  .content-list .content-icon span {
+    height: 40px;
+    width: 40px;
+  }
+  .wht {
+    font-size: 1rem;
+  }
+  .whtp {
+    font-size: 11px;
+    margin-top: unset !important;
+  }
+  .whath {
+    font-size: 16px;
+  }
+}
+li {
+  color: white;
+}
+label {
+  color: white !important;
+}
+input::placeholder {
+  color: white !important;
+}
+
+.modal-backdrop.show {
+  opacity: 0.2 !important;
+}
+.modal-backdrop {
+  display: none !important;
+}
+.loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
+}
+
+td tr {
+  width: fit-content !important;
+}
