@@ -82,7 +82,7 @@ const Presale: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState("00:00:00"); // Example default
 
   const [allowance, setAllowance] = useState(0);
-  const [contributionAmount, setContributionAmount] = useState(0);
+  const [contributionAmount, setContributionAmount] = useState("");
   const [tokensPurchased, setTokensPurchased] = useState(0);
   const [targetDate, setTargetDate] = useState(""); // 24 hours from now
 
@@ -175,7 +175,12 @@ const Presale: React.FC = () => {
   };
 
   const handleAddAmount = () => {
-    const number = (Number(contributionAmount) + 0.001).toFixed(4);
+    // Default to 0 if empty or not a number
+    const currentAmount = contributionAmount === "" || isNaN(parseFloat(contributionAmount))
+      ? 0
+      : parseFloat(contributionAmount);
+
+    const number = (currentAmount + 0.001).toFixed(4);
     if (number > 5) {
       return;
     }
@@ -183,7 +188,12 @@ const Presale: React.FC = () => {
   }
 
   const handleSubtractAmount = () => {
-    const number = (Number(contributionAmount) - 0.001).toFixed(4);
+    // Default to 0 if empty or not a number
+    const currentAmount = contributionAmount === "" || isNaN(parseFloat(contributionAmount))
+      ? 0
+      : parseFloat(contributionAmount);
+
+    const number = (currentAmount - 0.001).toFixed(4);
     if (number <= 0) {
       return;
     }
@@ -307,15 +317,15 @@ const Presale: React.FC = () => {
     tokenSymbol
 };
 
-  const { 
-    isLoading: contributing, 
-    write: deposit 
+  const {
+    isLoading: contributing,
+    write: deposit
   } = useContractWrite({
     address: contractAddress,
     abi: PresaleAbi,
     functionName: "deposit",
     args: [generateBytes32String("0")],
-    value: contributionAmount > 0 ? parseEther(contributionAmount.toString()) : undefined,
+    value: contributionAmount && parseFloat(contributionAmount) > 0 ? parseEther(contributionAmount.toString()) : undefined,
     onSuccess(data) {
       console.log(`transaction successful: ${data.hash} referral code: ${urlReferralCode}`);
       refetchBalance();
@@ -501,16 +511,18 @@ const Presale: React.FC = () => {
 
   useEffect(() => {
     let tokensPurchased = tokenBalance || 0;
-    if (tokensPurchased === 0) {
-        const cc = Number(contributionAmount / initialPrice); 
-        if (cc > 0) {
-
-        tokensPurchased = parseEther((cc).toString());
-        console.log(`Tokens purchased is ${tokensPurchased}`);
+    if (tokensPurchased === 0 && contributionAmount !== "") {
+        const contributionValue = parseFloat(contributionAmount);
+        if (!isNaN(contributionValue) && contributionValue > 0 && initialPrice) {
+          const cc = contributionValue / initialPrice;
+          if (cc > 0) {
+            tokensPurchased = parseEther((cc).toString());
+            console.log(`Tokens purchased is ${tokensPurchased}`);
+          }
         }
       }
     setTokensPurchased(Number(formatEther(tokensPurchased)).toFixed(4));
-  }, [contributionAmount]);
+  }, [contributionAmount, tokenBalance, initialPrice]);
 
   const handleClickFinalize = async () => {
     setIsLoading(true);
@@ -537,11 +549,15 @@ const Presale: React.FC = () => {
     const handleSetContributionAmount = (e) => {
       const value = e.target.value;
       if (value === "") {
-        setContributionAmount(0);
+        setContributionAmount("");
       } else {
-        const parsedValue = parseFloat(value);
+        // Allow input to start with "." by automatically prepending "0"
+        const normalizedValue = value.startsWith('.') ? `0${value}` : value;
+        const parsedValue = parseFloat(normalizedValue);
+
+        // Check if it's a valid number
         if (!isNaN(parsedValue) && parsedValue >= 0) {
-          setContributionAmount(parsedValue.toFixed(4));
+          setContributionAmount(normalizedValue);
         }
       }
     }
@@ -825,7 +841,7 @@ const Presale: React.FC = () => {
                           maxH={40}
                           backgroundColor={"gray.900"}
                           borderRadius={10}
-                          disabled={!isConnected || contributionAmount === 0 || contributing || balance == 0}
+                          disabled={!isConnected || !contributionAmount || parseFloat(contributionAmount) === 0 || contributing || balance == 0}
                           onClick={() => {
                             // if (contributionAmount < 0.25 || contributionAmount > 5) {
                             //   setErrorMessage("Contribution must be between 0.25 and 5 BNB.");
