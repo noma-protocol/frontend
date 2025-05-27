@@ -56,8 +56,8 @@ const IWETHAbi = IWETHArtifact.abi;
 const ERC20Artifact = await import(`../assets/ERC20.json`);
 const ERC20Abi = ERC20Artifact.abi;
 
-const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
-const NomaFactoryAbi = NomaFactoryArtifact.abi;
+const OikosFactoryArtifact = await import(`../assets/OikosFactory.json`);
+const OikosFactoryAbi = OikosFactoryArtifact.abi;
 
 const StakingContractArtifact = await import(`../assets/Staking.json`);
 const StakingContractAbi = StakingContractArtifact.abi;
@@ -66,7 +66,7 @@ const GonsTokenArtifact = await import(`../assets/GonsToken.json`);
 const GonsTokenAbi = GonsTokenArtifact.abi;
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 const Stake = () => {
@@ -189,12 +189,21 @@ const Stake = () => {
         };
     }, []);
 
+    if (token1Info?.tokenSymbol == "WMON") {
+        setToken1Info({
+            tokenName: "Wrapped BNB",
+            tokenSymbol: "WBNB",
+            tokenDecimals: 18,
+            balance: token1Info?.balance || "0",
+        });
+    } 
+
     useEffect(() => {
         const fetchVaultDescription = async () => {
             try {
                 const nomaFactoryContract = new ethers.Contract(
-                    nomaFactoryAddress,
-                    NomaFactoryAbi,
+                    oikosFactoryAddress,
+                    OikosFactoryAbi,
                     localProvider
                 );
 
@@ -586,7 +595,7 @@ const Stake = () => {
 
                         <Box p={2} px={4} mt={5} w="90%" ml={isMobile ? -5 : 0} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
                             <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
-                            <SimpleGrid columns={2} w="340px" mt={-5} fontSize={"14px"}>
+                            <SimpleGrid columns={2} w="370px" mt={-5} fontSize={"14px"}>
                                 <Box w="340px" backgroundColor={"#bf9b30"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>

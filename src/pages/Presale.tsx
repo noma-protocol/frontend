@@ -44,6 +44,7 @@ import bnbLogo from "../assets/images/bnb.png";
 
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
+import { Badge } from "reactstrap";
 
 const { formatEther, parseEther } = ethers.utils;
 
@@ -68,7 +69,7 @@ const Presale: React.FC = () => {
   const urlReferralCode = searchParams.get("r") || ""; // Fallback to empty string
   const contractAddress = searchParams.get("a") || ""; // Fallback to empty string
 
-  console.log(`Referral code from URL: ${urlReferralCode}`);
+  // console.log(`Referral code from URL: ${urlReferralCode}`);
 
   useEffect(() => {
     if (contractAddress == "0x0000000000000000000000000000000000000000") {
@@ -490,7 +491,7 @@ const Presale: React.FC = () => {
       );
 
       
-      console.log(timeLeft);
+      // console.log(timeLeft);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -548,6 +549,8 @@ const Presale: React.FC = () => {
   const handleClickDeposit = async () => {
       deposit()
     }
+
+    // console.log(`hard cap is ${hardCap} soft cap is ${softCap} x ${hardCap / 200} y ${hardCap / 25}`)
 
   return (
     <Container maxW="container.xl" p={2}>
@@ -734,7 +737,7 @@ const Presale: React.FC = () => {
                           Contribution Amount
                         </StatLabel>
                         <Text fontSize={13}  fontStyle={"italic"} m={2} mt={-2}>
-                          Choose a contribution amount {isMobile?<br />:<></>} (min {commifyDecimals(hardCap / 200, 4)} max {commifyDecimals(hardCap / 25, 4)} BNB)
+                          Choose a contribution amount {isMobile?<br />:<></>} (min <Badge fontSize="sm">{commifyDecimals(hardCap / 200, 2)}</Badge> max <Badge fontSize="sm">{commify(hardCap / 25, 2)}</Badge> BNB)
                         </Text>
                       </StatRoot>
                       <HStack spacing={4} align="center" justify="center" mt={2}>
@@ -769,8 +772,8 @@ const Presale: React.FC = () => {
                           colorPalette={"yellow"}
                           w={{ base: "120px", sm: "120px", md: "220px", lg: "220px" }} // Responsive widths
                           marks={[
-                            { value: (hardCap/200), label: commifyDecimals(hardCap / 200, 4).toString() },
-                            { value: (hardCap/25), label: commifyDecimals(hardCap / 25, 4).toString() },
+                            { value: (hardCap/200), label: commifyDecimals(hardCap / 200, 2).toString() },
+                            { value: (hardCap/25), label: commify(hardCap / 25, 0).toString() },
                           ]}
                           min={Number(hardCap/200)}
                           max={Number(hardCap/25)}
@@ -822,7 +825,7 @@ const Presale: React.FC = () => {
                           maxH={40}
                           backgroundColor={"gray.900"}
                           borderRadius={10}
-                          disabled={!isConnected || contributionAmount === 0 || contributing}
+                          disabled={!isConnected || contributionAmount === 0 || contributing || balance == 0}
                           onClick={() => {
                             // if (contributionAmount < 0.25 || contributionAmount > 5) {
                             //   setErrorMessage("Contribution must be between 0.25 and 5 BNB.");
@@ -868,7 +871,7 @@ const Presale: React.FC = () => {
             >
               <Box w={isMobile?"100%":"55%"} p={1}>
                 {finalized ? (
-                  <Text as="h3">
+                  <Text as="h4">
                     The presale has been finalized
                   </Text>
                 ) : (
@@ -891,7 +894,7 @@ const Presale: React.FC = () => {
                           fontWeight="bold"
                           fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
                       >
-                          {commify(contributions)}
+                          {commify(contributions, 2)}
                       </Text>
                   </Box>
                   <Box w="auto">
@@ -916,7 +919,7 @@ const Presale: React.FC = () => {
                           fontWeight="bold"
                           fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
                       >
-                          {commify(tokensPurchased)}
+                          {commify(tokensPurchased, 2)}
                       </Text>
                   </Box>
                   <Box w="auto" ml={1}>
