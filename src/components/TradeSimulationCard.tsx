@@ -71,7 +71,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
 
     // 1) Compute per-token rates:
     const bidRate = (bidQuote && amountToBuy && amountToBuy !== 0) ? bidQuote / amountToBuy : 0;   // e.g. 1.00420996 BNB/TOK
-    const askRate = (askQuote && amountToSell && amountToSell !== 0) ? askQuote / amountToSell : 0;   // e.g. 0.91337       BNB/TOK
+    const askRate = (askQuote && amountToSell && amountToSell !== 0) ? askQuote / amountToSell : 0;   // e.g. 0.956       BNB/TOK
 
     // 2) Mid-price:
     const midRate = (bidRate && askRate) ? (bidRate + askRate) / 2 : 0;     // ~1.000605

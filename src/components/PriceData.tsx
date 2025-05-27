@@ -321,7 +321,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   background: "#FF4560",
                 },
                 text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'} `, //${token1Symbol || '--'}/${token0Symbol || '--'}
-                offsetY: -45, // Fixed 10 pixel offset
+                offsetY: -25, // Fixed 10 pixel offset
               },
             },
             {
@@ -335,7 +335,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   background: "black",
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
-                offsetY: isWithinPercentageDifference(spotPrice, Number(formatEther(`${imv}`)), 1) ? (-45 + 30) : -20, // Fixed 10 pixel offset 
+                offsetY: isWithinPercentageDifference(spotPrice, Number(formatEther(`${imv}`)), 1) ? (-25 + 30) : -20, // Fixed 10 pixel offset 
               },
             },
           ]
