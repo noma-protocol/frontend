@@ -34,7 +34,7 @@ function NetworkHandler() {
         if (isConnected && network.chain?.name !== "local" && network.chain?.id !== (config.chain === "local" ? 1337 : 10143)) {
           try {
             await switchNetwork({
-              chainId: config.chain === "local" ? 1337 : 10143,
+              chainId: config.chain === "local" ? 1337 : 56,
             });
           } catch (error) {
             console.error("Failed to switch network:", error);
@@ -100,7 +100,7 @@ function App() {
     icons: ["https://avatars.githubusercontent.com/u/37784886"],
   };
 
-  const chains = [localhost, monad];
+  const chains = [localhost/*, bsc, monad*/];
   const wagmiConfig = defaultWagmiConfig({
     chains,
     projectId,
@@ -124,7 +124,7 @@ function App() {
     enableInjected: true,
     enableEmail: false,
     enableExplorer: false,
-    defaultChain: monad,
+    defaultChain: localhost,
     // These options help with connection persistence
     explorerRecommendedWalletIds: 'all',
     mobileWallets: [],
