@@ -66,8 +66,8 @@ const IWETHAbi = IWETHArtifact.abi;
 const ERC20Artifact = await import(`../assets/ERC20.json`);
 const ERC20Abi = ERC20Artifact.abi;
 
-const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
-const NomaFactoryAbi = NomaFactoryArtifact.abi;
+const OikosFactoryArtifact = await import(`../assets/OikosFactory.json`);
+const OikosFactoryAbi = OikosFactoryArtifact.abi;
 
 const LendingVaultArtifact = await import(`../assets/LendingVault.json`);
 const LendingVaultAbi = LendingVaultArtifact.abi;
@@ -113,6 +113,15 @@ const Borrow = () => {
     const [repayAmount, setRepayAmount] = useState("0");
 
     let loanData ;
+
+    if (token1Info?.tokenSymbol == "WMON") {
+        setToken1Info({
+            tokenName: "Wrapped BNB",
+            tokenSymbol: "WBNB",
+            tokenDecimals: 18,
+            balance: token1Info?.balance || "0",
+        });
+    }
 
     const durationChoices = createListCollection({
         items: [
@@ -252,7 +261,7 @@ const Borrow = () => {
         functionName: "approve",
         args: [
             vaultAddress,
-            isAdding ?  parseEther(`${extraCollateral + 1}`)  : parseEther(`${collateral + 1}`)
+            isAdding ?  parseEther(`${extraCollateral}`)  : parseEther(`${collateral}`)
         ],
         onSuccess(data) {
             if (isAdding) {
@@ -265,6 +274,9 @@ const Borrow = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsBorrowing(false);
             setIsLoading(false);
+            setIsAdding(false);
+            setIsRolling(false);
+            setIsRepaying(false);
 
             const msg = Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
             toaster.create({
@@ -468,7 +480,7 @@ const Borrow = () => {
 
         const nomaFactoryContract = new ethers.Contract(
             nomaFactoryAddress,
-            NomaFactoryAbi,
+            OikosFactoryAbi,
             localProvider
         );
 
@@ -578,7 +590,7 @@ const Borrow = () => {
             return;
         }
 
-        console.log(`Adding extra: ${extraCollateral} collateral ${collateral}}`);
+        console.log(`Adding extra: ${extraCollateral} collateral ${collateral}`);
         setIsAdding(true);
         setIsLoading(true);
         approve();
@@ -597,12 +609,19 @@ const Borrow = () => {
         approveToken1();
     }
 
+    const handleSetExtraCollateral = (e) => {
+
+        setExtraCollateral(e);
+        setCollateral(e);
+        // setIsAdding(true);
+    };
+
     const displayedCollateral = Number(formatEther(`${loanData?.collateralAmount || 0}`)) > 1000000 ?
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) :
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) ;
     
     return (
-        <Container maxW="container.xl=" py={12} pl={"0%"} ml={isMobile ? "3%" : "8%"}>
+        <Container maxW="container.xl=" py={12} pl={"0%"} ml={"10%"}>
             <Toaster />
 
             {!isConnected ? (
@@ -628,14 +647,14 @@ const Borrow = () => {
                     textAlign="left"
                     position="relative"
                     mt={"50px"}
-                    marginBottom={"15%"}
-                    ml={isMobile ? "20px" : 0}
+                    mb={"15%"}
+                    // ml={isMobile ? "20px" : 0}
                     // border="1px solid red"
                 >
                 {isAddress(vaultAddress) ? (
                     isMobile ? (
                         <Flex direction="column">
-                        <Box mt={30} w={isMobile ? "100%" : "98%"} ml={-5} >
+                        <Box mt={10} ml={isMobile ? 2 : -20}>
                         <BalanceCard 
                             ethBalance={ethBalance}
                             token0Balance={token0Info?.balance} 
@@ -657,9 +676,9 @@ const Borrow = () => {
                             page="borrow"
                             />
                         </Box>
-                        <Box p={2} mt={5} w={isMobile ? "95%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
+                        <Box p={2} mt={5} w={isMobile ? "90%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
                             <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Loan</Text>        
-                           <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={isMobile ? "95%" : "352px"} ml={2} mr={2}>
+                           <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> 
@@ -703,7 +722,7 @@ const Borrow = () => {
                                         <LoanAddCollateral
                                             size="sm"
                                             token0Symbol={token0Info.tokenSymbol}
-                                            handleSetCollateral={setExtraCollateral}
+                                            handleSetCollateral={handleSetExtraCollateral}
                                             extraCollateral={extraCollateral}
                                             isMobile={isMobile}
                                             ltv={ltv}
@@ -741,11 +760,11 @@ const Borrow = () => {
                                             variant={"outline"}
                                             h={6}
                                             // onClick={() => setIsLoading(true)}
-                                            disabled={isRolling || isLoading || isTokenInfoLoading || ltv <= 1}
+                                            disabled={isRolling || isTokenInfoLoading || ltv <= 1}
                                             w={"80px"}
                                             border="1px solid #f3f7c6"
                                         >
-                                        {isLoading ? <Spinner size="sm" /> : <Text fontSize={"11px"} color={"#f3f7c6"}>Roll</Text>}
+                                        {isRolling ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Roll</Text>}
                                         </Button>
                                         </DrawerTrigger>
                                         <DrawerBackdrop />
@@ -817,13 +836,13 @@ const Borrow = () => {
                                 p={2} 
                                 ml={-5}  
                                 mt={5}  
-                                w={isMobile ? "94%" : "98%"}   
+                                w={"90%"}   
                                 border="1px solid ivory" 
                                 borderRadius={10} 
                                 backgroundColor={"#222831"} 
                             >
                                 <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>New Loan</Text>    
-                                <SimpleGrid columns={2} w={isMobile ? "95%" : "352px"}  mt={-5} fontSize="xs" p={1} backgroundColor={"#222831"} ml={2} mr={2}>
+                                <SimpleGrid columns={2} w={"94%"}  mt={-5} fontSize="xs" p={1} backgroundColor={"#222831"} ml={2} mr={2}>
                                     <Box backgroundColor={"#a67c00"} >
                                         <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                     </Box>
@@ -867,10 +886,10 @@ const Borrow = () => {
                                                 </HStack>
                                             </Box>
                                             <Box mt={5}>
-                                                <Text  fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"xs":"15px"}>Collateral required</Text>
+                                                <Text  fontWeight={"bold"} color="#a67c00" fontSize={"xs"}>Collateral required</Text>
                                             </Box>
                                             <Box>
-                                                <Text fontSize={isMobile?"xs":"15px"}>{formatNumberPrecise(collateral || 4)} {token0Info.tokenSymbol}</Text>
+                                                <Text fontSize={"xs"}>{formatNumberPrecise(collateral || 4)} {token0Info.tokenSymbol}</Text>
                                             </Box>
                                             <Box mt={5}>
                                             <HStack>
@@ -888,7 +907,7 @@ const Borrow = () => {
                                                     </HStack>
                                                 <HStack>
                                                     <Box>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Box>
-                                                    <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info?.tokenSymbol}/{token1Info?.tokenSymbol}</Box>
+                                                    <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
                                                 </HStack>
                                             </Box> 
                                     </Box>
@@ -1007,7 +1026,7 @@ const Borrow = () => {
                                     <LoanAddCollateral
                                         size="lg"
                                         token0Symbol={token0Info.tokenSymbol}
-                                        handleSetCollateral={setExtraCollateral}
+                                        handleSetCollateral={handleSetExtraCollateral}
                                         extraCollateral={extraCollateral}
                                         isMobile={isMobile}
                                         ltv={ltv}
@@ -1039,11 +1058,11 @@ const Borrow = () => {
                                         variant={"outline"}
                                         h={8}
                                         // onClick={() => setIsLoading(true)}
-                                        disabled={isRolling || isLoading || isTokenInfoLoading || ltv <= 1}
+                                        disabled={isRolling  || isTokenInfoLoading || ltv <= 1}
                                         w={"120px"}
                                         border="1px solid #f3f7c6"
                                     >
-                                    {isLoading ? <Spinner size="sm" /> : <Text color={"#f3f7c6"}>Roll</Text>}
+                                    {isRolling ? <Spinner size="sm" /> : <Text fontSize="xs" color={"#f3f7c6"}>Roll</Text>}
                                     </Button>
                                     </DrawerTrigger>
                                     <DrawerBackdrop />
@@ -1214,7 +1233,7 @@ const Borrow = () => {
                                             </HStack>
                                         <HStack>
                                             <Box>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Box>
-                                            <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info?.tokenSymbol}/{token1Info?.tokenSymbol}</Box>
+                                            <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
                                         </HStack>
                                     </Box> 
                             </Box>

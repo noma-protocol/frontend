@@ -90,8 +90,8 @@ const localProvider = new JsonRpcProvider(
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
-const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
-const NomaFactoryAbi = NomaFactoryArtifact.abi;
+const OikosFactoryArtifact = await import(`../assets/OikosFactory.json`);
+const OikosFactoryAbi = OikosFactoryArtifact.abi;
 
 const ModelHelperArtifact = await import(`../assets/ModelHelper.json`);
 const ModelHelperAbi = ModelHelperArtifact.abi;
@@ -113,11 +113,11 @@ const WETHAbi = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const exchangeHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Exchange");
 const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
-const feeTier = 3000;
+const feeTier = 10000;
 
 ChartJS.register(
     CategoryScale,
@@ -204,6 +204,7 @@ const Exchange: React.FC = () => {
   const [allVaultDescriptions, setAllVaultDescriptions] = useState([]);
 
   const [chartData, setChartData] = useState(generateRandomData());
+  const [percentChange, setPercentChange] = useState<number>(0);
   const [wrapAmount, setWrapAmount] = useState(0);
   const [poolInfo, setPoolInfo] = useState({});
 
@@ -229,6 +230,15 @@ const Exchange: React.FC = () => {
     args: [selectedVault],
     watch: true,
   });
+
+  if (token1Info?.tokenSymbol == "WMON") {
+      setToken1Info({
+          tokenName: "Wrapped BNB",
+          tokenSymbol: "WBNB",
+          tokenDecimals: 18,
+          balance: token1Info?.balance || "0",
+      });
+  }
 
   // console.log(`Imv is ${formatEther(`${imv || 0}`)} for vault ${selectedVault}`);
 
@@ -268,7 +278,7 @@ const Exchange: React.FC = () => {
     );
 
     const poolAddress = await uniswapV3FactoryContract.getPool(token0, token1, feeTier);
-    // console.log(`Pool address for ${token0} and ${token1} is ${poolAddress}`);
+    console.log(`Pool address for ${token0} and ${token1} is ${poolAddress}`);
     return poolAddress;
   };
 
@@ -289,8 +299,8 @@ const Exchange: React.FC = () => {
     data: deployersData,
     isError: isAllVaultsError,
   } = useContractRead({
-    address: nomaFactoryAddress,
-    abi: NomaFactoryAbi,
+    address: oikosFactoryAddress,
+    abi: OikosFactoryAbi,
     functionName: "getDeployers",
     // enabled: isConnected,
   });
@@ -411,8 +421,8 @@ const Exchange: React.FC = () => {
   useEffect(() => {
     if (typeof deployersData !== "undefined") {
       const nomaFactoryContract = new ethers.Contract(
-        nomaFactoryAddress,
-        NomaFactoryAbi,
+        oikosFactoryAddress,
+        OikosFactoryAbi,
         localProvider
       );
 
@@ -469,6 +479,7 @@ const Exchange: React.FC = () => {
             setIsAllVaultsLoading(false);
             
           } catch (error) {
+            console.log(oikosFactoryAddress);
             console.error("Error fetching vaults:", error);
           }
         };
@@ -1112,14 +1123,14 @@ const Exchange: React.FC = () => {
                     {isMobile ?
                     <VStack alignItems={"left"} ml={5}>
                       <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT PRICE</Text></Box>
-                      <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
+                      <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 9)}</Text></Box>
                       <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
                       <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>(+{commifyDecimals(percentageChange, 2)}%)</Text></Box>
                     </VStack>
                     : 
                     <HStack>
                       <Box><Text color="#a67c00" fontWeight="bold">SPOT PRICE</Text></Box> 
-                      <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
+                      <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 9)}</Text></Box>
                       <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`}</Text></Box>
                       <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({commifyDecimals(percentageChange, 2)}%)</Text></Box>
                     </HStack>                    
@@ -1136,6 +1147,7 @@ const Exchange: React.FC = () => {
                           providerUrl="https://testnet-rpc.monad.xyz"  
                           token0Symbol={token0Info?.tokenSymbol} 
                           token1Symbol={token1Info.tokenSymbol}
+                          setPercentChange={setPercentChange}
                         />
                     </Box>
                     <BalanceCard
@@ -1225,6 +1237,7 @@ const Exchange: React.FC = () => {
                               providerUrl="https://testnet-rpc.monad.xyz"  
                               token0Symbol={token0Info?.tokenSymbol} 
                               token1Symbol={token1Info.tokenSymbol}
+                              setPercentChange={setPercentChange}
                             />
                           </Box>
                         </GridItem>

@@ -43,15 +43,15 @@ const localProvider = new JsonRpcProvider(
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
-const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
-const NomaFactoryAbi = NomaFactoryArtifact.abi;
+const OikosFactoryArtifact = await import(`../assets/OikosFactory.json`);
+const OikosFactoryAbi = OikosFactoryArtifact.abi;
 
 const uniswapV3FactoryABI = [
   "function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool)",
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const feeTier = 3000;
 
 const Markets: React.FC = () => {
@@ -102,12 +102,14 @@ const Markets: React.FC = () => {
 
   // fetch label for reserve asset
   const getReserveAssetLabel = (address: string) => {
-    
+    console.log("Fetching reserve asset label for address:", address);
+    console.log("Reserve Assets Map:", reserveAssetsMap);
     return reserveAssetsMap[address] || "Unknown";
   };
 
   const labelToLogoMap = {
     WMON: monadLogo,
+    WBNB: bnbLogo,
   };
 
   // fetch logo for reserve asset
@@ -122,8 +124,8 @@ const Markets: React.FC = () => {
     data: deployersData,
     isError: isAllVaultsError,
   } = useContractRead({
-    address: nomaFactoryAddress,
-    abi: NomaFactoryAbi,
+    address: oikosFactoryAddress,
+    abi: OikosFactoryAbi,
     functionName: "getDeployers",
     enabled: view === "all" && isConnected,
   });
@@ -134,8 +136,8 @@ const Markets: React.FC = () => {
       setIsAllVaultsLoading(true);
 
       const nomaFactoryContract = new ethers.Contract(
-        nomaFactoryAddress,
-        NomaFactoryAbi,
+        oikosFactoryAddress,
+        OikosFactoryAbi,
         localProvider
       );
 
@@ -220,8 +222,8 @@ const Markets: React.FC = () => {
         const fetchVaults = async () => {
           try {
             const nomaFactoryContract = new ethers.Contract(
-              nomaFactoryAddress,
-              NomaFactoryAbi,
+              oikosFactoryAddress,
+              OikosFactoryAbi,
               localProvider
             );
 
@@ -318,8 +320,8 @@ const Markets: React.FC = () => {
       const fetchUserVaults = async () => {
         try {
             const nomaFactoryContract = new ethers.Contract(
-                nomaFactoryAddress,
-                NomaFactoryAbi,
+                oikosFactoryAddress,
+                OikosFactoryAbi,
                 localProvider
             );
 
