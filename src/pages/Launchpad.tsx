@@ -118,7 +118,8 @@ const Launchpad: React.FC = () => {
                 presale: presale.toString()
             },
         ],
-        gas: 40000000, // Increase gas limit
+        value: parseEther(`${1}`), // 0.1 BNB for deployment
+        gasLimit: 30000000, // Increase gas limit
         onSuccess(data) {
         console.log(`transaction successful: ${data.hash}`);
 

@@ -49,19 +49,19 @@ const Migration = await import(`../assets/Migration.json`);
 const MigrationAbi = Migration.abi;
 
 // console.log("Whitelisted Addresses:", whitelistedAddresses);    
-const tokenAddress = "0x156b1AaCEa9c1707F8102C86313b46FBa35485Cf" //getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
+const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488" //getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
 
 const ERC20Artifact = await import(`../assets/ERC20.json`);
 
 // Dynamically import the NomaFactory artifact and extract its ABI
-const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
-const NomaFactoryAbi = NomaFactoryArtifact.abi;
+const OikosFactoryArtifact = await import(`../assets/OikosFactory.json`);
+const OikosFactoryAbi = OikosFactoryArtifact.abi;
 
 const ERC20Abi = ERC20Artifact.abi;
 // NomaFactory contract address
 // const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const oldOKSTokenAddress = "0x18aCf236eB40c0d4824Fb8f2582EBbEcD325Ef6a";
-const migrationContractAddress = "0xcdD4C6387E3f1F6b911d0830B94D9Ab00c6fE5F2";
+const migrationContractAddress = "0xbA2334E2bD9E7CA90fb08d6ABeAd1577f879EE35";
 // const feeTier = 3000;
 
 const Migrate: React.FC = () => {
@@ -344,7 +344,7 @@ const Migrate: React.FC = () => {
                             mt={2}
                             ml={"60px"}
                             variant={"outline"}
-                            disabled={!isWhitelisted || isMigrating || !oldOKSBalance || oldOKSBalance <= 0 || available <= 0}
+                            // disabled={!isWhitelisted || isMigrating || !oldOKSBalance || oldOKSBalance <= 0 || available <= 0}
                     >{isMigrating ? <Spinner size="sm" /> : <Text fontSize="sm" color="ivory">Withdraw</Text>}
                     </Button>
                     </Box>
