@@ -923,18 +923,27 @@ const Borrow = () => {
                                         backgroundColor={"#F5F5DC"}
                                         color={"gray.800"}
                                         >
-                                        <SelectTrigger>
+                                        <SelectTrigger
+                                            _hover={{ backgroundColor: "#e5e5c5" }}
+                                        >
                                             {durationChoices.items.map((data, index) => {
                                                 if (index > 0) return;
                                                 return (
                                                     <SelectValueText placeholder={data.label}>
                                                     </SelectValueText>
                                                 );
-                                                })}       
+                                                })}
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent
+                                            backgroundColor={"#F5F5DC"}
+                                            color={"gray.800"}
+                                        >
                                             {durationChoices.items.map((choice) => (
-                                                <SelectItem item={choice} key={choice.value}>
+                                                <SelectItem
+                                                    item={choice}
+                                                    key={choice.value}
+                                                    _hover={{ backgroundColor: "#e5e5c5" }}
+                                                >
                                                     {choice.label}
                                                 </SelectItem>
                                             ))}
@@ -1257,21 +1266,27 @@ const Borrow = () => {
                                 backgroundColor="#F5F5DC"
                                 
                                 >
-                                <SelectTrigger>
+                                <SelectTrigger
+                                    _hover={{ backgroundColor: "#e5e5c5" }}
+                                >
                                     {durationChoices.items.map((data, index) => {
                                         if (index > 0) return;
                                         return (
                                             <SelectValueText placeholder={data.label}>
                                             </SelectValueText>
                                         );
-                                        })}       
+                                        })}
                                 </SelectTrigger>
                                 <SelectContent
                                  backgroundColor="#F5F5DC"
                                  color="gray.800"
                                  >
                                     {durationChoices.items.map((choice) => (
-                                        <SelectItem item={choice} key={choice.value}>
+                                        <SelectItem
+                                            item={choice}
+                                            key={choice.value}
+                                            _hover={{ backgroundColor: "#e5e5c5" }}
+                                        >
                                             {choice.label}
                                         </SelectItem>
                                     ))}
