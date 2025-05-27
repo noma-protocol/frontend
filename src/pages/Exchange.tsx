@@ -1224,7 +1224,7 @@ const Exchange: React.FC = () => {
                         h="200px"
                         templateRows="repeat(2, 1fr)"
                         templateColumns="repeat(2, 1fr)"
-                        gap={4}
+                        gap={1}
                         mb={20}
                         mt={10}
                     >

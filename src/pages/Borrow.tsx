@@ -654,7 +654,7 @@ const Borrow = () => {
                 {isAddress(vaultAddress) ? (
                     isMobile ? (
                         <Flex direction="column">
-                        <Box mt={10} ml={isMobile ? 2 : -20}>
+                        <Box mt={10} ml={2}>
                         <BalanceCard 
                             ethBalance={ethBalance}
                             token0Balance={token0Info?.balance} 
@@ -870,7 +870,7 @@ const Borrow = () => {
                                                 <NumberInputField h={"30px"} w={{ base: "", lg: "200px" }} />
                                             </NumberInputRoot>
                                             </Box>
-                                            <Box>
+                                            <Box mt={2}>
                                                 <Image src={bnbLogo} w="25px"></Image>
                                             </Box>
                                         </HStack>
@@ -913,13 +913,15 @@ const Borrow = () => {
                                     </Box>
                                     <Box>
                                     <SelectRoot
-                                        mt={1}
+                                        mt={3}
                                         ml={12}
                                         collection={durationChoices}
                                         size="xs"
                                         width={"100px"}
                                         onChange={handleSetDuration}
                                         value={duration}
+                                        backgroundColor={"#F5F5DC"}
+                                        color={"gray.800"}
                                         >
                                         <SelectTrigger>
                                             {durationChoices.items.map((data, index) => {
@@ -939,12 +941,12 @@ const Borrow = () => {
                                         </SelectContent>
                                     </SelectRoot>
                                      <Button 
-                                        mt={4} 
-                                        w={"90px"}
+                                        mt={6} 
+                                        w={"100px"}
                                         h={"25px"}  
                                         borderColor={"#a67c00"} 
                                         variant="outline" 
-                                        ml={14} 
+                                        ml={12} 
                                         onClick={() => handleBorrow()}  
                                         disabled={
                                             isTokenInfoLoading || 
@@ -964,7 +966,7 @@ const Borrow = () => {
                         </Flex>
                                                  
                     ) : (
-                    <Box>
+                    <Box  w="90%">
                     {/* <Heading as="h2">
                         Borrow
                     <Text fontSize="md">
@@ -975,13 +977,14 @@ const Borrow = () => {
                         h="600px"
                         templateRows="repeat(2, 1fr)"
                         templateColumns="repeat(2, 1fr)"
-                        gap={10}
+                        gap={3}
                         mb={20}
                         mt={10}
-                        p={4}
+                        px={2}
+                        py={4}
                         // border="1px solid yellow"
                     >
-                        <GridItem border={"1px solid white"} p={4} px={6} ml={40} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem border={"1px solid white"} p={4} px={6} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                             <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">Active Loan</Text>
                             <SimpleGrid columns={5} mt={-5}>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
@@ -999,7 +1002,7 @@ const Borrow = () => {
                                 
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
-                                    <Box px={2} mt={2}> 
+                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius={5} border="1px solid gray" h="25px" borderTopRight={"none"}> 
                                         <HStack>
                                             <Box  fontSize="sm">
                                             {displayedCollateral}
@@ -1009,7 +1012,7 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2}> 
+                                    <Box  borderLeft="none" px={2} mt={2}  bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius={5} border="1px solid gray" h="25px"> 
                                         <HStack>
                                             <Box  fontSize="sm">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
@@ -1019,10 +1022,10 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2}  mt={2}> {commifyDecimals(ltv, 2)}</Box>
-                                    <Box px={2}  mt={2}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
+                                    <Box px={2}  mt={2}  bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius={5} border="1px solid gray" h="25px"> {commifyDecimals(ltv, 2)}</Box>
+                                    <Box px={2}  mt={2}  bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius={5} border="1px solid gray" h="25px"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
                                     <Box px={2}  mt={2} ml={-10}> 
-                                    <VStack>
+                                    <VStack ml={10}>
                                     <LoanAddCollateral
                                         size="lg"
                                         token0Symbol={token0Info.tokenSymbol}
@@ -1061,6 +1064,7 @@ const Borrow = () => {
                                         disabled={isRolling  || isTokenInfoLoading || ltv <= 1}
                                         w={"120px"}
                                         border="1px solid #f3f7c6"
+                                        borderRadius={5}
                                     >
                                     {isRolling ? <Spinner size="sm" /> : <Text fontSize="xs" color={"#f3f7c6"}>Roll</Text>}
                                     </Button>
@@ -1141,7 +1145,7 @@ const Borrow = () => {
                                 )}
                             </SimpleGrid>
                         </GridItem>
-                        <GridItem>
+                        <GridItem ml={-10}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
@@ -1163,7 +1167,7 @@ const Borrow = () => {
                                 page="borrow" 
                             />
                         </GridItem>
-                        <GridItem border={"1px solid white"} p={4} px={6} pb={8} ml={40} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem border={"1px solid white"} p={4} px={6} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                         <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">New Loan</Text>
                         <SimpleGrid columns={3} w="700px" mt={-5}>
                             <Box w="500px"backgroundColor={"#a67c00"}  mb={2}>
@@ -1191,9 +1195,12 @@ const Borrow = () => {
                                         setFloorPrice={(() => {})}
                                         height={"38px"}
                                         mt={1}
+                                        borderRadius={5}
+                                        // backgroundColor={"#F5F5DC"}
+                                        // color="gray.800"
                                     >
-                                        <NumberInputLabel h={"38px"} w={{ base: "", lg: "auto" }} />
-                                        <NumberInputField h={"38px"} w={{ base: "", lg: "200px" }} />
+                                        <NumberInputLabel  h={"38px"} w={{ base: "", lg: "auto" }} />
+                                        <NumberInputField  h={"38px"} w={{ base: "", lg: "200px" }} />
                                     </NumberInputRoot>
                                     </Box>
                                     <Box>
@@ -1240,12 +1247,15 @@ const Borrow = () => {
                             <Box>
                             <SelectRoot
                                 mt={1}
-                                ml={isMobile?25:55}
+                                ml={isMobile?25:62}
+                                color="gray.800"
                                 collection={durationChoices}
                                 size="sm"
-                                width={isMobile?"180px":"110px"}
+                                width={isMobile?"180px":"120px"}
                                 onChange={handleSetDuration}
                                 value={duration}
+                                backgroundColor="#F5F5DC"
+                                
                                 >
                                 <SelectTrigger>
                                     {durationChoices.items.map((data, index) => {
@@ -1256,7 +1266,10 @@ const Borrow = () => {
                                         );
                                         })}       
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent
+                                 backgroundColor="#F5F5DC"
+                                 color="gray.800"
+                                 >
                                     {durationChoices.items.map((choice) => (
                                         <SelectItem item={choice} key={choice.value}>
                                             {choice.label}
@@ -1266,13 +1279,22 @@ const Borrow = () => {
                             </SelectRoot>
                             </Box>
                             <Box>
-                            <Button mt={2} h={"30px"}  borderColor={"#a67c00"} variant="outline" ml={5} onClick={() => handleBorrow()}  
-                            disabled={
-                                isTokenInfoLoading || 
-                                loanData?.borrowAmount > 0 || 
-                                borrowAmount == 0 || 
-                                parseFloat(formatEther(`${token0Info.balance}`)) < parseFloat(`${collateral}`)
-                            } w={"120px"}>
+                            <Button 
+                                mt={2} 
+                                w="180px"
+                                h={"30px"}  
+                                borderColor={"#a67c00"} 
+                                variant="outline" 
+                                ml={5} 
+                                onClick={() => handleBorrow()}  
+                                disabled={
+                                    isTokenInfoLoading || 
+                                    loanData?.borrowAmount > 0 || 
+                                    borrowAmount == 0 || 
+                                    parseFloat(formatEther(`${token0Info.balance}`)) < parseFloat(`${collateral}`)
+                                } 
+                                borderRadius={5}
+                            >
                                {isBorrowing ? <Spinner size="sm" color="#a67c00"/> :  <Text color="#a67c00">Borrow</Text>}
                             </Button>
                             </Box>

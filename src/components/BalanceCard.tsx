@@ -137,7 +137,7 @@ const BalanceCard = ({
                 <Box color="white" background="#a67c00"  pl={3}>
                     <Text  fontSize="xs">Asset</Text>
                 </Box>
-                <Box  color="white" background="#a67c00" textAlign="left" >
+                <Box  color="white" background="#a67c00" textAlign="left" ml={-2} >
                     <Text  fontSize="xs">Balance</Text> 
                 </Box>
                 
@@ -146,14 +146,14 @@ const BalanceCard = ({
                 </Box>
                 
                 {/* BNB Row */}
-                <Box p={2} height="42px" display="flex" alignItems="center">
+                <Box p={2} height="42px" display="flex" alignItems="center" w="70px">
                     <HStack spacing={2}>
                         <Image src={bnbLogo} w="40px" alt="BNB" ml={-2} />
                         <Text fontSize="xs" mt={"-2px"} fontWeight={"bold"} ml={2}>BNB</Text>
                     </HStack>
                 </Box>
-                <Box bgColor={"#F5F5DC"} px={2} borderRadius={5} border="1px solid gray" mt={3} h="20px" w="130px" fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
-                    <Text fontSize={fontSize} color="gray.800" fontWeight={"bold"}  h={"20px"}>{commify(formattedEthBalance)}</Text>
+                <Box ml={-2} bgColor={"#F5F5DC"} px={2} borderRadius={5} border="1px solid gray" mt={3} h="20px" w="130px" fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
+                    <Text fontSize={fontSize} color="gray.800"  h={"20px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
                     <Box>
@@ -169,6 +169,7 @@ const BalanceCard = ({
                                 w={buttonSize}
                                 onClick={() => setActionType('wrap')}
                                 color="white"
+                                borderRadius={5}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     {isWrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Wrap</Text>}
@@ -224,7 +225,7 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box bgColor={"#F5F5DC"} w="130px"  color="gray.800" fontWeight={"bold"} px={2} borderRadius={5} border="1px solid gray" mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                <Box  ml={-2} bgColor={"#F5F5DC"} w="130px"  color="gray.800"  px={2} borderRadius={5} border="1px solid gray" mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token1Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
@@ -242,6 +243,7 @@ const BalanceCard = ({
                                 ml={2}
                                 onClick={() => setActionType('unwrap')}
                                 color="white"
+                                borderRadius={5}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     {isUnwrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Unwrap</Text>}
@@ -306,7 +308,7 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box bgColor={"#F5F5DC"} w="130px"  color="gray.800" fontWeight={"bold"}  px={2} borderRadius={5} border="1px solid gray" mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                <Box ml={-2} bgColor={"#F5F5DC"} w="130px"  color="gray.800" px={2} borderRadius={5} border="1px solid gray" mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token0Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center"  mt={2}>
@@ -324,6 +326,7 @@ const BalanceCard = ({
                                 mb={1}
                                 borderColor={withBg ? "gray" : "none"}
                                 color="white"
+                                borderRadius={5}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Borrow
@@ -340,6 +343,7 @@ const BalanceCard = ({
                                 mt={0}
                                 borderColor={withBg ? "gray" : "none"}
                                 color="white"
+                                borderRadius={5}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Stake
