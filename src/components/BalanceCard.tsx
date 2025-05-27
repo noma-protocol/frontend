@@ -149,11 +149,11 @@ const BalanceCard = ({
                 <Box p={2} height="42px" display="flex" alignItems="center">
                     <HStack spacing={2}>
                         <Image src={bnbLogo} w="40px" alt="BNB" ml={-2} />
-                        <Text fontSize="xs" mt={"-2px"} ml={2}>BNB</Text>
+                        <Text fontSize="xs" mt={"-2px"} fontWeight={"bold"} ml={2}>BNB</Text>
                     </HStack>
                 </Box>
-                <Box w="250px" p={2} fontSize={fontSize} textAlign="left" height="42px" display="flex" alignItems="left" justifyContent="left">
-                    <Text fontSize={fontSize}  h={"30px"}>{commify(formattedEthBalance)}</Text>
+                <Box bgColor={"#F5F5DC"} px={2} borderRadius={5} border="1px solid gray" mt={2} h="20px" w="130px" fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
+                    <Text fontSize={fontSize} color="black"  h={"20px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
                     <Box>
@@ -220,11 +220,11 @@ const BalanceCard = ({
                         <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2}>
                             <Image src={bnbLogo} w="40px" alt={token1Symbol || 'Token'} ml={-2} />
-                            <Text fontSize="xs"  ml={2} mt={"-2px"}>{token1Symbol || <Spinner size="sm" />}</Text>
+                            <Text fontSize="xs" fontWeight={"bold"} ml={2} mt={"-2px"}>{token1Symbol || <Spinner size="sm" />}</Text>
                         </HStack>
                     }
                 </Box>
-                <Box p={2} fontSize={fontSize} textAlign="left" height="42px" display="flex" alignItems="left" justifyContent="left">
+                <Box bgColor={"#F5F5DC"} w="130px" color="black"  px={2} borderRadius={5} border="1px solid gray" mt={2}  fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token1Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
@@ -237,7 +237,8 @@ const BalanceCard = ({
                                 variant="outline" 
                                 h="25px"
                                 w={buttonSize}
-                                mt={-2}
+                                // mt={-2}
+                                mt={-1}
                                 ml={2}
                                 onClick={() => setActionType('unwrap')}
                                 color="white"
@@ -300,15 +301,15 @@ const BalanceCard = ({
                             />
                             </Box>
                             <Box ml={2}>
-                               <Text ml={token0Symbol == "OKS" ? "-20px" : 0} fontSize="xs">&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
+                               <Text fontWeight="bold" ml={token0Symbol == "OKS" ? "-20px" : 0} fontSize="xs">&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
                             </Box>
                         </HStack>
                     }
                 </Box>
-                <Box p={2} fontSize={fontSize} textAlign="left" height="70px" display="flex" alignItems="left" justifyContent="left">
+                <Box bgColor={"#F5F5DC"} w="130px" color="black"  px={2} borderRadius={5} border="1px solid gray" mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token0Balance || 0}`))}
                 </Box>
-                <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center">
+                <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center"  mt={2}>
                     {page == "exchange" ?
                         <VStack spacing={2} align="center">
                             <Button 
@@ -336,6 +337,7 @@ const BalanceCard = ({
                                 onClick={handleClickStake}
                                 fontSize={fontSize}
                                 ml={2}
+                                mt={1}
                                 borderColor={withBg ? "gray" : "none"}
                                 color="white"
                             >
