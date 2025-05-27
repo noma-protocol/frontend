@@ -152,8 +152,8 @@ const BalanceCard = ({
                         <Text fontSize="xs" mt={"-2px"} fontWeight={"bold"} ml={2}>BNB</Text>
                     </HStack>
                 </Box>
-                <Box bgColor={"#F5F5DC"} px={2} borderRadius={5} border="1px solid gray" mt={2} h="20px" w="130px" fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
-                    <Text fontSize={fontSize} color="black"  h={"20px"}>{commify(formattedEthBalance)}</Text>
+                <Box bgColor={"#F5F5DC"} px={2} borderRadius={5} border="1px solid gray" mt={3} h="20px" w="130px" fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
+                    <Text fontSize={fontSize} color="gray.800" fontWeight={"bold"}  h={"20px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
                     <Box>
@@ -224,7 +224,7 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box bgColor={"#F5F5DC"} w="130px" color="black"  px={2} borderRadius={5} border="1px solid gray" mt={2}  fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                <Box bgColor={"#F5F5DC"} w="130px"  color="gray.800" fontWeight={"bold"} px={2} borderRadius={5} border="1px solid gray" mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token1Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
@@ -287,7 +287,7 @@ const BalanceCard = ({
                 </Box>
                 
                 {/* Token Row */}
-                <Box p={2}  display="flex" alignItems="center" mt={-8}>
+                <Box p={2}  display="flex" alignItems="center" mt={-10}>
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
                         <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2} >
@@ -306,7 +306,7 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box bgColor={"#F5F5DC"} w="130px" color="black"  px={2} borderRadius={5} border="1px solid gray" mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                <Box bgColor={"#F5F5DC"} w="130px"  color="gray.800" fontWeight={"bold"}  px={2} borderRadius={5} border="1px solid gray" mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token0Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center"  mt={2}>
@@ -337,7 +337,7 @@ const BalanceCard = ({
                                 onClick={handleClickStake}
                                 fontSize={fontSize}
                                 ml={2}
-                                mt={1}
+                                mt={0}
                                 borderColor={withBg ? "gray" : "none"}
                                 color="white"
                             >
