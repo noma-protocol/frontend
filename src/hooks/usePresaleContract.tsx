@@ -3,11 +3,11 @@ import { ethers } from "ethers";
 const { JsonRpcProvider } = ethers.providers;
 
 import { generateBytes32String } from "../utils";
+import config from "../config";
 
 const { formatEther } = ethers.utils;
 
 const usePresaleContract = (network, userAddress, presaleContractAddress, referralCode) => {
-    console.log(`Referral Code: ${referralCode}`);
     
     const [presaleData, setPresaleData] = useState({
         totalRaised: "0",
@@ -28,14 +28,14 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    console.log(`Network: ${network}`);
+
     // Setup Provider
     const provider = useMemo(
         () =>
             new JsonRpcProvider(
-                network === "ganache"
-                    ? "http://localhost:8545"
-                    : "https://testnet-rpc.monad.xyz"
+                config.chain == "local"
+                ? "http://localhost:8545"
+                : "https://testnet-rpc.monad.xyz"
             ),
         [network]
     );
