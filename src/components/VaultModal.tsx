@@ -14,7 +14,7 @@ import {
 import { commify } from "../utils";
 
 
-const VaultModal = ({vaultInfo, isMobile, ...rest}) => {
+const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, ...rest}) => {
 
   const tokenDecimals = vaultInfo.tokenDecimals || 0;
   const totalSupply = vaultInfo.totalSupply || 0;
@@ -23,7 +23,7 @@ const VaultModal = ({vaultInfo, isMobile, ...rest}) => {
     <Container>
       <DialogRoot>
       <DialogTrigger asChild >
-        <Button variant="outline" size="sm" ml={-10} fontSize={isMobile?"11px": "14px"} borderColor="#a67c00" color="#a67c00">
+        <Button variant="outline" size="sm" ml={5} fontSize={isMobile?"11px": "14px"} borderColor="#a67c00" color="#a67c00">
            Details
         </Button>
       </DialogTrigger>
@@ -84,7 +84,7 @@ const VaultModal = ({vaultInfo, isMobile, ...rest}) => {
               </HStack>
               <HStack>
                 <Box w={"50%"}>
-                  <Text fontWeight="bold" color="gray">Uniswap V3 Pool</Text>
+                  <Text fontWeight="bold" color="gray">Pool Address</Text>
                 </Box>
                 <Box>
                   <Text>

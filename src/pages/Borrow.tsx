@@ -111,6 +111,8 @@ const Borrow = () => {
     const [extraCollateral, setExtraCollateral] = useState("0");
     const [isAdding, setIsAdding] = useState(false);
     const [repayAmount, setRepayAmount] = useState("0");
+    const [isComputing, setIsComputing] = useState(false);
+    const [ltv, setLtv] = useState(0);
 
     let loanData ;
 
@@ -237,9 +239,15 @@ const Borrow = () => {
     });
 
     // console.log({IMV});
-
-    const ltv = (formatEther(`${loanData?.collateralAmount || 0}`) * formatEther(`${IMV || 1}`)) / formatEther(`${loanData?.borrowAmount|| 0}` );   
     
+    // Wrap the ltv calculation in a useEffect
+    useEffect(() => {
+        if (IMV && loanData?.collateralAmount && loanData?.borrowAmount) {
+            const calculatedLTV = (formatEther(`${loanData.collateralAmount}`) * formatEther(`${IMV}`)) / formatEther(`${loanData.borrowAmount}`);
+            setLtv(calculatedLTV);
+        }
+    }, [IMV, loanData]);
+
     // const {
     //     data: loanFees,
     //     refetch: fetchLoanFees
@@ -530,7 +538,16 @@ const Borrow = () => {
     }, [vaultAddress]);
 
     const handleSetAmountToBorrow = (e) => {
+         setIsComputing(true);
         let value = e.target.value.trim();
+        if (Number(value) > 100000000) {
+            toaster.create({
+                title: "Error",
+                description: "Borrow amount exceeds maximum limit of 100,000,000",
+            });
+            setBorrowAmount(0);
+            return;
+        }
         if (!/^\d*\.?\d*$/.test(value)) {
             setBorrowAmount(0);
             return;
@@ -572,9 +589,11 @@ const Borrow = () => {
     useEffect(() => {
         const interval = setInterval(() => {
         const computeCollateral = async () => {
+           
             const collateral = borrowAmount / formatEther(`${IMV || 0}`) || 0;
             // console.log({collateral});
             setCollateral(collateral);
+            setIsComputing(false);
         }
         computeCollateral();
         }, 1000);
@@ -683,7 +702,7 @@ const Borrow = () => {
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> 
                                 <HStack>
-                                 <Box><Text fontSize="sm">LTV</Text></Box>
+                                 <Box><Text fontSize="xs">LTV</Text></Box>
                                  <Box><Image src={placeholderLogo} w={15} /></Box>
                                 </HStack>
                                 </Box>
@@ -889,7 +908,11 @@ const Borrow = () => {
                                                 <Text  fontWeight={"bold"} color="#a67c00" fontSize={"xs"}>Collateral required</Text>
                                             </Box>
                                             <Box>
-                                                <Text fontSize={"xs"}>{formatNumberPrecise(collateral || 4)} {token0Info.tokenSymbol}</Text>
+                                                {isComputing ? (
+                                                    <Spinner size="xs" />
+                                                ) : (
+                                                    <Text fontSize={"xs"}>{formatNumberPrecise(collateral || 4)} {token0Info.tokenSymbol}</Text>
+                                                )}
                                             </Box>
                                             <Box mt={5}>
                                             <HStack>
@@ -1000,7 +1023,7 @@ const Borrow = () => {
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> 
                                 <HStack>
-                                 <Box><Text>LTV</Text></Box>
+                                 <Box><Text fontSize="xs">LTV</Text></Box>
                                  <Box><Image src={placeholderLogo} w={15} /></Box>
                                 </HStack>
                                 </Box>
@@ -1231,7 +1254,11 @@ const Borrow = () => {
                                         <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"12px":"15px"}>Collateral required</Text>
                                     </Box>
                                     <Box>
-                                        <Text>{commify(collateral || 0)} {token0Info.tokenSymbol}</Text>
+                                        {isComputing ? (
+                                            <Spinner size="sm" />
+                                        ) : (
+                                            <Text>{formatNumberPrecise(collateral || 0)} {token0Info.tokenSymbol}</Text>    
+                                        )}
                                     </Box>
                                     <Box mt={5}>
                                        <HStack>

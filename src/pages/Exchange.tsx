@@ -63,6 +63,8 @@ import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
 
+
+const feeTiers = config.feeTiers;
 const addresses = config.chain === "local"
   ? addressesLocal
   : addressesMonad;
@@ -117,7 +119,6 @@ const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local
 const exchangeHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Exchange");
 const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
-const feeTier = 10000;
 
 ChartJS.register(
     CategoryScale,
@@ -249,7 +250,7 @@ const Exchange: React.FC = () => {
         ["address", "uint24", "address"],
         [
           token0, 
-          feeTier, 
+          feeTiers[0],  
           token1
         ]
       );
@@ -258,7 +259,7 @@ const Exchange: React.FC = () => {
         ["address", "uint24", "address"],
         [
           token1, 
-          feeTier, 
+          feeTiers[0], 
           token0
         ]
       );
@@ -270,14 +271,20 @@ const Exchange: React.FC = () => {
     }
   }, [token0, token1]);
 
-  const fetchPoolAddress = async (token0: string, token1: string) => {
+  const fetchPoolAddress = async (token0: string, token1: string, vault: string) => {
+
+    const protocol = config.vault2ProtocolMap[vault];
+    // console.log(protocol); // "uniswap"
+
     const uniswapV3FactoryContract = new ethers.Contract(
-      config.protocolAddresses.uniswapV3Factory,
+      protocol == "uniswap" ? 
+      config.protocolAddresses.uniswapV3Factory :
+      config.protocolAddresses.pancakeV3Factory,
       uniswapV3FactoryABI,
       localProvider
     );
 
-    const poolAddress = await uniswapV3FactoryContract.getPool(token0, token1, feeTier);
+    const poolAddress = await uniswapV3FactoryContract.getPool(token0, token1, protocol == "uniswap" ? feeTiers[0] : feeTiers[1]);
     console.log(`Pool address for ${token0} and ${token1} is ${poolAddress}`);
     return poolAddress;
   };
@@ -462,7 +469,7 @@ const Exchange: React.FC = () => {
                   }
                 }
 
-                const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
+                const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1, vault);
 
                 // Create a new object with the additional poolAddress property
                 const augmentedVaultDescription = {
@@ -530,8 +537,9 @@ const Exchange: React.FC = () => {
 
         (async () => {
             const vault = vaultDescriptions.find(item => item.vault === selectedVault);
+            
             console.log({vault})
-            const poolAddress = await fetchPoolAddress(vault.token0, vault.token1);
+            const poolAddress = await fetchPoolAddress(vault.token0, vault.token1, selectedVault);
             // console.log(`Got pool address: ${poolAddress} spotPrice ${spotPrice}`);
             setPoolInfo({
                 poolAddress

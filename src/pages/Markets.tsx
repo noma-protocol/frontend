@@ -29,6 +29,8 @@ import nomaLogo from "../assets/images/noma_logo_transparent.png";
 import oksLogo from "../assets/images/logo_dark.png";
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
+import uniswapLogo from "../assets/images/uniswap.png";
+import pancakeLogo from "../assets/images/pancake.png";
 
 const addresses = config.chain === "local"
   ? addressesLocal
@@ -512,17 +514,20 @@ const Markets: React.FC = () => {
                     {/* <Box >
                       <Text fontWeight="bold"  color="#bf9b30" ml={2}>Index</Text>
                     </Box> */}
-                    <Box>
-                      <Text fontWeight="bold" color="#bf9b30"  ml={2}>{isMobile?"":"Token"} Name</Text>
+                    <Box w="100px">
+                      <Text fontWeight="bold" color="#bf9b30"  ml={2}> Name</Text>
                     </Box>
                     <Box>
-                      <Text fontWeight="bold"  color="#bf9b30" ml={isMobile?"32vw":"60px"} > {isMobile?"":"Token"}  Symbol</Text>
+                      <Text fontWeight="bold"  color="#bf9b30" ml={isMobile?"32vw":"60px"} > Symbol</Text>
                     </Box>
                     {!isMobile && (
                       <>
                       <Box>
                         <Text fontWeight="bold" color="#bf9b30"  ml={10}>Reserve Asset</Text>
                       </Box>
+                      <Box>
+                        <Text fontWeight="bold" color="#bf9b30"  ml={10}>Protocol</Text>
+                      </Box>                      
                       <Box ml={5}>
                         <Text fontWeight="bold"  color="#bf9b30" ml={7}>Presale</Text>
                       </Box>
@@ -564,12 +569,12 @@ const Markets: React.FC = () => {
                         </Box> */}
   
                         {/* Token Name */}
-                        <Box w={isMobile ? "200px" : "250px"} ml={isMobile ? 0 : 5}>
+                        <Box w={isMobile ? "200px" : "250px"} >
                           <Text fontSize={isMobile? "12px" : "14px"}  >{vault.tokenName}</Text>
                         </Box>
   
                         {/* Token Symbol */}
-                        <Box w={isMobile ? "140px" : "180px"}>
+                        <Box w={isMobile ? "140px" : "180px"} ml={5}>
                           <HStack>
                             <Box w="50%">
                               <Text fontSize={isMobile? "12px" : "14px"}  >{vault.tokenSymbol}</Text>
@@ -601,9 +606,19 @@ const Markets: React.FC = () => {
                                 </Box>
                               </HStack>
                             </Box>
-  
+                            <Box w="270px" ml={-10}>
+                              <HStack alignItems="center" spacing={2}>
+                                <Box p={1} borderRadius="md" ml={10}>
+                                  <Image
+                                    w="65px"
+                                    src={uniswapLogo}
+                                    alt="uniswap logo"
+                                  />
+                                </Box>
+                              </HStack>
+                            </Box>
                             {/* Presale Status */}
-                            <Box w="240px" ml={-10}>
+                            <Box w="260px" ml={15} textAlign={"center"}>
                               {hasPresale ? (
                                 <Link href={ `/presale?a=${vault.presaleContract}`} target={"_blank"}>
                                   {vault.finalized ? (
@@ -616,7 +631,7 @@ const Markets: React.FC = () => {
                                     </Text>) : 
                                     (
                                       <Text color={"#1ad000"} fontSize={isMobile? "11px" : "12px"} >
-                                        <b>In progress</b>
+                                        <b>In progress (click)</b>
                                       </Text>
                                     )}
                                 </Link>
