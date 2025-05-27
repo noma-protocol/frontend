@@ -727,18 +727,20 @@ const Stake = () => {
                         </Box>                           
                         </Flex>
                     ) : ( 
-                    <Box>                       
+                    <Box w="90%">
                     <Grid
                         h="600px"
                         templateRows="repeat(2, 1fr)"
                         templateColumns="repeat(2, 1fr)"
-                        gap={10}
+                        gap={3}
                         mb={20}
                         mt={10}
-                        p={4}
+                        px={2}
+                        py={4}
+                        // border="1px solid red"
 
                     >
-                        <GridItem border={"1px solid white"} p={4} ml={20}  backgroundColor={"#222831"} borderRadius={10}>
+                        <GridItem border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                             <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
                             <SimpleGrid columns={5} mt={-5} fontSize={"14px"}>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
@@ -772,7 +774,7 @@ const Stake = () => {
                                         </HStack>
                                     </Box>
                                     <Box px={2} mt={2}>
-                                        {0}%
+                                        {"N/A"}
                                     </Box>
                                     <Box px={2}  mt={2} ml={-10}> 
                                     <Button 
@@ -806,7 +808,7 @@ const Stake = () => {
 
                             </SimpleGrid>
                         </GridItem>
-                        <GridItem>
+                        <GridItem ml={-10}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
@@ -828,7 +830,7 @@ const Stake = () => {
                                 page="stake" 
                             />
                         </GridItem>
-                        <GridItem border={"1px solid white"} p={4} ml={20}  backgroundColor={"#222831"} borderRadius={10}>
+                        <GridItem border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                         <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">New Position</Text>
                         <SimpleGrid columns={2} w="700px" mt={-5} fontSize={"14px"}>
                             <Box w="500px" backgroundColor={"#bf9b30"}  mb={2}>

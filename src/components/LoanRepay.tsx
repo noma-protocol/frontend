@@ -48,6 +48,7 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
             disabled={isRepaying || isLoading}
             w={size == "lg" ? "120px" : "80px"}
             border="1px solid #f3f7c6"
+            borderRadius={5}
         >
         {isRepaying  ? <Spinner size="sm" /> : <Text fontSize={size == "lg" ? "14px" : "11px"} color={"#f3f7c6"}>Repay</Text>}
         </Button>

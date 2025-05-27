@@ -58,12 +58,12 @@ export const NumberInputRoot = React.forwardRef<
   return (
     <ChakraNumberInput.Root ref={ref} variant="outline" {...rest}>
       {children}
-      {!isMobile && (
+      {/* {!isMobile && (
         <ChakraNumberInput.Control h={"10px"}  mr={marginRight} mt={"5px"} >
           <ChakraNumberInput.IncrementTrigger onClick={handleIncrease}/>
           <ChakraNumberInput.DecrementTrigger onClick={handleDecrease}/>
         </ChakraNumberInput.Control>
-      )}
+      )} */}
     </ChakraNumberInput.Root>
   );
 });

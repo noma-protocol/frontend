@@ -109,6 +109,7 @@ export const SelectRoot = React.forwardRef<
       {...props}
       ref={ref}
       positioning={{ sameWidth: true, ...props.positioning }}
+      
     >
       {props.asChild ? (
         props.children

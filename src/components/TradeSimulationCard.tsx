@@ -167,7 +167,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             <Box mt={-2} w="100%" ml={isMobile ? 5 : 0}>
                 {isMobile ? (
                     <>
-                    <VStack mt={5} ml={20}>
+                    <VStack mt={5} ml={2}>
                         <HStack h="30px">
                             <Box w="90px" textAlign={"left"} ><Text fontSize={"xs"} color="#d6a700">{firstContent}</Text></Box>
                             <Box w="120px"><Text fontSize={"13px"} >{tradeMode == "BUY" ?  formatNumberPrecise(amountToBuy, 4) : formatNumberPrecise(amountToSell, 4) }</Text></Box>
