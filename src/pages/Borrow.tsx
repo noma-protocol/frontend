@@ -692,7 +692,7 @@ const Borrow = () => {
                                 </Box>
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
-                                    <Box px={2} mt={2}> 
+                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="5px 0 0 5px" border="1px solid gray" h="25px" borderRight="none">
                                         <HStack>
                                             <Box  fontSize="xs">
                                             {displayedCollateral}
@@ -702,7 +702,7 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2} ml={1}> 
+                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none">
                                         <HStack>
                                             <Box  fontSize="xs">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
@@ -712,8 +712,8 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} fontSize="xs" mt={2}> {commifyDecimals(ltv, 2)}</Box>
-                                    <Box px={2} fontSize="xs" mt={2}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
+                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none" fontSize="xs"> {commifyDecimals(ltv, 2)}</Box>
+                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0 5px 5px 0" border="1px solid gray" h="25px" borderLeft="none" fontSize="xs"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
                                     <VStack w="100%">
                                         <Box ml={-8} mt={4}><Text fontWeight="bold" fontSize="xs" color="#a67c00">Actions</Text></Box>
                                     <Box >                              
@@ -1002,7 +1002,7 @@ const Borrow = () => {
                                 
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
-                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius={5} border="1px solid gray" h="25px" borderTopRight={"none"}> 
+                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="5px 0 0 5px" border="1px solid gray" h="25px" borderRight="none">
                                         <HStack>
                                             <Box  fontSize="sm">
                                             {displayedCollateral}
@@ -1012,7 +1012,7 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box  borderLeft="none" px={2} mt={2}  bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius={5} border="1px solid gray" h="25px"> 
+                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none">
                                         <HStack>
                                             <Box  fontSize="sm">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
@@ -1022,8 +1022,8 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2}  mt={2}  bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius={5} border="1px solid gray" h="25px"> {commifyDecimals(ltv, 2)}</Box>
-                                    <Box px={2}  mt={2}  bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius={5} border="1px solid gray" h="25px"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
+                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none"> {commifyDecimals(ltv, 2)}</Box>
+                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0 5px 5px 0" border="1px solid gray" h="25px" borderLeft="none"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
                                     <Box px={2}  mt={2} ml={-10}> 
                                     <VStack ml={10}>
                                     <LoanAddCollateral
