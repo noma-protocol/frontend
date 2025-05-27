@@ -99,7 +99,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                         fontWeight="bold"
                         fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
                     >
-                        {contributions > 0 ?  contributions : (isNaN(contributionAmount) ? 0 : commifyDecimals(contributionAmount, 6))}
+                        {contributions > 0 ?  contributions : (isNaN(contributionAmount) ? 0 : commify(contributionAmount, 2))}
                     </Text>
                 </Box>
                 <Box 
@@ -153,7 +153,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 w={isMobile ? "50px" : "30px"} 
                 // border="1px solid white"
                 >
-                    <Image ml={isMobile ? 2 : 0} h={4} src={placeholderLogo} />
+                    <Image ml={isMobile ? 3 : 0} h={4} src={placeholderLogo} />
                 </Box>
                 <Box w={ "50px"} >
                     <Text ml={isMobile ? 0 : -1}  fontWeight="bold" fontSize={isMobile ? "8px" : "10px"}>

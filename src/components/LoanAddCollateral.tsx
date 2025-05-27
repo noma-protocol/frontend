@@ -38,8 +38,10 @@ const LoadAddCollateral = ({
     
     const _handleSetCollateral = (e) => {
         const value = e.target.value;
-        if (isNaN(value) || value == "") return 
-        if (Number(value) > 100000000) return;
+        if (isNaN(value) || value == "" || Number(value) > 100000000)  {
+            console.error("Invalid input: Not a valid number");
+            return
+        } 
         handleSetCollateral(value);
     }
 
@@ -55,11 +57,11 @@ const LoadAddCollateral = ({
             ml={size == "lg" ? 0 : 2}
             mt={size == "lg" ? 0 : 2}
             // onClick={() => setIsLoading(true)}
-            disabled={isTokenInfoLoading || isLoading}
+            disabled={isTokenInfoLoading}
             w={size == "lg" ? "120px" : "80px"}
             border="1px solid #f3f7c6"
         >
-        {isLoading ? <Spinner size="sm" /> : <Text fontSize={size == "lg" ? "14px" : "11px"} color={"#f3f7c6"}>Add </Text>}
+        {isAdding ? <Spinner size="sm" /> : <Text fontSize={size == "lg" ? "14px" : "11px"} color={"#f3f7c6"}>Add </Text>}
         </Button>
         </DrawerTrigger>
         <DrawerBackdrop />
