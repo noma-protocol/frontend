@@ -13,6 +13,7 @@ import Exchange from "./pages/Exchange";
 import Borrow from "./pages/Borrow";
 import Stake from "./pages/Stake";
 import Migrate from "./pages/Migrate";
+import config from "./config";
 
 const router = createBrowserRouter([
   {
@@ -27,10 +28,15 @@ const router = createBrowserRouter([
         path: "/presale",
         element: <Presale  />,
       },
-      // {
-      //   path: "/launchpad",
-      //   element: <Launchpad  />,
-      // },
+      config.chain === "local" ? 
+      {
+        path: "/launchpad",
+        element: <Launchpad  />,
+      } :      
+      {
+        path: "/launchpad",
+        element: <Launchpad  />,
+      },
       {
         path: "/markets",
         element: <Markets  />,
