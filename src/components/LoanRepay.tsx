@@ -46,11 +46,11 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
             mt={size == "lg" ? 0 : 2}
             // onClick={() => setIsRepaying(true)}
             disabled={isRepaying || isLoading}
-            w={size == "lg" ? "120px" : "80px"}
+            w={size == "lg" ? "90px" : "80px"}
             border="1px solid #f3f7c6"
             borderRadius={5}
         >
-        {isRepaying  ? <Spinner size="sm" /> : <Text fontSize={size == "lg" ? "14px" : "11px"} color={"#f3f7c6"}>Repay</Text>}
+        {isRepaying  ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Repay</Text>}
         </Button>
         </DrawerTrigger>
         <DrawerBackdrop />

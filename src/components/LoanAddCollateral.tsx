@@ -58,11 +58,11 @@ const LoadAddCollateral = ({
             mt={size == "lg" ? 0 : 2}
             // onClick={() => setIsLoading(true)}
             disabled={isTokenInfoLoading}
-            w={size == "lg" ? "120px" : "80px"}
+            w={size == "lg" ? "90px" : "80px"}
             border="1px solid #f3f7c6"
             borderRadius={5}
         >
-        {isAdding ? <Spinner size="sm" /> : <Text fontSize={size == "lg" ? "14px" : "11px"} color={"#f3f7c6"}>Add </Text>}
+        {isAdding ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Add </Text>}
         </Button>
         </DrawerTrigger>
         <DrawerBackdrop />

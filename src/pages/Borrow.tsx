@@ -986,7 +986,7 @@ const Borrow = () => {
                     >
                         <GridItem border={"1px solid white"} p={4} px={6} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                             <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">Active Loan</Text>
-                            <SimpleGrid columns={5} mt={-5}>
+                            <SimpleGrid columns={5} mt={-5} fontSize="xs">
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> 
@@ -998,7 +998,7 @@ const Borrow = () => {
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}>
                                 Expires
                                 </Box>
-                                <Box px={2} color="white" backgroundColor={"#a67c00"}> Actions </Box>
+                                <Box px={2} color="white" backgroundColor={"#a67c00"}> &nbsp;&nbsp;&nbsp;Actions </Box>
                                 
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
@@ -1062,7 +1062,7 @@ const Borrow = () => {
                                         h={8}
                                         // onClick={() => setIsLoading(true)}
                                         disabled={isRolling  || isTokenInfoLoading || ltv <= 1}
-                                        w={"120px"}
+                                        w={"90px"}
                                         border="1px solid #f3f7c6"
                                         borderRadius={5}
                                     >
