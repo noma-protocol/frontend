@@ -134,7 +134,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             h={isMobile ? "150px" : "300px"}  
             // ml={isMobile ? 1 : 0}
         >
-        <SimpleGrid columns={2} p={2} w="100%">
+        <SimpleGrid columns={1} p={2} w="90%">
             {/* ─── Column 1 ─────────────────────────────────────────────────────── */}
             <Box>
             {/* 
@@ -212,43 +212,44 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     // </SimpleGrid>             
                     <Grid
                         h="200px"
+                        w="100%"
                         templateRows="repeat(4, 1fr)"
                         templateColumns="repeat(3, 1fr)"
                         gap={4}
                         mb={20}
                         pb={10}
                     >     
-                    <GridItem colSpan={3} ml={2} >
+                    <GridItem colSpan={3} ml={2}>
                         <HStack h="30px">
                             <Box w="220px">                                
                                 <Text fontSize={"13px"} color="#d6a700" >Spending&nbsp;</Text>
                             </Box>
-                            <Box w="220px">
-                                    <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
+                            <Box w="230px" bgColor={"#F5F5DC"}   borderRadius={5} px={2} >
+                                    <Text color="gray.800" fontWeight={"bold"}  fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
                             </Box>
-                            <Box fontSize={"13px"} textAlign={"right"} w="110px">
+                            <Box fontSize={"13px"} ml={2} textAlign={"left"} w="110px"  alignItems={"left"} alignContent={"left"} fontWeight={"bold"}>
                                 {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "BNB"): token0Info.tokenSymbol} 
                             </Box>
-                            <Box h="auto" >
-                                <Image w="85px" src={tradeMode == "BUY" ? bnbLogo : oksLogo } alt="Token Logo" />
+                            <Box h="auto">
+                                <Image w="45px" src={tradeMode == "BUY" ? bnbLogo : oksLogo } alt="Token Logo" />
                             </Box>
                         </HStack>
                     </GridItem>
-                    <GridItem colSpan={3} mt={-4} ml={2}>
+                    <GridItem colSpan={3} mt={-1} ml={2}>
                         <HStack h="30px">
                             <Box  w="220px">                                
                                 <Text fontSize={"13px"} color="#d6a700">Receiving</Text>
                             </Box>
-                            <Box w="220px">
-                                <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ?
+                            <Box w="230px"  bgColor={"#F5F5DC"}  color="gray.800" fontWeight={"bold"} borderRadius={5} px={2} >
+                                <Text fontSize={"13px"} color="gray.800" fontWeight={"bold"} >&nbsp;{tradeMode == "BUY" ?
                                     (bidRate && bidRate !== 0 ? formatNumberPrecise(amountToBuy / bidRate) : "0") :
                                     (askRate ? formatNumberPrecise(amountToSell * askRate) : "0")}</Text>
                             </Box>
-                            <Box fontSize={"13px"} textAlign={"right"}  w="110px">
+                            <Box fontSize={"13px"} ml={2} textAlign={"left"}  w="110px" alignItems={"left"} alignContent={"left"} fontWeight={"bold"}>
                                 {isLoading ? <Spinner size="sm" /> : tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "BNB" : "WBNB")} 
                             </Box>
                             <Box h="auto" >
-                                <Image w="85px" src={tradeMode == "BUY" ? oksLogo : bnbLogo } alt="Token Logo" />
+                                <Image w="45px" src={tradeMode == "BUY" ? oksLogo : bnbLogo } alt="Token Logo" />
                             </Box>
                         </HStack>
                     </GridItem>
