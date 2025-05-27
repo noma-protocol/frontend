@@ -35,7 +35,7 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
             new JsonRpcProvider(
                 config.chain == "local"
                 ? "http://localhost:8545"
-                : "https://testnet-rpc.monad.xyz"
+                : "https://bsc-dataseed.bnbchain.org/"
             ),
         [network]
     );

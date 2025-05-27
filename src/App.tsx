@@ -5,7 +5,7 @@ import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
 import { WagmiConfig } from "wagmi";
 import { bsc, bscTestnet, localhost } from "viem/chains";
 
-import { monad } from './chains/monad';
+// import { monad } from './chains/monad';
 import config from './config';
 
 // import { ToastContainer } from "react-toastify";
@@ -31,10 +31,10 @@ function NetworkHandler() {
     if (isConnected) {
       const unwatchNetwork = watchNetwork(async (network) => {
         // Only switch networks if actually connected and on wrong network
-        if (isConnected && network.chain?.name !== "local" && network.chain?.id !== (config.chain === "local" ? 1337 : 10143)) {
+        if (isConnected && network.chain?.name !== "local" && network.chain?.id !== (config.chain === "local" ? 1337 : 56)) {
           try {
             await switchNetwork({
-              chainId: config.chain === "local" ? 1337 : 56,
+              chainId: config.chain === "local" ? 1337 : 1337,
             });
           } catch (error) {
             console.error("Failed to switch network:", error);
@@ -100,7 +100,7 @@ function App() {
     icons: ["https://avatars.githubusercontent.com/u/37784886"],
   };
 
-  const chains = [localhost, bsc, monad];
+  const chains = [localhost, bsc];
   const wagmiConfig = defaultWagmiConfig({
     chains,
     projectId,

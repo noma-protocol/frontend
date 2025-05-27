@@ -35,14 +35,15 @@ import {getContractAddress} from "../utils";
 import config from '../config'; 
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
+import addressesBsc   from "../assets/deployment.json";
 
 const addresses = config.chain === "local"
   ? addressesLocal
-  : addressesMonad;
+  : addressesBsc;
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  "https://testnet-rpc.monad.xyz"
+  "https://bsc-dataseed.bnbchain.org/"
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
@@ -59,7 +60,7 @@ const ERC20Abi = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
 const feeTier = 3000;
 
 const Liquidity: React.FC = () => {

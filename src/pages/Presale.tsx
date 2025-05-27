@@ -44,15 +44,17 @@ import bnbLogo from "../assets/images/bnb.png";
 
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
+import addressesBsc   from "../assets/deployment.json";
+
 import { Badge } from "reactstrap";
 
 const { formatEther, parseEther } = ethers.utils;
 
 const addresses = config.chain === "local"
   ? addressesLocal
-  : addressesMonad;
+  : addressesBsc;
 
-const tokenAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
+const tokenAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Proxy");
 
 const { environment, presaleContractAddress } = config;
 

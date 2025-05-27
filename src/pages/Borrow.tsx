@@ -46,9 +46,11 @@ import config from '../config';
 
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
+import addressesBsc   from "../assets/deployment.json";
+
 const addresses = config.chain === "local"
   ? addressesLocal
-  : addressesMonad;
+  : addressesBsc;
 
  
 
@@ -57,7 +59,7 @@ const { JsonRpcProvider } = ethers.providers;
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  "https://testnet-rpc.monad.xyz"
+  "https://bsc-dataseed.bnbchain.org/"
 );
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
@@ -79,8 +81,8 @@ const ModelHelperArtifact = await import(`../assets/ModelHelper.json`);
 const ModelHelperAbi = ModelHelperArtifact.abi;
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
-const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
+const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "ModelHelper");
 
 const Borrow = () => {
     const { address, isConnected } = useAccount();

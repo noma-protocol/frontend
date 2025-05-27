@@ -62,12 +62,13 @@ import useUniswapPrice from "../hooks/useUniswapPrice";
 import config from '../config'; 
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
+import addressesBsc   from "../assets/deployment.json";
 
 
 const feeTiers = config.feeTiers;
 const addresses = config.chain === "local"
   ? addressesLocal
-  : addressesMonad;
+  : addressesBsc;
 
   // console.log(`Config chain is ${config.chain}`);
   // console.log(`Addresses are ${JSON.stringify(addresses)}`);
@@ -88,7 +89,7 @@ const QuoterAbi = QuoterArtifact.abi;
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  "https://testnet-rpc.monad.xyz"
+  "https://bsc-dataseed.bnbchain.org/"
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
@@ -115,9 +116,9 @@ const WETHAbi = [
 ];
 
 // NomaFactory contract address
-const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
-const exchangeHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Exchange");
-const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
+const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
+const exchangeHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Exchange");
+const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "ModelHelper");
 
 
 ChartJS.register(
@@ -221,6 +222,7 @@ const Exchange: React.FC = () => {
   const [txAmount, setTxAmount] = useState("");
   const [balanceBeforePurchase, setBalanceBeforePurchase] = useState(0);
   const [balanceBeforeSale, setBalanceBeforeSale] = useState(0);
+  const [protocol, setProtocol] = useState("uniswap");
 
   const {
     data: imv
@@ -296,7 +298,7 @@ const Exchange: React.FC = () => {
     poolInfo.poolAddress, 
     config.chain == "local" ? 
      "http://localhost:8545" :
-    "https://testnet-rpc.monad.xyz"
+    "https://bsc-dataseed.bnbchain.org/"
   );
   
   /**
@@ -1152,7 +1154,7 @@ const Exchange: React.FC = () => {
                         {/* <Line options={options} data={chartData} /> */}
                         <PriceData 
                           poolAddress={poolInfo.poolAddress} 
-                          providerUrl="https://testnet-rpc.monad.xyz"  
+                          providerUrl="https://bsc-dataseed.bnbchain.org/"  
                           token0Symbol={token0Info?.tokenSymbol} 
                           token1Symbol={token1Info.tokenSymbol}
                           setPercentChange={setPercentChange}
@@ -1218,7 +1220,7 @@ const Exchange: React.FC = () => {
                         amountToSell={amountToSell}
                         tradeMode={tradeMode}
                         swapPath={swapPath}
-                        quoterAddress={config.protocolAddresses.QuoterV2}
+                        quoterAddress={protocol == "uniswap" ? config.protocolAddresses.uniswapQuoterV2 : config.protocolAddresses.pancakeQuoterV2}
                         quoterAbi={QuoterAbi}
                         setTxAmount={setTxAmount}
                         slippage={slippage}
@@ -1242,7 +1244,7 @@ const Exchange: React.FC = () => {
                           <PriceData
                               imv={imv}
                               poolAddress={poolInfo.poolAddress} 
-                              providerUrl="https://testnet-rpc.monad.xyz"  
+                              providerUrl="https://bsc-dataseed.bnbchain.org/"  
                               token0Symbol={token0Info?.tokenSymbol} 
                               token1Symbol={token1Info.tokenSymbol}
                               setPercentChange={setPercentChange}
@@ -1315,11 +1317,11 @@ const Exchange: React.FC = () => {
                                 amountToSell={amountToSell}
                                 tradeMode={tradeMode}
                                 swapPath={swapPath}
-                                quoterAddress={config.protocolAddresses.QuoterV2}
+                                quoterAddress={protocol == "uniswap" ? config.protocolAddresses.uniswapQuoterV2 : config.protocolAddresses.pancakeQuoterV2}
                                 quoterAbi={QuoterAbi}
                                 setTxAmount={setTxAmount}
                                 slippage={slippage}
-                                setSlippage={setSlippage}
+                                setSlippage={setSlippage} 
                                 isMobile={isMobile}
                                 isLoading={isTokenInfoLoading}
                               />
