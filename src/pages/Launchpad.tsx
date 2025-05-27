@@ -57,16 +57,17 @@ import bnbLogo from "../assets/images/bnb.png";
 import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
+import addressesBsc from "../assets/deployment.json";
 
-const addresses = config.chain === "local"
+const addresses = config.chain == "local"
   ? addressesLocal
-  : addressesMonad;
+  : addressesBsc;
 
 const { environment, presaleContractAddress } = config;
 
 const FactoryArtifact = await import(`../assets/OikosFactory.json`);
 const FactoryAbi = FactoryArtifact.abi;
-const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory"); 
 
 const Launchpad: React.FC = () => {
     const { address, isConnected } = useAccount();

@@ -47,7 +47,7 @@ const { JsonRpcProvider } = ethers.providers;
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  "https://testnet-rpc.monad.xyz"
+  "https://bsc-dataseed.bnbchain.org/"
 );
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
@@ -66,8 +66,8 @@ const GonsTokenArtifact = await import(`../assets/GonsToken.json`);
 const GonsTokenAbi = GonsTokenArtifact.abi;
 
 // NomaFactory contract address
-const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
-const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
+const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
+const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "ModelHelper");
 
 const Stake = () => {
     const { address, isConnected } = useAccount();

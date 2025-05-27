@@ -1,4 +1,4 @@
-const presaleContractAddress = "0xd582883e944fb36A2Be30f478e58e33339c01426";
+const presaleContractAddress = "0x99b32151E3C0c8432c4c6C9b6F3213123e443F06";
 const environment = import.meta.env.VITE_ENV;
 const chain = import.meta.env.VITE_CHAIN;
 const feeTiers = [3000, 10000];

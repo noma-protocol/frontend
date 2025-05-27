@@ -34,7 +34,7 @@ const addresses = config.chain === "local"
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  "https://testnet-rpc.monad.xyz"
+  "https://bsc-dataseed.bnbchain.org/"
 );
 
 const bscProvider = new JsonRpcProvider(
@@ -49,7 +49,7 @@ const Migration = await import(`../assets/Migration.json`);
 const MigrationAbi = Migration.abi;
 
 // console.log("Whitelisted Addresses:", whitelistedAddresses);    
-const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488" //getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
+const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488" //getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Proxy");
 
 const ERC20Artifact = await import(`../assets/ERC20.json`);
 
@@ -59,7 +59,7 @@ const OikosFactoryAbi = OikosFactoryArtifact.abi;
 
 const ERC20Abi = ERC20Artifact.abi;
 // NomaFactory contract address
-// const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+// const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
 const oldOKSTokenAddress = "0x18aCf236eB40c0d4824Fb8f2582EBbEcD325Ef6a";
 const migrationContractAddress = "0xbA2334E2bD9E7CA90fb08d6ABeAd1577f879EE35";
 // const feeTier = 3000;

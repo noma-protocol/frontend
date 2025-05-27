@@ -31,17 +31,18 @@ import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
 import uniswapLogo from "../assets/images/uniswap.png";
 import pancakeLogo from "../assets/images/pancake.png";
+import addressesBsc from "../assets/deployment.json";
 
 const addresses = config.chain === "local"
   ? addressesLocal
-  : addressesMonad;
+  : addressesBsc;
 
 const { formatEther, ZeroAddress } = ethers.utils;
 const {JsonRpcProvider} = ethers.providers;
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  "https://testnet-rpc.monad.xyz"
+  "https://bsc-dataseed.bnbchain.org/"
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
@@ -53,7 +54,7 @@ const uniswapV3FactoryABI = [
 ];
 
 // NomaFactory contract address
-const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
 const feeTier = 3000;
 
 const Markets: React.FC = () => {
@@ -548,7 +549,6 @@ const Markets: React.FC = () => {
                       hasPresale = false;
                     }
 
-                    // console.log(hasPresale)
                     return (
 
                       <Box
@@ -611,7 +611,7 @@ const Markets: React.FC = () => {
                                 <Box p={1} borderRadius="md" ml={10}>
                                   <Image
                                     w="65px"
-                                    src={uniswapLogo}
+                                    src={config.vault2ProtocolMap[vault.vault] == "uniswap" ? uniswapLogo : pancakeLogo}
                                     alt="uniswap logo"
                                   />
                                 </Box>
@@ -630,9 +630,18 @@ const Markets: React.FC = () => {
                                       <b>Expired</b>
                                     </Text>) : 
                                     (
-                                      <Text color={"#1ad000"} fontSize={isMobile? "11px" : "12px"} >
-                                        <b>In progress (click)</b>
-                                      </Text>
+                                      <VStack>
+                                        <Box>
+                                          <Text color={"#1ad000"} fontSize={"sm"} >
+                                              <b>In progress </b>
+                                          </Text>
+                                        </Box>
+                                        <Box>
+                                          <Text color={"white"} fontSize={"xs"} >
+                                              <b>Click to view</b>
+                                          </Text>
+                                        </Box>
+                                      </VStack>
                                     )}
                                 </Link>
                                 ) : (
