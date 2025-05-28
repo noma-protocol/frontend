@@ -591,7 +591,7 @@ const Markets: React.FC = () => {
                             <Box w="240px" ml={-10}>
                               {hasPresale ? (
                                 <Link href={ `/presale?a=${vault.presaleContract}`} target={"_blank"}>
-                                  {index == 3 ? (
+                                  {vault.finalized ? (
                                   <Text color={"#a67c00"} fontSize={isMobile? "12px" : "12px"} >
                                      <b>Finalized</b>
                                   </Text> 

@@ -43,8 +43,12 @@ import metamaskLogo from "../assets/images/metamask.svg";
 import placeholderLogo from "../assets/images/question.svg";
 import config from '../config'; 
 import bnbLogo from "../assets/images/bnb.png";
+import addresses from "../assets/deployment.json";
+
+const tokenAddress = getContractAddress(addresses, "1337", "Proxy");
 
 const { environment, presaleContractAddress } = config;
+
 
 const PresaleArtifact = await import(`../assets/Presale.json`);
 const PresaleAbi = PresaleArtifact.abi;
@@ -168,6 +172,18 @@ const Presale: React.FC = () => {
     setContributionAmount(number);
   }
   
+    const {
+      data: tokenBalancePresale
+    } = useContractRead({
+      address: tokenAddress,
+      abi: ERC20Abi,
+      functionName: "balanceOf",
+      args: [contractAddress],
+      watch: true,
+    });
+
+    console.log(`Token balance in presale contract is ${tokenBalancePresale}`);
+    
     const {
       data: presaleInfo
     } = useContractRead({
@@ -972,7 +988,7 @@ const Presale: React.FC = () => {
                       </Box>
                     </Flex>): <>Please login with your wallet</>}
                   </Box>        
-                  {presaleInfo?.deployer == address && hasExpired && !finalized ? (
+                  {presaleInfo?.deployer == address /*&& hasExpired*/ && !finalized ? (
                     <Box border="2px solid red" p={4} mt={10} w="300px" bgColor={"#363638"}>
                       <Text><b>Admin Controls</b></Text>
                         <HStack>
