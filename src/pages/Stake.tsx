@@ -520,7 +520,7 @@ const Stake = () => {
                                 page="borrow"
                             />
                         </Box>
-                        <Box p={2} mt={5} w={"100%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={-10} >
+                        <Box p={2} mt={5} w={"95%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={"-30px"} >
                         <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Position</Text>
                         <SimpleGrid columns={5} mt={-5} fontSize={"11px"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
@@ -595,15 +595,15 @@ const Stake = () => {
                             <Box 
                                 p={2}
                                 px={4} 
-                                ml={"-40px"}  
+                                ml={"-30px"}  
                                 mt={5}  
-                                w={"100%"}   
+                                w={"95%"}   
                                 border="1px solid ivory" 
                                 borderRadius={10} 
                                 backgroundColor={"#222831"} 
                             >
                             <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
-                            <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"14px"} border="1px solid red">
+                            <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"14px"} >
                                 <Box w="340px" backgroundColor={"#bf9b30"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>
