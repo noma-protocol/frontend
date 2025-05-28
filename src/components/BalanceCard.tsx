@@ -104,7 +104,7 @@ const BalanceCard = ({
         marginLeft = isMobile ? 0 : marginLeft; // Adjust margin for mobile
     } else if (page === "borrow") {
         if (isMobile) {
-            marginLeft = -7;
+            marginLeft = -6;
             cardWidth = "90%"; // Adjusted for mobile
         } else {
             cardWidth = "90%"; 
@@ -112,7 +112,7 @@ const BalanceCard = ({
     } else if (page === "stake") {
         cardWidth = isMobile ? "90%" : "80%"; 
         if (isMobile) {
-            marginLeft = -6;
+            marginLeft = -4;
         }
     }
 
