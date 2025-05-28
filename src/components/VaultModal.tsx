@@ -44,7 +44,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, ...rest}) => {
                 </Box>
                 <Box>
                   <Text>
-                    <a href={`https://etherscan.io/address/${vaultInfo.vaultAddress}`} target="_blank" rel="noreferrer">
+                    <a href={`https://bscscan.com/address/${vaultInfo.vaultAddress}`} target="_blank" rel="noreferrer">
                     {`${vaultInfo.vault?.slice(0, 6)}...${vaultInfo.vault?.slice(-6)}`}
                     </a>
                   </Text>
@@ -88,7 +88,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, ...rest}) => {
                 </Box>
                 <Box>
                   <Text>
-                    <a href={`https://etherscan.io/address/${vaultInfo.poolAddress}`} target="_blank" rel="noreferrer">
+                    <a href={`https://bscscan.com/address/${vaultInfo.poolAddress}`} target="_blank" rel="noreferrer">
                     {`${vaultInfo.poolAddress?.slice(0, 6)}...${vaultInfo.poolAddress?.slice(-6)}`}
                     </a>
                   </Text>

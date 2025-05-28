@@ -52,12 +52,12 @@ const Header: React.FC = () => {
           </Link>
           {/* Remove mx-auto class and add justify-content-start to align items to the left */}
           <ul className="navbar-nav items justify-content-start " >
-          <li className="nav-item" style={{border:window.location.href.indexOf("exchange") > -1 ? "1px solid #a67c00" : "none"}}>
+          <li className="nav-item" style={{border:window.location.href.indexOf("exchange.oikos.cash") > -1 ? "1px solid #a67c00" : "none"}}>
               <Link className="nav-link" href="/">
                   <Text color="#f3f7c6">Exchange</Text>
               </Link>
             </li>
-            <li className="nav-item" style={{marginLeft: "10px", border:window.location.href.indexOf("markets") > -1 ? "1px solid #a67c00" : "none"}}>
+            <li className="nav-item" style={{marginLeft: "10px", border:window.location.href.indexOf("exchange.oikos.cash/markets") > -1 ? "1px solid #a67c00" : "none"}}>
             <Link className="nav-link" href="/markets">
             <Text color="#f3f7c6">Markets</Text>
               </Link>
@@ -77,7 +77,7 @@ const Header: React.FC = () => {
                   <Text color="white">Presale</Text>
               </Link>
             </li>  */}
-            <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("liquidity") > -1 ? "1px solid #a67c00" : "none"}}>
+            <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("exchange.oikos.cash/liquidity") > -1 ? "1px solid #a67c00" : "none"}}>
               <Link className="nav-link" href="/liquidity">
                   <Text color="#f3f7c6">Liquidity</Text>
               </Link>
