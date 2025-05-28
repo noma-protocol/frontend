@@ -152,7 +152,7 @@ const BalanceCard = ({
                         <Text fontSize="xs" mt={"-2px"} fontWeight={"bold"} ml={2}>BNB</Text>
                     </HStack>
                 </Box>
-                <Box ml={-2} bgColor={"#F5F5DC"} px={2} borderRadius={5} border="1px solid gray" mt={3} h="20px" w="130px" fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
+                <Box ml={-2} bgColor={"#F5F5DC"} px={2} borderRadius={5} border="1px solid gray" mt={3} h="20px" w={isMobile ? "100px" : "130px"} fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
                     <Text fontSize={fontSize} color="gray.800"  h={"20px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
@@ -225,7 +225,7 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box  ml={-2} bgColor={"#F5F5DC"} w="130px"  color="gray.800"  px={2} borderRadius={5} border="1px solid gray" mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                <Box  ml={-2} bgColor={"#F5F5DC"} w={isMobile ? "100px" : "130px"}  color="gray.800"  px={2} borderRadius={5} border="1px solid gray" mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token1Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
@@ -308,7 +308,7 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box ml={-2} bgColor={"#F5F5DC"} w="130px"  color="gray.800" px={2} borderRadius={5} border="1px solid gray" mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                <Box ml={-2} bgColor={"#F5F5DC"} w={isMobile ? "100px" : "130px"}  color="gray.800" px={2} borderRadius={5} border="1px solid gray" mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token0Balance || 0}`))}
                 </Box>
                 <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center"  mt={2}>
