@@ -517,7 +517,7 @@ const Stake = () => {
                                 setWrapAmount={setWrapAmount}
                                 wrapAmount={wrapAmount}
                                 vaultAddress={vaultAddress} 
-                                page="borrow"
+                                page="stake"
                             />
                         </Box>
                         <Box p={2} mt={5} w={"95%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={"-30px"} >
