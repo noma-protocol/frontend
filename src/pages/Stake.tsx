@@ -342,7 +342,7 @@ const Stake = () => {
         functionName: "approve",
         args: [
             vaultDescription.stakingContract,
-            ethers.constants.MaxUint256
+            parseEther(`${stakeAmount || "0"}`) // Ensure stakeAmount is a string
         ],
         onSuccess(data) {
 
@@ -476,7 +476,7 @@ const Stake = () => {
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
-                    height="100%"
+                    height="100vh%"
                     color="white"
                 >
                 <Heading as="h2">Connect your wallet</Heading>
@@ -500,7 +500,7 @@ const Stake = () => {
                  {isAddress(vaultAddress) ? (
                     isMobile ? (
                         <Flex direction="column">
-                        <Box mt={10} ml={isMobile ? 2 : -20}>
+                        <Box mt={10} ml={-2} w="98%">
                             <BalanceCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
@@ -517,12 +517,12 @@ const Stake = () => {
                                 setWrapAmount={setWrapAmount}
                                 wrapAmount={wrapAmount}
                                 vaultAddress={vaultAddress} 
-                                page="stake"
+                                page="borrow"
                             />
                         </Box>
-                        <Box p={4} pb={4} mt={5} w="90%" ml={isMobile ? -5 : 0}   border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
+                        <Box px={4} py={2} mt={5} w="99%"  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={-10} >
                         <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
-                        <SimpleGrid columns={5} mt={-5} fontSize={"11px"}>
+                        <SimpleGrid columns={5} mt={-5} fontSize={"11px"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
@@ -592,10 +592,18 @@ const Stake = () => {
 
                         </SimpleGrid>                         
                         </Box>
-
-                        <Box p={2} px={4} mt={5} w="90%" ml={isMobile ? -5 : 0} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
+                            <Box 
+                                px={4}
+                                py={2} 
+                                ml={-10}  
+                                mt={5}  
+                                w={"98%"}   
+                                border="1px solid ivory" 
+                                borderRadius={10} 
+                                backgroundColor={"#222831"} 
+                            >
                             <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
-                            <SimpleGrid columns={2} w="370px" mt={-5} fontSize={"14px"}>
+                            <SimpleGrid columns={2} w="210px" mt={-5} fontSize={"14px"}>
                                 <Box w="340px" backgroundColor={"#bf9b30"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>
