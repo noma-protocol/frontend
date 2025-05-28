@@ -40,8 +40,8 @@ import {
     DrawerFooter,
     DrawerActionTrigger,
 } from '../components/ui/drawer'; // Ark UI Drawer components
-import { ro } from '@faker-js/faker';
-import { size } from 'viem';
+// import { ro } from '@faker-js/faker';
+// import { size } from 'viem';
 import config from '../config';
 
 import addressesLocal   from "../assets/deployment.json";
@@ -697,7 +697,7 @@ const Borrow = () => {
                             page="borrow"
                             />
                         </Box>
-                        <Box p={2} mt={5} w={isMobile ? "90%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
+                        <Box p={2} mt={5} w={isMobile ? "92%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
                             <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Loan</Text>        
                            <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
