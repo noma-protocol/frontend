@@ -1,7 +1,7 @@
 import { type Chain } from 'viem'
 
 export const monad = {
-  id: 10143,
+  id: 56,
   name: 'Monad Testnet',
   nativeCurrency: {
     name: 'Monad',
@@ -13,7 +13,7 @@ export const monad = {
       http: ['https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW'],
     },
     public: {
-      http: ['https://testnet-rpc.monad.xyz'],
+      http: ['https://bsc-dataseed.bnbchain.org/'],
     },
   },
   blockExplorers: {
