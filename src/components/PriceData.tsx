@@ -250,7 +250,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       text: ``,
       align: "left",
       style: {
-        color: "#ffffff"
+        color: "#ffffff",
+        fontSize: "8px",
       }
     },
     xaxis: {
@@ -260,6 +261,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
           colors: "#f8f8f8",
           fontSize: "8px",
         },
+        
         datetimeUTC: false,
       },
     },
@@ -278,6 +280,9 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     tooltip: {
       enabled: true,
       theme: "dark",
+      style: {
+        fontSize: "8px",
+      },
       x: {
         format: "dd MMM HH:mm"
       }
@@ -291,6 +296,12 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         wick: {
           useFillColor: true,
         }
+      }
+    },
+    legend: {
+      fontSize: "8px",
+      labels: {
+        colors: "#f8f8f8",
       }
     },
     grid: {
@@ -309,9 +320,10 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 style: {
                   color: "#fff",
                   background: "#FF4560",
+                  fontSize: "8px",
                 },
                 text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'}`,
-                offsetY: -25,
+                offsetY: 25,
               },
             },
             {
@@ -323,9 +335,10 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 style: {
                   color: "#fff",
                   background: "black",
+                  fontSize: "8px",
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
-                offsetY: isWithinPercentageDifference(spotPrice, Number(formatEther(`${imv}`)), 1) ? (-25 + 30) : -20,
+                offsetY: 120,
               },
             },
           ]
@@ -432,13 +445,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               </Box>
             )}
           </Box>
-          <Box ml={"20px"} mt={5} borderRadius={5} border="1px solid ivory" mb={5} w="93%">
+          <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : 1}  borderRadius={5} border="1px solid ivory" mb={5} w="99%">
             <Chart
               options={chartOptions}
               series={series}
               type="candlestick"
-              height={isMobile ? 200 : 300}
-              width={isMobile ? "99%" : "100%"}
+              height={isMobile ? 200 : 273}
+              width={"100%"}
             />
           </Box>
         </>
