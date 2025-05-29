@@ -1,10 +1,26 @@
 import React, { useEffect, useState, useRef } from "react";
 import Chart from "react-apexcharts";
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Text, Global, css } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { isMobile } from "react-device-detect";
 import { isWithinPercentageDifference } from "../utils";
 const { formatEther } = ethers.utils;
+
+// Set default font size for all ApexCharts
+if (typeof window !== "undefined") {
+  window.ApexCharts?.exec?.(
+    "all",
+    "updateOptions",
+    {
+      chart: {
+        fontSize: 8,
+        fontFamily: 'Helvetica, Arial, sans-serif',
+      }
+    },
+    false,
+    true
+  );
+}
 
 type UniswapPriceChartProps = {
   poolAddress: string;
@@ -245,13 +261,17 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       animations: { enabled: true },
       toolbar: { show: false },
       background: "#222831",
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      defaultLocale: 'en',
+      fontWeight: 400,
+      fontSize: 8,
     },
     title: {
       text: ``,
       align: "left",
       style: {
         color: "#ffffff",
-        fontSize: "8px",
+        fontSize: '8px',
       }
     },
     xaxis: {
@@ -259,11 +279,12 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       labels: {
         style: {
           colors: "#f8f8f8",
-          fontSize: "8px",
+          fontSize: '6px', // Try smaller font size for better compatibility
+          fontFamily: 'Helvetica, Arial, sans-serif',
         },
-        
         datetimeUTC: false,
       },
+      tickAmount: 6,
     },
     yaxis: {
       tooltip: {
@@ -273,15 +294,18 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         formatter: (val: number) => val.toFixed(8),
         style: {
           colors: "#f8f8f8",
-          fontSize: "8px",
+          fontSize: '6px', // Try smaller font size for better compatibility
+          fontFamily: 'Helvetica, Arial, sans-serif',
         }
       },
+      tickAmount: 5,
     },
     tooltip: {
       enabled: true,
       theme: "dark",
       style: {
-        fontSize: "8px",
+        fontSize: '8px',
+        fontFamily: 'Helvetica, Arial, sans-serif',
       },
       x: {
         format: "dd MMM HH:mm"
@@ -299,14 +323,28 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       }
     },
     legend: {
-      fontSize: "8px",
+      fontSize: '8px',
+      fontFamily: 'Helvetica, Arial, sans-serif',
       labels: {
         colors: "#f8f8f8",
-      }
+        useSeriesColors: false
+      },
+      itemMargin: {
+        horizontal: 5,
+        vertical: 0
+      },
     },
     grid: {
       borderColor: "#444",
       strokeDashArray: 3,
+    },
+    dataLabels: {
+      enabled: false,
+      style: {
+        fontSize: '8px',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        colors: ['#f8f8f8']
+      }
     },
     annotations: {
       yaxis: spotPrice && imv
@@ -320,14 +358,16 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 style: {
                   color: "#fff",
                   background: "#FF4560",
-                  fontSize: "8px",
+                  fontSize: '6px',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  cssClass: 'small-text-annotation',
                 },
                 text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'}`,
                 offsetY: 25,
               },
             },
             {
-              y: Number(formatEther(`${imv || 0}`)),
+              y: 0.000039655,
               borderColor: "yellow",
               strokeDashArray: 4,
               label: {
@@ -335,10 +375,12 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 style: {
                   color: "#fff",
                   background: "black",
-                  fontSize: "8px",
+                  fontSize: '6px',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  cssClass: 'small-text-annotation',
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
-                offsetY: 120,
+                offsetY: -25,
               },
             },
           ]
@@ -396,6 +438,22 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
   return (
     <Box ml={isMobile ? -5 : 0}>
+      <Global styles={css`
+        .apexcharts-text tspan,
+        .apexcharts-label,
+        .apexcharts-legend-text,
+        .apexcharts-tooltip,
+        .apexcharts-xaxis-label,
+        .apexcharts-yaxis-label,
+        .apexcharts-xaxis-title,
+        .apexcharts-yaxis-title,
+        .apexcharts-title,
+        .small-text-annotation text,
+        .apexcharts-xaxis text,
+        .apexcharts-yaxis text {
+          font-size: 6px !important;
+        }
+      `} />
       {apiError ? (
         <Box h="30px" bg="red.800" p={2} borderRadius="md">
           <Text fontSize="sm" color="white">API connection error. Please check that the price API is running.</Text>
