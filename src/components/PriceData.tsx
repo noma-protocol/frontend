@@ -68,7 +68,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   const [apiError, setApiError] = useState<boolean>(false);
   const lastPrice = useRef<number | null>(null);
   const lastRefreshTime = useRef<number | null>(null);
-  const API_BASE_URL = "http://localhost:3000" //"https://prices.oikos.cash"; // API base URL
+  const API_BASE_URL = "https://prices.oikos.cash"; // API base URL
 
   // Fetch latest price
   const fetchLatestPrice = async () => {
