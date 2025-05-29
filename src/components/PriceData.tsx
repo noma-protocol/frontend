@@ -266,6 +266,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       defaultLocale: 'en',
       fontWeight: 400,
       fontSize: 8,
+      offsetX: -2, // Shift chart to the left to center it
     },
     title: {
       text: ``,
@@ -292,14 +293,24 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         enabled: true
       },
       labels: {
-        formatter: (val: number) => val.toFixed(8),
+        formatter: (val: number) => {
+          // Only show values near our annotations
+          if (spotPrice && (
+              Math.abs(val - spotPrice) / spotPrice < 0.005 ||
+              Math.abs(val - Number(formatEther(`${imv || 0}`))) / Number(formatEther(`${imv || 0}`)) < 0.005
+            )) {
+            return val.toFixed(8);
+          }
+          return ''; // Hide other y-axis labels
+        },
         style: {
           colors: "#f8f8f8",
-          fontSize: '6px', // Try smaller font size for better compatibility
+          fontSize: '6px',
           fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
         }
       },
       tickAmount: 5,
+      floating: false,
     },
     tooltip: {
       enabled: true,
@@ -338,6 +349,9 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     grid: {
       borderColor: "#444",
       strokeDashArray: 3,
+      padding: {
+        right: 10, // Adjust right padding to center chart
+      },
     },
     dataLabels: {
       enabled: false,
@@ -363,16 +377,16 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
                   cssClass: 'small-text-annotation',
                 },
-                text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'}`,
+                text: ``, // `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'}`,
                 offsetY: 25,
               },
             },
             {
-              y: 0.000039655,
-              borderColor: "yellow",
+              y: spotPrice - (spotPrice * 0.09 / 100),
+              borderColor: "ivory",
               strokeDashArray: 4,
               label: {
-                borderColor: "yellow",
+                borderColor: "ivory",
                 style: {
                   color: "#fff",
                   background: "black",
@@ -505,14 +519,16 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               </Box>
             )}
           </Box>
-          <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : 1}  borderRadius={5} border="1px solid ivory" mb={5} w="99%">
-            <Box>
+          <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : -2}  borderRadius={5} border="1px solid ivory" mb={5} w="101%">
+            <Box
+              ml={1}
+            >
               <Chart
                 options={chartOptions}
                 series={series}
                 type="candlestick"
                 height={isMobile ? 200 : 273}
-                width={"100%"}
+                width={"101%"}
             />
             </Box>
           </Box>
