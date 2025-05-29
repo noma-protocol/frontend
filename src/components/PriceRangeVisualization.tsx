@@ -114,7 +114,7 @@ const PriceRangeVisualization = ({ data, width, height }) => {
             <AxisBottom
               top={yMax}
               scale={priceScale}
-              numTicks={isMobile ? 3 : 5}
+              numTicks={isMobile ? 2 : 4}
               stroke={'#ffffff'}
               tickStroke={'#ffffff'}
               tickLabelProps={() => ({
