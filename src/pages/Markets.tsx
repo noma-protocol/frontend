@@ -515,10 +515,10 @@ const Markets: React.FC = () => {
                     {/* <Box >
                       <Text fontWeight="bold"  color="#bf9b30" ml={2}>Index</Text>
                     </Box> */}
-                    <Box w="100px">
+                    <Box w="60%">
                       <Text fontWeight="bold" color="#bf9b30"  ml={2}> Name</Text>
                     </Box>
-                    <Box>
+                    <Box textAlign={isMobile ? "left" : "center"} alignItems={ isMobile ? "left" : "center"}>
                       <Text fontWeight="bold"  color="#bf9b30" ml={isMobile?"32vw":"60px"} > Symbol</Text>
                     </Box>
                     {!isMobile && (
