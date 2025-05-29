@@ -303,6 +303,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
           }
           return ''; // Hide other y-axis labels
         },
+        offsetX: -10, // This will effectively move the labels left (negative X direction)
         style: {
           colors: "#f8f8f8",
           fontSize: '6px',
@@ -314,14 +315,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     },
     tooltip: {
       enabled: true,
-      theme: "dark",
-      style: {
-        fontSize: '8px',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-      },
-      x: {
-        format: "dd MMM HH:mm"
-      }
+      theme: "dark"
     },
     plotOptions: {
       candlestick: {
@@ -457,7 +451,6 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         .apexcharts-text tspan,
         .apexcharts-label,
         .apexcharts-legend-text,
-        .apexcharts-tooltip,
         .apexcharts-xaxis-label,
         .apexcharts-yaxis-label,
         .apexcharts-xaxis-title,
@@ -468,6 +461,50 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         .apexcharts-yaxis text {
           font-size: 14px !important;
           font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
+        }
+        
+        .apexcharts-tooltip {
+          background-color: #222831 !important;
+          border: 1px solid #444 !important;
+          font-size: 16px !important;
+        }
+        
+        .apexcharts-tooltip-title {
+          background-color: #333 !important;
+          border-bottom: 1px solid #444 !important;
+          font-size: 16px !important;
+        }
+        
+        .apexcharts-tooltip-y-group {
+          padding: 4px 0 !important;
+        }
+        
+        .apexcharts-tooltip-text {
+          font-size: 16px !important;
+        }
+        
+        .apexcharts-tooltip-text-y-value {
+          font-size: 16px !important;
+        }
+        
+        .apexcharts-tooltip-marker {
+          width: 8px !important;
+          height: 8px !important;
+        }
+        
+        .apexcharts-tooltip-box {
+          font-size: 16px !important;
+        }
+        
+        .apexcharts-yaxis-label {
+          transform: translateX(-10px);
+        }
+        
+        /* This will truncate the long decimals in tooltip */
+        .apexcharts-tooltip-text-y-value {
+          max-width: 100px;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
       `} />
       {apiError ? (
