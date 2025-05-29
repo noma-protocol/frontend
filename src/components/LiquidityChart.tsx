@@ -162,7 +162,7 @@ return (
             </Box>
           ) : (
             <Box pl={25}>
-              <Table.Root style={{ marginTop: "20px" }} variant="simple" ml={"-5px"} maxWidth={"130px"} fontSize={"xs"} backgroundColor="#393E46"  borderRadius={"md"}>
+              <Table.Root style={{ marginTop: "20px" }} variant="simple" ml={"-10px"} maxWidth={"90px"} fontSize={"xs"} backgroundColor="#393E46"  borderRadius={"md"}>
               <Table.Header>
                 <Table.Row>
                   <Table.ColumnHeader></Table.ColumnHeader>
@@ -177,9 +177,9 @@ return (
               <Table.Body style={{ color: "ivory" }}>
                 <Table.Row>
                   <Table.Cell><Text color="#a67c00" fontSize="xs">Reserves (WMON)</Text></Table.Cell>
-                  <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1))}</Table.Cell>
-                  <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount1))}</Table.Cell>
-                  <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount1))}</Table.Cell>
+                  <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1), 2)}</Table.Cell>
+                  <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount1), 2)}</Table.Cell>
+                  <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount1), 2)}</Table.Cell>
                   {/* <Table.Cell>{commify(formatEther(underlyingBalances.token1))}</Table.Cell> */}
                   {/* <Table.Cell isNumeric>
                     {commify(
@@ -213,8 +213,8 @@ return (
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell><Text color="#a67c00" fontSize="xs">Capacity ({tokenSymbol})</Text></Table.Cell>
-                  <Table.Cell  fontSize="xs" isNumeric>{commify(formatEther(capacity?.floor))}</Table.Cell>
-                  <Table.Cell  fontSize="xs" isNumeric>{commify(formatEther(capacity?.anchor))}</Table.Cell>
+                  <Table.Cell  fontSize="xs" isNumeric>{commify(formatEther(capacity?.floor), 2)}</Table.Cell>
+                  <Table.Cell  fontSize="xs" isNumeric>{commify(formatEther(capacity?.anchor), 2)}</Table.Cell>
                   <Table.Cell  fontSize="xs" isNumeric>{"n/a"}</Table.Cell>
                   {/* <Table.Cell isNumeric>{"n/a"}</Table.Cell> */}
                   <Table.Cell></Table.Cell>
