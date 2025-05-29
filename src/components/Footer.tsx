@@ -35,14 +35,14 @@ const Footer: React.FC = () => {
                 <Box>
                 <NavItem>
                 <a href="https://docs.oikos.cash" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px"}}>
-                  Docs
+                  <><p style={{color:"#f3f7c6"}}>Docs</p></>
                 </a>
               </NavItem>
                 </Box>
                 <Box>
                 <NavItem>
-                <a href="https://oikoscash.medium.com/" target="_blank" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px"}}>
-                  Blog
+                <a href="https://oikoscash.medium.com/" target="_blank" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px", color:"#f3f7c6"}}>
+                   <><p style={{color:"#f3f7c6"}}>Blog</p></>
                 </a>
               </NavItem>
                 </Box>
@@ -52,7 +52,9 @@ const Footer: React.FC = () => {
           <Col md="3" xs="6">
             <Nav style={{margin:'5vh'}}>
               <NavItem>
-                <Link to="/Terms" style={{fontSize:isMobile?"12px": "14px"}}>Terms of Use</Link>
+                <Link to="/Terms" style={{fontSize:isMobile?"12px": "14px", color:"#f3f7c6"}}>
+                 <><p style={{color:"#f3f7c6"}}>Terms of Use</p></>
+                 </Link>
               </NavItem>
               {/* <NavItem>
                 <Link to="/Privacy">Privacy Policy</Link>
@@ -60,7 +62,7 @@ const Footer: React.FC = () => {
             </Nav>
           </Col>
           <Col md="3" style={{marginTop:'50px', paddingLeft:"100px", marginLeft:isMobile? "5%": 0}}>
-            <h3 className="title" style={{color:"#f8bd45"}}>Follow us:</h3>
+            <h3 className="title" >Follow us:</h3>
               <a
                 href="https://twitter.com/oikos_cash"
                 id="tooltip39661217"
