@@ -80,32 +80,43 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
   const sliderMax = tradeMode === "BUY" ? (useWeth == 1 ? Number(formatEther(`${token1Balance || 0}`)) : Number(formatEther(`${ethBalance || 0}`))) :Number(formatEther(`${token0Balance || 0}`));
   
 //   console.log(`SliderMax = ${token0Balance}`);
-  // Set an initial contribution value
-  const initialContribution = 1 // (sliderMax / 10);
+  // Set an initial contribution value based on balance
+  const initialContribution = sliderMax === 0 ? 0 :
+                             sliderMax < 1 ? sliderMax / 10 : // Use 10% for small balances
+                             Math.min(1, sliderMax / 10); // For larger balances, use 10% up to 1 max
   const [contributionAmount, setContributionAmount] = useState<number>(initialContribution);
   // Slider change handler – only update if token info is loaded.
 
   const handleSliderChange = (e) => {
-     if (isTokenInfoLoading) return; // Prevent updates if still loading
+     if (isTokenInfoLoading || sliderMax === 0) return; // Prevent updates if still loading or no balance
 
-    //  console.log(`Slider value changed to ${e}`);
-     let newValue = parseFloat(e);
+     // Parse value with appropriate precision based on balance size
+     let newValue;
+     if (sliderMax < 0.001) {
+       newValue = parseFloat(parseFloat(e).toFixed(8)); // More precision for very small values
+     } else if (sliderMax < 0.1) {
+       newValue = parseFloat(parseFloat(e).toFixed(6)); // Medium precision for small values
+     } else {
+       newValue = parseFloat(parseFloat(e).toFixed(4)); // Normal precision
+     }
+
+     // Ensure value doesn't exceed maximum
      if (newValue > sliderMax) newValue = sliderMax;
 
-    //  console.log(`Trade mode ${tradeMode} | New Value ${newValue}`);
+     // Ensure minimum value is respected (at least 0.0001 or smaller for very small balances)
+     const minValue = sliderMax < 0.001 ? 0.00001 : 0.0001;
+     if (newValue > 0 && newValue < minValue) newValue = minValue;
+
      setContributionAmount(newValue);
 
      if (tradeMode === "BUY") setAmountToBuy(newValue);
-     if (tradeMode === "SELL") {
-      // console.log(`Update value`);
-      setAmountToSell(newValue);
-     }
+     if (tradeMode === "SELL") setAmountToSell(newValue);
 
      refreshParams();
   };
 
   const handleTradeAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isTokenInfoLoading) return;
+    if (isTokenInfoLoading || sliderMax === 0) return;
 
     // Handle empty input
     if (e.target.value === "") {
@@ -114,16 +125,31 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
       } else {
         setAmountToSell(0);
       }
+      setContributionAmount(0);
       return;
     }
 
-    // Remove any leading zeros before a non-zero digit
-    const cleanedValue = e.target.value.replace(/^0+(?=\d)/, '');
+    // Allow decimal points for small values
+    const cleanedValue = e.target.value;
 
     // Parse the cleaned value
     let newValue = parseFloat(cleanedValue);
 
     if (isNaN(newValue)) return;
+
+    // Cap the value at the maximum available balance
+    if (newValue > sliderMax) {
+      newValue = sliderMax;
+    }
+
+    // Format with appropriate precision
+    if (sliderMax < 0.001) {
+      newValue = parseFloat(newValue.toFixed(8)); // More precision for very small values
+    } else if (sliderMax < 0.1) {
+      newValue = parseFloat(newValue.toFixed(6)); // Medium precision for small values
+    } else {
+      newValue = parseFloat(newValue.toFixed(4)); // Normal precision
+    }
 
     // Update the corresponding state
     if (tradeMode === "BUY") {
@@ -160,8 +186,8 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
   // Calculate slider marks with percentage labels
   // This ensures marks are always in sync with the current sliderMax
   const marks = React.useMemo(() => {
-    // If still loading or sliderMax is 0, use fixed labels
-    if (isTokenInfoLoading || sliderMax === 0) {
+    // If still loading, use empty labels for first mark
+    if (isTokenInfoLoading) {
       return [
         { value: 0, label: "0%" },
         { value: 0.5, label: "50%" },
@@ -169,10 +195,28 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
       ];
     }
 
-    // Calculate evenly spaced values
+    // If sliderMax is 0 (no balance), use fixed labels
+    if (sliderMax === 0) {
+      return [
+        { value: 0, label: "0%" },
+        { value: 0.5, label: "50%" },
+        { value: 1, label: "100%" }
+      ];
+    }
+
+    // If sliderMax is very small (less than 1), scale the marks appropriately
+    if (sliderMax < 1) {
+      return [
+        { value: 0, label: "0%" },
+        { value: sliderMax / 2, label: "50%" },
+        { value: sliderMax, label: "100%" }
+      ];
+    }
+
+    // Calculate evenly spaced values for normal case
     const half = sliderMax / 2;
 
-    // When data is loaded, show percentage labels
+    // When data is loaded with normal balance, show percentage labels
     return [
       { value: 0, label: "0%" },
       { value: half, label: "50%" },
@@ -248,7 +292,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Text ml={7} fontSize="xs" color="#a67c00" >
               {sliderMax === 0
                 ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
-                : "Slide to select"
+                : `Available: ${sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4)} ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}`
               }
             </Text>
             <Slider
@@ -256,16 +300,17 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 ml={10}
                 variant="outline"
                 w={"82%"}
-                defaultValue={[1]}
-                value={[contributionAmount]} // Direct token value
+                defaultValue={sliderMax < 1 ? [sliderMax / 10] : [1]} // Scale initial value for small balances
+                value={[Math.min(contributionAmount, sliderMax)]} // Ensure value doesn't exceed max
                 onValueChange={(e) => {
                     // Use actual value directly
                     handleSliderChange(e.value[0]);
                 }}
                 max={sliderMax === 0 ? 1 : sliderMax} // Use 1 as max when balance is 0
+                step={sliderMax < 0.01 ? 0.0001 : sliderMax < 0.1 ? 0.001 : 0.01} // Smaller steps for small balances
                 colorPalette="yellow"
                 thumbAlignment="center"
-                disabled={isTokenInfoLoading || sliderMax === 0} // Disable if balance is 0
+                disabled={isTokenInfoLoading || sliderMax === 0} // Only disable if no balance
                 marks={marks}
               />
               </>  
@@ -489,7 +534,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Text ml={5} fontSize="xs" color="#a67c00" >
               {sliderMax === 0
                 ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
-                : "Slide to select"
+                : `Available: ${sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4)} ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}`
               }
             </Text>
             <Slider
@@ -497,16 +542,17 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               ml={8}
               variant="outline"
               w={"70%"}
-              value={[contributionAmount]} // Direct token value
+              value={[Math.min(contributionAmount, sliderMax)]} // Ensure value doesn't exceed max
               onValueChange={(e) => {
                   // Use actual value directly
                   handleSliderChange(e.value[0]);
               }}
               min={0}
               max={sliderMax === 0 ? 1 : sliderMax} // Use 1 as max when balance is 0
+              step={sliderMax < 0.01 ? 0.0001 : sliderMax < 0.1 ? 0.001 : 0.01} // Smaller steps for small balances
               colorPalette="yellow"
               thumbAlignment="center"
-              disabled={isTokenInfoLoading || sliderMax === 0} // Disable if balance is 0
+              disabled={isTokenInfoLoading || sliderMax === 0} // Only disable if no balance
               marks={marks}
               />
               </>
