@@ -262,7 +262,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       animations: { enabled: true },
       toolbar: { show: false },
       background: "#222831",
-      fontFamily: 'Helvetica, Arial, sans-serif',
+      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
       defaultLocale: 'en',
       fontWeight: 400,
       fontSize: 8,
@@ -281,7 +281,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         style: {
           colors: "#f8f8f8",
           fontSize: '6px', // Try smaller font size for better compatibility
-          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
         },
         datetimeUTC: false,
       },
@@ -296,7 +296,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         style: {
           colors: "#f8f8f8",
           fontSize: '6px', // Try smaller font size for better compatibility
-          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
         }
       },
       tickAmount: 5,
@@ -360,7 +360,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   color: "#fff",
                   background: "#FF4560",
                   fontSize: '6px',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
                   cssClass: 'small-text-annotation',
                 },
                 text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'}`,
@@ -377,7 +377,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   color: "#fff",
                   background: "black",
                   fontSize: '6px',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
                   cssClass: 'small-text-annotation',
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
@@ -452,7 +452,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         .small-text-annotation text,
         .apexcharts-xaxis text,
         .apexcharts-yaxis text {
-          font-size: 6px !important;
+          font-size: 14px !important;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
         }
       `} />
       {apiError ? (
@@ -505,13 +506,15 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
             )}
           </Box>
           <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : 1}  borderRadius={5} border="1px solid ivory" mb={5} w="99%">
-            <Chart
-              options={chartOptions}
-              series={series}
-              type="candlestick"
-              height={isMobile ? 200 : 273}
-              width={"100%"}
+            <Box>
+              <Chart
+                options={chartOptions}
+                series={series}
+                type="candlestick"
+                height={isMobile ? 200 : 273}
+                width={"100%"}
             />
+            </Box>
           </Box>
         </>
       )}
