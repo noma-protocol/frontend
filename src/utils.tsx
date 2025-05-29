@@ -114,3 +114,45 @@ export function calculateExpiryDate(days = 30) {
   const options = { month: 'long', day: 'numeric' };
   return today.toLocaleDateString('en-US', options);
 }
+
+/**
+ * Calculate loan fees based on a daily rate of 0.057%
+ *
+ * @param {number} borrowAmount  – principal amount borrowed
+ * @param {number} duration      – loan duration in seconds
+ * @returns {number} fees        – total fees owed
+ */
+export function calculateLoanFees(borrowAmount, duration) {
+  const SECONDS_IN_DAY = 86400;
+  // daily rate = 0.057% → 57 / 100_000
+  const daysElapsed = Math.floor(duration / SECONDS_IN_DAY);
+  return (borrowAmount * 57 * daysElapsed) / 100_000;
+}
+
+export function formatNumberPrecise(value, sigDigits = 4) {
+  let num = typeof value === 'number'
+    ? value
+    : parseFloat(value);
+  if (isNaN(num)) return '0';
+
+  const sign = num < 0 ? '-' : '';
+  num = Math.abs(num);
+
+  const suffixes = ['', 'K', 'M', 'B', 'T'];
+  let idx = 0;
+  while (num >= 1000 && idx < suffixes.length - 1) {
+    num /= 1000;
+    idx++;
+  }
+
+  // Figure out how many decimals we need to hit sigDigits in total
+  const intDigits = Math.floor(num).toString().length;
+  const decPlaces = Math.max(sigDigits - intDigits, 0);
+
+  // Format and trim trailing zeros
+  const str = num
+    .toFixed(decPlaces)
+    .replace(/\.?0+$/, '');
+
+  return sign + str + suffixes[idx];
+}
