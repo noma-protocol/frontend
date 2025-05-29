@@ -51,7 +51,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   const [apiError, setApiError] = useState<boolean>(false);
   const lastPrice = useRef<number | null>(null);
   const lastRefreshTime = useRef<number | null>(null);
-  const API_BASE_URL = "https://prices.oikos.cash"; // API base URL
+  const API_BASE_URL = "http://localhost:3000" //"https://prices.oikos.cash"; // API base URL
 
   // Fetch latest price
   const fetchLatestPrice = async () => {
@@ -98,7 +98,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   const fetchOHLCData = async (intervalMinutes: string) => {
     try {
       // Use the OHLC endpoint
-      const response = await fetch(`${API_BASE_URL}/api/ohlc/${intervalMinutes}`);
+      const response = await fetch(`${API_BASE_URL}/api/price/ohlc/${intervalMinutes}`);
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -247,7 +247,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       background: "#222831",
     },
     title: {
-      text: `${token0Symbol}/${token1Symbol} Price`,
+      text: ``,
       align: "left",
       style: {
         color: "#ffffff"
@@ -257,8 +257,10 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       type: "datetime",
       labels: {
         style: {
-          colors: "#f8f8f8"
-        }
+          colors: "#f8f8f8",
+          fontSize: "8px",
+        },
+        datetimeUTC: false,
       },
     },
     yaxis: {
@@ -268,7 +270,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       labels: {
         formatter: (val: number) => val.toFixed(8),
         style: {
-          colors: "#f8f8f8"
+          colors: "#f8f8f8",
+          fontSize: "8px",
         }
       },
     },
@@ -358,13 +361,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   };
 
   // Define predefined time intervals
-  const predefinedIntervals = ["5m", "15m", "1h", "1d"];
+  const predefinedIntervals = ["5m", "15m", "1h", "24h"];
 
   // Update error handlers
   useEffect(() => {
     const checkApiConnection = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/ohlc/5m`);
+        const response = await fetch(`${API_BASE_URL}/api/price/ohlc/5m`);
         setApiError(!response.ok);
       } catch (error) {
         console.error("API connection error:", error);
@@ -429,13 +432,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               </Box>
             )}
           </Box>
-          <Box mt={-5}>
+          <Box ml={"20px"} mt={5} borderRadius={5} border="1px solid ivory" mb={5} w="93%">
             <Chart
               options={chartOptions}
               series={series}
               type="candlestick"
-              height={isMobile ? 250 : 350}
-              width={isMobile ? "100%" : "100%"}
+              height={isMobile ? 200 : 300}
+              width={isMobile ? "99%" : "100%"}
             />
           </Box>
         </>
