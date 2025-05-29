@@ -315,7 +315,50 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     },
     tooltip: {
       enabled: true,
-      theme: "dark"
+      theme: "dark",
+      shared: true,
+      intersect: false,
+      followCursor: true,
+      fixed: {
+        enabled: false
+      },
+      custom: function({seriesIndex, dataPointIndex, w}) {
+        try {
+          // Get the raw OHLC values
+          const o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
+          const h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
+          const l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
+          const c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
+
+          // Format values with a helper function to ensure exactly 8 decimal places
+          const formatValue = (val) => {
+            // Convert to a number first to handle any string inputs
+            return Number(val).toLocaleString('en-US', {
+              minimumFractionDigits: 8,
+              maximumFractionDigits: 8
+            });
+          };
+
+          // Format date/time
+          const timestamp = w.globals.seriesX[seriesIndex][dataPointIndex];
+          const date = new Date(timestamp);
+          const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          const dateStr = date.toLocaleDateString([], {month: 'short', day: 'numeric'});
+
+          return (
+            '<div class="apexcharts-tooltip-candlestick" style="font-size: 14px; padding: 5px;">' +
+            '<div style="text-align: center; font-weight: bold; margin-bottom: 5px;">' + dateStr + ' ' + timeStr + '</div>' +
+            '<div>Open: <span style="float: right;">' + formatValue(o) + '</span></div>' +
+            '<div>High: <span style="float: right;">' + formatValue(h) + '</span></div>' +
+            '<div>Low: <span style="float: right;">' + formatValue(l) + '</span></div>' +
+            '<div>Close: <span style="float: right;">' + formatValue(c) + '</span></div>' +
+            '</div>'
+          );
+        } catch (e) {
+          console.error("Error formatting tooltip:", e);
+          return '<div class="apexcharts-tooltip-candlestick">Error displaying data</div>';
+        }
+      }
     },
     plotOptions: {
       candlestick: {
@@ -459,7 +502,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         .small-text-annotation text,
         .apexcharts-xaxis text,
         .apexcharts-yaxis text {
-          font-size: 14px !important;
+          font-size: 12px !important;
           font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
         }
         
