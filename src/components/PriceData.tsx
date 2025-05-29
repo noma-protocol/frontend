@@ -54,7 +54,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   token0Symbol,
   token1Symbol,
   imv,
-  interval = "5m", // Default to 5 minute interval
+  interval = "15m", // Default to 15 minute interval
   setPercentChange = () => {}, // Default no-op function
   onPercentChange,
 }) => {
@@ -474,7 +474,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   useEffect(() => {
     const checkApiConnection = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/price/ohlc/5m`);
+        const response = await fetch(`${API_BASE_URL}/api/price/ohlc/15m`);
         setApiError(!response.ok);
       } catch (error) {
         console.error("API connection error:", error);
