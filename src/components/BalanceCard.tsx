@@ -191,7 +191,7 @@ const BalanceCard: React.FC = ({
                                     Cancel
                                 </Button>
                             </DrawerActionTrigger>
-                            <Button colorScheme="blue" onClick={handleAction}  w="120px">
+                            <Button colorScheme="blue" onClick={handleAction}  w="120px" ml={2}>
                                 {isWrapping ? <Spinner size="sm" /> : "Confirm"}
                             </Button>                                
                         </Box>                                
@@ -251,7 +251,7 @@ const BalanceCard: React.FC = ({
                                         Cancel
                                     </Button>
                                 </DrawerActionTrigger>
-                                <Button colorScheme="blue" onClick={handleAction} w="120px">
+                                <Button colorScheme="blue" onClick={handleAction} w="120px" ml={2}>
                                     {isUnwrapping ? <Spinner size="sm" /> : "Confirm"}
                                 </Button>                                
                             </Box>                                
@@ -264,7 +264,7 @@ const BalanceCard: React.FC = ({
                 </Box>
                 <Box 
                 // h={'40px'} 
-                // mt={2} 
+                 mt={2} 
                 // p={2}
                 // border="1px solid"
                 >
@@ -294,7 +294,8 @@ const BalanceCard: React.FC = ({
                 <Box 
                     // border="1px solid"
                     // h={'40px'} 
-                    // mt={isMobile ? "-2px" : 0} 
+                    // mt={isMobile ? "-2px" : 0}
+                    mt={2}
                     p={2} 
                     fontSize={isMobile?"12px":oversizeToken0?"13px":"13px"}
                 >
