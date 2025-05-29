@@ -15,10 +15,14 @@ type UniswapPriceChartProps = {
   interval?: string; // Optional interval parameter
 };
 
-// Price data type from API
-type PriceData = {
+// OHLC data type from API
+type OHLCData = {
   timestamp: number;
-  price: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
 };
 
 // Add onPercentChange callback to props
@@ -33,22 +37,23 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   token0Symbol,
   token1Symbol,
   imv,
-  interval = "60", // Default to 1 hour interval
+  interval = "5m", // Default to 5 minute interval
   setPercentChange = () => {}, // Default no-op function
   onPercentChange,
 }) => {
-  const [series, setSeries] = useState([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: [] }]);
+  const [series, setSeries] = useState([{
+    name: `Price ${token0Symbol}/${token1Symbol}`,
+    data: []
+  }]);
   const [spotPrice, setSpotPrice] = useState<number | null>(null);
   const [availableIntervals, setAvailableIntervals] = useState<string[]>([]);
   const [selectedInterval, setSelectedInterval] = useState<string>(interval);
   const [apiError, setApiError] = useState<boolean>(false);
-  // const [percentChange, setPercentChange] = useState<number>(0);
   const lastPrice = useRef<number | null>(null);
   const lastRefreshTime = useRef<number | null>(null);
-  // Store interval price data to check if prices are the same
-  // Removed static intervals tracking
-  const API_BASE_URL = "https://prices.oikos.cash"; // Replace with your actual API base URL
+  const API_BASE_URL = "https://prices.oikos.cash"; // API base URL
 
+  // Fetch latest price
   const fetchLatestPrice = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/price/latest`);
@@ -57,7 +62,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       }
 
       const data = await response.json();
-      
+
       // Extract price from different possible API response formats
       let priceValue;
 
@@ -67,6 +72,10 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       } else if (typeof data.price !== 'undefined') {
         // Direct price property
         priceValue = data.price;
+      } else if (data.ohlc && data.ohlc.length > 0) {
+        // OHLC format - use the close price of the most recent candle
+        const lastCandle = data.ohlc[data.ohlc.length - 1];
+        priceValue = lastCandle.close;
       } else {
         console.error("Invalid price data format:", data);
         return null;
@@ -85,106 +94,58 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     }
   };
 
-  const fetchPriceHistory = async (intervalMinutes: string) => {
+  // Fetch OHLC data from API
+  const fetchOHLCData = async (intervalMinutes: string) => {
     try {
-      // Use the correct endpoint
-      const response = await fetch(`${API_BASE_URL}/api/price/${intervalMinutes}`);
+      // Use the OHLC endpoint
+      const response = await fetch(`${API_BASE_URL}/api/ohlc/${intervalMinutes}`);
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
 
       const responseJson = await response.json();
 
-      // Extract the price data array
-      let priceDataArray;
-      
-      if (Array.isArray(responseJson)) {
-        // If the response is already an array, use it directly
-        priceDataArray = responseJson;
-      } else if (responseJson && typeof responseJson === 'object' && Array.isArray(responseJson.dataPoints)) {
-        // If the response has dataPoints array
-        priceDataArray = responseJson.dataPoints;
+      // Check if we have OHLC data
+      if (responseJson && responseJson.ohlc && Array.isArray(responseJson.ohlc)) {
+        // Format the OHLC data for ApexCharts
+        const ohlcData = responseJson.ohlc.map((candle: OHLCData) => ({
+          x: new Date(candle.timestamp),
+          y: [candle.open, candle.high, candle.low, candle.close]
+        }));
+
+        // Update last refresh time
+        lastRefreshTime.current = Date.now();
+
+        return ohlcData;
       } else {
-        console.error("API response doesn't contain valid price data:", responseJson);
-        return [];
-      }
-
-      // Check if array is empty
-      if (priceDataArray.length === 0) {
-        return [];
-      }
-
-      try {
-        // Check the structure of the first item to determine the format
-        if (priceDataArray.length > 0) {
-          const firstItem = priceDataArray[0];
-          
-          // Process based on the structure we find
-          if (typeof firstItem.timestamp !== 'undefined' && typeof firstItem.price !== 'undefined') {
-            // Standard format with timestamp and price fields
-            return priceDataArray.map(item => [
-              typeof item.timestamp === 'number' && item.timestamp > 1000000000000
-                ? item.timestamp  // Already in milliseconds
-                : item.timestamp * 1000, // Convert to milliseconds
-              typeof item.price === 'number' ? item.price : parseFloat(item.price)
-            ] as [number, number]);
-          } 
-          else if (typeof firstItem.time !== 'undefined' && typeof firstItem.value !== 'undefined') {
-            // Alternative format with time and value fields
-            return priceDataArray.map(item => [
-              typeof item.time === 'number' && item.time > 1000000000000
-                ? item.time  // Already in milliseconds
-                : item.time * 1000, // Convert to milliseconds
-              typeof item.value === 'number' ? item.value : parseFloat(item.value)
-            ] as [number, number]);
-          }
-          else if (Array.isArray(firstItem) && firstItem.length === 2) {
-            // Already in [timestamp, price] format
-            return priceDataArray.map(item => [
-              Number(item[0]),
-              typeof item[1] === 'number' ? item[1] : parseFloat(item[1])
-            ] as [number, number]);
-          }
-          else {
-            console.error("Unrecognized data point format:", firstItem);
-            return [];
-          }
-        }
-        
-        return [];
-      } catch (err) {
-        console.error("Error processing price data:", err);
+        console.error("API response doesn't contain valid OHLC data:", responseJson);
         return [];
       }
     } catch (error) {
-      console.error("Error fetching price history:", error);
+      console.error("Error fetching OHLC data:", error);
       return [];
     }
   };
 
-  // Calculate percentage change based on history data
-  const calculatePercentChange = (historyData: [number, number][]) => {
-    if (!historyData || historyData.length < 2) return 0;
+  // Calculate percentage change based on OHLC data
+  const calculatePercentChange = (ohlcData: any[]) => {
+    if (!ohlcData || ohlcData.length < 2) return 0;
 
     // Get first and last price points
-    const firstPrice = historyData[0][1];
-    const lastPrice = historyData[historyData.length - 1][1];
+    const firstPrice = ohlcData[0].y[0]; // open of first candle
+    const lastPrice = ohlcData[ohlcData.length - 1].y[3]; // close of last candle
 
     // Calculate percentage change
     const change = ((lastPrice - firstPrice) / firstPrice) * 100;
     return change;
   };
 
-  // Removed checkStaticPrices function
-
   useEffect(() => {
     let pollInterval: NodeJS.Timeout;
 
     const startFetching = async () => {
-      // Fetch the initial price history
-      const historyData = await fetchPriceHistory(selectedInterval);
-
-      // Removed static intervals checking
+      // Fetch the initial OHLC data
+      const ohlcData = await fetchOHLCData(selectedInterval);
 
       // Fetch the latest price
       const latestPrice = await fetchLatestPrice();
@@ -194,11 +155,14 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         setSpotPrice(latestPrice);
 
         // Only display actual price history data
-        if (historyData.length > 0) {
-          setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
+        if (ohlcData.length > 0) {
+          setSeries([{
+            name: `${token0Symbol}/${token1Symbol}`,
+            data: ohlcData
+          }]);
 
           // Calculate and set percentage change
-          const change = calculatePercentChange(historyData);
+          const change = calculatePercentChange(ohlcData);
           setPercentChange(change);
 
           // Notify parent component if callback provided
@@ -207,7 +171,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
           }
         } else {
           // Set empty data array when no history is available
-          setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: [] }]);
+          setSeries([{ name: `${token0Symbol}/${token1Symbol}`, data: [] }]);
           setPercentChange(0);
 
           // Notify parent with zero change
@@ -237,18 +201,19 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
           const shouldRefreshAll = !lastRefreshTime.current || (now - lastRefreshTime.current > refreshInterval);
 
           if (shouldRefreshAll) {
-            console.log(`Refreshing price data for ${selectedInterval} interval`);
+            console.log(`Refreshing OHLC data for ${selectedInterval} interval`);
 
-            // Fetch price history for the current interval
-            const historyData = await fetchPriceHistory(selectedInterval);
+            // Fetch OHLC data for the current interval
+            const ohlcData = await fetchOHLCData(selectedInterval);
 
-            // Removed static intervals checking and interval price data updates
-
-            if (historyData.length > 0) {
-              setSeries([{ name: `Price ${token0Symbol}/${token1Symbol}`, data: historyData }]);
+            if (ohlcData.length > 0) {
+              setSeries([{
+                name: `${token0Symbol}/${token1Symbol}`,
+                data: ohlcData
+              }]);
 
               // Recalculate percentage change with new data
-              const change = calculatePercentChange(historyData);
+              const change = calculatePercentChange(ohlcData);
               setPercentChange(change);
 
               // Notify parent component if callback provided
@@ -268,45 +233,67 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   }, [poolAddress, providerUrl, token0Symbol, token1Symbol, selectedInterval]);
 
   // Compute the minimum y value from your series data
-  const computedMinY =
-    series[0].data.length > 0
-      ? Math.min(...series[0].data.map((item: [number, number]) => item[1]))
-      : 0; 
+  const computedMinY = series[0].data.length > 0
+    ? Math.min(...series[0].data.map((item: any) => item.y[2])) // Use the lowest 'low' value
+    : 0;
 
+  // Chart options for candlestick chart
   const chartOptions = {
     chart: {
-      type: "area",
-      animations: { enabled: true, easing: "linear", speed: 1000 },
+      type: "candlestick",
+      height: 350,
+      animations: { enabled: true },
       toolbar: { show: false },
+      background: "#222831",
+    },
+    title: {
+      text: `${token0Symbol}/${token1Symbol} Price`,
+      align: "left",
+      style: {
+        color: "#ffffff"
+      }
     },
     xaxis: {
       type: "datetime",
-      labels: { show: false },
-    },
-    yaxis: {
-      labels: { show: false },
-      axisTicks: { show: false },
-      axisBorder: { show: false },
-    },
-    stroke: { curve: "smooth", width: 2 },
-    fill: {
-      type: "gradient",
-      gradient: {
-        shadeIntensity: 1,
-        inverseColors: false,
-        opacityFrom: 0.6,
-        opacityTo: 0.1,
-        stops: [0, 100],
-        colorStops: [
-          { offset: 0, color: "#00ffff", opacity: 0.7 },
-          { offset: 100, color: "#00ffff", opacity: 0.1 },
-        ],
+      labels: {
+        style: {
+          colors: "#f8f8f8"
+        }
       },
     },
-    colors: ["#00ffff"],
-    tooltip: { enabled: false },
-    grid: { show: false },
-    dataLabels: { enabled: false },
+    yaxis: {
+      tooltip: {
+        enabled: true
+      },
+      labels: {
+        formatter: (val: number) => val.toFixed(8),
+        style: {
+          colors: "#f8f8f8"
+        }
+      },
+    },
+    tooltip: {
+      enabled: true,
+      theme: "dark",
+      x: {
+        format: "dd MMM HH:mm"
+      }
+    },
+    plotOptions: {
+      candlestick: {
+        colors: {
+          upward: "#00B746",
+          downward: "#EF403C"
+        },
+        wick: {
+          useFillColor: true,
+        }
+      }
+    },
+    grid: {
+      borderColor: "#444",
+      strokeDashArray: 3,
+    },
     annotations: {
       yaxis: spotPrice && imv
         ? [
@@ -320,12 +307,12 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   color: "#fff",
                   background: "#FF4560",
                 },
-                text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'} `, //${token1Symbol || '--'}/${token0Symbol || '--'}
-                offsetY: -25, // Fixed 10 pixel offset
+                text: `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'}`,
+                offsetY: -25,
               },
             },
             {
-              y: computedMinY, // Always uses the computed minimum from your series
+              y: Number(formatEther(`${imv || 0}`)),
               borderColor: "yellow",
               strokeDashArray: 4,
               label: {
@@ -335,7 +322,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   background: "black",
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
-                offsetY: isWithinPercentageDifference(spotPrice, Number(formatEther(`${imv}`)), 1) ? (-25 + 30) : -20, // Fixed 10 pixel offset 
+                offsetY: isWithinPercentageDifference(spotPrice, Number(formatEther(`${imv}`)), 1) ? (-25 + 30) : -20,
               },
             },
           ]
@@ -344,7 +331,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   };
 
   useEffect(() => {
-    // Use predefined intervals instead of fetching from API
+    // Use predefined intervals
     setAvailableIntervals(predefinedIntervals);
   }, []);
 
@@ -353,40 +340,31 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     if (newInterval === selectedInterval) {
       return;
     }
-    
+
     // Update the selected interval state
     setSelectedInterval(newInterval);
-    
-    // Fetch new price history data immediately when interval changes
-    const historyData = await fetchPriceHistory(newInterval);
-    
+
+    // Fetch new OHLC data immediately when interval changes
+    const ohlcData = await fetchOHLCData(newInterval);
+
     // Always update the series, even if empty
     setSeries([{
-      name: `Price ${token0Symbol}/${token1Symbol}`,
-      data: historyData
+      name: `${token0Symbol}/${token1Symbol}`,
+      data: ohlcData
     }]);
-    
+
     // Update the last refresh time
     lastRefreshTime.current = Date.now();
   };
 
   // Define predefined time intervals
-  const predefinedIntervals = ["1440"]; // 5m, 15m, 30m, 1h, 24h in minutes
-
-  // Convert numeric interval to display format
-  const formatIntervalDisplay = (interval: string) => {
-    const num = parseInt(interval, 10);
-    if (num < 60) return `${num}m`;
-    if (num === 60) return `1h`;
-    if (num === 1440) return `24h`;
-    return `${num / 60}h`;
-  };
+  const predefinedIntervals = ["5m", "15m", "1h", "1d"];
 
   // Update error handlers
   useEffect(() => {
     const checkApiConnection = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/price/latest`);
+        const response = await fetch(`${API_BASE_URL}/api/ohlc/5m`);
         setApiError(!response.ok);
       } catch (error) {
         console.error("API connection error:", error);
@@ -404,7 +382,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     <Box ml={isMobile ? -5 : 0}>
       {apiError ? (
         <Box h="30px" bg="red.800" p={2} borderRadius="md">
-          <Text fontSize="sm" color="white">API connection error. Please check that the price API is running on port 3000.</Text>
+          <Text fontSize="sm" color="white">API connection error. Please check that the price API is running.</Text>
         </Box>
       ) : series[0].data.length === 0 ? (
         <Box h="30px"><Text fontSize="sm" ml={isMobile ? 5 : 0}>Loading price data... </Text></Box>
@@ -443,32 +421,22 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                         fontWeight={selectedInterval === int ? "bold" : "normal"}
                         color={selectedInterval === int ? "black" : "white"}
                       >
-                        {formatIntervalDisplay(int)}
+                        {int}
                       </Text>
                     </Box>
                   );
                 })}
               </Box>
             )}
-            {/* <Box
-              display="flex"
-              alignItems="center"
-              px={3}
-              mr={2}
-              borderRadius="md"
-              bg={percentChange > 0 ? "green.700" : percentChange < 0 ? "red.700" : "gray.700"}
-            >
-              <Text
-                fontSize="xs"
-                fontWeight="bold"
-                color="white"
-              >
-                {percentChange > 0 ? "+" : ""}{percentChange.toFixed(2)}%
-              </Text>
-            </Box> */}
           </Box>
           <Box mt={-5}>
-            <Chart options={chartOptions} series={series} type="area" height={isMobile ? 250 : 300} w={isMobile ? "200px": "auto"} />
+            <Chart
+              options={chartOptions}
+              series={series}
+              type="candlestick"
+              height={isMobile ? 250 : 350}
+              width={isMobile ? "100%" : "100%"}
+            />
           </Box>
         </>
       )}
