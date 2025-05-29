@@ -160,19 +160,17 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
   // Calculate slider marks with percentage labels
   // This ensures marks are always in sync with the current sliderMax
   const marks = React.useMemo(() => {
-    // If still loading, use empty labels for first mark
-    if (isTokenInfoLoading) {
+    // If still loading or sliderMax is 0, use fixed labels
+    if (isTokenInfoLoading || sliderMax === 0) {
       return [
-        { value: 0, label: "" },
-        { value: sliderMax / 2, label: "50%" },
-        { value: sliderMax, label: "100%" }
+        { value: 0, label: "0%" },
+        { value: 0.5, label: "50%" },
+        { value: 1, label: "100%" }
       ];
     }
 
     // Calculate evenly spaced values
-    const quarter = sliderMax / 4;
     const half = sliderMax / 2;
-    const threeQuarters = (sliderMax * 3) / 4;
 
     // When data is loaded, show percentage labels
     return [
@@ -247,7 +245,12 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           </NumberInputRoot>
           {isMobile && (
             <>
-            <Text ml={7} fontSize="xs" color="#a67c00" >Slide to select</Text>
+            <Text ml={7} fontSize="xs" color="#a67c00" >
+              {sliderMax === 0
+                ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
+                : "Slide to select"
+              }
+            </Text>
             <Slider
                 mt={2}
                 ml={10}
@@ -259,10 +262,10 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                     // Use actual value directly
                     handleSliderChange(e.value[0]);
                 }}
-                max={sliderMax} // Use actual token maximum
+                max={sliderMax === 0 ? 1 : sliderMax} // Use 1 as max when balance is 0
                 colorPalette="yellow"
                 thumbAlignment="center"
-                disabled={isTokenInfoLoading}
+                disabled={isTokenInfoLoading || sliderMax === 0} // Disable if balance is 0
                 marks={marks}
               />
               </>  
@@ -483,7 +486,12 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Box w="60%" mt={-2}>
             {!isMobile && (
               <>
-            <Text ml={5} fontSize="xs" color="#a67c00" >Slide to select</Text>
+            <Text ml={5} fontSize="xs" color="#a67c00" >
+              {sliderMax === 0
+                ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
+                : "Slide to select"
+              }
+            </Text>
             <Slider
               mt={2}
               ml={8}
@@ -495,10 +503,10 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                   handleSliderChange(e.value[0]);
               }}
               min={0}
-              max={sliderMax} // Use actual token maximum
+              max={sliderMax === 0 ? 1 : sliderMax} // Use 1 as max when balance is 0
               colorPalette="yellow"
               thumbAlignment="center"
-              disabled={isTokenInfoLoading}
+              disabled={isTokenInfoLoading || sliderMax === 0} // Disable if balance is 0
               marks={marks}
               />
               </>
