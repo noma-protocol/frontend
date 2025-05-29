@@ -514,8 +514,8 @@ const Markets: React.FC = () => {
                   <HStack> 
                     {/* <Box >
                       <Text fontWeight="bold"  color="#bf9b30" ml={2}>Index</Text>
-                    </Box> */}
-                    <Box w="60%">
+                    </Box> */} 
+                    <Box w={isMobile?  "60%" :"100px"}>
                       <Text fontWeight="bold" color="#bf9b30"  ml={2}> Name</Text>
                     </Box>
                     <Box textAlign={isMobile ? "left" : "center"} alignItems={ isMobile ? "left" : "center"}>
