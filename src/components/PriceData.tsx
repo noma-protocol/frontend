@@ -371,7 +371,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   };
 
   // Define predefined time intervals
-  const predefinedIntervals = ["5", "15", "30", "60", "1440"]; // 5m, 15m, 30m, 1h, 24h in minutes
+  const predefinedIntervals = ["1440"]; // 5m, 15m, 30m, 1h, 24h in minutes
 
   // Convert numeric interval to display format
   const formatIntervalDisplay = (interval: string) => {
