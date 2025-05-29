@@ -395,7 +395,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   cssClass: 'small-text-annotation',
                 },
                 text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
-                offsetY: -25,
+                offsetY: -10,
               },
             },
           ]
