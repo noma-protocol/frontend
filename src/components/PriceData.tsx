@@ -519,7 +519,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               </Box>
             )}
           </Box>
-          <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : -2}  borderRadius={5} border="1px solid ivory" mb={5} w="101%">
+          <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : -2}  borderRadius={5} border="1px solid ivory" mb={5} w={isMobile ? "92%" : "101%"}>
             <Box
               ml={1}
             >
@@ -527,8 +527,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 options={chartOptions}
                 series={series}
                 type="candlestick"
-                height={isMobile ? 200 : 273}
-                width={"101%"}
+                height={isMobile ? 198 : 273}
+                width={isMobile ? "100%" : "101%"}
             />
             </Box>
           </Box>
