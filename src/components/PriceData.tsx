@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Chart from "react-apexcharts";
-import { Box, Text, Global, css } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
+import { css, Global } from "@emotion/react";
 import { ethers } from "ethers";
 import { isMobile } from "react-device-detect";
 import { isWithinPercentageDifference } from "../utils";
