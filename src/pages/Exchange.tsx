@@ -1058,12 +1058,15 @@ const Exchange: React.FC = () => {
           boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
           m={4}
           border="1px solid #a67c00"
+          mt="100px"
+          ml="15%"
         >
           <Box
             mb={6}
             p={4}
             borderRadius="full"
             bg="rgba(166, 124, 0, 0.2)"
+            
           >
             <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 7H5C3.89543 7 3 7.89543 3 9V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V9C21 7.89543 20.1046 7 19 7Z" stroke="#a67c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
