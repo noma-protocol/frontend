@@ -1058,7 +1058,7 @@ const Exchange: React.FC = () => {
                             </Box>
                         </GridItem> 
                         <GridItem colSpan={1} mt={10} ml={20}> 
-                            <Box w="100%" h="300px" /*border={isMobile ? "":"1px solid gray"}*/  pt={8} >
+                            <Box w="100%" h="auto" /*border={isMobile ? "":"1px solid gray"}*/  pt={8} >
                               
                               <Text fontWeight={"bold"} ml={8} color="#a67c00">
                                   Trade Info 
@@ -1081,6 +1081,7 @@ const Exchange: React.FC = () => {
                                 isMobile={isMobile}
                               />
                             </Box>
+                            
                         </GridItem>                             
                     </Grid>
                 }
