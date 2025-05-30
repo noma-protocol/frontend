@@ -54,17 +54,17 @@ const Header: React.FC = () => {
           <ul className="navbar-nav items justify-content-start " >
           <li className="nav-item" style={{border:window.location.href.indexOf("exchange") > -1 ? "1px solid #a67c00" : "none"}}>
               <Link className="nav-link" href="/exchange">
-                  <Text color="white">Exchange</Text>
+                  <Text color="#f3f7c6">Exchange</Text>
               </Link>
             </li>
             <li className="nav-item" style={{marginLeft: "10px", border:window.location.href.indexOf("markets") > -1 ? "1px solid #a67c00" : "none"}}>
             <Link className="nav-link" href="/markets">
-            <Text color="white">Markets</Text>
+            <Text color="#f3f7c6">Markets</Text>
               </Link>
             </li>
             <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("launchpad") > -1 ? "1px solid #a67c00" : "none"}}>
             <Link className="nav-link" href="/launchpad">
-                  <Text color="white">Launchpad</Text>
+                  <Text color="#f3f7c6">Launchpad</Text>
               </Link>
             </li>
           {/* <li className="nav-item">
@@ -79,7 +79,7 @@ const Header: React.FC = () => {
             </li>  */}
             <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("liquidity") > -1 ? "1px solid #a67c00" : "none"}}>
               <Link className="nav-link" href="/liquidity">
-                  <Text color="white">Liquidity</Text>
+                  <Text color="#f3f7c6">Liquidity</Text>
               </Link>
             </li>
             {/* <li className="nav-item">
