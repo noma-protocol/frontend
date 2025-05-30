@@ -87,6 +87,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
   const handleSliderChange = (e) => {
      if (isTokenInfoLoading) return; // Prevent updates if still loading
 
+     console.log(`Slider value changed to ${e}`);
      let newValue = parseFloat(e);
      if (newValue > sliderMax) newValue = sliderMax;
 
@@ -195,22 +196,23 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             />
           </NumberInputRoot>
           {isMobile && (
-                <Slider
-                  mt={2}
-                  ml={isMobile ? 5 : 10}
-                  variant="outline"
-                  w={"100%"}
-                  // Scale the contributionAmount for the slider
-                  value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
-                  onValueChange={(e) => {
-                      const scaledValue = e.value[0] / 100; // Convert back to decimal
-                      handleSliderChange(scaledValue); // Pass the decimal value to the handler
-                  }}
-                  max={sliderMax} // Scale the max value as well
-                  colorPalette="yellow"
-                  thumbAlignment="center"
-                  disabled={isTokenInfoLoading} // Disable slider while token info is loading
-                />
+            <Slider
+              mt={2}
+              // ml={isMobile ? 5 : 10}
+              ml={5}
+              variant="outline"
+              w={"83%"}
+              // Scale the contributionAmount for the slider
+              value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
+              onValueChange={(e) => {
+                  const scaledValue = e.value[0] / 100; // Convert back to decimal
+                  handleSliderChange(scaledValue); // Pass the decimal value to the handler
+              }}
+              max={sliderMax * 100} // Scale the max value as well
+              colorPalette="yellow"
+              thumbAlignment="center"
+              disabled={isTokenInfoLoading} // Disable slider while token info is loading
+              />
                 
                 )}
             {/* {isMobile && (
@@ -380,11 +382,11 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Box w="60%">
             {!isMobile && (
             <Slider
-              mt={isMobile? 5 : 2}
+              mt={2}
               // ml={isMobile ? 5 : 10}
               ml={5}
               variant="outline"
-              w={isMobile ? "88%" : "83%"}
+              w={"83%"}
               // Scale the contributionAmount for the slider
               value={[contributionAmount * 100]} // Scale by 100 for 2 decimal places
               onValueChange={(e) => {
