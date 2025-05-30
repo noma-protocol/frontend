@@ -604,7 +604,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
             </Box>
           </Box>
           <Box mt={-4}>
-              <Text fontSize="sm">IMV {Number(formatEther(`${imv}`)).toFixed(9)} {token1Symbol}/{token0Symbol}</Text>
+              <Text fontSize="sm">IMV {Number(formatEther(`${imv || 0}`)).toFixed(9)} {token1Symbol}/{token0Symbol}</Text>
           </Box>
         </HStack>
 
