@@ -58,7 +58,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import {fa, faker} from '@faker-js/faker'
 import PriceData from "../components/PriceData";
-import useUniswapPrice from "../hooks/useUniswapPrice";
+// import useUniswapPrice from "../hooks/useUniswapPrice"; // Not needed anymore
 import config from '../config'; 
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
@@ -291,15 +291,16 @@ const Exchange: React.FC = () => {
     return poolAddress;
   };
 
-  const {
-    priceData,
-    percentageChange
-  } = useUniswapPrice(
-    poolInfo.poolAddress, 
-    config.chain == "local" ? 
-     "http://localhost:8545" :
-    "https://bsc-dataseed.bnbchain.org/"
-  );
+  // We don't need this hook anymore as we're getting the percentage change from PriceData component
+  // const {
+  //   priceData,
+  //   percentageChange
+  // } = useUniswapPrice(
+  //   poolInfo.poolAddress,
+  //   config.chain == "local" ?
+  //    "http://localhost:8545" :
+  //   "https://bsc-dataseed.bnbchain.org/"
+  // );
   
   /**
    * Fetch all vaults for the "All Markets" view
@@ -1135,14 +1136,14 @@ const Exchange: React.FC = () => {
                       <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT PRICE</Text></Box>
                       <Box><Text fontSize="sm">{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
                       <Box><Text  fontSize="sm">{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
-                      <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>(+{commifyDecimals(percentageChange, 2)}%)</Text></Box>
+                      <Box><Text color={percentChange < 0 ? "red" : percentChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)</Text></Box>
                     </VStack>
                     : 
                     <HStack>
                       <Box><Text color="#a67c00" fontWeight="bold">SPOT PRICE</Text></Box> 
                       <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
                       <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`}</Text></Box>
-                      <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({commifyDecimals(percentageChange, 2)}%)</Text></Box>
+                      <Box><Text color={percentChange < 0 ? "red" : percentChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)</Text></Box>
                     </HStack>                    
                     }
                 </Box>
@@ -1152,12 +1153,14 @@ const Exchange: React.FC = () => {
                     <Flex direction="column">
                     <Box mt={10}>
                         {/* <Line options={options} data={chartData} /> */}
-                        <PriceData 
-                          poolAddress={poolInfo.poolAddress} 
-                          providerUrl="https://bsc-dataseed.bnbchain.org/"  
-                          token0Symbol={token0Info?.tokenSymbol} 
+                        <PriceData
+                          poolAddress={poolInfo.poolAddress}
+                          providerUrl="https://bsc-dataseed.bnbchain.org/"
+                          token0Symbol={token0Info?.tokenSymbol}
                           token1Symbol={token1Info.tokenSymbol}
+                          imv={imv}
                           setPercentChange={setPercentChange}
+                          onPercentChange={(percent) => setPercentChange(percent)}
                         />
                     </Box>
                     <BalanceCard
@@ -1243,11 +1246,12 @@ const Exchange: React.FC = () => {
                           <Box mt={5}>
                           <PriceData
                               imv={imv}
-                              poolAddress={poolInfo.poolAddress} 
-                              providerUrl="https://bsc-dataseed.bnbchain.org/"  
-                              token0Symbol={token0Info?.tokenSymbol} 
+                              poolAddress={poolInfo.poolAddress}
+                              providerUrl="https://bsc-dataseed.bnbchain.org/"
+                              token0Symbol={token0Info?.tokenSymbol}
                               token1Symbol={token1Info.tokenSymbol}
                               setPercentChange={setPercentChange}
+                              onPercentChange={(percent) => setPercentChange(percent)}
                             />
                           </Box>
                         </GridItem>
