@@ -292,7 +292,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Text ml={7} fontSize="xs" color="#a67c00" >
               {sliderMax === 0
                 ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
-                : `Available: ${sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4)} ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}`
+                : `Available: ${commify(sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4), 2)} ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}`
               }
             </Text>
             <Slider
@@ -534,7 +534,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Text ml={5} fontSize="xs" color="#a67c00" >
               {sliderMax === 0
                 ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
-                : `Available: ${sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4)} ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}`
+                : `Available: ${commify(sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4),2)} ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}`
               }
             </Text>
             <Slider
