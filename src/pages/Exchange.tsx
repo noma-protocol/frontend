@@ -1047,12 +1047,49 @@ const Exchange: React.FC = () => {
       {!isConnected ? (
         <Box
           display="flex"
+          flexDirection="column"
           alignItems="center"
           justifyContent="center"
-          height="100vh"
+          height="70vh"
           color="white"
+          bg="#222831"
+          p={8}
+          borderRadius="xl"
+          boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
+          m={4}
+          border="1px solid #a67c00"
         >
-          <Heading as="h2">Connect your wallet</Heading>
+          <Box
+            mb={6}
+            p={4}
+            borderRadius="full"
+            bg="rgba(166, 124, 0, 0.2)"
+          >
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 7H5C3.89543 7 3 7.89543 3 9V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V9C21 7.89543 20.1046 7 19 7Z" stroke="#a67c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 10H21" stroke="#a67c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 15H7.01" stroke="#a67c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M11 15H13" stroke="#a67c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </Box>
+          <Heading as="h2" mb={4} fontSize="2xl" textAlign="center">Wallet Not Connected</Heading>
+          <Text fontSize="md" textAlign="center" mb={6} color="gray.400">
+            Please connect your wallet to access the Oikos Exchange
+          </Text>
+          <Box
+            p={1}
+            bgGradient="linear(to-r, #a67c00, #e2c058, #a67c00)"
+            borderRadius="md"
+          >
+            <Box
+              bg="#222831"
+              borderRadius="md"
+              px={6}
+              py={2}
+            >
+              <Text fontWeight="bold" color="#a67c00">Connect Wallet</Text>
+            </Box>
+          </Box>
         </Box>
       ) : isMobile && isLandscape ? (
         <RotateDeviceMessage />
@@ -1156,6 +1193,7 @@ const Exchange: React.FC = () => {
                         <PriceData
                           poolAddress={poolInfo.poolAddress}
                           providerUrl="https://bsc-dataseed.bnbchain.org/"
+                          isTokenInfoLoading={isTokenInfoLoading}
                           token0Symbol={token0Info?.tokenSymbol}
                           token1Symbol={token1Info.tokenSymbol}
                           imv={imv}
@@ -1248,6 +1286,7 @@ const Exchange: React.FC = () => {
                               imv={imv}
                               poolAddress={poolInfo.poolAddress}
                               providerUrl="https://bsc-dataseed.bnbchain.org/"
+                              isTokenInfoLoading={isTokenInfoLoading}
                               token0Symbol={token0Info?.tokenSymbol}
                               token1Symbol={token1Info.tokenSymbol}
                               setPercentChange={setPercentChange}
