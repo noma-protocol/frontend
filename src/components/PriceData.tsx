@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import Chart from "react-apexcharts";
-import { Box, Text } from "@chakra-ui/react";
+import { Box, HStack, Text } from "@chakra-ui/react";
 import { css, Global } from "@emotion/react";
 import { ethers } from "ethers";
 import { isMobile } from "react-device-detect";
@@ -418,23 +418,23 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 offsetY: 25,
               },
             },
-            {
-              y: spotPrice - (spotPrice * 0.09 / 100),
-              borderColor: "ivory",
-              strokeDashArray: 4,
-              label: {
-                borderColor: "ivory",
-                style: {
-                  color: "#fff",
-                  background: "black",
-                  fontSize: '6px',
-                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-                  cssClass: 'small-text-annotation',
-                },
-                text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
-                offsetY: -10,
-              },
-            },
+            // {
+            //   y: spotPrice - (spotPrice * 0.09 / 100),
+            //   borderColor: "ivory",
+            //   strokeDashArray: 4,
+            //   label: {
+            //     borderColor: "ivory",
+            //     style: {
+            //       color: "#fff",
+            //       background: "black",
+            //       fontSize: '6px',
+            //       fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+            //       cssClass: 'small-text-annotation',
+            //     },
+            //     text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
+            //     offsetY: -10,
+            //   },
+            // },
           ]
         : [],
     },
@@ -558,47 +558,56 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         <Box h="30px"><Text fontSize="sm" ml={isMobile ? 5 : 0}>Loading price data... </Text></Box>
       ) : (
         <>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            mt={-4}
-            ml={isMobile ? 2 : 0}
-            p={2}
-            borderRadius="md"
-            boxShadow="md"
-            h="40px"
-            w="100%"
-          >
-            {availableIntervals.length > 0 && (
-              <Box display="flex" gap={3} alignItems="left">
-                {availableIntervals.map((int) => {
-                  return (
-                    <Box
-                      key={int}
-                      px={3}
-                      py={1}
-                      borderRadius="md"
-                      bg={selectedInterval === int ? "#00ffc0" : "gray.700"}
-                      cursor="pointer"
-                      onClick={() => handleIntervalChange(int)}
-                      _hover={{ bg: selectedInterval === int ? "cyan.600" : "gray.600" }}
-                      transition="all 0.2s"
-                      position="relative"
-                    >
-                      <Text
-                        mt={-4}
-                        fontSize="xs"
-                        fontWeight={selectedInterval === int ? "bold" : "normal"}
-                        color={selectedInterval === int ? "black" : "white"}
+        <HStack>
+          <Box>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              mt={-4}
+              ml={isMobile ? 2 : 0}
+              p={2}
+              borderRadius="md"
+              boxShadow="md"
+              h="40px"
+              w="100%"
+            >
+              {availableIntervals.length > 0 && (
+                <Box display="flex" gap={3} alignItems="left">
+                  {availableIntervals.map((int) => {
+                    return (
+                      <Box
+                        key={int}
+                        px={3}
+                        py={1}
+                        borderRadius="md"
+                        bg={selectedInterval === int ? "#00ffc0" : "gray.700"}
+                        cursor="pointer"
+                        onClick={() => handleIntervalChange(int)}
+                        _hover={{ bg: selectedInterval === int ? "cyan.600" : "gray.600" }}
+                        transition="all 0.2s"
+                        position="relative"
                       >
-                        {int}
-                      </Text>
-                    </Box>
-                  );
-                })}
-              </Box>
-            )}
+                        <Text
+                          mt={-4}
+                          fontSize="xs"
+                          fontWeight={selectedInterval === int ? "bold" : "normal"}
+                          color={selectedInterval === int ? "black" : "white"}
+                        >
+                          {int}
+                        </Text>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              )}
+
+            </Box>
           </Box>
+          <Box mt={-4}>
+              <Text fontSize="sm">IMV {Number(formatEther(`${imv}`)).toFixed(9)} {token1Symbol}/{token0Symbol}</Text>
+          </Box>
+        </HStack>
+
           <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : -2}  borderRadius={5} border="1px solid ivory" mb={5} w={isMobile ? "92%" : "101%"}>
             <Box
               ml={1}
@@ -619,3 +628,4 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 };
 
 export default PriceData;
+//
