@@ -4,7 +4,7 @@ import { LanguageContext, LanguageContextType } from "../core/LanguageProvider";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount } from "wagmi";
 import Logo from "../assets/images/logo.svg";
-// import { isMobile } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { Link, Image } from '@chakra-ui/react';
 import { useMenu } from "../hooks/MenuContext";
 
@@ -104,9 +104,9 @@ const Header: React.FC = () => {
           <ul className="navbar-nav action">
             <li className="nav-item ml-2" >
               <Button onClick={() => open()} variant="outline" h="40px" w="220px" >
-                <p style={{color:"#a67c00"}}>
-                <i className="fa-solid fa-wallet mr-md-2 green-bg"></i>
-                {isConnected
+                <p style={{color:"#a67c00", fontSize:(isMobile ? "12px" : "16px")}}>
+                <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>
+                &nbsp;&nbsp;{isConnected
                   ? `${address?.slice(0, 6)}...${address?.slice(-6)}`
                   : !ctx.isSpanishCountry
                   ? "Connect wallet"
@@ -200,16 +200,7 @@ const Header: React.FC = () => {
                       <a className="btn ml-lg-auto btn-bordered-white" href="/presale">
                         Presale
                       </a>
-                    </li>  */}
-                    <li
-                      className="nav-item"
-                      data-bs-dismiss="modal"
-                      style={{ fontSize: "20px", marginTop:"20px"}}
-                    >
-                      <a className="btn ml-lg-auto btn-bordered-white" href="/liquidity" target="_blank">
-                        Liquidity
-                      </a>             
-                    </li>       
+                    </li>  */}      
                     {/* <li
                       className="nav-item"
                       data-bs-dismiss="modal"
