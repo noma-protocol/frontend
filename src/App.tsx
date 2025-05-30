@@ -3,7 +3,10 @@ import { Outlet } from "react-router-dom";
 import { LanguageProvider } from "./core/LanguageProvider";
 import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
 import { WagmiConfig } from "wagmi";
-import { bsc, localhost } from "viem/chains";
+import { bsc, bscTestnet, localhost } from "viem/chains";
+
+import { monad } from './chains/monad';
+
 // import { ToastContainer } from "react-toastify";
 import { switchNetwork, watchNetwork } from "wagmi/actions";
 import "react-toastify/dist/ReactToastify.css";
@@ -21,15 +24,15 @@ function App() {
   const TRACKING_ID = "UA-XXXXX-X"; // OUR_TRACKING_ID
   ReactGA.initialize(TRACKING_ID);
 
-  const projectId = "1607c5f300e1191999e3033443961435";
+  const projectId = "1607c5f300e1191999e3033443961XXX";
   const metadata = {
-    name: "Oikos Protocol",
-    description: "Decentralized Money",
+    name: "Noma Protocol",
+    description: "Next-gen Launchpad",
     url: "https://web3modal.com",
     icons: ["https://avatars.githubusercontent.com/u/37784886"],
   };
 
-  const chains = [bsc, localhost];
+  const chains = [localhost, monad];
   const wagmiConfig = defaultWagmiConfig({
     chains,
     projectId,
@@ -46,7 +49,7 @@ function App() {
     // }
     if (network.chain?.name != "local") {
       await switchNetwork({
-        chainId: 1337,
+        chainId: 10143,
       });
     }
     console.log(`Network is ${network.chain?.name}`)

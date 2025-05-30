@@ -29,6 +29,7 @@ import { ethers } from 'ethers';
 import { commify, commifyDecimals } from '../utils';
 import ethLogo from '../assets/images/weth.svg';
 import bnbLogo from '../assets/images/bnb-logo.png';
+import monadLogo from '../assets/images/monad.png';
 import oksLogo from '../assets/images/logo_dark.png';
 import placeHolder from '../assets/images/question.svg';
 import nomaLogo from '../assets/images/noma_logo_transparent.png';
@@ -144,12 +145,12 @@ const BalanceCard: React.FC = ({
                     Actions
                 </Box>
                 <Box h={'30px'} mt={2} p={2}>
-                    <HStack><Box><Image src={bnbLogo} w="25px"></Image></Box><Box>BNB</Box></HStack>
+                    <HStack><Box><Image src={monadLogo} w="25px"></Image></Box><Box>MON</Box></HStack>
                 </Box>
                 <Box h={'30px'} mt={2}  p={2} fontSize={isMobile?"12px": oversizeEth?"13px":"13px"}>
                     {commify(ethBalance)}
                 </Box>
-                <Box h={'40px'} mt={2}>
+                <Box h={'40px'} mt={2} ml={2}>
                 <DrawerRoot>
                     <DrawerTrigger asChild>
                         <Button 
@@ -173,7 +174,7 @@ const BalanceCard: React.FC = ({
                         <Box mt="80%" ml={5}>
                         <DrawerHeader>
                             <DrawerTitle>
-                                <Text as="h3" color="#bf9b30">Wrap BNB</Text>
+                                <Text as="h3" color="#bf9b30">Wrap MON</Text>
                             </DrawerTitle>
                             <DrawerCloseTrigger asChild mt="82%" mr={5}>
                                 <Button variant="ghost" size="sm">×</Button>
@@ -202,16 +203,16 @@ const BalanceCard: React.FC = ({
                     </DrawerContent>
                 </DrawerRoot>
                 </Box>
-                <Box h={'40px'} mt={1} p={2}>
+                <Box h={'40px'} mt={1} p={2} >
                     {isTokenInfoLoading ? 
                     <Spinner size="sm" ml={2} /> : 
-                    <HStack><Box><Image src={bnbLogo} w="25px"></Image></Box><Box>{token1Symbol}</Box></HStack>
+                    <HStack><Box><Image src={monadLogo} w="25px"></Image></Box><Box>{token1Symbol}</Box></HStack>
                     }
                 </Box>
                 <Box h={'40px'} mt={2} p={2} fontSize={isMobile?"12px":oversizeToken1?"13px":"13px"}>
                     {commify(formatEther(`${token1Balance || 0}`))}
                 </Box>
-                <Box h={'40px'} mt={2}>
+                <Box h={'40px'} mt={2} ml={2}>
                     <DrawerRoot>
                         <DrawerTrigger asChild>
                             <Button 
@@ -276,15 +277,17 @@ const BalanceCard: React.FC = ({
                             // ml={isMobile ? -2 : -2}
                             >
                             <Image 
-                                mt={-2}
+                                // mt={-2}
+                                ml={2}
                                 src={token0Symbol == "OKS" ? oksLogo : placeHolder} 
                                 w={token0Symbol == "OKS" ? "45px" : "25px"}
                             />
                         </Box>
                         <Box 
                             // mt={isMobile ? -5 : -3}
-                            mt={-2} 
-                            ml={-2}
+                            // mt={-2} 
+                            // ml={-2}
+                            // ml={2}
                         >
                             {token0Symbol}
                         </Box>
@@ -301,7 +304,7 @@ const BalanceCard: React.FC = ({
                 >
                     {commify(formatEther(`${token0Balance || 0}`))}
                 </Box>
-                <Box h={'40px'} mt={2}>
+                <Box h={'40px'} mt={2} ml={4}>
                     {page != "borrow" ?
                     <VStack ml={-8}>
                         <Box>                    
@@ -318,7 +321,7 @@ const BalanceCard: React.FC = ({
                                 Borrow
                             </Button>
                     </Box>
-                        <Box>
+                        <Box ml={"2px"} mt={1}>
                         <Button 
                             variant="outline" 
                             h="30px" 
