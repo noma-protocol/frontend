@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import Chart from "react-apexcharts";
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Box, HStack, Text, Spinner } from "@chakra-ui/react";
 import { css, Global } from "@emotion/react";
 import { ethers } from "ethers";
 import { isMobile } from "react-device-detect";
@@ -46,6 +46,7 @@ type OHLCData = {
 interface ExtendedPriceChartProps extends UniswapPriceChartProps {
   setPercentChange?: (percent: number) => void; // Optional callback to set percent change
   onPercentChange?: (percent: number) => void;
+  isTokenInfoLoading?: boolean; // Optional loading state for token info
 }
 
 const PriceData: React.FC<ExtendedPriceChartProps> = ({
@@ -53,6 +54,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   providerUrl,
   token0Symbol,
   token1Symbol,
+  isTokenInfoLoading,
   imv,
   interval = "15m", // Default to 15 minute interval
   setPercentChange = () => {}, // Default no-op function
@@ -418,23 +420,6 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 offsetY: 25,
               },
             },
-            {
-              y: spotPrice - (spotPrice * 0.09 / 100),
-              borderColor: "ivory",
-              strokeDashArray: 4,
-              label: {
-                borderColor: "ivory",
-                style: {
-                  color: "#fff",
-                  background: "black",
-                  fontSize: '6px',
-                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-                  cssClass: 'small-text-annotation',
-                },
-                text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
-                offsetY: -10,
-              },
-            },
           ]
         : [],
     },
@@ -604,7 +589,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
             </Box>
           </Box>
           <Box mt={-4} mr={isMobile ? 2 : 0}>
-              <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {token1Symbol}/{token0Symbol}</Text>
+              <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`}</Text>
           </Box>
         </HStack>
 
