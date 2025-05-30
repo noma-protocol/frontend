@@ -588,7 +588,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
             </Box>
           </Box>
-          <Box mt={-4} mr={isMobile ? 2 : 0}>
+          <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
               <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`}</Text>
           </Box>
         </HStack>
