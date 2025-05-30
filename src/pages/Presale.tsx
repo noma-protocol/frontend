@@ -45,7 +45,7 @@ import config from '../config';
 import bnbLogo from "../assets/images/bnb.png";
 import addresses from "../assets/deployment.json";
 
-const tokenAddress = getContractAddress(addresses, "1337", "Proxy");
+const tokenAddress = getContractAddress(addresses, "10143", "Proxy");
 
 const { environment, presaleContractAddress } = config;
 

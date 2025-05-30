@@ -62,7 +62,7 @@ const { environment, presaleContractAddress } = config;
 
 const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
 const NomaFactoryAbi = NomaFactoryArtifact.abi;
-const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
 
 const Launchpad: React.FC = () => {
     const { address, isConnected } = useAccount();
@@ -76,7 +76,7 @@ const Launchpad: React.FC = () => {
     const [floorPrice, setFloorPrice] = useState("0");
     const [presalePrice, setPresalePrice] = useState("0");
 
-    const [token1, setToken1] = useState("0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c");
+    const [token1, setToken1] = useState("0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd");
     const [feeTier, setFeeTier] = useState(10);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -368,7 +368,7 @@ const Launchpad: React.FC = () => {
 
     const assets = createListCollection({
         items: [
-          { label: "WBNB", value: "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c" }
+          { label: "WBNB", value: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd" }
         ],
       })
     
