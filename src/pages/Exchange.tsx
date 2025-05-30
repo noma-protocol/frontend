@@ -155,6 +155,7 @@ const Exchange: React.FC = () => {
 
   const [errorDeployed, setErrorDeployed] = useState(false);
   const [isTokenInfoLoading, setIsTokenInfoLoading] = useState(true);
+  const [isRefreshingTokenInfo, setIsRefreshingTokenInfo] = useState(false);
   const [isWrapping, setIsWrapping] = useState(false);
   const [isUnwrapping, setIsUnwrapping] = useState(false);
   const [vaultDescriptions, setVaultDescriptions] = useState([]);
@@ -269,42 +270,103 @@ const Exchange: React.FC = () => {
     return () => clearInterval(interval);
     }, [address]);
 
+  // Initial fetch of token information
   useEffect(() => {
-    
-    const interval = setInterval(() => {
-        const fetchTokenInfo = async (tokenAddress) => {
-        setIsTokenInfoLoading(true);
+    const fetchInitialTokenInfo = async () => {
+      if (!token0 || !token1) return;
 
-        const tokenContract = new ethers.Contract(
+      setIsTokenInfoLoading(true);
+
+      try {
+        // Fetch token0 info
+        const token0Contract = new ethers.Contract(
+          token0,
+          ERC20Abi,
+          localProvider
+        );
+
+        const token0Name = await token0Contract.name();
+        const token0Symbol = await token0Contract.symbol();
+        const token0Decimals = await token0Contract.decimals();
+        const token0Balance = await token0Contract.balanceOf(address);
+
+        // Fetch token1 info
+        const token1Contract = new ethers.Contract(
+          token1,
+          ERC20Abi,
+          localProvider
+        );
+
+        const token1Name = await token1Contract.name();
+        const token1Symbol = await token1Contract.symbol();
+        const token1Decimals = await token1Contract.decimals();
+        const token1Balance = await token1Contract.balanceOf(address);
+
+        // Update state with fetched data
+        setToken0Info({
+          tokenName: token0Name,
+          tokenSymbol: token0Symbol,
+          tokenDecimals: token0Decimals,
+          balance: token0Balance
+        });
+
+        setToken1Info({
+          tokenName: token1Name,
+          tokenSymbol: token1Symbol,
+          tokenDecimals: token1Decimals,
+          balance: token1Balance
+        });
+      } catch (error) {
+        console.error("Error fetching initial token info:", error);
+      } finally {
+        setIsTokenInfoLoading(false);
+      }
+    };
+
+    fetchInitialTokenInfo();
+  }, [token0, token1, address]);
+
+  // Background refresh of token information
+  useEffect(() => {
+    if (!token0 || !token1) return;
+
+    const interval = setInterval(() => {
+      const refreshTokenInfo = async (tokenAddress) => {
+        // Use a different state for background refreshes
+        setIsRefreshingTokenInfo(true);
+
+        try {
+          const tokenContract = new ethers.Contract(
             tokenAddress,
             ERC20Abi,
             localProvider
-        );
+          );
 
-        const tokenName = await tokenContract.name();
-        const tokenSymbol = await tokenContract.symbol();
-        const tokenDecimals = await tokenContract.decimals();
-        
-        const balance = await tokenContract.balanceOf(address);
+          const tokenName = await tokenContract.name();
+          const tokenSymbol = await tokenContract.symbol();
+          const tokenDecimals = await tokenContract.decimals();
+          const balance = await tokenContract.balanceOf(address);
 
-        setIsTokenInfoLoading(false);
-        return { tokenName, tokenSymbol, tokenDecimals, balance };
-        };
+          return { tokenName, tokenSymbol, tokenDecimals, balance };
+        } catch (error) {
+          console.error(`Error refreshing token info for ${tokenAddress}:`, error);
+          return null;
+        }
+      };
 
-        fetchTokenInfo(token0).then((data) => {
-            // console.log({data})
-            setToken0Info(data);
-        });
+      // Only update state if the refresh was successful
+      Promise.all([
+        refreshTokenInfo(token0),
+        refreshTokenInfo(token1)
+      ]).then(([token0Data, token1Data]) => {
+        if (token0Data) setToken0Info(token0Data);
+        if (token1Data) setToken1Info(token1Data);
+        setIsRefreshingTokenInfo(false);
+      });
+    }, 5000); // Increased interval to 5 seconds
 
-        fetchTokenInfo(token1).then((data) => {
-            // console.log({data})
-            setToken1Info(data);
-        });
-
-    }, 3000);
-
-    return () => clearInterval(interval);    
-    } , [token0, token1]);
+    return () => clearInterval(interval);
+  } , [token0, token1, address]);
 
   useEffect(() => {
     if (typeof deployersData !== "undefined") {
@@ -723,9 +785,16 @@ const Exchange: React.FC = () => {
     const handleSelectMarket = (event) => {
       console.log("Selected Market:", event.target.value);
       setChartData(generateRandomData());
-      setIsTokenInfoLoading(true);
+      setIsTokenInfoLoading(true); // Set loading state for initial load
       setSelectedVault(event.target.value);
       setErrorDeployed(false); // Reset the error state when a new vault is selected
+
+      // Set a timeout to reset loading state in case token data fetch takes too long
+      const safetyTimeout = setTimeout(() => {
+        setIsTokenInfoLoading(false);
+      }, 5000);
+
+      return () => clearTimeout(safetyTimeout);
     }
 
     const handleBuyTokens = () => {
@@ -900,17 +969,18 @@ const Exchange: React.FC = () => {
                 {isMobile ? 
                 <Box mt={10}>
                     <Flex direction="column">
-                    <BalanceCard 
+                    <BalanceCard
                         ethBalance={ethBalance}
-                        token0Balance={token0Info?.balance} 
-                        token0Symbol={token0Info?.tokenSymbol} 
-                        token1Symbol={token1Info.tokenSymbol} 
+                        token0Balance={token0Info?.balance}
+                        token0Symbol={token0Info?.tokenSymbol}
+                        token1Symbol={token1Info.tokenSymbol}
                         token1Balance={token1Info?.balance}
                         deposit={deposit}
                         withdraw={withdraw}
                         setIsLoading={setIsLoading}
                         isLoading={isLoading}
                         isTokenInfoLoading={isTokenInfoLoading}
+                        isRefreshingTokenInfo={isRefreshingTokenInfo}
                         isWrapping={isWrapping}
                         setIsWrapping={setIsWrapping}
                         isUnwrapping={isUnwrapping}
@@ -1005,17 +1075,18 @@ const Exchange: React.FC = () => {
                         </GridItem>
                         <GridItem>
                             <Box mt={10}>
-                            <BalanceCard 
+                            <BalanceCard
                                 ethBalance={ethBalance}
-                                token0Balance={token0Info?.balance} 
-                                token0Symbol={token0Info?.tokenSymbol} 
-                                token1Symbol={token1Info.tokenSymbol} 
+                                token0Balance={token0Info?.balance}
+                                token0Symbol={token0Info?.tokenSymbol}
+                                token1Symbol={token1Info.tokenSymbol}
                                 token1Balance={token1Info?.balance}
                                 deposit={deposit}
                                 withdraw={withdraw}
                                 setIsLoading={setIsLoading}
                                 isLoading={isLoading}
                                 isTokenInfoLoading={isTokenInfoLoading}
+                                isRefreshingTokenInfo={isRefreshingTokenInfo}
                                 isWrapping={isWrapping}
                                 setIsWrapping={setIsWrapping}
                                 isUnwrapping={isUnwrapping}
