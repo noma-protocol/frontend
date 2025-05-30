@@ -418,23 +418,23 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 offsetY: 25,
               },
             },
-            // {
-            //   y: spotPrice - (spotPrice * 0.09 / 100),
-            //   borderColor: "ivory",
-            //   strokeDashArray: 4,
-            //   label: {
-            //     borderColor: "ivory",
-            //     style: {
-            //       color: "#fff",
-            //       background: "black",
-            //       fontSize: '6px',
-            //       fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-            //       cssClass: 'small-text-annotation',
-            //     },
-            //     text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
-            //     offsetY: -10,
-            //   },
-            // },
+            {
+              y: spotPrice - (spotPrice * 0.09 / 100),
+              borderColor: "ivory",
+              strokeDashArray: 4,
+              label: {
+                borderColor: "ivory",
+                style: {
+                  color: "#fff",
+                  background: "black",
+                  fontSize: '6px',
+                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+                  cssClass: 'small-text-annotation',
+                },
+                text: `IMV: ${imv ? Number(formatEther(`${imv}`)).toFixed(9) : '0.00'}`,
+                offsetY: -10,
+              },
+            },
           ]
         : [],
     },
@@ -558,7 +558,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         <Box h="30px"><Text fontSize="sm" ml={isMobile ? 5 : 0}>Loading price data... </Text></Box>
       ) : (
         <>
-        <HStack>
+        <HStack justifyContent="space-between">
           <Box>
             <Box
               display="flex"
@@ -603,8 +603,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
             </Box>
           </Box>
-          <Box mt={-4}>
-              <Text fontSize="sm">IMV {Number(formatEther(`${imv || 0}`)).toFixed(9)} {token1Symbol}/{token0Symbol}</Text>
+          <Box mt={-4} mr={isMobile ? 2 : 0}>
+              <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {token1Symbol}/{token0Symbol}</Text>
           </Box>
         </HStack>
 
