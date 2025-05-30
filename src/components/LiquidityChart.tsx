@@ -22,7 +22,7 @@ const LiquidityChart = ({ isConnected, data, tokenName, tokenSymbol, spotPrice, 
 return (
     <>
     {typeof data["Floor"] !== "undefined" && typeof data["Anchor"] !== "undefined" ? (
-      <Box as="section" className="main-section">
+      <Box as="section" className="main-section" mt={-20}>
         {/* <SimpleGrid maxWidth={"60%"} ml="20%" columns={8}>
           {isConnected ? <SlideControls isConnected /> : <></>}
         </SimpleGrid>*/}
