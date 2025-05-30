@@ -26,7 +26,7 @@ return (
         {/* <SimpleGrid maxWidth={"60%"} ml="20%" columns={8}>
           {isConnected ? <SlideControls isConnected /> : <></>}
         </SimpleGrid>*/}
-        <SimpleGrid maxWidth={isMobile ? "50%" : "30%"} ml="60%" mt={-150} columns={2} rows={3} p={2} borderRadius="md"  >
+        <SimpleGrid maxWidth={isMobile ? "50%" : "30%"} ml="60%" mt={-250} columns={2} rows={3} p={2} borderRadius="md"  >
           <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"11px":"14px"}>Circulating</Text></Box>
           <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"11px":"14px"}>{isMobile ? "L.R." : "Liquidity Ratio"}</Text></Box>
           <Box w="auto" textAlign="right" fontSize={isMobile?"11px":"14px"}>
@@ -41,7 +41,7 @@ return (
               <Text color="#a67c00" fontSize={isMobile?"11px":"14px"}>Spot</Text>
               <Box mt={-6} fontSize={isMobile?"11px":"14px"}>
               <label>{commifyPatched(formatEther(spotPrice))}</label>
-              <Text mt={isMobile ? 0 : -2} fontSize={"small"} fontSize={isMobile?"8px":"14px"}>(WBNB/{tokenSymbol})</Text>
+              <Text mt={isMobile ? 0 : -2} fontSize={"small"} fontSize={isMobile?"8px":"14px"}>(WMON/{tokenSymbol})</Text>
               </Box>
             </Box>
         </SimpleGrid>
@@ -63,7 +63,7 @@ return (
               </Table.Header>
               <Table.Body style={{ color: "ivory" }}>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Reserves (WBNB)</Text></Table.Cell>
+                  <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Reserves (WMON)</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1))}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount1))}</Table.Cell>
                   {/* <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount1))}</Table.Cell>
@@ -169,7 +169,7 @@ return (
               </Table.Header>
               <Table.Body style={{ color: "ivory" }}>
                 <Table.Row>
-                  <Table.Cell>Reserves (WBNB)</Table.Cell>
+                  <Table.Cell>Reserves (WMON)</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1))}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount1))}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount1))}</Table.Cell>
