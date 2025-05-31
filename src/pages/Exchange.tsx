@@ -1081,7 +1081,7 @@ const Exchange: React.FC = () => {
                 <Box mt={-2} ml={2}>
                     {isMobile ?
                     <VStack alignItems={"left"} ml={5}>
-                    <Box><Text color="#a67c00" fontWeight="bold">SPOT PRICE</Text></Box>
+                    <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT PRICE</Text></Box>
                     <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 5)}</Text></Box>
                     <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
                     <Box><Text color={percentageChange < 0 ? "red" : percentageChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>(+{commifyDecimals(percentageChange, 2)}%)</Text></Box>
