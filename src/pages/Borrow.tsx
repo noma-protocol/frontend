@@ -768,7 +768,7 @@ const Borrow = () => {
                                         </DrawerRoot>
                                     </Box>
                                     </HStack>
-                                    </>) : <><Text size="xs" mt={2} ml={2}>No active loan</Text></>
+                                    </>) : <Box mt={2} mb={2} w="120px"><Text fontSize="xs" ml={2}>No active loan</Text></Box>
                                     }                                
                             </SimpleGrid>
 
