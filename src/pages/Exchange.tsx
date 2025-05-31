@@ -72,7 +72,9 @@ const ExchangeHelperAbi = ExchangeHelperArtifact.abi;
 const QuoterArtifact = await import(`../assets/QuoterV2.json`);
 const QuoterAbi = QuoterArtifact.abi;
 
-const localProvider = new JsonRpcProvider("https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW");
+const localProvider = new JsonRpcProvider(process.env.MONAD ? 
+    "https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW" :
+    "http://localhost:8545");
 
 // Dynamically import the NomaFactory artifact and extract its ABI
 const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
@@ -85,24 +87,16 @@ const uniswapV3FactoryABI = [
   "function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool)",
 ];
 
-// const ERC20Abi = [
-//     "function totalSupply() view returns (uint)",
-//     "function balanceOf(address) view returns (uint)",
-//     "function decimals() view returns (uint)",
-//     "function symbol() view returns (string)",
-//     "function name() view returns (string)",
-// ];
-
 const WETHAbi = [
     "function deposit() payable external"
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
 const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
-const exchangeHelperAddress = getContractAddress(addresses, "10143", "Exchange");
+const exchangeHelperAddress = getContractAddress(addresses, "1337", "Exchange");
 const quoterAddress = "0x1b4E313fEF15630AF3e6F2dE550Dbf4cC9D3081d";
-const addressModelHelper = getContractAddress(addresses, "10143", "ModelHelper");
+const addressModelHelper = getContractAddress(addresses, "1337", "ModelHelper");
 
 const feeTier = 3000;
 
@@ -423,7 +417,7 @@ const Exchange: React.FC = () => {
                   stakingContract: vaultDescriptionData[8],
                 };
 
-                if (plainVaultDescription.tokenSymbol === "OKS" || plainVaultDescription.tokenSymbol === "TST") {
+                if (plainVaultDescription.tokenSymbol === "OKS" /*|| plainVaultDescription.tokenSymbol === "TST"*/) {
                   // console.log("Skipping OKS vault:", vault.toString());
                   continue;
                 }

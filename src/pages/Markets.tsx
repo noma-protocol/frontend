@@ -45,7 +45,7 @@ const uniswapV3FactoryABI = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
 const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const feeTier = 3000;
 

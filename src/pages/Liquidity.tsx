@@ -48,7 +48,7 @@ const ERC20Abi = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
 const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
 const feeTier = 3000;
 
@@ -128,7 +128,7 @@ const Liquidity: React.FC = () => {
                   presaleContract: vaultDescriptionData[7],
                 };
 
-                if (plainVaultDescription.tokenSymbol === "OKS" || plainVaultDescription.tokenSymbol === "TST") {
+                if (plainVaultDescription.tokenSymbol === "OKS"/* || plainVaultDescription.tokenSymbol === "TST"*/) {
                   console.log("Skipping OKS vault:", vault.toString());
                   continue;
                 }

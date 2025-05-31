@@ -62,7 +62,7 @@ const { environment, presaleContractAddress } = config;
 
 const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
 const NomaFactoryAbi = NomaFactoryArtifact.abi;
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
 
 const Launchpad: React.FC = () => {
     const { address, isConnected } = useAccount();

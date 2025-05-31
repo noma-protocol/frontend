@@ -45,7 +45,9 @@ import { size } from 'viem';
 const { formatEther, parseEther, isAddress, MaxUint256 } = ethers.utils;
 const { JsonRpcProvider } = ethers.providers;
 
-const localProvider = new JsonRpcProvider("https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW");
+const localProvider = new JsonRpcProvider(process.env.MONAD ? 
+    "https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW" :
+    "http://localhost:8545");
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
 const IWETHAbi = IWETHArtifact.abi;
@@ -66,8 +68,8 @@ const ModelHelperArtifact = await import(`../assets/ModelHelper.json`);
 const ModelHelperAbi = ModelHelperArtifact.abi;
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
-const modelHelperAddress = getContractAddress(addresses, "10143", "ModelHelper");
+const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
+const modelHelperAddress = getContractAddress(addresses, "1337", "ModelHelper");
 
 const Borrow = () => {
     const { address, isConnected } = useAccount();

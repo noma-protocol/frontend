@@ -49,7 +49,7 @@ function App() {
     // }
     if (network.chain?.name != "local") {
       await switchNetwork({
-        chainId: 10143,
+        chainId: 1337,
       });
     }
     console.log(`Network is ${network.chain?.name}`)

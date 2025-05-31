@@ -58,8 +58,8 @@ const GonsTokenArtifact = await import(`../assets/GonsToken.json`);
 const GonsTokenAbi = GonsTokenArtifact.abi;
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, "10143", "Factory");
-const modelHelperAddress = getContractAddress(addresses, "10143", "ModelHelper");
+const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
+const modelHelperAddress = getContractAddress(addresses, "1337", "ModelHelper");
 
 const Stake = () => {
     const { address, isConnected } = useAccount();
