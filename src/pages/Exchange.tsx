@@ -819,7 +819,7 @@ const Exchange: React.FC = () => {
                 setIsLoadingExecuteTrade(false);
                 toaster.create({
                     title: "Success",
-                    description: `Sold  ${commify(tokenDiff, 4)} WMON.\nReceived ${commify(wethDiff, 4)} ${useWeth == 1 ? token1Info.tokenSymbol : "MON"}`,
+                    description: `Sold  ${commify(tokenDiff, 4)} ${token0Info.tokenSymbol}.\nReceived ${commify(wethDiff, 4)} ${useWeth == 1 ? token1Info.tokenSymbol : "MON"}`,
                 });
               };
               fetchBalances();
