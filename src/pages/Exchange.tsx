@@ -93,7 +93,7 @@ const WETHAbi = [
 
 // NomaFactory contract address
 const nomaFactoryAddress = getContractAddress(addresses, "1337", "Factory");
-const uniswapV3FactoryAddress = "0x961235a9020B05C44DF1026D956D1F4D78014276";
+const uniswapV3FactoryAddress = "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7";
 const exchangeHelperAddress = getContractAddress(addresses, "1337", "Exchange");
 const quoterAddress = "0x1b4E313fEF15630AF3e6F2dE550Dbf4cC9D3081d";
 const addressModelHelper = getContractAddress(addresses, "1337", "ModelHelper");
