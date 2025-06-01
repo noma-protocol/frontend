@@ -118,7 +118,7 @@ const Footer: React.FC = (
                         border: "1px solid ivory",
                       }}
                       _hover={{
-                        bg: "#f8bd4500",
+                        bg: "#f8bd4520",
                         borderColor: "#f8bd45",
                         transform: "translateY(-2px)",
                         transition: "all 0.2s ease-in-out"
