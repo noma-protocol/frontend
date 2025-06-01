@@ -27,6 +27,7 @@ import addressesMonad from "../assets/deployment_monad.json";
 import { formatEther } from "viem";
 import { formatNumberPrecise, getContractAddress } from "../utils";
 import { Toaster, toaster } from "../components/ui/toaster";
+import metamaskLogo from "../assets/images/metamask.svg";
 
 const addresses = config.chain === "local"
   ? addressesLocal
@@ -186,6 +187,59 @@ const Migrate: React.FC = () => {
     console.log("Old OKS Balance:", oldOKSBalance);
     console.log("Balance after migration:", balanceAfterMigration);
 
+    const addTokenToMetaMask = async () => {
+      try {
+        // Create a provider using MetaMask's injected web3 provider
+        if (typeof window.ethereum !== 'undefined') {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+  
+          // Get the contract interface and ABI (replace with your token's ABI)
+          const tokenABI = [
+            "function name() public view returns (string memory)",
+            "function symbol() public view returns (string memory)",
+            "function decimals() public view returns (uint8)",
+            "function totalSupply() public view returns (uint256)",
+            "function balanceOf(address account) public view returns (uint256)",
+            "function transfer(address recipient, uint256 amount) public returns (bool)",
+          ];
+          
+          // Create a contract instance
+          const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+  
+          // Get the token details
+          const name = await tokenContract.name();
+          const symbol = await tokenContract.symbol();
+          const decimals = await tokenContract.decimals();
+  
+          // Prepare the token information for MetaMask
+          const formattedSymbol = symbol || "OKS";
+          const formattedDecimals = decimals || 18; // Default to 18 if not specified
+  
+          const hexValue = ethers.utils.parseUnits('1', formattedDecimals);
+  
+          // Add the token to MetaMask
+          await window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: tokenAddress,
+                symbol: formattedSymbol,
+                decimals: formattedDecimals,
+                image: `http://exchange.oikos.cash/src/assets/images/logo.svg`, 
+              },
+            },
+          });
+        } else {
+          console.error("MetaMask is not installed.");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
   return (
     <Container maxW="container.xl" h="90vh">
       <Toaster />
@@ -251,6 +305,33 @@ const Migrate: React.FC = () => {
                         <Box  w="45%"><Text fontSize="xs" color="#f3b500"> After migration: </Text></Box>
                         <Box><Text fontSize="xs" fontWeight={"bold"}> {formatNumberPrecise(balanceAfterMigration || 0, 4)} OKS</Text></Box>
                         <Box><Text fontSize="xs" color="ivory">(NEW)</Text></Box>
+
+                    </HStack> 
+                    <HStack>
+                        <Box  ml="45%"
+>
+                            <Button 
+                                colorScheme="yellow"
+                                onClick={addTokenToMetaMask}
+                                borderColor="ivory"
+                                w="140px"
+                                mt={2}
+                                ml={1}
+                                fontSize={"xx-small"}
+                                variant={"outline"}
+                                borderRadius={5}
+                                h="25px"
+                                >  
+                                <Box mt={1}> 
+                                    <HStack>
+                                            <Image src={metamaskLogo} w={15} mt={-1} />
+                                        <Box>
+                                            Add to Metamask
+                                        </Box>
+                                    </HStack>
+                                </Box>
+                                </Button>
+                        </Box>
                     </HStack>
                 </Flex>
                 <Flex direction="column" borderRadius={"10px"} backgroundColor="#2D3748" p={4} w="300px" ml={"-8vw"} >
