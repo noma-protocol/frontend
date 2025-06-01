@@ -10,14 +10,27 @@ import {
   DialogTitle,
   DialogTrigger
 } from "../components/ui/dialog"
-
+import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { commify } from "../utils";
+import { formatEther } from "viem";
 
+const ERC20Artifact = await import(`../assets/ERC20.json`);
+const ERC20Abi = ERC20Artifact.abi;
 
-const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, ...rest}) => {
+const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488"; // Replace with your token's contract address
+
+const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...rest}) => {
 
   const tokenDecimals = vaultInfo.tokenDecimals || 0;
-  const totalSupply = vaultInfo.totalSupply || 0;
+
+    const {
+        data: totalSupply
+    } = useContractRead({
+        address: tokenAddress,
+        abi: ERC20Abi,
+        functionName: "totalSupply",
+        args: []
+    });
 
   return (
     <Container>
@@ -87,7 +100,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, ...rest}) => {
                   <Text fontWeight="bold" color="gray">Total Supply</Text>
                 </Box>
                 <Box>
-                  <Text>{commify(totalSupply)}</Text>
+                  <Text>{commify(formatEther(`${totalSupply}`))}</Text>
                 </Box>
               </HStack>
               <HStack>
