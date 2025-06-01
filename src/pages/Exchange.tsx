@@ -184,6 +184,13 @@ const Exchange: React.FC = () => {
   const screenOrientation = useScreenOrientation();
   const isLandscape = screenOrientation.includes("landscape");
 
+  // redirect if URL contains "migrate"
+  useEffect(() => {
+    if (window.location.href.includes("migrate")) {
+      window.location.href = "https://exchange.oikos.cash/migrate";
+    }
+  }, []);
+
   const [isAllVaultsLoading, setIsAllVaultsLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingExecuteTrade, setIsLoadingExecuteTrade] = useState(false);
