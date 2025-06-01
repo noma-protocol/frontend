@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SimpleGrid, Box, HStack, Center, VStack } from '@chakra-ui/react';
+import { SimpleGrid, Box, HStack, Center, VStack, Text} from '@chakra-ui/react';
 import {
   Button,
   NavItem,
@@ -10,15 +10,73 @@ import {
   UncontrolledTooltip,
 } from "reactstrap";
 
+import { ethers } from "ethers";
 import Logo from "../assets/images/oikos-type.svg";
 import { isMobile } from "react-device-detect";
+import metamaskLogo from "../assets/images/metamask.svg";
 
 const Footer: React.FC = (
   page = "home" // Default value for page prop, can be overridden when used
 ) => { 
 
-   const isFilteredPage = window.location.href.includes("liquidity") || window.location.href.includes("markets");
+    const isFilteredPage = window.location.href.includes("liquidity") || window.location.href.includes("markets");
 
+    const addTokenToMetaMask = async () => {
+
+      const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488"; // Replace with your token's contract address
+
+      try {
+        // Create a provider using MetaMask's injected web3 provider
+        if (typeof window.ethereum !== 'undefined') {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+
+          // Get the contract interface and ABI (replace with your token's ABI)
+          const tokenABI = [
+            "function name() public view returns (string memory)",
+            "function symbol() public view returns (string memory)",
+            "function decimals() public view returns (uint8)",
+            "function totalSupply() public view returns (uint256)",
+            "function balanceOf(address account) public view returns (uint256)",
+            "function transfer(address recipient, uint256 amount) public returns (bool)",
+          ];
+          
+          // Create a contract instance
+          const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+
+          // Get the token details
+          const name = await tokenContract.name();
+          const symbol = await tokenContract.symbol();
+          const decimals = await tokenContract.decimals();
+
+          // Prepare the token information for MetaMask
+          const formattedSymbol = symbol || "OKS";
+          const formattedDecimals = decimals || 18; // Default to 18 if not specified
+
+          const hexValue = ethers.utils.parseUnits('1', formattedDecimals);
+
+          // Add the token to MetaMask
+          await window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: tokenAddress,
+                symbol: formattedSymbol,
+                decimals: formattedDecimals,
+                image: `http://exchange.oikos.cash/src/assets/images/logo.svg`, 
+              },
+            },
+          });
+        } else {
+          console.error("MetaMask is not installed.");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    
   return (
     <>
   { !isMobile && !isFilteredPage ? (    
@@ -35,14 +93,47 @@ const Footer: React.FC = (
       <Container>
         <Row >
           <Col md="3" style={{paddingTop: isMobile?25:0}}>
-            <img
-              src={Logo}
-              style={{
-                maxWidth: "10vh",
-                marginLeft: isMobile ? "36%" : 50,
-                marginTop: isMobile? 30 : 50
-              }}
-            />
+
+            <VStack>
+              <img
+                src={Logo}
+                style={{
+                  maxWidth: "10vh",
+                  marginLeft: isMobile ? "36%" : 20,
+                  marginTop: isMobile? 30 : 50
+                }}
+              />
+               <Box mt={5}>
+                  <Button
+                      colorScheme="yellow"
+                      onClick={addTokenToMetaMask}
+                      borderColor="ivory"
+                      ml={1}
+                      fontSize={"xx-small"}
+                      variant={"outline"}
+                      _hover={{
+                        bg: "#3b3000",
+                        borderColor: "#f8bd45",
+                        transform: "translateY(-2px)",
+                        transition: "all 0.2s ease-in-out"
+                      }}
+                      transition="all 0.2s ease-in-out"
+                      >
+                      <Box mt={1}>
+                          <HStack>
+                            <img src={metamaskLogo}
+                                  style={{
+                                      width: "15px",
+                                    }}
+                              />
+                            <Box>
+                              <Text fontSize="xs">Add to Metamask</Text>
+                            </Box>
+                          </HStack>
+                      </Box>
+                      </Button>                
+               </Box>
+            </VStack>
           </Col>
           <Col md="3" xs="6" >
             <Nav style={{margin:'5vh'}}>
