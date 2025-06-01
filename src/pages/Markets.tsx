@@ -457,47 +457,40 @@ const Markets: React.FC = () => {
         </Box>
       ) : (
         <Box
-          w="100%"
           color="white"
-          display="flex"
-          alignItems="center"
-          // justifyContent="center"
           textAlign="left"
-          position="relative"
-          // mb={50}
-          h="20%" 
           mt={isMobile ? "18%" : "100px"}
-          // mb={"90%"}
+          ml={isMobile ? 2 : "20%"}
+          alignContent={"center"}
+          alignItems={"center"}
         >
-          <SimpleGrid columns={1} w={isMobile?"95%":"100%"} ml={isMobile ? "0" : "20vw"} >
-            <Box px={4} mb={4} w="100%">
-            <HStack spacing={4}  ml={4}>
-              <Button
-                onClick={() => handleSetView("all")}
-                colorScheme={view === "all" ? "blue" : "gray"}
-                variant={view === "all" ? "solid" : "outline"}
-              >
-                All Markets
-              </Button>
-              <Button
-                onClick={() => handleSetView("my")}
-                colorScheme={view === "my" ? "blue" : "gray"}
-                variant={view === "my" ? "solid" : "outline"}
-              >
-                My Markets
-              </Button>
-            </HStack>
+          <Box width="98%" maxW="1200px" mx="auto" >
+            <Box px={4} mb={4}>
+              <HStack spacing={4}>
+                <Button
+                  onClick={() => handleSetView("all")}
+                  colorScheme={view === "all" ? "blue" : "gray"}
+                  variant={view === "all" ? "solid" : "outline"}
+                >
+                  All Markets
+                </Button>
+                <Button
+                  onClick={() => handleSetView("my")}
+                  colorScheme={view === "my" ? "blue" : "gray"}
+                  variant={view === "my" ? "solid" : "outline"}
+                >
+                  My Markets
+                </Button>
+              </HStack>
             </Box>
 
             {/* Vaults List */}
             <Box
-              ml={isMobile ? 5: 0}
               border="1px solid gray"
               p={8}
               borderRadius={20}
-              w={isMobile ? "auto" : "80%"}
-              h="100%"
               backgroundColor="#222831"
+              overflow="hidden"
               key={`vaults-container-${isAllVaultsLoading ? 'loading' : 'loaded'}`} // Force re-render on loading state change
             >
               {isAllVaultsLoading ? (
@@ -510,34 +503,31 @@ const Markets: React.FC = () => {
               ) : (view === "all" ? vaultDescriptions.length === 0 : userVaults.length === 0) ? (
                 <Text>No vaults found.<br /><br /><br /><br /><br /><br /><br /><br /></Text>
               ) : (
-                <VStack align="start" spacing={6}>
-                  <HStack> 
-                    {/* <Box >
-                      <Text fontWeight="bold"  color="#bf9b30" ml={2}>Index</Text>
-                    </Box> */} 
-                    <Box w={isMobile?  "60%" :"100px"}>
-                      <Text fontWeight="bold" color="#bf9b30"  ml={2}> Name</Text>
+                <VStack align="start" spacing={6} width="100%">
+                  <Box width="100%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4}>
+                    <Box>
+                      <Text fontWeight="bold" color="#bf9b30">Name</Text>
                     </Box>
-                    <Box textAlign={isMobile ? "left" : "center"} alignItems={ isMobile ? "left" : "center"}>
-                      <Text fontWeight="bold"  color="#bf9b30" ml={isMobile?"32vw":"60px"} > Symbol</Text>
+                    <Box>
+                      <Text fontWeight="bold" color="#bf9b30">Symbol</Text>
                     </Box>
                     {!isMobile && (
                       <>
                       <Box>
-                        <Text fontWeight="bold" color="#bf9b30"  ml={10}>Reserve Asset</Text>
+                        <Text fontWeight="bold" color="#bf9b30">Reserve Asset</Text>
                       </Box>
                       <Box>
-                        <Text fontWeight="bold" color="#bf9b30"  ml={10}>Protocol</Text>
-                      </Box>                      
-                      <Box ml={5}>
-                        <Text fontWeight="bold"  color="#bf9b30" ml={7}>Presale</Text>
+                        <Text fontWeight="bold" color="#bf9b30">Protocol</Text>
                       </Box>
-                      <Box ml={7}>
-                        <Text fontWeight="bold" color="#bf9b30" ml={7}>Action</Text>
+                      <Box>
+                        <Text fontWeight="bold" color="#bf9b30">Presale</Text>
+                      </Box>
+                      <Box>
+                        <Text fontWeight="bold" color="#bf9b30">Action</Text>
                       </Box>
                       </>
-                    ) }
-                  </HStack>
+                    )}
+                  </Box>
                   {vaultsDataArray?.map((vault, index) => {
                     // console.log(vault)
 
@@ -561,103 +551,84 @@ const Markets: React.FC = () => {
                         cursor="pointer"
                         onClick={() => handleVaultClick(vault)}
                         _hover={{ backgroundColor: "#393E46" }}
-                    > 
-                      <HStack alignItems="center" spacing={4}>
-                        {/* Vault Number */}
-                        {/* <Box w="100px">
-                          <Text fontSize={isMobile? "12px" : "14px"}  fontWeight="bold">Vault {index + 1}</Text>
-                        </Box> */}
-  
-                        {/* Token Name */}
-                        <Box w={isMobile ? "200px" : "250px"} >
-                          <Text fontSize={isMobile? "12px" : "14px"}  >{vault.tokenName}</Text>
-                        </Box>
-  
-                        {/* Token Symbol */}
-                        <Box w={isMobile ? "140px" : "180px"} ml={5}>
-                          <HStack>
-                            <Box w="50%">
-                              <Text fontSize={isMobile? "12px" : "14px"}  >{vault.tokenSymbol}</Text>
-                            </Box>
-                            <Box>
-                              <Image 
-                              ml={vault.tokenSymbol == "OKS" ? -2 : 0}
-                              w={vault.tokenSymbol == "OKS" ? "40px" : "20px"} 
-                              src={vault.tokenSymbol == "OKS" ? oksLogo : placeholderLogo} alt="token logo" 
+                    >
+                      <VStack width="100%" spacing={4}>
+                        <Box width="100%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4} alignItems="center">
+                          {/* Token Name */}
+                          <Box>
+                            <Text>{vault.tokenName}</Text>
+                          </Box>
+
+                          {/* Token Symbol */}
+                          <Box>
+                            <HStack>
+                              <Box><Text mr={2} >{vault.tokenSymbol}</Text></Box>
+                              <Box>
+                               <Image
+                                w={vault.tokenSymbol == "OKS" ? "40px" : "20px"}
+                                src={vault.tokenSymbol == "OKS" ? oksLogo : placeholderLogo}
+                                alt="token logo"
                               />
-                            </Box>                            
-                          </HStack>
-                        </Box>
-  
-                        {/* Reserve Asset Label and Logo (Desktop Only) */}
-                        {!isMobile && (
-                          <>
-                            <Box w="270px" ml={10}>
-                              <HStack alignItems="center" spacing={2}>
-                                <Box p={1} borderRadius="md">
-                                  <Text>{getReserveAssetLabel(vault.token1)}</Text>
+                              </Box>
+                            </HStack>
+                          </Box>
+
+                          {/* Desktop columns */}
+                          {!isMobile ? (
+                            <>
+                              <Box>
+                                <HStack alignItems="center">
+                                <Box>
+                                  <Text mt={10} mr={2}>{getReserveAssetLabel(vault.token1)}</Text>
                                 </Box>
-                                <Box  p={1} borderRadius="md">
+                                <Box>
                                   <Image
                                     w="25px"
                                     src={getReserveAssetLogo(getReserveAssetLabel(vault.token1))}
                                     alt="reserve asset logo"
                                   />
                                 </Box>
-                              </HStack>
-                            </Box>
-                            <Box w="270px" ml={-10}>
-                              <HStack alignItems="center" spacing={2}>
-                                <Box p={1} borderRadius="md" ml={10}>
-                                  <Image
-                                    w="65px"
-                                    src={config.vault2ProtocolMap[vault.vault] == "uniswap" ? uniswapLogo : pancakeLogo}
-                                    alt="uniswap logo"
-                                  />
-                                </Box>
-                              </HStack>
-                            </Box>
-                            {/* Presale Status */}
-                            <Box w="260px" ml={15} textAlign={"center"}>
-                              {hasPresale ? (
-                                <Link href={ `/presale?a=${vault.presaleContract}`} target={"_blank"}>
-                                  {vault.finalized ? (
-                                  <Text color={"#a67c00"} fontSize={isMobile? "12px" : "12px"} >
-                                     <b>Finalized</b>
-                                  </Text> 
-                                  ) : vault.expired ? (
-                                    <Text color={"red"} fontSize={isMobile? "12px" : "12px"} >
-                                      <b>Expired</b>
-                                    </Text>) : 
-                                    (
+                                </HStack>
+                              </Box>
+
+                              <Box>
+                                <Image
+                                  w="65px"
+                                  src={config.vault2ProtocolMap[vault.vault] == "uniswap" ? uniswapLogo : pancakeLogo}
+                                  alt="protocol logo"
+                                />
+                              </Box>
+
+                              {/* Presale Status */}
+                              <Box textAlign="center">
+                                {hasPresale ? (
+                                  <Link href={`/presale?a=${vault.presaleContract}`} target="_blank">
+                                    {vault.finalized ? (
+                                      <Text color="#a67c00" fontSize="sm" ml={"-80px"}><b>Finalized</b></Text>
+                                    ) : vault.expired ? (
+                                      <Text color="red" fontSize="sm"><b>Expired</b></Text>
+                                    ) : (
                                       <VStack>
-                                        <Box>
-                                          <Text color={"#1ad000"} fontSize={"sm"} >
-                                              <b>In progress </b>
-                                          </Text>
-                                        </Box>
-                                        <Box>
-                                          <Text color={"white"} fontSize={"xs"} >
-                                              <b>Click to view</b>
-                                          </Text>
-                                        </Box>
+                                        <Text color="#1ad000" fontSize="sm"><b>In progress</b></Text>
+                                        <Text color="white" fontSize="xs"><b>Click to view</b></Text>
                                       </VStack>
                                     )}
-                                </Link>
+                                  </Link>
                                 ) : (
-                                  <Text color={"gray"}  fontSize={isMobile? "11px" : "12px"}>
-                                    <b>No</b>
-                                  </Text>
+                                  <Text color="gray" fontSize="sm"><b>No</b></Text>
                                 )}
-                            </Box>
-  
-                            {/* Vault Modal */}
-                            <Box w="180px">
-                              <VaultModal vaultInfo={vault} isMobile={isMobile}/>
-                            </Box>
-                          </>
-                        )}
-                      </HStack>
+                              </Box>
+
+                              {/* Vault Modal */}
+                              <Box textAlign="center">
+                                <VaultModal vaultInfo={vault} isMobile={isMobile}/>
+                              </Box>
+                            </>
+                          ) : null}
+                        </Box>
+
+                        {/* No mobile action buttons */}
+                      </VStack>
                     </Box>
                     )
                   })}
@@ -666,8 +637,7 @@ const Markets: React.FC = () => {
               )}
             </Box>
 
-          </SimpleGrid>
-          {/* {isMobile ? (<></>) : <><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></>}  */}
+          </Box>
         </Box>
       )}
     </Container>
