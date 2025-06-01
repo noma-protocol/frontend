@@ -103,7 +103,7 @@ const Footer: React.FC = (
                   marginTop: isMobile? 30 : 50
                 }}
               />
-               <Box mt={-5}>
+               <Box mt={2}>
                   <Button
                       colorScheme="yellow"
                       onClick={addTokenToMetaMask}
