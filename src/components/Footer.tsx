@@ -111,6 +111,7 @@ const Footer: React.FC = (
                       ml={1}
                       fontSize={"xx-small"}
                       variant={"outline"}
+                      borderRadius="0"
                       _hover={{
                         bg: "#3b3000",
                         borderColor: "#f8bd45",
