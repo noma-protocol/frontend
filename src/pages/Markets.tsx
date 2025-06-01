@@ -621,7 +621,7 @@ const Markets: React.FC = () => {
 
                               {/* Vault Modal */}
                               <Box textAlign="center">
-                                <VaultModal vaultInfo={vault} isMobile={isMobile}/>
+                                <VaultModal vaultInfo={vault} isMobile={isMobile} address={address}/>
                               </Box>
                             </>
                           ) : null}
