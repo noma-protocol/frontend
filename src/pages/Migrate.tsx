@@ -265,7 +265,7 @@ const Migrate: React.FC = () => {
           justifyContent="center"
           textAlign="left"
           position="relative"
-            mt={isMobile ? "22vh" : "10vh"}
+          mt={isMobile ? "25vh" : "10vh"}
           h="30%"
         //   border={isMobile ? "none" : "1px solid #2D3748"}
           ml={"20%"}
