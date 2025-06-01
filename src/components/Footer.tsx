@@ -104,11 +104,8 @@ const Footer: React.FC = (
                 }}
               />
                <Box mt={2}>
-                  <Button
+                  <button
                       onClick={addTokenToMetaMask}
-                      ml={1}
-                      fontSize={"xx-small"}
-                      variant={"outline"}
                       style={{
                         borderRadius: "0px",
                         height: "35px",
@@ -116,28 +113,27 @@ const Footer: React.FC = (
                         width: "200px",
                         backgroundColor: "transparent",
                         border: "1px solid ivory",
+                        marginLeft: "4px",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease-in-out",
                       }}
-                      _hover={{
-                        bg: "#f8bd4520",
-                        borderColor: "#f8bd45",
-                        transform: "translateY(-2px)",
-                        transition: "all 0.2s ease-in-out"
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = "rgba(248, 189, 69, 0.2)";
+                        e.currentTarget.style.borderColor = "#f8bd45";
+                        e.currentTarget.style.transform = "translateY(-2px)";
                       }}
-                      transition="all 0.2s ease-in-out"
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                        e.currentTarget.style.borderColor = "ivory";
+                        e.currentTarget.style.transform = "translateY(0)";
+                      }}
                       >
-                      <Box mt={0} ml={5}>
-                          <HStack>
-                            <img src={metamaskLogo}
-                                  style={{
-                                      width: "15px",
-                                    }}
-                              />
-                            <Box>
-                              <Text fontSize="xs">Add to Metamask</Text>
-                            </Box>
-                          </HStack>
-                      </Box>
-                      </Button>                
+                      <div style={{ marginLeft: "5px", display: "flex", alignItems: "center" }}>
+                          <img src={metamaskLogo} style={{ width: "15px", marginRight: "5px" }} />
+                          <span style={{ fontSize: "12px", color: "white" }}>Add to Metamask</span>
+                      </div>
+                      </button>                
                </Box>
             </VStack>
           </Col>
