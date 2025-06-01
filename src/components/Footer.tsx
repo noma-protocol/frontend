@@ -105,26 +105,27 @@ const Footer: React.FC = (
               />
                <Box mt={2}>
                   <Button
-                      colorScheme="yellow"
                       onClick={addTokenToMetaMask}
-                      borderColor="ivory"
                       ml={1}
                       fontSize={"xx-small"}
                       variant={"outline"}
                       style={{
                         borderRadius: "0px",
-                        height: "25px",
-                        padding: "0px 10px"
+                        height: "35px",
+                        padding: "0px 10px",
+                        width: "200px",
+                        backgroundColor: "transparent",
+                        border: "1px solid ivory",
                       }}
                       _hover={{
-                        bg: "#3b3000",
+                        bg: "#f8bd4500",
                         borderColor: "#f8bd45",
                         transform: "translateY(-2px)",
                         transition: "all 0.2s ease-in-out"
                       }}
                       transition="all 0.2s ease-in-out"
                       >
-                      <Box mt={1}>
+                      <Box mt={0} ml={5}>
                           <HStack>
                             <img src={metamaskLogo}
                                   style={{
