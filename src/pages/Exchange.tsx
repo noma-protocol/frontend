@@ -241,17 +241,6 @@ const Exchange: React.FC = () => {
     watch: true,
   });
 
-  if (token1Info?.tokenSymbol == "WMON") {
-      setToken1Info({
-          tokenName: "Wrapped BNB",
-          tokenSymbol: "WBNB",
-          tokenDecimals: 18,
-          balance: token1Info?.balance || "0",
-      });
-  }
-
-  // console.log(`Imv is ${formatEther(`${imv || 0}`)} for vault ${selectedVault}`);
-
   useEffect(() => {
 
     if (token0 && token1) {
