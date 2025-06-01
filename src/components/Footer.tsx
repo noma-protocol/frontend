@@ -129,7 +129,7 @@ const Footer: React.FC = (
                         e.currentTarget.style.transform = "translateY(0)";
                       }}
                       >
-                      <div style={{ marginLeft: "5px", display: "flex", alignItems: "center" }}>
+                      <div style={{ marginLeft: "25px", display: "flex", alignItems: "center" }}>
                           <img src={metamaskLogo} style={{ width: "15px", marginRight: "5px" }} />
                           <span style={{ fontSize: "12px", color: "white" }}>Add to Metamask</span>
                       </div>
