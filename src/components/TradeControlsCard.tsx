@@ -570,7 +570,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                     onClick={() => {
                       handleExecuteTrade();
                     }}
-                    disabled={isLoadingExecuteTrade || isLoading}
+                  disabled={isLoadingExecuteTrade || isLoading || tradeMode === "BUY" ? amountToBuy <= 0 : amountToSell <= 0}
                     border="1px solid #a67c00"
                     _hover={{ backgroundColor: isLoadingExecuteTrade ? "#a67c00" : "#a67c0020" }}
                   >
