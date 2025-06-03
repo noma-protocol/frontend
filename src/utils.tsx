@@ -134,33 +134,52 @@ export function calculateLoanFees(borrowAmount, duration) {
 }
 
 export function formatNumberPrecise(value, sigDigits = 4) {
-  let num = typeof value === 'number'
-    ? value
-    : parseFloat(value);
+  // Handle edge case for empty or invalid input
+  if (value === null || value === undefined || value === '') return '0';
+  
+  // Convert to number if it's a string
+  let num = typeof value === 'number' ? value : parseFloat(value);
   if (isNaN(num)) return '0';
 
+  // Handle negative numbers
   const sign = num < 0 ? '-' : '';
   num = Math.abs(num);
-
+  
+  // Define suffixes for number abbreviation
   const suffixes = ['', 'K', 'M', 'B', 'T'];
   let idx = 0;
+  
+  // Determine which suffix to use
   while (num >= 1000 && idx < suffixes.length - 1) {
     num /= 1000;
     idx++;
   }
-
-  // Figure out how many decimals we need to hit sigDigits in total
-  const intDigits = Math.floor(num).toString().length;
-  const decPlaces = Math.max(sigDigits - intDigits, 0);
-
-  // Format and trim trailing zeros
-  const str = num
-    .toFixed(decPlaces)
-    .replace(/\.?0+$/, '');
-
-  return sign + str + suffixes[idx];
+  
+  // Special case for handling numbers that should display with K, M, B, T suffixes
+  if (idx > 0) {
+    // For suffixed numbers like 1K, 1M, etc.
+    if (num < 10) {
+      // For 1K-9.9K range: show one decimal (e.g., 1.2K)
+      return sign + num.toFixed(1).replace(/\.0$/, '') + suffixes[idx];
+    } else if (num < 100) {
+      // For 10K-99.9K range: show one decimal if non-zero
+      return sign + num.toFixed(1).replace(/\.0$/, '') + suffixes[idx];
+    } else {
+      // For 100K+ range: show no decimals (e.g., 140K)
+      return sign + Math.round(num) + suffixes[idx];
+    }
+  } else {
+    // For regular numbers without suffixes
+    if (sigDigits <= 0) return sign + Math.round(num).toString();
+    
+    // Figure out how many decimals we need
+    const intDigits = Math.floor(num).toString().length;
+    const decPlaces = Math.max(sigDigits - intDigits, 0);
+    
+    // Format with appropriate decimal places and trim trailing zeros
+    return sign + num.toFixed(decPlaces).replace(/\.?0+$/, '');
+  }
 }
-
 /**
  * @param {string} userAddress  An Ethereum address (e.g. "0xAbC123...").
  * @returns {string}            A 32‐byte hex string: first 8 bytes are ASCII hex chars, rest zero.
