@@ -1,14 +1,13 @@
-const presaleContractAddress = "0x99b32151E3C0c8432c4c6C9b6F3213123e443F06";
 const environment = import.meta.env.VITE_ENV;
 const chain = import.meta.env.VITE_CHAIN;
 const feeTiers = [3000, 10000];
 
 const oksVault = "0x5EffFAD2602DCe520C09c58fa88b0e06609C52b8";
+const presaleContractAddress = "0x99b32151E3C0c8432c4c6C9b6F3213123e443F06";
 
 const vault2ProtocolMap = {
     [oksVault]: "uniswap",
 };
-
 
 const protocolAddresses = {
     uniswapV3Factory: "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7",
