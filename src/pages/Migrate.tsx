@@ -118,6 +118,18 @@ const Migrate: React.FC = () => {
     });
 
     const {
+        data: initialIMV,
+        refetch: fetchInitialIMV,
+    } = useContractRead({
+        address: migrationContractAddress,
+        abi: MigrationAbi,
+        functionName: "initialIMV",
+        args: []
+    });
+
+    console.log("initialIMV :", initialIMV);
+
+    const {
         data: initialBalanceOf,
         refetch: fetchInitialBalanceOf,
     } = useContractRead({
