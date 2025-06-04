@@ -25,7 +25,7 @@ import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
 import { formatEther } from "viem";
-import { formatNumberPrecise, getContractAddress } from "../utils";
+import { formatNumberPrecise, getContractAddress, commify } from "../utils";
 import { Toaster, toaster } from "../components/ui/toaster";
 import metamaskLogo from "../assets/images/metamask.svg";
 
@@ -62,7 +62,7 @@ const ERC20Abi = ERC20Artifact.abi;
 // NomaFactory contract address
 // const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
 const oldOKSTokenAddress = "0x18aCf236eB40c0d4824Fb8f2582EBbEcD325Ef6a";
-const migrationContractAddress = "0xbA2334E2bD9E7CA90fb08d6ABeAd1577f879EE35";
+const migrationContractAddress = "0x5693Af4DbD109D396330d6C173FFB84Ce1ce487C";
 // const feeTier = 3000;
 
 const Migrate: React.FC = () => {
@@ -85,8 +85,8 @@ const Migrate: React.FC = () => {
         const fetchOldOKSBalance = async () => {
             if (!address) return;
             try {
-                const balance = await oksContract.balanceOf(address);
-                setOldOKSBalance(balance);
+                // const balance = await oksContract.balanceOf(address);
+                setOldOKSBalance(0);
             } catch (error) {
                 console.error("Error fetching old OKS balance:", error);
                 setOldOKSBalance(0);
@@ -116,6 +116,8 @@ const Migrate: React.FC = () => {
         functionName: "withdrawnOf",
         args: [address]
     });
+
+    console.log("Withdrawn Of:", withdrawnOf);
 
     const {
         data: initialIMV,
@@ -253,7 +255,7 @@ const Migrate: React.FC = () => {
     };
 
   return (
-    <Container maxW="container.xl" h="90vh">
+    <Container maxW="container.xl" h="50vw">
       <Toaster />
 
       {!isConnected ? (
@@ -277,11 +279,10 @@ const Migrate: React.FC = () => {
           justifyContent="center"
           textAlign="left"
           position="relative"
-          mt={isMobile ? "25vh" : "10vh"}
+          mt={isMobile ? "25vh" : "15vh"}
           h="30%"
         //   border={isMobile ? "none" : "1px solid #2D3748"}
           ml={"20%"}
-
         >
             {isMobile ? (
                 <>
@@ -355,7 +356,7 @@ const Migrate: React.FC = () => {
                         </HStack>
                         <HStack mt={2}>
                             <Box  w="35%"><Text fontSize="sm" color="#f3b500"> Withdrew: </Text></Box>
-                            <Box><Text fontSize="sm" fontWeight={"bold"}> {formatNumberPrecise(withdrawnOf || 0, 4)} OKS</Text></Box>
+                            <Box><Text fontSize="sm" fontWeight={"bold"}> {commify(formatEther(`${withdrawnOf || 0}`) || 0, 4)} OKS</Text></Box>
                         </HStack>
                         </Box>
                     <Box >
@@ -425,7 +426,7 @@ const Migrate: React.FC = () => {
                         </HStack>
                         <HStack mt={2}>
                             <Box  w="35%"><Text fontSize="sm" color="#f3b500"> Withdrew: </Text></Box>
-                            <Box><Text fontSize="sm" fontWeight={"bold"}> {formatNumberPrecise(formatEther(withdrawnOf || 0) || 0, 4)} OKS</Text></Box>
+                            <Box><Text fontSize="sm" fontWeight={"bold"}> {commify(formatEther(`${withdrawnOf || 0}`) || 0, 4)} OKS</Text></Box>
                         </HStack>
                         </Box>
                     <Box >
