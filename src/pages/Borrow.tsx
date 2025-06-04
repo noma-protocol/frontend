@@ -334,11 +334,12 @@ const Borrow = () => {
             `${duration}`
         ],
         onSuccess(data) {
+            console.log(data)
             setIsBorrowing(false);
             setIsLoading(false);
-            setTimeout(() => {
-                window.location.reload();
-              }, 4000); // 4000ms = 4 seconds
+            // setTimeout(() => {
+            //     window.location.reload();
+            //   }, 4000); // 4000ms = 4 seconds
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
