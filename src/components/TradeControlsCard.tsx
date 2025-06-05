@@ -359,7 +359,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           colSpan={isMobile ? 2 : 1} 
           ml={isMobile ? 2 : 6}
          >
-        <VStack w="100%" alignItems={"left"} px={5} mt={isMobile ? 4 : 0}>
+        <VStack w="90%" alignItems={"left"} px={5} mt={isMobile ? 4 : 0}>
           <Box><Text pb={2} ml={isMobile ? 0 : -4} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text></Box>
          <Box>
         <RadioGroup 
@@ -369,7 +369,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         >
         <Box 
           position="relative" 
-          border="1px solid" 
+          border="1px solid red" 
           borderColor={tradeMode =="BUY" ? "#00412b" : "#FF153F"} 
           borderLeft={0}
           borderRight={0}
@@ -405,7 +405,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
 
             {isMobile ? "Trade Type" : "Type"}
           </Badge>
-            <HStack gap="4" mt={3} ml={isMobile ? "70px" : 4}>
+            <HStack gap="4" mt={3} ml={isMobile ? "50px" : 4}>
               <CustomRadio
                 tradeMode={tradeMode}
                 value="BUY"
@@ -421,6 +421,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 name="tradeModeSell"
                 isChecked={tradeMode == "SELL"}
                 onChange={() => setTradeMode("SELL")}
+                 border="1px solid red"
               >
                 <b>SELL</b>
               </CustomRadio>
@@ -474,7 +475,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           >
             Asset
           </Badge>
-            <HStack gap="4" mt={3} ml={isMobile ? "70px" : 4}>
+            <HStack gap="4" mt={3} ml={isMobile ? "50px" : 4}>
               <CustomRadio
                 value="1"
                 name="useWeth"

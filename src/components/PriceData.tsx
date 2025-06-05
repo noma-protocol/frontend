@@ -591,6 +591,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
             </Box>
           </Box>
+              {isMobile ? (
               <VStack mt={-2}>
                 <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
                     <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
@@ -599,6 +600,15 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   <Text fontSize={isMobile ? "xs" : "sm"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
                 </Box>
               </VStack>
+              ) : 
+              <>
+              <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
+                    <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
+                </Box>
+                <Box  mt={-2} ml={10}>
+                  <Text fontSize={isMobile ? "xs" : "sm"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
+                </Box>
+              </>}
         </HStack>
 
           <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : -2}  borderRadius={5} border="1px solid ivory" mb={5} w={isMobile ? "92%" : "101%"}>
