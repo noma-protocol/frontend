@@ -1207,6 +1207,7 @@ const Exchange: React.FC = () => {
                       <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT PRICE</Text></Box>
                       <Box><Text fontSize="sm">{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
                       <Box><Text  fontSize="sm">{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
+                      <Box><Text  fontSize="sm">(${commifyDecimals(priceUSD > 0 && spotPrice > 0 ? formatEther(`${spotPrice}`) * priceUSD : 0)})</Text></Box>
                       <Box><Text color={percentChange < 0 ? "red" : percentChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)</Text></Box>
                     </VStack>
                     : 
