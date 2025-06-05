@@ -426,7 +426,7 @@ const Migrate: React.FC = () => {
                         </HStack>
                         <HStack mt={2}>
                             <Box  w="35%"><Text fontSize="sm" color="#f3b500"> Withdrew: </Text></Box>
-                            <Box><Text fontSize="sm" fontWeight={"bold"}> {commify(formatEther(`${withdrawnOf || 0}`) || 0, 4)} OKS</Text></Box>
+                            <Box><Text fontSize="sm" fontWeight={"bold"}> {formatNumberPrecise(formatEther(`${withdrawnOf || 0}`) || 0, 4)} OKS</Text></Box>
                         </HStack>
                         </Box>
                     <Box >
