@@ -188,7 +188,7 @@ const Exchange: React.FC = () => {
   // redirect if URL contains "migrate"
   useEffect(() => {
     if (window.location.href.includes("migrate")) {
-      window.location.href = "https://exchange.oikos.cash/migrate";
+      window.location.href = "https://app.oikos.cash/migrate";
     }
   }, []);
 
