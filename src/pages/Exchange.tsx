@@ -187,7 +187,7 @@ const Exchange: React.FC = () => {
 
   // redirect if URL contains "migrate"
   useEffect(() => {
-    if (window.location.href.includes("migrate")) {
+    if (window.location.href.includes("migrate.oikos.cash")) {
       window.location.href = "https://app.oikos.cash/migrate";
     }
   }, []);
@@ -232,7 +232,6 @@ const Exchange: React.FC = () => {
   const [balanceBeforeSale, setBalanceBeforeSale] = useState(0);
   const [protocol, setProtocol] = useState("uniswap");
   const [priceUSD, setPriceUSD] = useState("0.00000000000");
-
 
   useEffect(() => {
     const fetchPrice = async () => {
@@ -1091,7 +1090,7 @@ const Exchange: React.FC = () => {
           m={4}
           border="1px solid #a67c00"
           mt="100px"
-          ml="15%"
+          ml={isMobile ? 5 : "15%"}
         >
           <Box
             mb={6}
@@ -1140,7 +1139,7 @@ const Exchange: React.FC = () => {
           mt={"50px"}
           ml={"5px"}
         >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "24%"}>
+          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "10%"} mr={"10%"} >
             <Box px={4}>
               {/* Header Section */}
               {/* <Heading as="h3">
@@ -1233,6 +1232,7 @@ const Exchange: React.FC = () => {
                           token0Symbol={token0Info?.tokenSymbol}
                           token1Symbol={token1Info.tokenSymbol}
                           imv={imv}
+                          priceUSD={priceUSD} 
                           setPercentChange={setPercentChange}
                           onPercentChange={(percent) => setPercentChange(percent)}
                         />
@@ -1319,6 +1319,7 @@ const Exchange: React.FC = () => {
                             {/* <Line options={options} data={chartData} /> */}
                           <Box mt={5}>
                           <PriceData
+                              priceUSD={priceUSD} 
                               imv={imv}
                               poolAddress={poolInfo.poolAddress}
                               providerUrl="https://bsc-dataseed.bnbchain.org/"
