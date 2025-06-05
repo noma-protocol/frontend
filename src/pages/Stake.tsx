@@ -342,7 +342,7 @@ const Stake = () => {
         functionName: "approve",
         args: [
             vaultDescription.stakingContract,
-            parseEther(`${stakeAmount || "0"}`) // Ensure stakeAmount is a string
+            parseEther(`${(stakeAmount + (stakeAmount / 100)) || "0"}`)  // Ensure stakeAmount is a string
         ],
         onSuccess(data) {
 
@@ -532,7 +532,8 @@ const Stake = () => {
                     textAlign="left"
                     position="relative"
                     mt={"50px"}
-                    // border="1px solid red"
+                    ml={isMobile ? 0 : "-5%"}
+                    border="1px solid red"
                     mb={"15%"}
                 >
                  {isAddress(vaultAddress) ? (
