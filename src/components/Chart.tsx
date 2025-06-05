@@ -42,7 +42,7 @@ const MyChart = ({ positions, isMobile }) => {
   
     return (
         <Box ml={isMobile? "5px" : "20px"}>
-            <PriceRangeVisualization data={chartData} width={isMobile? 350 : 900} height={300}  />
+            <PriceRangeVisualization data={chartData} width={isMobile? 350 : 990} height={300}  />
         </Box>
     );
 };
