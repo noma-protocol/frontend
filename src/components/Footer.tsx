@@ -65,7 +65,7 @@ const Footer: React.FC = (
                 address: tokenAddress,
                 symbol: formattedSymbol,
                 decimals: formattedDecimals,
-                image: `http://exchange.oikos.cash/src/assets/images/logo.svg`, 
+                image: `http://app.oikos.cash/src/assets/images/logo.svg`, 
               },
             },
           });

@@ -29,7 +29,7 @@ function App() {
   const metadata = {
     name: "Oikos",
     description: "Next-gen Launchpad",
-    url: "https://exchange.oikos.cash",
+    url: "https://app.oikos.cash",
     icons: ["https://avatars.githubusercontent.com/u/37784886"],
   };
 
