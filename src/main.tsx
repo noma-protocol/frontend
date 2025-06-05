@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 import HomePage from "./pages/Home";
@@ -21,41 +21,40 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
+        index: true, // This means path === "/"
+        element: <Navigate to="/exchange" replace />,
+      },
+      {
         path: "/exchange",
-        element: <Exchange  />,
+        element: <Exchange />,
       },
       {
         path: "/presale",
-        element: <Presale  />,
+        element: <Presale />,
       },
-      config.chain === "local" ? 
       {
         path: "/launchpad",
-        element: <Launchpad  />,
-      } :      
-      {
-        path: "/launchpad",
-        element: <Launchpad  />,
+        element: <Launchpad />,
       },
       {
         path: "/markets",
-        element: <Markets  />,
+        element: <Markets />,
       },
       {
         path: "/liquidity",
-        element: <Liquidity  />,
+        element: <Liquidity />,
       },
       {
         path: "/borrow",
-        element: <Borrow  />,
+        element: <Borrow />,
       },
       {
         path: "/stake",
-        element: <Stake  />,
+        element: <Stake />,
       },
       {
         path: "/migrate",
-        element: <Migrate  />,
+        element: <Migrate />,
       },
     ],
   },

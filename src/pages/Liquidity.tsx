@@ -36,10 +36,16 @@ import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
 import addressesBsc   from "../assets/deployment.json";
+import axios from 'axios';
+
+const ModelHelperArtifact = await import(`../assets/ModelHelper.json`);
+const ModelHelperAbi = ModelHelperArtifact.abi;
 
 const addresses = config.chain === "local"
   ? addressesLocal
   : addressesBsc;
+
+const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "ModelHelper");
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
@@ -80,6 +86,61 @@ const Liquidity: React.FC = () => {
   const [capacity, setCapacity] = useState({});
   const [feesToken0, setFeesToken0] = useState(0);
   const [feesToken1, setFeesToken1] = useState(0);
+  const [priceUSD, setPriceUSD] = useState("0.00000000000");
+
+  const {
+    data: imv
+  } = useContractRead({
+    address: addressModelHelper,
+    abi: ModelHelperAbi,
+    functionName: "getIntrinsicMinimumValue",
+    args: [selectedVault],
+    watch: true,
+  });
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const cached = localStorage.getItem('bnb_usd_price');
+        const cacheTime = localStorage.getItem('bnb_usd_price');
+
+        // Check if cache exists and is fresh (less than 5 minutes old)
+        if (cached && cacheTime && Date.now() - Number(cacheTime) < 5 * 60 * 1000) {
+          setPriceUSD(Number(cached).toFixed(11));
+          return;
+        }
+
+        const url = 'https://api.coingecko.com/api/v3/simple/price';
+
+        const params = {
+          ids: 'binancecoin',
+          vs_currencies: 'usd',
+        };
+
+        const headers = {
+          'x-cg-demo-api-key': process.env.VITE_CG_API_KEY,
+        };
+  
+        const response = await axios.get(url, { params, headers });
+
+        console.log(response)
+        console.log(response.data)
+
+        const freshPrice = response.data['binancecoin'].usd;
+
+        // // Save to state and cache
+        setPriceUSD(Number(freshPrice).toFixed(11));
+
+        localStorage.setItem('bnb_usd_price', freshPrice);
+        localStorage.setItem('bnb_usd_price_time', Date.now().toString());
+
+      } catch (err) {
+        console.log(err.message);
+      }
+    };
+
+    fetchPrice();
+  }, [spotPrice]);
 
   const fetchPoolAddress = async (token0: string, token1: string) => {
     const uniswapV3FactoryContract = new ethers.Contract(
@@ -354,7 +415,7 @@ const Liquidity: React.FC = () => {
           mt={"10px"}
           backgroundColor={"blackAlpha.800"}
         >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "20vw"} mt={"15vh"}>
+          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "15vw"} mt={"15vh"}>
               {/* Header Section */}
               {/* <Heading as="h3">
                 Liquidity
@@ -412,6 +473,8 @@ const Liquidity: React.FC = () => {
                       isConnected={isConnected}
                       data={vaultData}
                       spotPrice={spotPrice}
+                      priceUSD={priceUSD}
+                      imvPrice={imv}
                       circulatingSupply={circulatingSupply}
                       liquidityRatio={liquidityRatio}
                       capacity={capacity}
