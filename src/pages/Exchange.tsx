@@ -39,6 +39,7 @@ import {
 
 import { formatEther, parseEther } from "viem";
 import {commify, commifyDecimals, getContractAddress} from "../utils";
+import axios from 'axios';
 
 import BalanceCard from "../components/BalanceCard";
 import TradeControlsCard from "../components/TradeControlsCard";
@@ -230,7 +231,53 @@ const Exchange: React.FC = () => {
   const [balanceBeforePurchase, setBalanceBeforePurchase] = useState(0);
   const [balanceBeforeSale, setBalanceBeforeSale] = useState(0);
   const [protocol, setProtocol] = useState("uniswap");
+  const [priceUSD, setPriceUSD] = useState("0.00000000000");
 
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const cached = localStorage.getItem('bnb_usd_price');
+        const cacheTime = localStorage.getItem('bnb_usd_price');
+
+        // Check if cache exists and is fresh (less than 5 minutes old)
+        if (cached && cacheTime && Date.now() - Number(cacheTime) < 5 * 60 * 1000) {
+          setPriceUSD(Number(cached).toFixed(11));
+          return;
+        }
+
+        const url = 'https://api.coingecko.com/api/v3/simple/price';
+
+        const params = {
+          ids: 'binancecoin',
+          vs_currencies: 'usd',
+        };
+
+        const headers = {
+          'x-cg-demo-api-key': process.env.VITE_CG_API_KEY,
+        };
+  
+        const response = await axios.get(url, { params, headers });
+
+        console.log(response)
+        console.log(response.data)
+
+        const freshPrice = response.data['binancecoin'].usd;
+
+        // // Save to state and cache
+        setPriceUSD(Number(freshPrice).toFixed(11));
+
+        localStorage.setItem('bnb_usd_price', freshPrice);
+        localStorage.setItem('bnb_usd_price_time', Date.now().toString());
+
+      } catch (err) {
+        console.log(err.message);
+      }
+    };
+
+    fetchPrice();
+  }, [spotPrice]);
+  
   const {
     data: imv
   } = useContractRead({
@@ -287,17 +334,6 @@ const Exchange: React.FC = () => {
     return poolAddress;
   };
 
-  // We don't need this hook anymore as we're getting the percentage change from PriceData component
-  // const {
-  //   priceData,
-  //   percentageChange
-  // } = useUniswapPrice(
-  //   poolInfo.poolAddress,
-  //   config.chain == "local" ?
-  //    "http://localhost:8545" :
-  //   "https://bsc-dataseed.bnbchain.org/"
-  // );
-  
   /**
    * Fetch all vaults for the "All Markets" view
    */
@@ -1179,6 +1215,7 @@ const Exchange: React.FC = () => {
                       <Box><Text color="#a67c00" fontWeight="bold">SPOT PRICE</Text></Box> 
                       <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
                       <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`}</Text></Box>
+                      <Box><Text>(${commifyDecimals(priceUSD > 0 && spotPrice > 0 ? formatEther(`${spotPrice}`) * priceUSD : 0)})</Text></Box>
                       <Box><Text color={percentChange < 0 ? "red" : percentChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)</Text></Box>
                     </HStack>                    
                     }
