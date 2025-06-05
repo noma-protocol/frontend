@@ -1137,7 +1137,7 @@ const Exchange: React.FC = () => {
           textAlign="left"
           position="relative"
           mt={"50px"}
-          ml={"5px"}
+          ml={"5%"}
         >
           <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "10%"} mr={"10%"} >
             <Box px={4}>
@@ -1201,7 +1201,7 @@ const Exchange: React.FC = () => {
                     </SelectContent>
                 </SelectRoot>
                 </Box>
-                <Box mt={-2} ml={isMobile? 5 : 2}>
+                <Box mt={-2} ml={isMobile? -2 : 2}>
                     {isMobile ?
                     <VStack alignItems={"left"} ml={5}>
                       <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT PRICE</Text></Box>

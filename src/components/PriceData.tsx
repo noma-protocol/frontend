@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import Chart from "react-apexcharts";
-import { Box, HStack, Text, Spinner } from "@chakra-ui/react";
+import { Box, HStack, Text, Spinner, VStack } from "@chakra-ui/react";
 import { css, Global } from "@emotion/react";
 import { ethers } from "ethers";
 import { isMobile } from "react-device-detect";
@@ -591,10 +591,14 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
             </Box>
           </Box>
-          <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
-              <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} 
-              (${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
-          </Box>
+              <VStack mt={-2}>
+                <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
+                    <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
+                </Box>
+                <Box  mt={-2} ml={10}>
+                  <Text fontSize={isMobile ? "xs" : "sm"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
+                </Box>
+              </VStack>
         </HStack>
 
           <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : -2}  borderRadius={5} border="1px solid ivory" mb={5} w={isMobile ? "92%" : "101%"}>
