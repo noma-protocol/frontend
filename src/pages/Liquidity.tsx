@@ -415,7 +415,7 @@ const Liquidity: React.FC = () => {
           mt={"10px"}
           backgroundColor={"blackAlpha.800"}
         >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "15vw"} mt={"15vh"}>
+          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "10%"} mt={"15vh"}>
               {/* Header Section */}
               {/* <Heading as="h3">
                 Liquidity
