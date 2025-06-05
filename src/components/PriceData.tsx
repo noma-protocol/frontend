@@ -29,6 +29,7 @@ type UniswapPriceChartProps = {
   token0Symbol: string;
   token1Symbol: string;
   imv: string;
+  priceUSD: string;
   interval?: string; // Optional interval parameter
 };
 
@@ -56,6 +57,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   token1Symbol,
   isTokenInfoLoading,
   imv,
+  priceUSD,
   interval = "15m", // Default to 15 minute interval
   setPercentChange = () => {}, // Default no-op function
   onPercentChange,
@@ -473,6 +475,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     return () => clearInterval(connectionCheck);
   }, []);
 
+  console.log(Number(formatEther(`${imv || 0}`)) * Number(priceUSD), "IMV in USD");
   return (
     <Box ml={isMobile ? -5 : 0}>
       <Global styles={css`
@@ -589,7 +592,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
             </Box>
           </Box>
           <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
-              <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`}</Text>
+              <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} 
+              (${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
           </Box>
         </HStack>
 
@@ -602,7 +606,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 series={series}
                 type="candlestick"
                 height={isMobile ? 198 : 273}
-                width={isMobile ? "100%" : "101%"}
+                width={isMobile ? "100%" : "100%"}
             />
             </Box>
           </Box>

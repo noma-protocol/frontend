@@ -17,7 +17,7 @@ import SlideControls from "./SlideControls.tsx";
 
 const { formatEther, formatUnits, parseEther } = ethers.utils;
 
-const LiquidityChart = ({ isConnected, data, tokenName, tokenSymbol, spotPrice, circulatingSupply, liquidityRatio, capacity, accumulatedFees, underlyingBalances}) => {
+const LiquidityChart = ({ isConnected, data, tokenName, tokenSymbol, priceUSD, spotPrice, imvPrice, circulatingSupply, liquidityRatio, capacity, accumulatedFees, underlyingBalances}) => {
 
 return (
     <>
@@ -107,7 +107,7 @@ return (
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Capacity ({tokenSymbol})</Text></Table.Cell>
-                  <Table.Cell isNumeric>{commify(formatEther(capacity?.floor))}</Table.Cell>
+                  <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1 || 0) / formatEther(`${imvPrice || 0}`) || 0)}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(capacity?.anchor))}</Table.Cell>
                   <Table.Cell isNumeric>{"n/a"}</Table.Cell>
                   {/* <Table.Cell isNumeric>{"n/a"}</Table.Cell> */}
@@ -115,20 +115,20 @@ return (
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Tick Lower</Text></Table.Cell>
-                  <Table.Cell isNumeric>
-                    {commifyPatched(tickToPrice(data["Floor"]?.lowerTick)[0])}
+                  <Table.Cell isNumeric fontSize="sm"> 
+                    {commifyPatched(tickToPrice(data["Floor"]?.lowerTick)[0])} (${commify(tickToPrice(data["Floor"]?.lowerTick || 0)[0]  * priceUSD)})
                     <Text color="gray" fontSize="13px">
                       ({Number(data["Floor"]?.lowerTick)})
                     </Text>
                   </Table.Cell>
-                  <Table.Cell isNumeric>
-                    {commifyPatched(tickToPrice(data["Anchor"]?.lowerTick))}
+                  <Table.Cell isNumeric fontSize="sm">
+                    {commifyPatched(tickToPrice(data["Anchor"]?.lowerTick))} (${commify(tickToPrice(data["Anchor"]?.lowerTick || 0)[0]  * priceUSD)})
                     <Text color="gray" fontSize="13px">
                       ({Number(data["Anchor"]?.lowerTick)})
                     </Text>
                   </Table.Cell>
-                  <Table.Cell isNumeric>
-                    {commifyPatched(tickToPrice(data["Discovery"]?.lowerTick))}
+                  <Table.Cell isNumeric fontSize="sm">
+                    {commifyPatched(tickToPrice(data["Discovery"]?.lowerTick))} (${commify(tickToPrice(data["Discovery"]?.lowerTick || 0)[0]  * priceUSD)})
                     <Text color="gray" fontSize="13px">
                       ({Number(data["Discovery"]?.lowerTick)})
                     </Text>
@@ -137,20 +137,20 @@ return (
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Tick Upper</Text></Table.Cell>
-                  <Table.Cell isNumeric>
-                    {commifyPatched(tickToPrice(data["Floor"]?.upperTick))}
+                  <Table.Cell isNumeric fontSize="sm">
+                    {commifyPatched(tickToPrice(data["Floor"]?.upperTick))} (${commify(tickToPrice(data["Floor"]?.upperTick || 0)[0]  * priceUSD)})
                     <Text color="gray" fontSize="13px">
                       ({Number(data["Floor"]?.upperTick)})
                     </Text>
                   </Table.Cell>
-                  <Table.Cell isNumeric>
-                    {commifyPatched(tickToPrice(data["Anchor"]?.upperTick))}
+                  <Table.Cell isNumeric fontSize="sm">
+                    {commifyPatched(tickToPrice(data["Anchor"]?.upperTick))} (${commify(tickToPrice(data["Anchor"]?.upperTick || 0)[0]  * priceUSD)})
                     <Text color="gray" fontSize="13px">
                       ({Number(data["Anchor"]?.upperTick)})
                     </Text>
                   </Table.Cell>
-                  <Table.Cell isNumeric>
-                    {commifyPatched(tickToPrice(data["Discovery"]?.upperTick))}
+                  <Table.Cell isNumeric fontSize="sm">
+                    {commifyPatched(tickToPrice(data["Discovery"]?.upperTick))} (${commify(tickToPrice(data["Discovery"]?.upperTick || 0)[0]  * priceUSD)})
                     <Text color="gray" fontSize="13px">
                       ({Number(data["Discovery"]?.upperTick)})
                     </Text>
@@ -213,7 +213,7 @@ return (
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell><Text color="#a67c00" fontSize="xs">Capacity ({tokenSymbol})</Text></Table.Cell>
-                  <Table.Cell  fontSize="xs" isNumeric>{commify(formatEther(capacity?.floor), 2)}</Table.Cell>
+                  <Table.Cell fontSize="xs" isNumeric>{commify(formatEther(data["Floor"]?.amount1 || 0) / formatEther(`${imvPrice || 0}`) || 0)}</Table.Cell>
                   <Table.Cell  fontSize="xs" isNumeric>{commify(formatEther(capacity?.anchor), 2)}</Table.Cell>
                   <Table.Cell  fontSize="xs" isNumeric>{"n/a"}</Table.Cell>
                   {/* <Table.Cell isNumeric>{"n/a"}</Table.Cell> */}
