@@ -48,17 +48,18 @@ const Header: React.FC = () => {
             src={Logo}
             alt="Noma Protocol"
             style={{ width: "80px", height: "80px" }}
+            ml={isMobile ? "0" : "-40px"}
           />
           </Link>
           {/* Remove mx-auto class and add justify-content-start to align items to the left */}
           <ul className="navbar-nav items justify-content-start " >
           <li className="nav-item" style={{border:window.location.href.indexOf("app.oikos.cash/exchange") > -1 ? "1px solid #a67c00" : "none"}}>
-              <Link className="nav-link" href="https://app.oikos.cash/exchange" isExternal>
+              <Link className="nav-link" href="/exchange">
                   <Text color="#f3f7c6">Exchange</Text>
               </Link>
             </li>
             <li className="nav-item" style={{marginLeft: "10px", border:window.location.href.indexOf("app.oikos.cash/markets") > -1 ? "1px solid #a67c00" : "none"}}>
-            <Link className="nav-link" href="https://app.oikos.cash/markets">
+            <Link className="nav-link" href="/markets">
             <Text color="#f3f7c6">Markets</Text>
               </Link>
             </li>
@@ -78,7 +79,7 @@ const Header: React.FC = () => {
               </Link>
             </li>  */}
             <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("app.oikos.cash/liquidity") > -1 ? "1px solid #a67c00" : "none"}}>
-              <Link className="nav-link" href="https://app.oikos.cash/liquidity">
+              <Link className="nav-link" href="/liquidity">
                   <Text color="#f3f7c6">Liquidity</Text>
               </Link>
             </li>
@@ -160,7 +161,7 @@ const Header: React.FC = () => {
                       data-bs-dismiss="modal"
                       style={{ fontSize: "20px", marginTop:"20px"}}
                     >
-                      <a className="btn ml-lg-auto btn-bordered-white" href="https://app.oikos.cash/exchange" >
+                      <a className="btn ml-lg-auto btn-bordered-white" href="/exchange" >
                         Exchange
                       </a>
                     </li>                     
@@ -174,12 +175,12 @@ const Header: React.FC = () => {
                       </a>
                     </li>                 */}
                     <li className="nav-item" style={{ fontSize: "20px", marginTop:"20px"}}>
-                      <a className="btn ml-lg-auto btn-bordered-white" href="https://app.oikos.cash/markets">
+                      <a className="btn ml-lg-auto btn-bordered-white" href="/markets">
                         Markets
                       </a>
                     </li>
                     <li className="nav-item" style={{ fontSize: "20px", marginTop:"20px"}}>
-                      <a className="btn ml-lg-auto btn-bordered-white" href="https://app.oikos.cash/liquidity">
+                      <a className="btn ml-lg-auto btn-bordered-white" href="/liquidity">
                         Liquidity
                       </a>
                     </li>
