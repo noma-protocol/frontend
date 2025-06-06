@@ -596,16 +596,16 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
                     <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
                 </Box>
-                <Box  mt={-2} ml={10}>
+                <Box  mt={-2} ml={2}>
                   <Text fontSize={isMobile ? "xs" : "sm"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
                 </Box>
               </VStack>
               ) : 
               <>
-              <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
+              <Box mt={-3} mr={isMobile ? -15 : 0} ml={isMobile ? 7 : 10} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
                     <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
                 </Box>
-                <Box  mt={-2} ml={10}>
+                <Box  mt={-2} ml={2}>
                   <Text fontSize={isMobile ? "xs" : "sm"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
                 </Box>
               </>}
