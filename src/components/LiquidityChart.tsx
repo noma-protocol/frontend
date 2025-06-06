@@ -28,7 +28,7 @@ return (
         </SimpleGrid>*/}
         <SimpleGrid 
           maxWidth={isMobile ? "40%" : "20%"} 
-          ml={isMobile ? "50vw" : "40vw"} 
+          ml={isMobile ? "50vw" : "50vw"} 
           mt={isMobile ? "-6vh" : "-100px"} 
           columns={2} 
           rows={3} 
@@ -53,7 +53,9 @@ return (
             </Box>
         </SimpleGrid>
         {/* <center> */}
-          <Box ml={isMobile ? "25px" : 0}><Chart positions={data} isMobile={isMobile} /></Box>
+          <Box ml={isMobile ? "25px" : 0}>
+            <Chart positions={data} isMobile={isMobile} />
+            </Box>
           {!isMobile ? (
             <Box pl={5} ml={"5%"}>
             <Table.Root style={{ marginTop: "20px" }} variant="simple" maxWidth={"80%"} backgroundColor="#222831" borderRadius={"md"} >
