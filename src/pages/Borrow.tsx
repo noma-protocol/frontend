@@ -59,7 +59,7 @@ const { JsonRpcProvider } = ethers.providers;
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  "https://config.RPC_URL/"
+  `https://${config.RPC_URL}/`
 );
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
