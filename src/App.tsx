@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { LanguageProvider } from "./core/LanguageProvider";
 import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
 import { WagmiConfig } from "wagmi";
+import React from "react";
 import { bsc, bscTestnet, localhost } from "viem/chains";
 
 import { monad } from './chains/monad';
@@ -13,7 +14,6 @@ import { switchNetwork, watchNetwork } from "wagmi/actions";
 import "react-toastify/dist/ReactToastify.css";
 import { MenuProvider } from "./hooks/MenuContext"; // Import the MenuProvider
 
-import React from "react";
 import ReactGA from 'react-ga';
 import { Provider } from "./components/ui/provider"
 

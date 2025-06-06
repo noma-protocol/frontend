@@ -588,7 +588,7 @@ const Presale: React.FC = () => {
         {/* {!hasExpired || address == presaleInfo?.deployer ? ( */}
           <>
         <VStack spacing={8} w="full" px={4}>
-          <Box w="full" maxW="1000px" ml={isMobile?0:"18%"}>
+          <Box w="full" maxW="1000px" ml={isMobile?0:"2%"}>
             {contractAddress != "0x0000000000000000000000000000000000000000" && contractAddress ? 
           <VStack spacing={4} w="full" align="center">
             {/* Content Box */}

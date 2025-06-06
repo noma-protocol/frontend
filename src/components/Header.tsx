@@ -104,7 +104,7 @@ const Header: React.FC = () => {
 
           <ul className="navbar-nav action">
             <li className="nav-item ml-2" >
-              <Button onClick={() => open()} variant="outline" h="40px" w="220px" >
+              <Button  onClick={() => open()} variant="outline" h="40px" w="220px" >
                 <p style={{color:"#a67c00", fontSize:(isMobile ? "12px" : "16px")}}>
                 <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>
                 &nbsp;&nbsp;{isConnected
@@ -114,6 +114,7 @@ const Header: React.FC = () => {
                   : "Conectar billetera"}
                 </p>
               </Button>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </li>
           </ul>
 

@@ -460,11 +460,11 @@ const Markets: React.FC = () => {
           color="white"
           textAlign="left"
           mt={isMobile ? "18%" : "100px"}
-          ml={isMobile ? 2 : "10%"}
+          ml={isMobile ? 2 : "2%"}
           alignContent={"center"}
           alignItems={"center"}
         >
-          <Box width="98%" maxW="1200px" mx="auto" >
+          <Box width="100%" maxW="1100px" mx="auto" >
             <Box px={4} mb={4}>
               <HStack spacing={4}>
                 <Button
@@ -504,7 +504,7 @@ const Markets: React.FC = () => {
                 <Text>No vaults found.<br /><br /><br /><br /><br /><br /><br /><br /></Text>
               ) : (
                 <VStack align="start" spacing={6} width="100%">
-                  <Box width="100%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4}>
+                  <Box width="95%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4}>
                     <Box>
                       <Text fontWeight="bold" color="#bf9b30">Name</Text>
                     </Box>
@@ -547,20 +547,20 @@ const Markets: React.FC = () => {
                         border="1px solid"
                         borderColor={isMobile? vault.presaleContract != zeroAddress ? "#a67c00" : "gray" : "gray"}
                         borderRadius="md"
-                        w="100%"
+                        w="98%"
                         cursor="pointer"
                         onClick={() => handleVaultClick(vault)}
                         _hover={{ backgroundColor: "#393E46" }}
                     >
-                      <VStack width="100%" spacing={4}>
-                        <Box width="100%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4} alignItems="center">
+                      <VStack width="98%" spacing={4}>
+                        <Box width="98%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4} alignItems="center">
                           {/* Token Name */}
-                          <Box>
+                          <Box ml={isMobile ? 0 : "-20px"}>
                             <Text>{vault.tokenName}</Text>
                           </Box>
 
                           {/* Token Symbol */}
-                          <Box>
+                          <Box ml={isMobile ? 0 : "-15px"}>
                             <HStack>
                               <Box><Text mr={2} >{vault.tokenSymbol}</Text></Box>
                               <Box>
