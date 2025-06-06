@@ -34,21 +34,30 @@ return (
           rows={3} 
           p={2}   
         >
-          <Box w="120px" textAlign="left"><Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>Circulating</Text></Box>
-          <Box w="auto" textAlign="right"><Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>{isMobile ? "L.R." : "Liquidity Ratio"}</Text></Box>
-          <Box w="auto" textAlign={isMobile ? "right" : "left"} fontSize={isMobile?"xs":"14px"}>
-            <label>{commify(Number(formatEther(circulatingSupply)).toFixed(6))}</label>
-            {/* <Text mt={-2} fontSize={"small"}>(NOMA)</Text> */}
+          <Box w="120px" textAlign="left" >
+            <Text color="#a67c00" fontSize={isMobile?"xs":"13px"}>Circulating</Text>
           </Box>
-          <Box w="auto" textAlign="right" fontSize={isMobile?"xs":"14px"}>
+          <Box w="auto" textAlign="right">
+            <Text color="#a67c00" fontSize={isMobile?"xs":"13px"}>
+            {isMobile ? "L.R." : "Liquidity Ratio"}
+            </Text>
+            </Box>
+          <Box w="auto" textAlign={isMobile ? "right" : "left"} fontSize={isMobile?"xs":"13px"}>
+            <label>{commify(Number(formatEther(circulatingSupply)).toFixed(6))}</label>
+            <Text mt={-2} fontSize={"small"}>(OKS)</Text>
+          </Box>
+          <Box w="auto" textAlign="right" fontSize={isMobile?"xs":"13px"} >
             <label>{commifyPatched(formatEther(liquidityRatio), 2)}</label>
           </Box>
 
           <Box w="auto" textAlign="left" mt={2}>
-              <Text color="#a67c00" fontSize={isMobile?"xs":"14px"}>Spot</Text>
-              <Box mt={-6} fontSize={isMobile?"xs":"14px"}>
+              <Text color="#a67c00" fontSize={isMobile?"xs":"13px"}>Spot</Text>
+              <Box mt={-6} fontSize={isMobile?"xs":"13px"}>
               <label>{commifyPatched(formatEther(spotPrice))}</label>
-              <Text mt={isMobile ? 0 : -2} fontSize={"small"} fontSize={isMobile?"8px":"14px"}>(WBNB/{tokenSymbol})</Text>
+              <Text mt={isMobile ? 0 : -1} fontSize={"small"} fontSize={isMobile?"8px":"13px"}>(WBNB/{tokenSymbol})</Text>
+              </Box>
+              <Box>
+                <Text fontSize={isMobile?"xs":"13px"}>${commify(Number(formatEther(spotPrice)) * priceUSD, 4)}</Text>
               </Box>
             </Box>
         </SimpleGrid>
