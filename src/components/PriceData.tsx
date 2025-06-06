@@ -58,7 +58,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   isTokenInfoLoading,
   imv,
   priceUSD,
-  interval = "15m", // Default to 15 minute interval
+  interval = "24h", // Default to 24h interval
   setPercentChange = () => {}, // Default no-op function
   onPercentChange,
 }) => {
