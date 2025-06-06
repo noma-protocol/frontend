@@ -858,7 +858,7 @@ const Stake = () => {
 
                             </SimpleGrid>
                         </GridItem>
-                        <GridItem  ml={"-8vh"}>
+                        <GridItem  ml={"-6vh"}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
