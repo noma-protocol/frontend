@@ -828,7 +828,7 @@ const Stake = () => {
                                         h={"25px"}  
                                         borderColor={"#a67c00"} 
                                         variant="outline" 
-                                        ml={10} 
+                                        ml={5} 
                                         onClick={() => handleUnstake()}  
                                     disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
                                         w={"120px"}

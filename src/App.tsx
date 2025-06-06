@@ -43,7 +43,7 @@ function App() {
   createWeb3Modal({ wagmiConfig, projectId, chains });
 
   watchNetwork(async (network) => {
-
+    console.log("Network changed:", network.chain?.name);
     if (network.chain?.name != "local") {
       await switchNetwork({
         chainId: config.chain == "local" ? 1337 : 56,
