@@ -1,5 +1,6 @@
 const environment = import.meta.env.VITE_ENV;
 const chain = import.meta.env.VITE_CHAIN;
+const RPC_URL = import.meta.env.VITE_RPC_URL;
 const feeTiers = [3000, 10000];
 
 const oksVault = "0x5EffFAD2602DCe520C09c58fa88b0e06609C52b8";
@@ -20,6 +21,7 @@ const protocolAddresses = {
 
 export default {
     chain,
+    RPC_URL,
     vault2ProtocolMap, 
     feeTiers,
     protocolAddresses,
