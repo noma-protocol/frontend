@@ -35,11 +35,11 @@ const addresses = config.chain === "local"
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  "https://https://bnb-mainnet.g.alchemy.com/v2/ABiHuR-8MHnojsrXqqV_tAnPKJSZyUbN/"
+  "https://process.env.VITE_RPC_URL/"
 );
 
 const bscProvider = new JsonRpcProvider(
-    "https://bnb-mainnet.g.alchemy.com/v2/ABiHuR-8MHnojsrXqqV_tAnPKJSZyUbN"
+    "process.env.VITE_RPC_URL"
 );
 
 const Whitelist = await import(`../assets/Whitelist.json`);
