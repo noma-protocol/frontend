@@ -28,6 +28,8 @@ import { commify } from '../utils';
 import bnbLogo from '../assets/images/bnb.png';
 import oksLogo from '../assets/images/logo_dark.png';
 import placeHolder from '../assets/images/question.svg';
+import Wrap from './Wrap'; // Assuming Wrap component is in the same directory
+import Unwrap from './Unwrap';
 
 const { formatEther } = ethers.utils;
 
@@ -155,65 +157,17 @@ const BalanceCard = ({
                 <Box ml={-2} bgColor={"#F5F5DC"} px={2} borderRadius={5} border="1px solid gray" mt={3} h="20px" w={isMobile ? "100px" : "130px"} fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
                     <Text fontSize={fontSize} color="gray.800"  h={"20px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
-                <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
-                    <Box>
-                    <DrawerRoot >
-                        <DrawerTrigger asChild>
-                            <Button 
-                                disabled={isWrapping}
-                                border="1px solid"
-                                borderColor={actionType === 'wrap' ? "#a67c00" : "gray"}
-                                variant="outline" 
-                                h="25px"
-                                ml={2}
-                                w={buttonSize}
-                                onClick={() => setActionType('wrap')}
-                                color="white"
-                                borderRadius={5}
-                            >
-                                <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
-                                    {isWrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Wrap</Text>}
-                                </Box>
-                            </Button>
-                        </DrawerTrigger>
-                        <DrawerBackdrop />
-                        <DrawerContent>
-                            <Box p={4} mt={{ base: "50%", md: "80%" }} >
-                                <DrawerHeader>
-                                    <DrawerTitle>
-                                        <Text as="h3" color="#bf9b30">Wrap BNB</Text>
-                                    </DrawerTitle>
-                                    <DrawerCloseTrigger asChild>
-                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada"><Text color="#dadada">×</Text></Button>
-                                    </DrawerCloseTrigger>
-                                </DrawerHeader>
-                                <DrawerBody>
-                                    <Input
-                                        placeholder="Enter amount to wrap"
-                                        onChange={(e) => setWrapAmount(e.target.value)}
-                                        w="100%"
-                                        mb={4}
-                                    />
-                                    <HStack mt={4} spacing={3} justifyContent="left" ml={2}>
-                                        <DrawerActionTrigger asChild>
-                                            <Button  w="45%" colorScheme="blue" onClick={() => setWrapAmount('0')} border="1px solid gray" color="black" backgroundColor={"#dadada"}>
-                                                <Box minH="20px" display="flex" alignItems="center" justifyContent="center" color="black">
-                                                    Cancel
-                                                </Box>
-                                            </Button>
-                                        </DrawerActionTrigger>
-                                        <Button  w="45%" variant="outline" onClick={handleAction} border="1px solid gray">
-                                            <Box minH="20px" display="flex" alignItems="center" justifyContent="center" color="white">
-                                                {isWrapping ? <Spinner size="sm" /> : "Confirm"}
-                                            </Box>
-                                        </Button>
-                                    </HStack>
-                                </DrawerBody>
-                            </Box>
-                        </DrawerContent>
-                    </DrawerRoot>
-                    </Box>
-                </Box>
+                <Wrap 
+                    wrapAmount={wrapAmount}
+                    isWrapping={isWrapping}
+                    setWrapAmount={setWrapAmount}
+                    handleAction={handleAction}
+                    setActionType={setActionType}
+                    actionType={actionType}
+                    fontSize={fontSize}
+                    buttonSize={buttonSize}
+                    bnbBalance={ethBalance}
+                />
                 
                 {/* WBNB Row */}
                 <Box p={2} height="42px" display="flex" alignItems="center">
@@ -228,66 +182,19 @@ const BalanceCard = ({
                 <Box  ml={-2} bgColor={"#F5F5DC"} w={isMobile ? "100px" : "130px"}  color="gray.800"  px={2} borderRadius={5} border="1px solid gray" mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     {commify(formatEther(`${token1Balance || 0}`))}
                 </Box>
-                <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
-                    <DrawerRoot>
-                        <DrawerTrigger asChild>
-                            <Button 
-                                border="1px solid"
-                                borderColor={actionType === 'unwrap' ? "#a67c00" : "gray"}
-                                disabled={isUnwrapping || token1Balance == 0} 
-                                variant="outline" 
-                                h="25px"
-                                w={buttonSize}
-                                // mt={-2}
-                                mt={-1}
-                                ml={2}
-                                onClick={() => setActionType('unwrap')}
-                                color="white"
-                                borderRadius={5}
-                            >
-                                <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
-                                    {isUnwrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Unwrap</Text>}
-                                </Box>
-                            </Button>
-                        </DrawerTrigger>
-                        <DrawerBackdrop />
-                        <DrawerContent>
-                            <Box p={4} mt={{ base: "50%", md: "80%" }}>
-                                <DrawerHeader>
-                                    <DrawerTitle>
-                                        <Text as="h3" color="#bf9b30">Unwrap {token1Symbol}</Text>
-                                    </DrawerTitle>
-                                    <DrawerCloseTrigger asChild>
-                                        <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada"><Text color="#dadada">×</Text></Button>
-                                    </DrawerCloseTrigger>
-                                </DrawerHeader>
-                                <DrawerBody>
-                                    <Input
-                                        placeholder="Enter amount to unwrap"
-                                        onChange={(e) => setWrapAmount(e.target.value)}
-                                        w="100%"
-                                        mb={4}
-                                    />
-                                    <HStack mt={4} spacing={3} justifyContent="left" ml={2}>
-                                        <DrawerActionTrigger asChild>
-                                            <Button w="45%"  colorScheme="blue"  onClick={() => setWrapAmount('0')} border="1px solid gray" color="black" backgroundColor={"#dadada"}>
-                                                <Box minH="20px" display="flex" alignItems="center" justifyContent="center">
-                                                    Cancel
-                                                </Box>
-                                            </Button>
-                                        </DrawerActionTrigger>
-                                        <Button w="45%" variant="outline" onClick={handleAction} border="1px solid gray" color="white">
-                                            <Box minH="20px" display="flex" alignItems="center" justifyContent="center" >
-                                                {isUnwrapping ? <Spinner size="sm" /> : "Confirm"}
-                                            </Box>
-                                        </Button>
-                                    </HStack>
-                                </DrawerBody>
-                            </Box>
-                        </DrawerContent>
-                    </DrawerRoot>
-                </Box>
                 
+                <Unwrap
+                    wrapAmount={wrapAmount}
+                    isUnwrapping={isUnwrapping}
+                    setWrapAmount={setWrapAmount}
+                    handleAction={handleAction}
+                    setActionType={setActionType}
+                    actionType={actionType}
+                    fontSize={fontSize}
+                    buttonSize={buttonSize}
+                    token1Balance={token1Balance}
+                />
+
                 {/* Token Row */}
                 <Box p={2}  display="flex" alignItems="center" mt={-10}>
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
