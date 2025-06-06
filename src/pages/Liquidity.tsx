@@ -49,7 +49,7 @@ const addressModelHelper = getContractAddress(addresses, config.chain == "local"
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  `${config.RPC_URL}/`
+  config.RPC_URL
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
