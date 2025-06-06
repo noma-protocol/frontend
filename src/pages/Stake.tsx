@@ -342,7 +342,7 @@ const Stake = () => {
         functionName: "approve",
         args: [
             vaultDescription.stakingContract,
-            parseEther(`${(stakeAmount + (stakeAmount / 100)) || "0"}`)  // Ensure stakeAmount is a string
+            parseEther(`${(stakeAmount || 0) }`) + parseEther(`${0.000000001}`)   
         ],
         onSuccess(data) {
 
@@ -378,7 +378,8 @@ const Stake = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsStaking(false);
 
-            const msg = Number(error.message.toString().indexOf("StakingNotEnabled")) > -1 ? "Staking not enabled." :
+            const msg = Number(error.message.toString().indexOf("0xfb8f41b2")) > -1 ? "Insufficient allowance" :
+                        Number(error.message.toString().indexOf("StakingNotEnabled")) > -1 ? "Staking not enabled." :
                         Number(error.message.toString().indexOf("InvalidParameters")) > -1 ? "Can't stake zero." :
                         Number(error.message.toString().indexOf("CooldownNotElapsed")) > -1 ? "Cooldown not elapsed. Try again later." :
                         Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
