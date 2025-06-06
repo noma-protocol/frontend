@@ -373,6 +373,9 @@ const Stake = () => {
         ],
         onSuccess(data) {
             setIsStaking(false);
+            setTimeout(() => {
+                window.location.reload();
+            }, 4000); // 4000ms = 4 seconds
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
