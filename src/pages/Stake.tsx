@@ -532,7 +532,7 @@ const Stake = () => {
                     textAlign="left"
                     position="relative"
                     mt={"50px"}
-                    ml={isMobile ? 0 : "-5vw"}
+                    ml={isMobile ? 0 : "-2vw"}
                     mb={"15%"}
                 >
                  {isAddress(vaultAddress) ? (
@@ -773,7 +773,7 @@ const Stake = () => {
                         </Box>                           
                         </Flex>
                     ) : ( 
-                    <Box w="90%">
+                    <Box w="99%">
                     <Grid
                         h="600px"
                         templateRows="repeat(2, 1fr)"
@@ -786,7 +786,7 @@ const Stake = () => {
                         // border="1px solid red"
 
                     >
-                        <GridItem border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
+                        <GridItem w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                             <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
                             <SimpleGrid columns={5} mt={-5} fontSize={"14px"}>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
@@ -854,7 +854,7 @@ const Stake = () => {
 
                             </SimpleGrid>
                         </GridItem>
-                        <GridItem ml={-10}>
+                        <GridItem  ml={"-8vh"}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
@@ -876,9 +876,9 @@ const Stake = () => {
                                 page="stake" 
                             />
                         </GridItem>
-                        <GridItem border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
+                        <GridItem  w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                         <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">New Position</Text>
-                        <SimpleGrid columns={2} w="700px" mt={-5} fontSize={"14px"}>
+                        <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"14px"}>
                             <Box w="500px" backgroundColor={"#bf9b30"}  mb={2}>
                                 <Text>&nbsp;<b>Amount</b></Text>
                             </Box>

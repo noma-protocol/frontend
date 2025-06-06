@@ -709,7 +709,7 @@ const Borrow = () => {
                     position="relative"
                     mt={"50px"}
                     mb={"15%"}
-                    ml={isMobile ? 0 : "-5vw"}
+                    ml={isMobile ? 0 : "-2vw"}
                     // ml={isMobile ? "20px" : 0}
                     // border="1px solid red"
                 >
@@ -1041,7 +1041,7 @@ const Borrow = () => {
                         </Flex>
                                                  
                     ) : (
-                    <Box  w="90%">
+                    <Box  w="99%">
                     {/* <Heading as="h2">
                         Borrow
                     <Text fontSize="md">
@@ -1059,7 +1059,7 @@ const Borrow = () => {
                         py={4}
                         // border="1px solid yellow"
                     >
-                        <GridItem border={"1px solid white"} p={4} px={6} ml={5} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem w="90%" border={"1px solid white"} p={4} px={6} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                             <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">Active Loan</Text>
                             <SimpleGrid columns={5} mt={-5} fontSize="xs">
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
@@ -1220,7 +1220,7 @@ const Borrow = () => {
                                 )}
                             </SimpleGrid>
                         </GridItem>
-                        <GridItem ml={-10}>
+                        <GridItem ml={"-8vh"}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
@@ -1242,9 +1242,9 @@ const Borrow = () => {
                                 page="borrow" 
                             />
                         </GridItem>
-                        <GridItem border={"1px solid white"} p={4} px={6} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem w="90%" border={"1px solid white"} p={4} px={6} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                         <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">New Loan</Text>
-                        <SimpleGrid columns={3} w="700px" mt={-5}>
+                        <SimpleGrid columns={3} w="100%" mt={-5}>
                             <Box w="500px"backgroundColor={"#a67c00"}  mb={2}>
                                 <Text>&nbsp;<b>Amount</b></Text>
                             </Box>
