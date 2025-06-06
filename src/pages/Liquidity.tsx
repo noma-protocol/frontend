@@ -49,7 +49,7 @@ const addressModelHelper = getContractAddress(addresses, config.chain == "local"
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  "https://bsc-dataseed.bnbchain.org/"
+  "https://https://bnb-mainnet.g.alchemy.com/v2/ABiHuR-8MHnojsrXqqV_tAnPKJSZyUbN/"
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
