@@ -271,7 +271,7 @@ const Borrow = () => {
         functionName: "approve",
         args: [
             vaultAddress,
-            isAdding ?  parseEther(`${extraCollateral}`)  : parseEther(`${collateral}`)
+            isAdding ?  parseEther(`${extraCollateral + (extraCollateral/100)}`)  : parseEther(`${collateral + (collateral/100)}`)
         ],
         onSuccess(data) {
             if (isAdding) {
@@ -346,7 +346,8 @@ const Borrow = () => {
             setIsBorrowing(false);
             setIsLoading(false);
 
-            const msg = Number(error.message.toString().indexOf("0x76166401")) > -1 ? "Invalid duration" :
+            const msg = Number(error.message.toString().indexOf("0xfb8f41b2")) > -1 ? "Insufficient allowance" :
+                        Number(error.message.toString().indexOf("0x76166401")) > -1 ? "Invalid duration" :
                         Number(error.message.toString().indexOf("0x39218f3b")) > -1 ? "Not permitted before first shift" :
                         Number(error.message.toString().indexOf("_deployPosition(2)")) > -1 ? "Trading did not start yet" :
                         Number(error.message.toString().indexOf("NoLiquidity")) > -1 ? "Not enough liquidity" :
