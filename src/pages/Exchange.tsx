@@ -1139,7 +1139,7 @@ const Exchange: React.FC = () => {
           mt={"50px"}
           ml={"5%"}
         >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "5%"} mr={isMobile ? "0" : "15%"} >
+          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "5%"} mr={isMobile ? "5" : "15%"} >
             <Box px={4}>
               {/* Header Section */}
               {/* <Heading as="h3">
