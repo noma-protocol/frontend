@@ -1228,7 +1228,7 @@ const Exchange: React.FC = () => {
                         {/* <Line options={options} data={chartData} /> */}
                         <PriceData
                           poolAddress={poolInfo.poolAddress}
-                          providerUrl=`https://${config.RPC_URL}/`
+                          providerUrl={`https://${config.RPC_URL}/`}
                           isTokenInfoLoading={isTokenInfoLoading}
                           token0Symbol={token0Info?.tokenSymbol}
                           token1Symbol={token1Info.tokenSymbol}
@@ -1323,7 +1323,7 @@ const Exchange: React.FC = () => {
                               priceUSD={priceUSD} 
                               imv={imv}
                               poolAddress={poolInfo.poolAddress}
-                              providerUrl=`https://${config.RPC_URL}/`
+                              providerUrl={`https://${config.RPC_URL}/`}
                               isTokenInfoLoading={isTokenInfoLoading}
                               token0Symbol={token0Info?.tokenSymbol}
                               token1Symbol={token1Info.tokenSymbol}
