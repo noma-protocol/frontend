@@ -431,7 +431,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         </RadioGroup>          
          </Box>
 
-        <Box w="100%" mt={2} mb={isMobile ? 0 : 4}>
+        <Box w="90%" mt={2} mb={isMobile ? 0 : 4}>
           <HStack>
             
           <RadioGroup
@@ -448,7 +448,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             border="1px solid"
             borderColor={"#a67c00"}
             px={12}
-            w={isMobile ?"70vw":"100%"}
+            w={isMobile ?"70vw":"90%"}
             h="35px"
             ml={isMobile? 0: -5}
             borderLeft={0}
