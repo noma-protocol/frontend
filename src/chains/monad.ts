@@ -13,7 +13,7 @@ export const monad = {
       http: ['https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW'],
     },
     public: {
-      http: ['https://process.env.VITE_RPC_URL/'],
+      http: ['https://config.RPC_URL/'],
     },
   },
   blockExplorers: {
