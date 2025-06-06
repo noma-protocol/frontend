@@ -14,7 +14,7 @@ export const monad = {
       http: ['https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW'],
     },
     public: {
-      http: [`${config.RPC_URL}/`],
+      http: [config.RPC_URL],
     },
   },
   blockExplorers: {

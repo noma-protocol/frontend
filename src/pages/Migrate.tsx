@@ -35,11 +35,11 @@ const addresses = config.chain === "local"
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  `${config.RPC_URL}/`
+  config.RPC_URL
 );
 
 const bscProvider = new JsonRpcProvider(
-    "config.RPC_URL"
+    config.RPC_URL
 );
 
 const Whitelist = await import(`../assets/Whitelist.json`);

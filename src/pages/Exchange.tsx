@@ -90,7 +90,7 @@ const QuoterAbi = QuoterArtifact.abi;
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
-  `${config.RPC_URL}/`
+  config.RPC_URL
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
@@ -1228,7 +1228,7 @@ const Exchange: React.FC = () => {
                         {/* <Line options={options} data={chartData} /> */}
                         <PriceData
                           poolAddress={poolInfo.poolAddress}
-                          providerUrl={`${config.RPC_URL}/`}
+                          providerUrl={config.RPC_URL}
                           isTokenInfoLoading={isTokenInfoLoading}
                           token0Symbol={token0Info?.tokenSymbol}
                           token1Symbol={token1Info.tokenSymbol}
@@ -1323,7 +1323,7 @@ const Exchange: React.FC = () => {
                               priceUSD={priceUSD} 
                               imv={imv}
                               poolAddress={poolInfo.poolAddress}
-                              providerUrl={`${config.RPC_URL}/`}
+                              providerUrl={config.RPC_URL}
                               isTokenInfoLoading={isTokenInfoLoading}
                               token0Symbol={token0Info?.tokenSymbol}
                               token1Symbol={token1Info.tokenSymbol}
