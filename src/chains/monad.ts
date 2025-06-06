@@ -1,4 +1,5 @@
 import { type Chain } from 'viem'
+import config from '../config'
 
 export const monad = {
   id: 56,
@@ -13,7 +14,7 @@ export const monad = {
       http: ['https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW'],
     },
     public: {
-      http: ['https://config.RPC_URL/'],
+      http: [`https://${config.RPC_URL}/`],
     },
   },
   blockExplorers: {
