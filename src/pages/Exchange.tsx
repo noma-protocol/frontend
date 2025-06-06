@@ -1137,7 +1137,7 @@ const Exchange: React.FC = () => {
           textAlign="left"
           position="relative"
           mt={"50px"}
-          ml={"2%"}
+          ml={isMobile ? "2%" : "5%"}
         >
           <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "5%"} mr={isMobile ? "5" : "15%"} >
             <Box px={4}>
