@@ -154,8 +154,8 @@ const BalanceCard = ({
                         <Text fontSize="xs" mt={"-2px"} fontWeight={"bold"} ml={2}>BNB</Text>
                     </HStack>
                 </Box>
-                <Box ml={-2} bgColor={"#F5F5DC"} px={2} borderRadius={5} border="1px solid gray" mt={3} h="20px" w={isMobile ? "100px" : "130px"} fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
-                    <Text fontSize={fontSize} color="gray.800"  h={"20px"}>{commify(formattedEthBalance)}</Text>
+                <Box ml={-2} bgColor={"#18181b"} px={2} borderRadius={5}  mt={3} h="20px" w={isMobile ? "100px" : "130px"} fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
+                    <Text fontSize={fontSize} color="white"  h={"20px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Wrap 
                     wrapAmount={wrapAmount}
@@ -179,8 +179,8 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box  ml={-2} bgColor={"#F5F5DC"} w={isMobile ? "100px" : "130px"}  color="gray.800"  px={2} borderRadius={5} border="1px solid gray" mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
-                    {commify(formatEther(`${token1Balance || 0}`))}
+                <Box  ml={-2} bgColor={"#18181b"} w={isMobile ? "100px" : "130px"}  color="gray.800"  px={2} borderRadius={5}  mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                    <Text color="white" fontSize="xs">{commify(formatEther(`${token1Balance || 0}`))}</Text>
                 </Box>
                 
                 <Unwrap
@@ -215,8 +215,8 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box ml={-2} bgColor={"#F5F5DC"} w={isMobile ? "100px" : "130px"}  color="gray.800" px={2} borderRadius={5} border="1px solid gray" mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
-                    {commify(formatEther(`${token0Balance || 0}`))}
+                <Box ml={-2} bgColor={"#18181b"} w={isMobile ? "100px" : "130px"}  color="gray.800" px={2} borderRadius={5} mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                    <Text fontSize="xs" color="white">{commify(formatEther(`${token0Balance || 0}`))}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center"  mt={2}>
                     {page == "exchange" ?
@@ -234,6 +234,7 @@ const BalanceCard = ({
                                 borderColor={withBg ? "gray" : "none"}
                                 color="white"
                                 borderRadius={5}
+                                _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Borrow
@@ -251,6 +252,7 @@ const BalanceCard = ({
                                 borderColor={withBg ? "gray" : "none"}
                                 color="white"
                                 borderRadius={5}
+                                _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Stake

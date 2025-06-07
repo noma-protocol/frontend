@@ -71,6 +71,7 @@ const Unwrap = ({
                         onClick={() => setActionType('wrap')}
                         color="white"
                         borderRadius={5}
+                        _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                     >
                         <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                             {isWrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Unwrap</Text>}
@@ -85,7 +86,7 @@ const Unwrap = ({
                                 <Text as="h3" color="#bf9b30">Unwrap BNB</Text>
                             </DrawerTitle>
                             <DrawerCloseTrigger asChild>
-                                <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada"><Text color="#dadada">×</Text></Button>
+                                <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada" _hover={{ bg: "#f44336", color: "white" }}><Text color="#dadada">×</Text></Button>
                             </DrawerCloseTrigger>
                         </DrawerHeader>
                         <DrawerBody>
@@ -104,13 +105,13 @@ const Unwrap = ({
 
                             <HStack mt={4} spacing={3} justifyContent="left" ml={2}>
                                 <DrawerActionTrigger asChild>
-                                    <Button  w="45%" colorScheme="blue" onClick={() => setWrapAmount('0')} border="1px solid gray" color="black" backgroundColor={"#dadada"}>
+                                    <Button  w="45%" colorScheme="blue" onClick={() => setWrapAmount('0')} border="1px solid gray" color="black" backgroundColor={"#dadada"} _hover={{ bg: "#f44336", borderColor: "#f44336", color: "white" }}>
                                         <Box minH="20px" display="flex" alignItems="center" justifyContent="center" color="black">
                                             Cancel
                                         </Box>
                                     </Button>
                                 </DrawerActionTrigger>
-                                <Button  w="45%" variant="outline" onClick={handleAction} border="1px solid gray">
+                                <Button  w="45%" variant="outline" onClick={handleAction} border="1px solid gray" _hover={{ bg: "#4CAF50", borderColor: "#4CAF50", color: "white" }}>
                                     <Box minH="20px" display="flex" alignItems="center" justifyContent="center" color="white">
                                         {isWrapping ? <Spinner size="sm" /> : "Confirm"}
                                     </Box>
