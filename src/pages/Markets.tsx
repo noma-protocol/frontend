@@ -506,7 +506,7 @@ const Markets: React.FC = () => {
                 <VStack align="start" spacing={6} width="100%">
                   <Box width="95%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4}>
                     <Box>
-                      <Text fontWeight="bold" color="#bf9b30">Name</Text>
+                      <Text fontWeight="bold" color="#bf9b30">&nbsp;Name</Text>
                     </Box>
                     <Box>
                       <Text fontWeight="bold" color="#bf9b30">Symbol</Text>
@@ -555,7 +555,7 @@ const Markets: React.FC = () => {
                       <VStack width="98%" spacing={4}>
                         <Box width="98%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4} alignItems="center">
                           {/* Token Name */}
-                          <Box ml={isMobile ? 0 : "-20px"}>
+                          <Box ml={isMobile ? 0 : "-10px"}>
                             <Text>{vault.tokenName}</Text>
                           </Box>
 
@@ -600,7 +600,7 @@ const Markets: React.FC = () => {
                               </Box>
 
                               {/* Presale Status */}
-                              <Box textAlign="center">
+                              <Box textAlign="center" ml={2}>
                                 {hasPresale ? (
                                   <Link href={`/presale?a=${vault.presaleContract}`} target="_blank">
                                     {vault.finalized ? (
