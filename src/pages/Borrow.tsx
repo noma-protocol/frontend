@@ -804,7 +804,7 @@ const Borrow = () => {
                                     <VStack w="100%">
                                         <Box ml={-8} mt={4}><Text fontSize="xs" color="#a67c00">Actions</Text></Box>
                                     <Box >                              
-                                    <HStack alignItems="center" justifyContent="space-between" w="100%" pb={2} ml={isMobile ? "35%" : 0}>
+                                    <HStack alignItems="center" justifyContent="space-between" w="100%" pb={2} ml={isMobile ? "35%" : 0} mt={-2}>
                                     <Box>
                                         <LoanAddCollateral
                                             size="sm"
@@ -1131,8 +1131,8 @@ const Borrow = () => {
                                     </Box>
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0" h="25px" borderLeft="none" borderRight="none" fontSize="sm">{commifyDecimals(ltv, 2)}</Box>
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0 5px 5px 0" h="25px" borderLeft="none" fontSize={"sm"}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
-                                    <Box px={2}  mt={1} ml={-10}> 
-                                    <VStack ml={10}>
+                                    <Box px={2}  mt={1} ml={-10} > 
+                                    <VStack ml={10}> 
                                     <LoanAddCollateral
                                         size="lg"
                                         token0Symbol={token0Info.tokenSymbol}
