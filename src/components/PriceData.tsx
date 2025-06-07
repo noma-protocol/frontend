@@ -148,16 +148,51 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     }
   };
 
-  // Calculate percentage change based on OHLC data
-  const calculatePercentChange = (ohlcData: any[]) => {
+  // Calculate percentage change based on OHLC data and selected interval
+  const calculatePercentChange = (ohlcData: any[], interval: string) => {
     if (!ohlcData || ohlcData.length < 2) return 0;
 
-    // Get first and last price points
-    const firstPrice = ohlcData[0].y[3]; // close of first candle (not open)
-    const lastPrice = ohlcData[ohlcData.length - 1].y[3]; // close of last candle
+    const now = new Date().getTime();
+    let targetTime: number;
+
+    // Calculate the target time based on the selected interval
+    switch (interval) {
+      case "15m":
+        targetTime = now - (15 * 60 * 1000); // 15 minutes ago
+        break;
+      case "1h":
+        targetTime = now - (60 * 60 * 1000); // 1 hour ago
+        break;
+      case "24h":
+        targetTime = now - (24 * 60 * 60 * 1000); // 24 hours ago
+        break;
+      default:
+        // Fallback to first candle if interval not recognized
+        const firstPrice = ohlcData[0].y[3];
+        const lastPrice = ohlcData[ohlcData.length - 1].y[3];
+        return ((lastPrice - firstPrice) / firstPrice) * 100;
+    }
+
+    // Find the candle closest to the target time
+    let closestCandle = ohlcData[0];
+    let minTimeDiff = Math.abs(new Date(ohlcData[0].x).getTime() - targetTime);
+
+    for (const candle of ohlcData) {
+      const candleTime = new Date(candle.x).getTime();
+      const timeDiff = Math.abs(candleTime - targetTime);
+      
+      if (timeDiff < minTimeDiff) {
+        minTimeDiff = timeDiff;
+        closestCandle = candle;
+      }
+    }
+
+    // Use the close price of the closest candle as the starting point
+    const startPrice = closestCandle.y[3]; // close price
+    const currentPrice = ohlcData[ohlcData.length - 1].y[3]; // most recent close price
 
     // Calculate percentage change
-    const change = ((lastPrice - firstPrice) / firstPrice) * 100;
+    const change = ((currentPrice - startPrice) / startPrice) * 100;
     return change;
   };
 
@@ -183,7 +218,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
           }]);
 
           // Calculate and set percentage change
-          const change = calculatePercentChange(ohlcData);
+          const change = calculatePercentChange(ohlcData, selectedInterval);
           setPercentChange(change);
 
           // Notify parent component if callback provided
@@ -234,7 +269,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               }]);
 
               // Recalculate percentage change with new data
-              const change = calculatePercentChange(ohlcData);
+              const change = calculatePercentChange(ohlcData, selectedInterval);
               setPercentChange(change);
 
               // Notify parent component if callback provided
