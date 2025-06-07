@@ -153,7 +153,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     if (!ohlcData || ohlcData.length < 2) return 0;
 
     // Get first and last price points
-    const firstPrice = ohlcData[0].y[0]; // open of first candle
+    const firstPrice = ohlcData[0].y[3]; // close of first candle (not open)
     const lastPrice = ohlcData[ohlcData.length - 1].y[3]; // close of last candle
 
     // Calculate percentage change
