@@ -567,10 +567,10 @@ const Borrow = () => {
     const handleSetAmountToBorrow = (e) => {
          setIsComputing(true);
         let value = e.target.value.trim();
-        if (Number(value) > 100000000) {
+        if (Number(value) > 100000000 || Number(value) <= 0) {
             toaster.create({
                 title: "Error",
-                description: "Borrow amount exceeds maximum limit of 100,000,000",
+                description: "Invalid borrow amount.",
             });
             setBorrowAmount(0);
             return;
@@ -1321,9 +1321,9 @@ const Borrow = () => {
                                     <Box>
                                         <Text fontWeight={"bold"} color="#a67c00">Borrowing</Text>
                                     </Box>
-                                    <Box>
+                                    <Box w="380px">
                                         <HStack >
-                                            <Box w="50px" textAlign={"left"}><Text>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
+                                            <Box w="95px" textAlign={"left"}><Text>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
                                             <Box>{token1Info.tokenSymbol}</Box>
                                             <Box  w="120px" fontSize={"11px"} mt={"2px"}> <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
                                         </HStack>
