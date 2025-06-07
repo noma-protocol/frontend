@@ -973,6 +973,7 @@ const Exchange: React.FC = () => {
 
     const handleSelectMarket = (event) => {
       console.log("Selected Market:", event.target.value);
+      
       setChartData(generateRandomData());
       setIsTokenInfoLoading(true); // Set loading state for initial load
       setSelectedVault(event.target.value);
@@ -1007,6 +1008,7 @@ const Exchange: React.FC = () => {
           setBalanceBeforeSale(token1Info.balance);
           setBuyArgs(args);
           approveWeth();
+
         } else if (useWeth == "0") {
 
           args = [
@@ -1016,6 +1018,7 @@ const Exchange: React.FC = () => {
             address,
             false
           ]
+
           setBalanceBeforePurchase(token0Info.balance);
           setBalanceBeforeSale(ethBalance);
           setBuyArgs(args);

@@ -25,6 +25,7 @@ const LoadAddCollateral = ({
     token0Symbol, 
     extraCollateral, 
     handleSetCollateral, 
+    handleSetExtraCollateral,
     isMobile, 
     ltv, 
     setIsAdding, 
@@ -38,11 +39,15 @@ const LoadAddCollateral = ({
     
     const _handleSetCollateral = (e) => {
         const value = e.target.value;
+        console.log(`Input value: ${value}`);
         if (isNaN(value) || value == "" || Number(value) > 100000000)  {
             console.error("Invalid input: Not a valid number");
             return
         } 
+
+        console.log(`Setting collateral to: ${value}`);
         handleSetCollateral(value);
+        handleSetExtraCollateral(value);
     }
 
     const displayCollateral = extraCollateral >= 1000000 ? formatNumberPrecise(extraCollateral, 5) : commify(extraCollateral, 4);
@@ -95,7 +100,6 @@ const LoadAddCollateral = ({
                             onChange={_handleSetCollateral}
                             ml={isMobile ? 0 : 1.5}
                             marginRight={"5px"}
-                            setValue={handleSetCollateral}
                             targetValue={extraCollateral}
                             customStep={0.1}
                         >
