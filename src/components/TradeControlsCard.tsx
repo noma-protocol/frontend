@@ -529,13 +529,27 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
         {/* Slider */}
         <GridItem colSpan={2} mt={5} ml={5}>
           <HStack>
-            <Box w="60%" mt={-2}>
+            <Box w="90%" mt={-2}>
             {!isMobile && (
               <>
             <Text ml={5} fontSize="xs" color="#a67c00" >
               {sliderMax === 0
                 ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
-                : `Available: ${commify(sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4),2)} ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}`
+                : (
+                  <HStack>
+                    <Box>
+                      <Text fontSize="xs">Available: </Text>
+                    </Box>
+                    <Box w="30%">
+                      <Badge w="120px">
+                        {commify(sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4),2)}
+                      </Badge> 
+                    </Box>
+                    <Box ml={8}>
+                      <Text fontSize="xs" color="white">{tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}</Text>
+                    </Box>
+                  </HStack>
+                )
               }
             </Text>
             <Slider
@@ -562,7 +576,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Box>
               {!isMobile && (
                 <Button
-                    ml={-2}
+                    mr={55}
                     mt={2}
                     mb={2}
                     variant="outline"

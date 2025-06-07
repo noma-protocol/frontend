@@ -224,8 +224,8 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                             <Box w="220px">                                
                                 <Text fontSize={"13px"} color="#d6a700" >Spending&nbsp;</Text>
                             </Box>
-                            <Box w="230px" bgColor={"#F5F5DC"}   borderRadius={5} px={2} >
-                                    <Text color="gray.800" fontWeight={"bold"}  fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
+                            <Box w="230px" bgColor={"#18181b"}   borderRadius={5} px={2} >
+                                    <Text color="white" fontWeight={"bold"}  fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
                             </Box>
                             <Box fontSize={"13px"} ml={2} textAlign={"left"} w="110px"  alignItems={"left"} alignContent={"left"} fontWeight={"bold"}>
                                 {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "BNB"): token0Info.tokenSymbol} 
@@ -240,8 +240,8 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                             <Box  w="220px">                                
                                 <Text fontSize={"13px"} color="#d6a700">Receiving</Text>
                             </Box>
-                            <Box w="230px"  bgColor={"#F5F5DC"}  color="gray.800" fontWeight={"bold"} borderRadius={5} px={2} >
-                                <Text fontSize={"13px"} color="gray.800" fontWeight={"bold"} >&nbsp;{tradeMode == "BUY" ?
+                            <Box w="230px"  bgColor={"#18181b"}  color="white" fontWeight={"bold"} borderRadius={5} px={2} >
+                                <Text fontSize={"13px"} color="white" fontWeight={"bold"} >&nbsp;{tradeMode == "BUY" ?
                                     (bidRate && bidRate !== 0 ? formatNumberPrecise(amountToBuy / bidRate) : "0") :
                                     (askRate ? formatNumberPrecise(amountToSell * askRate) : "0")}</Text>
                             </Box>
