@@ -61,6 +61,7 @@ const LoadAddCollateral = ({
             w={size == "lg" ? "90px" : "80px"}
             border="1px solid #f3f7c6"
             borderRadius={5}
+            _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
         >
         {isAdding ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Add </Text>}
         </Button>
