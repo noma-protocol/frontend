@@ -754,9 +754,9 @@ const Borrow = () => {
                                 </Box>
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
-                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="5px 0 0 5px" border="1px solid gray" h="25px" borderRight="none">
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="gray.800" fontWeight={"bold"} borderRadius="5px 0 0 5px" border="1px solid gray" h="25px" borderRight="none">
                                         <HStack>
-                                            <Box  fontSize="xs">
+                                            <Box  fontSize="xs" color="white">
                                             {displayedCollateral}
                                             </Box>
                                             <Box  fontSize="xx-small" ml={-1}>
@@ -764,9 +764,9 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none">
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none">
                                         <HStack>
-                                            <Box  fontSize="xs">
+                                            <Box  fontSize="xs" color="white">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
                                             </Box>
                                             <Box  fontSize="xx-small" ml={-1}>
@@ -774,8 +774,8 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none" fontSize="xs"> {commifyDecimals(ltv, 2)}</Box>
-                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0 5px 5px 0" border="1px solid gray" h="25px" borderLeft="none" fontSize="xs"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none" fontSize="xs"> {commifyDecimals(ltv, 2)}</Box>
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white" fontWeight={"bold"} borderRadius="0 5px 5px 0" border="1px solid gray" h="25px" borderLeft="none" fontSize="xs"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
                                     <VStack w="100%">
                                         <Box ml={-8} mt={4}><Text fontWeight="bold" fontSize="xs" color="#a67c00">Actions</Text></Box>
                                     <Box >                              
@@ -825,6 +825,8 @@ const Borrow = () => {
                                             disabled={isRolling || isTokenInfoLoading || ltv <= 1}
                                             w={"80px"}
                                             border="1px solid #f3f7c6"
+                                            borderRadius={5}
+                                            _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                                         >
                                         {isRolling ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Roll</Text>}
                                         </Button>
@@ -986,11 +988,11 @@ const Borrow = () => {
                                         width={"100px"}
                                         onChange={handleSetDuration}
                                         value={duration}
-                                        backgroundColor={"#F5F5DC"}
-                                        color={"gray.800"}
+                                        backgroundColor={"#18181b"}
+                                        color={"white"}
                                         >
                                         <SelectTrigger
-                                            _hover={{ backgroundColor: "#e5e5c5" }}
+                                            _hover={{ backgroundColor: "#18181d" }}
                                         >
                                             {durationChoices.items.map((data, index) => {
                                                 if (index > 0) return;
@@ -1001,14 +1003,14 @@ const Borrow = () => {
                                                 })}
                                         </SelectTrigger>
                                         <SelectContent
-                                            backgroundColor={"#F5F5DC"}
-                                            color={"gray.800"}
+                                            backgroundColor={"#18181b"}
+                                            color={"white"}
                                         >
                                             {durationChoices.items.map((choice) => (
                                                 <SelectItem
                                                     item={choice}
                                                     key={choice.value}
-                                                    _hover={{ backgroundColor: "#e5e5c5" }}
+                                                    _hover={{ backgroundColor: "#18181d" }}
                                                 >
                                                     {choice.label}
                                                 </SelectItem>
@@ -1060,7 +1062,7 @@ const Borrow = () => {
                         // border="1px solid yellow"
                     >
                         <GridItem w="90%" border={"1px solid white"} p={4} px={6} ml={5} borderRadius={10} backgroundColor={"#222831"}>
-                            <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">Active Loan</Text>
+                            <Text fontSize={isMobile?"12px":"15px"} color="#a67c00">Active Loan</Text>
                             <SimpleGrid columns={5} mt={-5} fontSize="xs">
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
@@ -1077,7 +1079,7 @@ const Borrow = () => {
                                 
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
-                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="5px 0 0 5px" border="1px solid gray" h="25px" borderRight="none">
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white" borderRadius="5px 0 0 5px" h="25px" borderRight="none">
                                         <HStack>
                                             <Box  fontSize="sm">
                                             {displayedCollateral}
@@ -1087,7 +1089,7 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none">
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white" borderRadius="0" h="25px" borderLeft="none" borderRight="none">
                                         <HStack>
                                             <Box  fontSize="sm">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
@@ -1097,8 +1099,8 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none"> {commifyDecimals(ltv, 2)}</Box>
-                                    <Box px={2} mt={2} bgColor={"#F5F5DC"} color="gray.800" fontWeight={"bold"} borderRadius="0 5px 5px 0" border="1px solid gray" h="25px" borderLeft="none"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white" borderRadius="0" h="25px" borderLeft="none" borderRight="none" fontSize="sm">{commifyDecimals(ltv, 2)}</Box>
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white" borderRadius="0 5px 5px 0" h="25px" borderLeft="none" fontSize={"sm"}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
                                     <Box px={2}  mt={2} ml={-10}> 
                                     <VStack ml={10}>
                                     <LoanAddCollateral
@@ -1140,6 +1142,7 @@ const Borrow = () => {
                                         w={"90px"}
                                         border="1px solid #f3f7c6"
                                         borderRadius={5}
+                                        _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                                     >
                                     {isRolling ? <Spinner size="sm" /> : <Text fontSize="xs" color={"#f3f7c6"}>Roll</Text>}
                                     </Button>
@@ -1327,17 +1330,17 @@ const Borrow = () => {
                             <SelectRoot
                                 mt={1}
                                 ml={isMobile?25:62}
-                                color="gray.800"
+                                color={"white"}
                                 collection={durationChoices}
                                 size="sm"
                                 width={isMobile?"180px":"120px"}
                                 onChange={handleSetDuration}
                                 value={duration}
-                                backgroundColor="#F5F5DC"
+                                backgroundColor="#18181b"
                                 
                                 >
                                 <SelectTrigger
-                                    _hover={{ backgroundColor: "#e5e5c5" }}
+                                    _hover={{ backgroundColor: "#18181bFF" }}
                                 >
                                     {durationChoices.items.map((data, index) => {
                                         if (index > 0) return;
@@ -1348,14 +1351,14 @@ const Borrow = () => {
                                         })}
                                 </SelectTrigger>
                                 <SelectContent
-                                 backgroundColor="#F5F5DC"
-                                 color="gray.800"
+                                 backgroundColor="#18181b"
+                                 color={"white"}
                                  >
                                     {durationChoices.items.map((choice) => (
                                         <SelectItem
                                             item={choice}
                                             key={choice.value}
-                                            _hover={{ backgroundColor: "#e5e5c5" }}
+                                            _hover={{ backgroundColor: "#18181bFF" }}
                                         >
                                             {choice.label}
                                         </SelectItem>
@@ -1366,7 +1369,7 @@ const Borrow = () => {
                             <Box>
                             <Button 
                                 mt={2} 
-                                w="180px"
+                                w="150px"
                                 h={"30px"}  
                                 borderColor={"#a67c00"} 
                                 variant="outline" 
