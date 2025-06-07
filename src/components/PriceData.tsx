@@ -485,6 +485,23 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       data: ohlcData
     }]);
 
+    // Calculate and set percentage change for new interval
+    if (ohlcData.length > 0) {
+      const change = calculatePercentChange(ohlcData, newInterval);
+      setPercentChange(change);
+
+      // Notify parent component if callback provided
+      if (onPercentChange) {
+        onPercentChange(change);
+      }
+    } else {
+      // Set zero change if no data available
+      setPercentChange(0);
+      if (onPercentChange) {
+        onPercentChange(0);
+      }
+    }
+
     // Update the last refresh time
     lastRefreshTime.current = Date.now();
   };
