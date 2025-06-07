@@ -43,7 +43,7 @@ return (
             </Text>
             </Box>
           <Box w="auto" textAlign={isMobile ? "right" : "left"} fontSize={isMobile?"xs":"13px"}>
-            <label>{commify(Number(formatEther(circulatingSupply)).toFixed(6))}</label>
+            <label>{commify(formatEther(circulatingSupply), 2)}</label>
           </Box>
           <Box w="auto" textAlign="right" fontSize={isMobile?"xs":"13px"} >
             <label>{commifyPatched(formatEther(liquidityRatio), 2)}</label>
