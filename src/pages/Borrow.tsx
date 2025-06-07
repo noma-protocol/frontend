@@ -741,7 +741,7 @@ const Borrow = () => {
                             />
                         </Box>
                         <Box p={2} mt={5} w={isMobile ? "90%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
-                            <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Loan</Text>        
+                            <Text fontSize={"12px"}  color="#a67c00" ml={2}>Active Loan</Text>        
                            <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
                                 <Box fontSize="xs" w='95px' px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
@@ -760,7 +760,7 @@ const Borrow = () => {
                                 </Box>
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
-                                    <Box px={2} mt={2} bgColor={"#18181b"} color="gray.800" fontWeight={"bold"} borderRadius="5px 0 0 5px" border="1px solid gray" h="25px" borderRight="none">
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="gray.800"  borderRadius="5px 0 0 5px" h="25px" borderRight="none">
                                         <HStack>
                                             <Box  fontSize="xs" color="white">
                                             {displayedCollateral}
@@ -770,7 +770,7 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2} bgColor={"#18181b"} color="gray.800" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none">
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="gray.800"  borderRadius="0"  h="25px" borderLeft="none" borderRight="none">
                                         <HStack>
                                             <Box  fontSize="xs" color="white">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
@@ -780,10 +780,10 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white" fontWeight={"bold"} borderRadius="0" border="1px solid gray" h="25px" borderLeft="none" borderRight="none" fontSize="xs"> {commifyDecimals(ltv, 2)}</Box>
-                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white" fontWeight={"bold"} borderRadius="0 5px 5px 0" border="1px solid gray" h="25px" borderLeft="none" fontSize="xs"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white"  borderRadius="0"  h="25px" borderLeft="none" borderRight="none" fontSize="xs"> {commifyDecimals(ltv, 2)}</Box>
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white" borderRadius="0 5px 5px 0" h="25px" borderLeft="none" fontSize="xs"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
                                     <VStack w="100%">
-                                        <Box ml={-8} mt={4}><Text fontWeight="bold" fontSize="xs" color="#a67c00">Actions</Text></Box>
+                                        <Box ml={-8} mt={4}><Text fontSize="xs" color="#a67c00">Actions</Text></Box>
                                     <Box >                              
                                     <HStack alignItems="center" justifyContent="space-between" w="100%" pb={2} ml={isMobile ? "35%" : 0}>
                                     <Box>
