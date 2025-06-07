@@ -36,7 +36,8 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
     }
 
     return (
-    <>
+    <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
+        <Box mt={-5} >
         <DrawerRoot >
         <DrawerTrigger asChild>
         <Button 
@@ -84,7 +85,7 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                         marginRight={"5px"}
                         defaultValue='0'
                         targetValue={repayAmount}
-                        setValue={setRepayAmount}
+                        // setValue={setRepayAmount}
                         customStep={0.1}
                     >
                         <NumberInputLabel h={"38px"} w={{ base: "", lg: "auto" }} />
@@ -130,7 +131,8 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
             </DrawerFooter> */}
         </DrawerContent>
         </DrawerRoot>
-    </>
+    </Box>
+    </Box>
     )
 
 }

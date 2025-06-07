@@ -52,7 +52,7 @@ const LoadAddCollateral = ({
 
     return (
         <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
-            <Box>
+            <Box mt={-1}>
             <DrawerRoot >
             <DrawerTrigger asChild>
             <Button 
