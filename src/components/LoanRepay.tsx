@@ -43,7 +43,7 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
         <Button 
             variant={"outline"}
             h={size == "lg" ? 8 : 6}
-            ml={size == "lg" ? 0 : 2}
+            ml={size == "lg" ? 0 : isMobile ? -1 : 2}
             mt={size == "lg" ? 0 : isMobile ? 0 : 2}
             // onClick={() => setIsRepaying(true)}
             disabled={isRepaying || isLoading}

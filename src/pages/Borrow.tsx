@@ -844,7 +844,6 @@ const Borrow = () => {
                                         <DrawerTrigger asChild>
                                         <Button
                                             ml={2}
-                                            mt={1} 
                                             variant={"outline"}
                                             h={6}
                                             // onClick={() => setIsLoading(true)}
