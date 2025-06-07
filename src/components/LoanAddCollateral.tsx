@@ -39,13 +39,11 @@ const LoadAddCollateral = ({
     
     const _handleSetCollateral = (e) => {
         const value = e.target.value;
-        console.log(`Input value: ${value}`);
         if (isNaN(value) || value == "" || Number(value) > 100000000)  {
             console.error("Invalid input: Not a valid number");
             return
         } 
 
-        console.log(`Setting collateral to: ${value}`);
         handleSetCollateral(value);
         handleSetExtraCollateral(value);
     }

@@ -266,29 +266,49 @@ const Borrow = () => {
     const loanFees = calculateLoanFees(`${borrowAmount}`, `${duration}`);
 
     const {
-        write: approve
+        write: approveBorrow
     } = useContractWrite({
         address: token0,
         abi: ERC20Abi,
         functionName: "approve",
         args: [
             vaultAddress,
-            isAdding ?  parseEther(`${extraCollateral}`).add(parseEther(`${0.000001}`)) : parseEther(`${collateral}`).add(parseEther(`${0.000001}`))
+            parseEther(`${collateral}`).add(parseEther(`${0.000001}`))
         ],
         onSuccess(data) {
-            if (isAdding) {
-                addCollateral();
-            } else {
-                borrow();
-            }
+            borrow();
         },
         onError(error) {
-            console.error(`transaction failed: ${error.message}`);
+            console.error(`borrow approval failed: ${error.message}`);
             setIsBorrowing(false);
             setIsLoading(false);
+
+            const msg = Number(error.message.toString().indexOf("0xfb8f41b2")) > -1 ? "Insufficient allowance" : 
+            Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
+            toaster.create({
+                title: "Error",
+                description: msg,
+            });
+        }
+    });
+
+    const {
+        write: approveAddCollateral
+    } = useContractWrite({
+        address: token0,
+        abi: ERC20Abi,
+        functionName: "approve",
+        args: [
+            vaultAddress,
+            parseEther(`${extraCollateral}`).add(parseEther(`${0.000001}`))
+        ],
+        onSuccess(data) {
+            addCollateral();
+        },
+        onError(error) {
+            console.error(`add collateral approval failed: ${error.message}`);
+            setIsLoading(false);
             setIsAdding(false);
-            setIsRolling(false);
-            setIsRepaying(false);
 
             const msg = Number(error.message.toString().indexOf("0xfb8f41b2")) > -1 ? "Insufficient allowance" : 
             Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
@@ -574,7 +594,7 @@ const Borrow = () => {
         }
         setIsBorrowing(true);
         setIsLoading(true);
-        approve();
+        approveBorrow();
     }
 
     const handleSetDuration = (e) => {
@@ -616,11 +636,9 @@ const Borrow = () => {
             return;
         }
 
-        console.log(`Adding extra: ${parseEther(`${extraCollateral}`)} collateral ${collateral}`);
-
         setIsAdding(true);
         setIsLoading(true);
-        approve();
+        approveAddCollateral();
     }
 
     const handleClickRepayAmount = () => {
