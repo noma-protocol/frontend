@@ -87,6 +87,7 @@ const LoanActiveLoan = ({}) => {
                         disabled={isRolling || isLoading || isTokenInfoLoading || ltv <= 1}
                         w={"120px"}
                         border="1px solid #f3f7c6"
+                        _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                     >
                     {isLoading ? <Spinner size="sm" /> : <Text color={"#f3f7c6"}>Roll</Text>}
                     </Button>
