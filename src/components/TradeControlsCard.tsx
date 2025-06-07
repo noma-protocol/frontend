@@ -292,8 +292,21 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Text ml={7} fontSize="xs" color="#a67c00" >
               {sliderMax === 0
                 ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
-                : `Available: ${commify(sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4), 2)} ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}`
-              }
+                : (
+                  <HStack>
+                    <Box>
+                      <Text fontSize="xs">Available: </Text>
+                    </Box>
+                    <Box w="30%">
+                      <Badge w="120px">
+                        {commify(sliderMax.toFixed(sliderMax < 0.001 ? 8 : sliderMax < 0.1 ? 6 : 4),2)}
+                      </Badge> 
+                    </Box>
+                    <Box ml={8}>
+                      <Text fontSize="xs" color="white">{tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}</Text>
+                    </Box>
+                  </HStack>                  
+                ) }
             </Text>
             <Slider
                 mt={2}
