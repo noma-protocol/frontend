@@ -46,7 +46,8 @@ const Unwrap = ({
     setWrapAmount,
     fontSize,
     buttonSize,
-    token1Balance
+    token1Balance,
+    size="sm"
 }) => {
 
     const handleUseMax = () => {
@@ -64,9 +65,10 @@ const Unwrap = ({
                         disabled={isWrapping}
                         border="1px solid"
                         borderColor={actionType === 'wrap' ? "#a67c00" : "gray"}
-                        variant="outline" 
-                        h="25px"
-                        ml={2}
+                        variant={"outline"}
+                        h={size == "lg" ? 8 : 6}
+                        ml={size == "lg" ? 0 : 2}
+                        mt={size == "lg" ? 0 : 2}
                         w={buttonSize}
                         onClick={() => setActionType('wrap')}
                         color="white"
@@ -80,12 +82,12 @@ const Unwrap = ({
                 </DrawerTrigger>
                 <DrawerBackdrop />
                 <DrawerContent>
-                    <Box p={4} mt={{ base: "50%", md: "80%" }} >
+                    <Box mt="80%" ml={5}>
                         <DrawerHeader>
                             <DrawerTitle>
                                 <Text as="h3" color="#bf9b30">Unwrap BNB</Text>
                             </DrawerTitle>
-                            <DrawerCloseTrigger asChild>
+                            <DrawerCloseTrigger asChild mt="82%" mr={5}>
                                 <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada" _hover={{ bg: "#f44336", color: "white" }}><Text color="#dadada">×</Text></Button>
                             </DrawerCloseTrigger>
                         </DrawerHeader>
@@ -94,7 +96,7 @@ const Unwrap = ({
                                 placeholder="Enter amount to unwrap"
                                 onChange={(e) => setWrapAmount(e.target.value)}
                                 value={wrapAmount}
-                                w="100%"
+                                w="90%"
                                 mb={4}
                             />
                             <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
@@ -103,7 +105,7 @@ const Unwrap = ({
                             </Text>
                             </VStack>
 
-                            <HStack mt={4} spacing={3} justifyContent="left" ml={2}>
+                            <HStack mt={4} spacing={3} justifyContent="left" ml={2} w="90%">
                                 <DrawerActionTrigger asChild>
                                     <Button  w="45%" colorScheme="blue" onClick={() => setWrapAmount('0')} border="1px solid gray" color="black" backgroundColor={"#dadada"} _hover={{ bg: "#f44336", borderColor: "#f44336", color: "white" }}>
                                         <Box minH="20px" display="flex" alignItems="center" justifyContent="center" color="black">
