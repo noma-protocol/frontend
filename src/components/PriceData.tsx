@@ -477,7 +477,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
   console.log(Number(formatEther(`${imv || 0}`)) * Number(priceUSD), "IMV in USD");
   return (
-    <Box ml={isMobile ? -5 : 0}>
+    <Box ml={isMobile ? -5 : 0} mt={isMobile ? 0 : "-5px"}>
       <Global styles={css`
         .apexcharts-text tspan,
         .apexcharts-label,
@@ -611,7 +611,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               </>}
         </HStack>
 
-          <Box h={isMobile ? 200 : 275} ml={isMobile ? "20px" : -2}  borderRadius={5} border="1px solid ivory" mb={5} w={isMobile ? "92%" : "101%"}>
+          <Box h={isMobile ? 200 : 285} ml={isMobile ? "20px" : 0}  borderRadius={5} border="1px solid ivory" mb={5} w={isMobile ? "92%" : "99%"}>
             <Box
               ml={1}
             >
@@ -619,7 +619,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 options={chartOptions}
                 series={series}
                 type="candlestick"
-                height={isMobile ? 198 : 273}
+                height={isMobile ? 198 : 283}
                 width={isMobile ? "100%" : "100%"}
             />
             </Box>
