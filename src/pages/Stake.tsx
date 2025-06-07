@@ -797,15 +797,15 @@ const Stake = () => {
                     >
                         <GridItem w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                             <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
-                            <SimpleGrid columns={5} mt={-5} fontSize={"14px"}>
+                            <SimpleGrid columns={4} mt={-5} fontSize={"14px"}>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" /> : `s${token0Info.tokenSymbol}`} </Box>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
-                                <Box px={2} color="white" backgroundColor={"#bf9b30"}> APR</Box>
+                                {/* <Box px={2} color="white" backgroundColor={"#bf9b30"}> APR</Box> */}
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Actions </Box> 
                                 {stakedBalance > 0 ? ( 
                                     <>
-                                    <Box px={2} mt={2} bgColor={"#18181b"}> 
+                                    <Box px={2} mt={1} bgColor={"#18181b"} borderRadius={5}> 
                                         <HStack>
                                             <Box  fontSize="sm" color="white">
                                             {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
@@ -815,10 +815,10 @@ const Stake = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white">
+                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius={5}>
                                         {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 6)}
                                     </Box>
-                                    <Box px={2} mt={2} bgColor={"#18181b"}>     
+                                    <Box px={2} mt={1} bgColor={"#18181b"} borderRadius={5}>     
                                         <HStack>
                                             <Box  fontSize="sm" color="white">
                                             {commify(rewards, 4)}
@@ -828,10 +828,10 @@ const Stake = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white">
+                                    {/* <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius={5}>
                                         {"N/A"}
-                                    </Box>
-                                    <Box px={2}  mt={2} ml={-10}> 
+                                    </Box> */}
+                                    <Box px={2}  mt={1} ml={-10}> 
                                     <Button 
                                         h={"25px"}  
                                         borderColor={"#a67c00"} 
@@ -896,7 +896,7 @@ const Stake = () => {
                             </Box>
                             <Box w="auto">
                                 <HStack>
-                                    <Box w="auto">
+                                    <Box w="auto" mt={-2}>
                                     <NumberInputRoot
                                         isMobile={isMobile}
                                         min={0}
@@ -915,7 +915,7 @@ const Stake = () => {
                                         <NumberInputField h={"25px"} w={{ base: "", lg: "200px" }} placeholder="Enter amount" />
                                     </NumberInputRoot>
                                     </Box>
-                                    <Box mt={1}>
+                                    <Box mt={-1}>
                                         <Image src={oksLogo} w="40px"></Image>
                                     </Box>
                                 </HStack>
