@@ -40,6 +40,8 @@ import {
     DrawerFooter,
     DrawerActionTrigger,
 } from '../components/ui/drawer'; // Ark UI Drawer components
+import { Tooltip } from "../components/ui/tooltip"
+
 // import { ro } from '@faker-js/faker';
 // import { size } from 'viem';
 import config from '../config';
@@ -746,7 +748,11 @@ const Borrow = () => {
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> 
                                 <HStack>
                                  <Box><Text fontSize="xs">LTV</Text></Box>
-                                 <Box><Image src={placeholderLogo} w={15} /></Box>
+                                 <Box>
+                                    <Tooltip content="Loan to Value Ratio" placement="top">
+                                        <Image src={placeholderLogo} w={15} />
+                                    </Tooltip>
+                                 </Box>
                                 </HStack>
                                 </Box>
                                 <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}>
@@ -1069,7 +1075,11 @@ const Borrow = () => {
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> 
                                 <HStack>
                                  <Box><Text fontSize="xs">LTV</Text></Box>
-                                 <Box><Image src={placeholderLogo} w={15} /></Box>
+                                 <Box>
+                                    <Tooltip content="Loan to Value Ratio: LTV is the ratio of the loan amount to the value of the collateral" placement="top">
+                                        <Image src={placeholderLogo} w={15} />
+                                    </Tooltip>                                    
+                                 </Box>
                                 </HStack>
                                 </Box>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}>
