@@ -37,14 +37,14 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
 
     return (
     <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
-        <Box mt={-5} >
+        <Box mt={isMobile ? 0 : -5} >
         <DrawerRoot >
         <DrawerTrigger asChild>
         <Button 
             variant={"outline"}
             h={size == "lg" ? 8 : 6}
             ml={size == "lg" ? 0 : 2}
-            mt={size == "lg" ? 0 : 2}
+            mt={size == "lg" ? 0 : isMobile ? 0 : 2}
             // onClick={() => setIsRepaying(true)}
             disabled={isRepaying || isLoading}
             w={size == "lg" ? "90px" : "80px"}
