@@ -91,7 +91,7 @@ const Footer: React.FC = (
         zIndex:    2400
       }}>
       <Container>
-        <Row style={{marginTop: "-20px"}}>
+        <Row style={{marginTop: "-20px", marginLeft: "-15%"}}>
           <Col md="3" style={{paddingTop: isMobile?25:0}}>
 
             <VStack>
