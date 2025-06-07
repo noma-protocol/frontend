@@ -273,7 +273,7 @@ const Borrow = () => {
         functionName: "approve",
         args: [
             vaultAddress,
-            isAdding ?  parseEther(`${extraCollateral + (extraCollateral/100)}`)  : parseEther(`${collateral + (collateral/100)}`)
+            isAdding ?  parseEther(`${extraCollateral}`).add(parseEther(`${0.000001}`)) : parseEther(`${collateral}`).add(parseEther(`${0.000001}`))
         ],
         onSuccess(data) {
             if (isAdding) {
@@ -290,7 +290,8 @@ const Borrow = () => {
             setIsRolling(false);
             setIsRepaying(false);
 
-            const msg = Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
+            const msg = Number(error.message.toString().indexOf("0xfb8f41b2")) > -1 ? "Insufficient allowance" : 
+            Number(error.message.toString().indexOf("User rejected the request.")) > -1 ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
                 description: msg,
@@ -615,7 +616,8 @@ const Borrow = () => {
             return;
         }
 
-        console.log(`Adding extra: ${extraCollateral} collateral ${collateral}`);
+        console.log(`Adding extra: ${parseEther(`${extraCollateral}`)} collateral ${collateral}`);
+
         setIsAdding(true);
         setIsLoading(true);
         approve();
@@ -635,7 +637,6 @@ const Borrow = () => {
     }
 
     const handleSetExtraCollateral = (e) => {
-
         setExtraCollateral(e);
         setCollateral(e);
         // setIsAdding(true);
@@ -790,7 +791,8 @@ const Borrow = () => {
                                         <LoanAddCollateral
                                             size="sm"
                                             token0Symbol={token0Info.tokenSymbol}
-                                            handleSetCollateral={handleSetExtraCollateral}
+                                            handleSetCollateral={setCollateral}
+                                            handleSetExtraCollateral={handleSetExtraCollateral}
                                             extraCollateral={extraCollateral}
                                             isMobile={isMobile}
                                             ltv={ltv}
@@ -1116,7 +1118,8 @@ const Borrow = () => {
                                     <LoanAddCollateral
                                         size="lg"
                                         token0Symbol={token0Info.tokenSymbol}
-                                        handleSetCollateral={handleSetExtraCollateral}
+                                        handleSetCollateral={setCollateral}
+                                        handleSetExtraCollateral={handleSetExtraCollateral}
                                         extraCollateral={extraCollateral}
                                         isMobile={isMobile}
                                         ltv={ltv}

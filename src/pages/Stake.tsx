@@ -344,7 +344,7 @@ const Stake = () => {
         functionName: "approve",
         args: [
             vaultDescription.stakingContract,
-            parseEther(`${(stakeAmount || "0") }`) + parseEther(`${0.000001}`)   
+            parseEther(`${(stakeAmount || "0") }`).add(parseEther(`${0.000001}`))   
         ],
         onSuccess(data) {
 
