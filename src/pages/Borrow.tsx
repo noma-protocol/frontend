@@ -567,7 +567,7 @@ const Borrow = () => {
     const handleSetAmountToBorrow = (e) => {
          setIsComputing(true);
         let value = e.target.value.trim();
-        if (Number(value) > 100000000 || Number(value) < 0.000001) {
+        if (Number(value) > 100000000 || (Number(value) > 0 && Number(value) < 0.000001)) {
             toaster.create({
                 title: "Error",
                 description: "Invalid borrow amount.",
