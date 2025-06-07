@@ -9,6 +9,7 @@ import { Toaster, toaster } from "../components/ui/toaster";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import BalanceCard from '../components/BalanceCard';
 import ethLogo from '../assets/images/weth.svg';
+import oksLogo from '../assets/images/logo_dark.png';
 import placeholderLogo from '../assets/images/question.svg';
 import {
     SelectContent,
@@ -36,6 +37,7 @@ import {
     DrawerFooter,
     DrawerActionTrigger,
 } from '../components/ui/drawer'; // Ark UI Drawer components
+import { Tooltip } from "../components/ui/tooltip"
 
 import CountdownTimer from '../components/CooldownCountdown';
 import { ro } from '@faker-js/faker';
@@ -82,7 +84,7 @@ const Stake = () => {
     const [isStaking, setIsStaking] = useState(false);
     const [isUnstaking, setIsUnstaking] = useState(false);
 
-    const [stakeAmount, setStakeAmount] = useState("0");
+    const [stakeAmount, setStakeAmount] = useState("");
 
     const [isTokenInfoLoading, setIsTokenInfoLoading] = useState(true);
     const [isWrapping, setIsWrapping] = useState(false);
@@ -342,7 +344,7 @@ const Stake = () => {
         functionName: "approve",
         args: [
             vaultDescription.stakingContract,
-            parseEther(`${(stakeAmount || 0) }`) + parseEther(`${0.000001}`)   
+            parseEther(`${(stakeAmount || "0") }`) + parseEther(`${0.000001}`)   
         ],
         onSuccess(data) {
 
@@ -453,8 +455,8 @@ const Stake = () => {
         // If the input is not a number (excluding empty string which is handled separately), return early
         if (value !== "" && isNaN(Number(value))) return;
 
-        // Set the value, defaulting to "0" for empty strings to prevent ethers.js errors
-        setStakeAmount(value === "" ? "0" : value);
+        // Set the value as-is, allowing empty strings
+        setStakeAmount(value);
     }
 
     const handleStake = async () => {
@@ -671,7 +673,7 @@ const Stake = () => {
                                             h="25px"
                                         >
                                             <NumberInputLabel h={"25px"} w={{ base: "", lg: "auto" }} />
-                                            <NumberInputField h={"25px"} w={{ base: "", lg: "200px" }} />
+                                            <NumberInputField h={"25px"} w={{ base: "", lg: "200px" }} placeholder="Enter amount" />
                                         </NumberInputRoot>
                                         </Box>
                                         <Box mt={2}>
@@ -684,7 +686,7 @@ const Stake = () => {
                                         </Box>
                                         <Box>
                                             <HStack>
-                                                <Box w="auto"><Text fontSize="xs">{formatNumberPrecise(stakeAmount || "0", 4)} </Text></Box>
+                                                <Box w="auto"><Text fontSize="xs">{stakeAmount ? formatNumberPrecise(stakeAmount, 4) : "0.0000"} </Text></Box>
                                                 <Box fontSize="xs">{isTokenInfoLoading ? <Spinner size="xs" /> : token0Info.tokenSymbol}</Box>
                                             </HStack>
                                         </Box>                                    
@@ -700,6 +702,9 @@ const Stake = () => {
                                             ) : (
                                                 <Text fontSize="xs" color="gray">N/A</Text>
                                             )}
+                                        </Box>
+                                        <Box>
+                                            <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogo} w={15}></Image></Tooltip>
                                         </Box>
                                         </HStack>
                                         <HStack w="400px">
@@ -767,7 +772,7 @@ const Stake = () => {
                                         variant="outline"
                                         ml={10}
                                         onClick={() => handleStake()}
-                                        disabled={isLoading || !stakeAmount || Number(stakeAmount) <= 0}
+                                        disabled={isLoading || !stakeAmount || stakeAmount === "" || Number(stakeAmount) <= 0}
                                         w={"120px"}
                                     >
                                         {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"13px"} color="#a67c00">Stake</Text>}
@@ -800,9 +805,9 @@ const Stake = () => {
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Actions </Box> 
                                 {stakedBalance > 0 ? ( 
                                     <>
-                                    <Box px={2} mt={2}> 
+                                    <Box px={2} mt={2} bgColor={"#18181b"}> 
                                         <HStack>
-                                            <Box  fontSize="sm">
+                                            <Box  fontSize="sm" color="white">
                                             {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
                                             </Box>
                                             <Box  fontSize="xx-small">
@@ -810,12 +815,12 @@ const Stake = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2}>
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white">
                                         {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 6)}
                                     </Box>
-                                    <Box px={2} mt={2}>     
+                                    <Box px={2} mt={2} bgColor={"#18181b"}>     
                                         <HStack>
-                                            <Box  fontSize="sm">
+                                            <Box  fontSize="sm" color="white">
                                             {commify(rewards, 4)}
                                             </Box>
                                             <Box  fontSize="xx-small">
@@ -823,7 +828,7 @@ const Stake = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={2}>
+                                    <Box px={2} mt={2} bgColor={"#18181b"} color="white">
                                         {"N/A"}
                                     </Box>
                                     <Box px={2}  mt={2} ml={-10}> 
@@ -831,10 +836,10 @@ const Stake = () => {
                                         h={"25px"}  
                                         borderColor={"#a67c00"} 
                                         variant="outline" 
-                                        ml={5} 
+                                        ml={10} 
                                         onClick={() => handleUnstake()}  
                                     disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
-                                        w={"120px"}
+                                        w={"100px"}
                                         
                                     >
                                         {isUnstaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"13px"} color="#a67c00">Unstake</Text>}
@@ -906,12 +911,12 @@ const Stake = () => {
                                         setFloorPrice={(() => {})}
                                         h="25px"
                                     >
-                                        <NumberInputLabel h={"38px"} w={{ base: "", lg: "auto" }} />
-                                        <NumberInputField h={"38px"} w={{ base: "", lg: "200px" }} />
+                                        <NumberInputLabel h={"25px"} w={{ base: "", lg: "auto" }} />
+                                        <NumberInputField h={"25px"} w={{ base: "", lg: "200px" }} placeholder="Enter amount" />
                                     </NumberInputRoot>
                                     </Box>
-                                    <Box mt={2}>
-                                        <Image src={placeholderLogo} w="25px"></Image>
+                                    <Box mt={1}>
+                                        <Image src={oksLogo} w="40px"></Image>
                                     </Box>
                                 </HStack>
                                 <VStack alignItems={"left"}>
@@ -921,7 +926,7 @@ const Stake = () => {
                                     </Box>
                                     <Box>
                                     <HStack>
-                                            <Box w="auto"><Text>{formatNumberPrecise(stakeAmount || "0", 4)} </Text></Box>
+                                            <Box w="auto"><Text>{stakeAmount ? formatNumberPrecise(stakeAmount, 4) : "0.0000"} </Text></Box>
                                             <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info.tokenSymbol}</Box>
                                     </HStack>
                                     </Box>
@@ -944,6 +949,9 @@ const Stake = () => {
                                             ) : (
                                                 <Text fontSize="xs" color="#a67c00">N/A</Text>
                                             )}
+                                        </Box>
+                                        <Box>
+                                            <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogo} w={15}></Image></Tooltip>
                                         </Box>
                                     </HStack>
                                 </VStack>
@@ -999,11 +1007,12 @@ const Stake = () => {
                                 </SelectContent>
                             </SelectRoot> */}
                                 <Button
-                                    mt={1} h={"30px"}
+                                    mt={1} 
+                                    h={"25px"}
                                     borderColor={"#a67c00"}
                                     variant="outline" ml={5}
                                     onClick={() => handleStake()}
-                                    disabled={isLoading || !stakeAmount || Number(stakeAmount) <= 0} w={"120px"}
+                                    disabled={isLoading || !stakeAmount || stakeAmount === "" || Number(stakeAmount) <= 0} w={"120px"}
                                 >
                                     {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"13px"} color="#a67c00">Stake</Text>}
                                 </Button>
