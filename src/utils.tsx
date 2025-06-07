@@ -139,7 +139,7 @@ export function formatNumberPrecise(value, sigDigits = 4) {
   
   // Convert to number if it's a string
   let num = typeof value === 'number' ? value : parseFloat(value);
-  if (isNaN(num)) return '0';
+  if (isNaN(num) || num === 0) return '0';
 
   // Handle negative numbers
   const sign = num < 0 ? '-' : '';
@@ -172,12 +172,44 @@ export function formatNumberPrecise(value, sigDigits = 4) {
     // For regular numbers without suffixes
     if (sigDigits <= 0) return sign + Math.round(num).toString();
     
-    // Figure out how many decimals we need
-    const intDigits = Math.floor(num).toString().length;
-    const decPlaces = Math.max(sigDigits - intDigits, 0);
-    
-    // Format with appropriate decimal places and trim trailing zeros
-    return sign + num.toFixed(decPlaces).replace(/\.?0+$/, '');
+    if (num >= 1) {
+      // For numbers >= 1, use the original logic
+      const intDigits = Math.floor(num).toString().length;
+      const decPlaces = Math.max(sigDigits - intDigits, 0);
+      return sign + num.toFixed(decPlaces).replace(/\.?0+$/, '');
+    } else {
+      // For numbers < 1, use scientific notation awareness and proper significant digits
+      // Convert to string to check for scientific notation
+      const numStr = num.toString();
+      
+      if (numStr.includes('e') || numStr.includes('E')) {
+        // Handle scientific notation
+        return sign + num.toPrecision(sigDigits).replace(/\.?0+$/, '');
+      } else {
+        // For regular decimal numbers < 1
+        // Find the position of first non-zero digit after decimal point
+        const decimalStr = numStr.split('.')[1] || '';
+        let firstNonZeroIndex = -1;
+        
+        for (let i = 0; i < decimalStr.length; i++) {
+          if (decimalStr[i] !== '0') {
+            firstNonZeroIndex = i;
+            break;
+          }
+        }
+        
+        if (firstNonZeroIndex === -1) {
+          return '0'; // All zeros after decimal
+        }
+        
+        // Calculate how many decimal places we need to show sigDigits significant digits
+        const decPlaces = firstNonZeroIndex + sigDigits;
+        const formatted = num.toFixed(Math.min(decPlaces, 18)); // Cap at 18 to avoid precision issues
+        
+        // Remove trailing zeros but keep at least one decimal place if original had decimals
+        return sign + formatted.replace(/\.?0+$/, '');
+      }
+    }
   }
 }
 /**
