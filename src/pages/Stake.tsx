@@ -1026,13 +1026,13 @@ const Stake = () => {
                         </SimpleGrid>
 
                         </GridItem>
-                    </Grid>
-                       <p
+                        <p
                         style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
                         onClick={() => window.history.back()}
                         >
                         Go Back
-                        </p>    
+                        </p>   
+                    </Grid> 
                     </Box>
                      )
                 ) : (
