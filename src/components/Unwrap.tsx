@@ -68,7 +68,7 @@ const Unwrap = ({
                         variant={"outline"}
                         h={size == "lg" ? 8 : 6}
                         ml={size == "lg" ? 0 : 2}
-                        mt={size == "lg" ? 0 : 2}
+                        mt={size == "lg" ? 0 : 1}
                         w={buttonSize}
                         onClick={() => setActionType('wrap')}
                         color="white"
