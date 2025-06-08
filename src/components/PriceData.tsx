@@ -132,7 +132,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     try {
       const apiEndpoint = mapIntervalToEndpoint(interval);
       // Use the OHLC endpoint
-      console.log(`[Debug] Fetching OHLC data from: ${API_BASE_URL}/api/price/ohlc/${apiEndpoint} (for interval: ${interval})`);
+      // console.log(`[Debug] Fetching OHLC data from: ${API_BASE_URL}/api/price/ohlc/${apiEndpoint} (for interval: ${interval})`);
       const response = await fetch(`${API_BASE_URL}/api/price/ohlc/${apiEndpoint}`);
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
@@ -164,15 +164,15 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
   // Calculate percentage change based on OHLC data and selected interval
   const calculatePercentChange = (ohlcData: any[], interval: string) => {
-    console.log(`[Debug] calculatePercentChange called with interval: ${interval}, data length: ${ohlcData?.length}`);
+    // console.log(`[Debug] calculatePercentChange called with interval: ${interval}, data length: ${ohlcData?.length}`);
     
     if (!ohlcData || ohlcData.length < 1) {
-      console.log('[Debug] No data for percentage calculation');
+      // console.log('[Debug] No data for percentage calculation');
       return 0;
     }
     
     if (ohlcData.length === 1) {
-      console.log('[Debug] Only one data point, cannot calculate percentage change');
+      // console.log('[Debug] Only one data point, cannot calculate percentage change');
       return 0;
     }
 
@@ -204,7 +204,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     }
 
     const targetTime = now - targetTimeAgo;
-    console.log(`[Debug] Looking for data ${targetTimeAgo / (60 * 60 * 1000)} hours ago (${new Date(targetTime)})`);
+    // console.log(`[Debug] Looking for data ${targetTimeAgo / (60 * 60 * 1000)} hours ago (${new Date(targetTime)})`);
 
     // Find the candle closest to our target time (but not in the future)
     let startCandle = ohlcData[0]; // fallback to first candle
@@ -229,13 +229,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     const startPrice = startCandle.y[3]; // close price
     const endPrice = endCandle.y[3]; // close price
 
-    console.log(`[Debug] Start candle: ${new Date(startCandle.x)} - Price: ${startPrice}`);
-    console.log(`[Debug] End candle: ${new Date(endCandle.x)} - Price: ${endPrice}`);
-    console.log(`[Debug] Actual time span: ${((new Date(endCandle.x).getTime() - new Date(startCandle.x).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours`);
+    // console.log(`[Debug] Start candle: ${new Date(startCandle.x)} - Price: ${startPrice}`);
+    // console.log(`[Debug] End candle: ${new Date(endCandle.x)} - Price: ${endPrice}`);
+    // console.log(`[Debug] Actual time span: ${((new Date(endCandle.x).getTime() - new Date(startCandle.x).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours`);
 
     // Calculate percentage change
     const change = ((endPrice - startPrice) / startPrice) * 100;
-    console.log(`[Debug] Calculated percentage change: ${change}%`);
+    // console.log(`[Debug] Calculated percentage change: ${change}%`);
     
     return change;
   };
@@ -301,7 +301,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
           const shouldRefreshAll = !lastRefreshTime.current || (now - lastRefreshTime.current > refreshInterval);
 
           if (shouldRefreshAll) {
-            console.log(`Refreshing OHLC data for ${selectedInterval} interval`);
+            // console.log(`Refreshing OHLC data for ${selectedInterval} interval`);
 
             // Fetch OHLC data for the current interval
             const ohlcData = await fetchOHLCData(selectedInterval);
@@ -571,7 +571,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     return () => clearInterval(connectionCheck);
   }, []);
 
-  console.log(Number(formatEther(`${imv || 0}`)) * Number(priceUSD), "IMV in USD");
+  // console.log(Number(formatEther(`${imv || 0}`)) * Number(priceUSD), "IMV in USD");
   return (
     <Box ml={isMobile ? -5 : 0} mt={isMobile ? 0 : "-5px"}>
       <Global styles={css`
