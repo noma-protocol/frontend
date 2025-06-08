@@ -29,7 +29,7 @@ return (
         <SimpleGrid 
           maxWidth={isMobile ? "40%" : "20%"} 
           ml={isMobile ? "50vw" : "50vw"} 
-          mt={isMobile ? "-6vh" : "-100px"} 
+          mt={isMobile ? "-11vh" : "-160px"} 
           columns={2} 
           rows={3} 
           p={2}   
