@@ -1238,12 +1238,12 @@ const Exchange: React.FC = () => {
                 </Box>
                 <Box mt={-2} ml={isMobile? 7 : 2}>
                     {isMobile ?
-                    <VStack alignItems={"left"} ml={5}>
+                    <VStack alignItems={"right"} ml={"35px"} textAlign={"right"} spacing={0}>
                       <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT</Text></Box>
-                      <Box><Text fontSize="sm">{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
-                      <Box><Text  fontSize="sm">{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
-                      <Box><Text  fontSize="sm">(${commifyDecimals(priceUSD > 0 && spotPrice > 0 ? formatEther(`${spotPrice}`) * priceUSD : 0)})</Text></Box>
-                      <Box><Text color={percentChange < 0 ? "red" : percentChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)</Text></Box>
+                      <Box><Text fontSize="xs">{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
+                      <Box><Text  fontSize="xs">{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
+                      <Box><Text  fontSize="xs">(${commifyDecimals(priceUSD > 0 && spotPrice > 0 ? formatEther(`${spotPrice}`) * priceUSD : 0)})</Text></Box>
+                      <Box><Text color={percentChange < 0 ? "red" : percentChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"xs"}>({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)</Text></Box>
                     </VStack>
                     : 
                     <HStack w="60%">
