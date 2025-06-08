@@ -483,7 +483,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   };
 
   // Define predefined time intervals
-  const predefinedIntervals = ["15m", "1h", "24h"];
+  const predefinedIntervals = ["15m", "1h", "24h", "1w", "1M"];
 
   // Update error handlers
   useEffect(() => {
