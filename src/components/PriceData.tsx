@@ -226,21 +226,15 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     // Use the most recent candle as the end point
     const endCandle = ohlcData[ohlcData.length - 1];
     
-    const startPriceRaw = startCandle.y[3]; // close price in raw units
-    const endPriceRaw = endCandle.y[3]; // close price in raw units
+    const startPrice = startCandle.y[3]; // close price
+    const endPrice = endCandle.y[3]; // close price
 
-    // Convert to USD prices using the current USD rate
-    const currentUSDRate = Number(priceUSD);
-    const startPriceUSD = startPriceRaw * currentUSDRate;
-    const endPriceUSD = endPriceRaw * currentUSDRate;
-
-    console.log(`[Debug] Start candle: ${new Date(startCandle.x)} - Raw: ${startPriceRaw}, USD: $${startPriceUSD.toFixed(6)}`);
-    console.log(`[Debug] End candle: ${new Date(endCandle.x)} - Raw: ${endPriceRaw}, USD: $${endPriceUSD.toFixed(6)}`);
-    console.log(`[Debug] Current USD rate: ${currentUSDRate}`);
+    console.log(`[Debug] Start candle: ${new Date(startCandle.x)} - Price: ${startPrice}`);
+    console.log(`[Debug] End candle: ${new Date(endCandle.x)} - Price: ${endPrice}`);
     console.log(`[Debug] Actual time span: ${((new Date(endCandle.x).getTime() - new Date(startCandle.x).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours`);
 
-    // Calculate percentage change using USD prices
-    const change = ((endPriceUSD - startPriceUSD) / startPriceUSD) * 100;
+    // Calculate percentage change using raw token prices
+    const change = ((endPrice - startPrice) / startPrice) * 100;
     console.log(`[Debug] Calculated percentage change: ${change}%`);
     
     return change;
