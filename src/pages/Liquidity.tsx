@@ -12,7 +12,8 @@ import {
   Link,
   Select,
   Spinner,
-  createListCollection
+  createListCollection,
+  GridItem
 } from "@chakra-ui/react";
 import { useAccount, useContractRead } from "wagmi";
 import { Toaster } from "../components/ui/toaster";
@@ -461,26 +462,26 @@ const Liquidity: React.FC = () => {
               {isAllVaultsLoading ? (
                   <><HStack><Box mt={10} ml={5}><Text>Loading vaults...</Text></Box> <Box mt={10}><Spinner size="sm" /></Box></HStack></>
               ) : vaultsSelectData?.items?.length > 0 ? (
-                <VStack mt={10} ml={isMobile ? 2: 0}>
+                <Box ml={isMobile ? 2 : "15%"}>
+                <VStack mt={10} >
                   <Box w="100%">
-                    <HStack ml={isMobile ? "20px" : 0}>
-                      <Box w="150px">
-                          {isMobile ? (
-                            <></> ) : (
-                              <Text> Go to:</Text>
-                            )}
-
-                      </Box>
-                      <Box fontSize={isMobile ? "xs" : "sm"}>
+                    <SimpleGrid columns={2}>
+                        {isMobile ? (
+                          <></>
+                          ) : (
+                            <GridItem><Text fontSize="sm" mt={isMobile ? 0 : 10}>Go to:</Text></GridItem>
+                          )
+                        }
+                      <GridItem colSpan={isMobile ? 2 : 1}>
                         <SelectRoot
-                          mt={5}
-                          ml={isMobile ? "-170px" : 5}
-                          mb={2}
+                          mt={isMobile ? 5 : 0}
+                          ml={isMobile ? 3 : 5}
                           collection={createListCollection(_navigationSelectData )}
                           size="sm"
                           width={isMobile ? "165px" : "160px"}
                           onChange={handleSelectDestination}
                           value={selectedDestination} // Bind the selected value to the state
+                          h={"30px"}
                         >
                         <SelectTrigger>
                           {_navigationSelectData.items.map((data, index) => {
@@ -503,65 +504,60 @@ const Liquidity: React.FC = () => {
                               );
                           })}
                           </SelectContent>
-                      </SelectRoot>
-                      </Box>                    
-                    </HStack>
+                      </SelectRoot>                       
+                      </GridItem>
+                    </SimpleGrid>
                   </Box>
-                  <Box>
-                    <Box>
-                      <HStack ml={isMobile ? "40px" : 0} mt={isMobile ? 2 : 0}>
-                        <Box>
-                          <Box w="140px">
-                            {isMobile ? (
-                              <></>
-                             ) : (
-                                <Text>Choose vault:</Text>
-                              )
-                            }
-                          </Box>
-                        </Box>
-                        <Box fontSize={isMobile ? "xs" : "sm"}>
-                        <SelectRoot
-                          ml={isMobile ? "-190px" : 5}
-                          mb={2}
-                          mt={isMobile ? "-12px":5}
-                          collection={vaultsSelectData}
-                          size="sm"
-                          width={isMobile ? "165px" : "160px"}
-                          onChange={handleSelectMarket}
-                          value={selectedVault} // Bind the selected value to the state
-                          h={"30px"}
-                      >
-                        <SelectTrigger>
+                  <Box >
+                    <SimpleGrid columns={2}>
+                          {isMobile ? (
+                            <></>
+                            ) : (
+                              <GridItem  mt={isMobile ? 0 : "10px"}><Text fontSize="sm">Choose vault:</Text></GridItem>
+                            )
+                          }
+                      <GridItem colSpan={isMobile ? 2 : 1}>
+                      <SelectRoot
+                        ml={isMobile ? "-20px" : 5}
+                        mb={isMobile ? 2 : 0}
+                        mt={isMobile ? 0  : 2}
+                        collection={vaultsSelectData}
+                        size="sm"
+                        width={isMobile ? "165px" : "160px"}
+                        onChange={handleSelectMarket}
+                        value={selectedVault} // Bind the selected value to the state
+                        h={"30px"}
+                    >
+                      <SelectTrigger>
+                      {vaultsSelectData.items
+                        .slice()          // make a shallow copy
+                        .reverse()        // reverse the copy 
+                        .map((vaultData, index) => {
+                        if (index > 0) return;
+                          return (
+                            <SelectValueText placeholder={vaultData.label}>
+                            </SelectValueText>
+                          );
+                        })}                  
+                        </SelectTrigger>
+                      <SelectContent>
                         {vaultsSelectData.items
-                          .slice()          // make a shallow copy
-                          .reverse()        // reverse the copy 
-                          .map((vaultData, index) => {
-                          if (index > 0) return;
-                            return (
-                              <SelectValueText placeholder={vaultData.label}>
-                              </SelectValueText>
-                            );
-                          })}                  
-                          </SelectTrigger>
-                        <SelectContent>
-                          {vaultsSelectData.items
-                          .slice()          // make a shallow copy
-                          .reverse()        // reverse the copy 
-                          .map((vaultData) => {
-                            return (
-                              <SelectItem item={vaultData} key={vaultData.value}>
-                                {vaultData.label}
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </SelectRoot>
-                        </Box>
-                      </HStack>
-                      </Box>  
+                        .slice()          // make a shallow copy
+                        .reverse()        // reverse the copy 
+                        .map((vaultData) => {
+                          return (
+                            <SelectItem item={vaultData} key={vaultData.value}>
+                              {vaultData.label}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                        </SelectRoot>                        
+                      </GridItem>
+                    </SimpleGrid>
                   </Box>
                 </VStack>
+                </Box>
               ) : (
                 <Text>No vaults available.</Text>
               )}
