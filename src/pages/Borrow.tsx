@@ -1064,7 +1064,13 @@ const Borrow = () => {
 
                                     </Box>
                                 </SimpleGrid>
-                            </Box>                        
+                            </Box>   
+                            <p
+                                style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
+                                onClick={() => window.history.back()}
+                            >
+                            Go Back
+                            </p>                          
                         </Flex>
                                                  
                     ) : (
@@ -1420,6 +1426,12 @@ const Borrow = () => {
                         </SimpleGrid>
 
                         </GridItem>
+                        <p
+                                style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
+                                onClick={() => window.history.back()}
+                            >
+                            Go Back
+                        </p>     
                     </Grid>
                     </Box>
                     )

@@ -53,16 +53,16 @@ const Header: React.FC = () => {
           </Link>
           {/* Remove mx-auto class and add justify-content-start to align items to the left */}
           <ul className="navbar-nav items justify-content-start " >
-          <li className="nav-item" style={{border:window.location.href.indexOf("app.oikos.cash/exchange") > -1 ? "1px solid #a67c00" : "none"}}>
+          {/* <li className="nav-item" style={{border:window.location.href.indexOf("app.oikos.cash/exchange") > -1 ? "1px solid #a67c00" : "none"}}>
               <Link className="nav-link" href="/exchange">
                   <Text color="#f3f7c6">Exchange</Text>
               </Link>
-            </li>
-            <li className="nav-item" style={{marginLeft: "10px", border:window.location.href.indexOf("app.oikos.cash/markets") > -1 ? "1px solid #a67c00" : "none"}}>
+            </li> */}
+            {/* <li className="nav-item" style={{marginLeft: "10px", border:window.location.href.indexOf("app.oikos.cash/markets") > -1 ? "1px solid #a67c00" : "none"}}>
             <Link className="nav-link" href="/markets">
             <Text color="#f3f7c6">Markets</Text>
               </Link>
-            </li>
+            </li> */}
             {/* <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("launchpad") > -1 ? "1px solid #a67c00" : "none"}}>
             <Link className="nav-link" href="/launchpad">
                   <Text color="#f3f7c6">Launchpad</Text>
@@ -78,11 +78,11 @@ const Header: React.FC = () => {
                   <Text color="white">Presale</Text>
               </Link>
             </li>  */}
-            <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("app.oikos.cash/liquidity") > -1 ? "1px solid #a67c00" : "none"}}>
+            {/* <li className="nav-item" style={{marginLeft: "10px",border:window.location.href.indexOf("app.oikos.cash/liquidity") > -1 ? "1px solid #a67c00" : "none"}}>
               <Link className="nav-link" href="/liquidity">
                   <Text color="#f3f7c6">Liquidity</Text>
               </Link>
-            </li>
+            </li> */}
             {/* <li className="nav-item">
               <Link className="nav-link"  target="_blank" href="https://github.com/noma-protocol" isExternal >
                   Github
