@@ -402,6 +402,9 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       shared: true,
       intersect: false,
       followCursor: true,
+      hideDelay: 300, // Add delay before hiding tooltip
+      showDelay: 0,   // No delay to show tooltip
+      sticky: true,   // Make tooltip sticky
       fixed: {
         enabled: false
       },
