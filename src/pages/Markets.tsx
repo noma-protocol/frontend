@@ -460,11 +460,11 @@ const Markets: React.FC = () => {
           color="white"
           textAlign="left"
           mt={isMobile ? "18%" : "100px"}
-          ml={isMobile ? 2 : "2%"}
+          ml={isMobile ? 0 : "2%"}
           alignContent={"center"}
           alignItems={"center"}
         >
-          <Box width="100%" maxW="1100px" mx="auto" >
+          <Box width={isMobile ? "95%" : "100%"} maxW="1100px" mx="auto" >
             <Box px={4} mb={4}>
               <HStack spacing={4}>
                 <Button
