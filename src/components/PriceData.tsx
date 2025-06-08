@@ -115,11 +115,25 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     }
   };
 
+  // Map user-friendly intervals to API endpoints
+  const mapIntervalToEndpoint = (interval: string) => {
+    switch (interval) {
+      case "15m": return "15m";
+      case "1h": return "1h"; 
+      case "24h": return "24h";
+      case "1w": return "24h"; // Use 24h data for 1w calculation
+      case "1M": return "24h"; // Use 24h data for 1M calculation
+      default: return interval;
+    }
+  };
+
   // Fetch OHLC data from API
-  const fetchOHLCData = async (intervalMinutes: string) => {
+  const fetchOHLCData = async (interval: string) => {
     try {
+      const apiEndpoint = mapIntervalToEndpoint(interval);
       // Use the OHLC endpoint
-      const response = await fetch(`${API_BASE_URL}/api/price/ohlc/${intervalMinutes}`);
+      console.log(`[Debug] Fetching OHLC data from: ${API_BASE_URL}/api/price/ohlc/${apiEndpoint} (for interval: ${interval})`);
+      const response = await fetch(`${API_BASE_URL}/api/price/ohlc/${apiEndpoint}`);
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -152,21 +166,75 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   const calculatePercentChange = (ohlcData: any[], interval: string) => {
     console.log(`[Debug] calculatePercentChange called with interval: ${interval}, data length: ${ohlcData?.length}`);
     
-    if (!ohlcData || ohlcData.length < 2) {
-      console.log('[Debug] Not enough data for percentage calculation');
+    if (!ohlcData || ohlcData.length < 1) {
+      console.log('[Debug] No data for percentage calculation');
+      return 0;
+    }
+    
+    if (ohlcData.length === 1) {
+      console.log('[Debug] Only one data point, cannot calculate percentage change');
       return 0;
     }
 
-    // Simple approach: compare first and last candles in the dataset
-    // The API should return data for the requested interval period
-    const firstPrice = ohlcData[0].y[3]; // close price of first candle
-    const lastPrice = ohlcData[ohlcData.length - 1].y[3]; // close price of last candle
+    const now = new Date().getTime();
+    let targetTimeAgo: number;
 
-    console.log(`[Debug] First candle: ${new Date(ohlcData[0].x)} - Price: ${firstPrice}`);
-    console.log(`[Debug] Last candle: ${new Date(ohlcData[ohlcData.length - 1].x)} - Price: ${lastPrice}`);
+    // Calculate how far back to look based on the interval
+    switch (interval) {
+      case "15m":
+        targetTimeAgo = 15 * 60 * 1000; // 15 minutes
+        break;
+      case "1h":
+        targetTimeAgo = 60 * 60 * 1000; // 1 hour
+        break;
+      case "24h":
+        targetTimeAgo = 24 * 60 * 60 * 1000; // 24 hours
+        break;
+      case "1w":
+        targetTimeAgo = 7 * 24 * 60 * 60 * 1000; // 1 week
+        break;
+      case "1M":
+        targetTimeAgo = 30 * 24 * 60 * 60 * 1000; // 1 month (30 days)
+        break;
+      default:
+        // Fallback to first and last candle
+        const firstPrice = ohlcData[0].y[3];
+        const lastPrice = ohlcData[ohlcData.length - 1].y[3];
+        return ((lastPrice - firstPrice) / firstPrice) * 100;
+    }
+
+    const targetTime = now - targetTimeAgo;
+    console.log(`[Debug] Looking for data ${targetTimeAgo / (60 * 60 * 1000)} hours ago (${new Date(targetTime)})`);
+
+    // Find the candle closest to our target time (but not in the future)
+    let startCandle = ohlcData[0]; // fallback to first candle
+    let minTimeDiff = Infinity;
+
+    for (const candle of ohlcData) {
+      const candleTime = new Date(candle.x).getTime();
+      
+      // Only consider candles that are at or before our target time
+      if (candleTime <= targetTime) {
+        const timeDiff = Math.abs(candleTime - targetTime);
+        if (timeDiff < minTimeDiff) {
+          minTimeDiff = timeDiff;
+          startCandle = candle;
+        }
+      }
+    }
+
+    // Use the most recent candle as the end point
+    const endCandle = ohlcData[ohlcData.length - 1];
+    
+    const startPrice = startCandle.y[3]; // close price
+    const endPrice = endCandle.y[3]; // close price
+
+    console.log(`[Debug] Start candle: ${new Date(startCandle.x)} - Price: ${startPrice}`);
+    console.log(`[Debug] End candle: ${new Date(endCandle.x)} - Price: ${endPrice}`);
+    console.log(`[Debug] Actual time span: ${((new Date(endCandle.x).getTime() - new Date(startCandle.x).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours`);
 
     // Calculate percentage change
-    const change = ((lastPrice - firstPrice) / firstPrice) * 100;
+    const change = ((endPrice - startPrice) / startPrice) * 100;
     console.log(`[Debug] Calculated percentage change: ${change}%`);
     
     return change;
