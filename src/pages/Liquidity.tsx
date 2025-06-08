@@ -87,6 +87,32 @@ const Liquidity: React.FC = () => {
   const [feesToken0, setFeesToken0] = useState(0);
   const [feesToken1, setFeesToken1] = useState(0);
   const [priceUSD, setPriceUSD] = useState("0.00000000000");
+  const [selectedDestination, setSelectedDestination] = useState("/liquidity");
+
+  const _navigationSelectData = {
+    items: [
+      {
+        label: "Exchange",
+        value: "/exchange",
+      },
+      {
+        label: "Markets",
+        value: "/markets",
+      },
+      {
+        label: "Liquidity",
+        value: "/liquidity",
+      },
+      {
+        label: "Borrow",
+        value: `/borrow?v=${selectedVault}`,
+      },
+      {
+        label: "Stake",
+        value: `/stake?v=${selectedVault}`,
+      },
+    ],
+  };
 
   const {
     data: imv
@@ -386,6 +412,13 @@ const Liquidity: React.FC = () => {
     setErrorDeployed(false); // Reset the error state when a new vault is selected
   }
 
+  const handleSelectDestination = (event) => {
+      console.log(`Selected destination: ${event.target.value}`);
+        
+      window.location = event.target.value;
+  }
+    
+
   return (
     <Container maxW="container.xl" h="90vh">
       <Toaster />
@@ -424,45 +457,111 @@ const Liquidity: React.FC = () => {
                 </Text>
               </Heading> */}
 
-              <Box >
+              <Box w={isMobile ? "55%" : "25%"}>
               {isAllVaultsLoading ? (
                   <><HStack><Box mt={10} ml={5}><Text>Loading vaults...</Text></Box> <Box mt={10}><Spinner size="sm" /></Box></HStack></>
               ) : vaultsSelectData?.items?.length > 0 ? (
-                <SelectRoot
-                  ml={5}
-                  mb={2}
-                  mt={10}
-                  collection={vaultsSelectData}
-                  size="sm"
-                  width={isMobile ? "165px" : "200px"}
-                  onChange={handleSelectMarket}
-                  value={selectedVault} // Bind the selected value to the state
-                >
-                  <SelectTrigger>
-                  {vaultsSelectData.items
-                    .slice()          // make a shallow copy
-                    .reverse()        // reverse the copy 
-                    .map((vaultData, index) => {
-                    if (index > 0) return;
-                      return (
-                        <SelectValueText placeholder={vaultData.label}>
-                        </SelectValueText>
-                      );
-                    })}                  
-                    </SelectTrigger>
-                  <SelectContent>
-                    {vaultsSelectData.items
-                    .slice()          // make a shallow copy
-                    .reverse()        // reverse the copy 
-                    .map((vaultData) => {
-                      return (
-                        <SelectItem item={vaultData} key={vaultData.value}>
-                          {vaultData.label}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </SelectRoot>
+                <VStack mt={10} ml={isMobile ? 2: 0}>
+                  <Box w="100%">
+                    <HStack ml={isMobile ? "20px" : 0}>
+                      <Box w="150px">
+                          {isMobile ? (
+                            <></> ) : (
+                              <Text> Go to:</Text>
+                            )}
+
+                      </Box>
+                      <Box fontSize={isMobile ? "xs" : "sm"}>
+                        <SelectRoot
+                          mt={5}
+                          ml={isMobile ? "-170px" : 5}
+                          mb={2}
+                          collection={createListCollection(_navigationSelectData )}
+                          size="sm"
+                          width={isMobile ? "165px" : "160px"}
+                          onChange={handleSelectDestination}
+                          value={selectedDestination} // Bind the selected value to the state
+                        >
+                        <SelectTrigger>
+                          {_navigationSelectData.items.map((data, index) => {
+                          if (index > 0) return;
+                              return (
+                              <SelectValueText placeholder={data.label}>
+                              </SelectValueText>
+                              );
+                          })}                  
+                          </SelectTrigger>
+                          <SelectContent>
+                          {_navigationSelectData.items
+                            .slice()          // make a shallow copy
+                            .reverse()        // reverse the copy 
+                            .map((data) => {
+                              return (
+                              <SelectItem item={data} key={data.value}>
+                                  {data.label}
+                              </SelectItem>
+                              );
+                          })}
+                          </SelectContent>
+                      </SelectRoot>
+                      </Box>                    
+                    </HStack>
+                  </Box>
+                  <Box>
+                    <Box>
+                      <HStack ml={isMobile ? "40px" : 0} mt={isMobile ? 2 : 0}>
+                        <Box>
+                          <Box w="140px">
+                            {isMobile ? (
+                              <></>
+                             ) : (
+                                <Text>Choose vault:</Text>
+                              )
+                            }
+                          </Box>
+                        </Box>
+                        <Box fontSize={isMobile ? "xs" : "sm"}>
+                        <SelectRoot
+                          ml={isMobile ? "-190px" : 5}
+                          mb={2}
+                          mt={isMobile ? "-12px":5}
+                          collection={vaultsSelectData}
+                          size="sm"
+                          width={isMobile ? "165px" : "160px"}
+                          onChange={handleSelectMarket}
+                          value={selectedVault} // Bind the selected value to the state
+                          h={"30px"}
+                      >
+                        <SelectTrigger>
+                        {vaultsSelectData.items
+                          .slice()          // make a shallow copy
+                          .reverse()        // reverse the copy 
+                          .map((vaultData, index) => {
+                          if (index > 0) return;
+                            return (
+                              <SelectValueText placeholder={vaultData.label}>
+                              </SelectValueText>
+                            );
+                          })}                  
+                          </SelectTrigger>
+                        <SelectContent>
+                          {vaultsSelectData.items
+                          .slice()          // make a shallow copy
+                          .reverse()        // reverse the copy 
+                          .map((vaultData) => {
+                            return (
+                              <SelectItem item={vaultData} key={vaultData.value}>
+                                {vaultData.label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </SelectRoot>
+                        </Box>
+                      </HStack>
+                      </Box>  
+                  </Box>
+                </VStack>
               ) : (
                 <Text>No vaults available.</Text>
               )}
