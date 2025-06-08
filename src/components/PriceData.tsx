@@ -150,7 +150,12 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
   // Calculate percentage change based on OHLC data and selected interval
   const calculatePercentChange = (ohlcData: any[], interval: string) => {
-    if (!ohlcData || ohlcData.length < 2) return 0;
+    console.log(`[Debug] calculatePercentChange called with interval: ${interval}, data length: ${ohlcData?.length}`);
+    
+    if (!ohlcData || ohlcData.length < 2) {
+      console.log('[Debug] Not enough data for percentage calculation');
+      return 0;
+    }
 
     const now = new Date().getTime();
     let targetTime: number;
@@ -167,11 +172,16 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         targetTime = now - (24 * 60 * 60 * 1000); // 24 hours ago
         break;
       default:
+        console.log(`[Debug] Using fallback calculation for interval: ${interval}`);
         // Fallback to first candle if interval not recognized
         const firstPrice = ohlcData[0].y[3];
         const lastPrice = ohlcData[ohlcData.length - 1].y[3];
-        return ((lastPrice - firstPrice) / firstPrice) * 100;
+        const fallbackChange = ((lastPrice - firstPrice) / firstPrice) * 100;
+        console.log(`[Debug] Fallback change: ${fallbackChange}%`);
+        return fallbackChange;
     }
+
+    console.log(`[Debug] Target time: ${new Date(targetTime)}, Now: ${new Date(now)}`);
 
     // Find the candle closest to the target time
     let closestCandle = ohlcData[0];
@@ -191,8 +201,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     const startPrice = closestCandle.y[3]; // close price
     const currentPrice = ohlcData[ohlcData.length - 1].y[3]; // most recent close price
 
+    console.log(`[Debug] Closest candle time: ${new Date(closestCandle.x)}`);
+    console.log(`[Debug] Start price: ${startPrice}, Current price: ${currentPrice}`);
+
     // Calculate percentage change
     const change = ((currentPrice - startPrice) / startPrice) * 100;
+    console.log(`[Debug] Calculated percentage change: ${change}%`);
+    
     return change;
   };
 
