@@ -779,7 +779,13 @@ const Stake = () => {
                                     </Button>
                                 </Box>
                             </SimpleGrid>                        
-                        </Box>                           
+                        </Box>  
+                        <p
+                                style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
+                                onClick={() => window.history.back()}
+                            >
+                            Go Back
+                        </p>                             
                         </Flex>
                     ) : ( 
                     <Box w="99%">
@@ -1021,6 +1027,12 @@ const Stake = () => {
 
                         </GridItem>
                     </Grid>
+                       <p
+                        style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
+                        onClick={() => window.history.back()}
+                        >
+                        Go Back
+                        </p>    
                     </Box>
                      )
                 ) : (

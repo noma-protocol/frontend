@@ -232,6 +232,32 @@ const Exchange: React.FC = () => {
   const [balanceBeforeSale, setBalanceBeforeSale] = useState(0);
   const [protocol, setProtocol] = useState("uniswap");
   const [priceUSD, setPriceUSD] = useState("0.00000000000");
+  const [selectedDestination, setSelectedDestination] = useState("Exchange");
+
+  const _navigationSelectData = {
+    items: [
+      {
+        label: "Exchange",
+        value: "/exchange",
+      },
+      {
+        label: "Markets",
+        value: "/markets",
+      },
+      {
+        label: "Liquidity",
+        value: "/liquidity",
+      },
+      {
+        label: "Borrow",
+        value: `/borrow?v=${selectedVault}`,
+      },
+      {
+        label: "Stake",
+        value: `/stake?v=${selectedVault}`,
+      },
+    ],
+  };
 
   useEffect(() => {
     const fetchPrice = async () => {
@@ -1074,6 +1100,12 @@ const Exchange: React.FC = () => {
         setUseWeth(value);
     }
 
+    const handleSelectDestination = (event) => {
+        console.log(`Selected destination: ${event.target.value}`);
+         
+        window.location = event.target.value;
+    }
+
   return (
     <Container maxW="container.xl" py={12} minH="1100px">
       <Toaster />
@@ -1207,23 +1239,67 @@ const Exchange: React.FC = () => {
                 <Box mt={-2} ml={isMobile? 7 : 2}>
                     {isMobile ?
                     <VStack alignItems={"left"} ml={5}>
-                      <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT PRICE</Text></Box>
+                      <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT</Text></Box>
                       <Box><Text fontSize="sm">{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
                       <Box><Text  fontSize="sm">{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
                       <Box><Text  fontSize="sm">(${commifyDecimals(priceUSD > 0 && spotPrice > 0 ? formatEther(`${spotPrice}`) * priceUSD : 0)})</Text></Box>
                       <Box><Text color={percentChange < 0 ? "red" : percentChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)</Text></Box>
                     </VStack>
                     : 
-                    <HStack>
-                      <Box><Text color="#a67c00" fontWeight="bold">SPOT PRICE</Text></Box> 
+                    <HStack w="60%">
+                      <Box><Text color="#a67c00" fontWeight="bold">SPOT</Text></Box> 
                       <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
-                      <Box><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`}</Text></Box>
+                      <Box w="120px"><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`}</Text></Box>
                       <Box><Text>(${commifyDecimals(priceUSD > 0 && spotPrice > 0 ? formatEther(`${spotPrice}`) * priceUSD : 0)})</Text></Box>
                       <Box><Text color={percentChange < 0 ? "red" : percentChange > 0 ? "green" : "gray"} fontWeight={"bold"} fontSize={"sm"}>({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)</Text></Box>
                     </HStack>                    
                     }
                 </Box>
+                <Box ml={"15%"}>
+                    <HStack>
+                      <Box w="80px" >
+                          <Text> Go to:</Text>
+                      </Box>
+                      <Box>
+                        <SelectRoot
+                          mt={isMobile ? "-60px" : 0}
+                          ml={5}
+                          mb={2}
+                          collection={createListCollection(_navigationSelectData )}
+                          size="sm"
+                          width={isMobile ? "185px" : "150px"}
+                          onChange={handleSelectDestination}
+                          value={selectedDestination} // Bind the selected value to the state
+                          
+                      >
+                          <SelectTrigger>
+                          {_navigationSelectData.items.map((data, index) => {
+                          if (index > 0) return;
+                              return (
+                              <SelectValueText placeholder={data.label}>
+                              </SelectValueText>
+                              );
+                          })}                  
+                          </SelectTrigger>
+                          <SelectContent>
+                          {_navigationSelectData.items
+                            .slice()          // make a shallow copy
+                            .reverse()        // reverse the copy 
+                            .map((data) => {
+                              return (
+                              <SelectItem item={data} key={data.value}>
+                                  {data.label}
+                              </SelectItem>
+                              );
+                          })}
+                          </SelectContent>
+                      </SelectRoot>
+                      </Box>
+                    </HStack>
+                
+                </Box>                
                 </HStack>
+
                 {isMobile ? 
                 <Box mt={10}>
                     <Flex direction="column">
