@@ -643,7 +643,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       ) : (
         <>
         <HStack justifyContent="space-between">
-          <Box>
+          <Box w="100%">
             <Box
               display="flex"
               justifyContent="space-between"
@@ -688,23 +688,26 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
             </Box>
           </Box>
               {isMobile ? (
-              <VStack mt={-2}>
+              <VStack ml={-10} mt={-10}>
                 <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
-                    <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
+                    <Text fontSize={"xs"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
                 </Box>
-                <Box  mt={-2} ml={"60%"}>
-                  <Text fontSize={isMobile ? "xs" : "sm"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
+                <Box  mt={-2} ml={"35%"}>
+                  <Text fontSize={"xs"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
                 </Box>
               </VStack>
               ) : 
-              <>
-              <Box mt={-3} mr={isMobile ? -15 : 0} ml={isMobile ? 7 : 10} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
-                    <Text fontSize={isMobile ? "xs" : "sm"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
-                </Box>
-                <Box  mt={-2} ml={2}>
-                  <Text fontSize={isMobile ? "xs" : "sm"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
-                </Box>
-              </>}
+              <Box w="100%" >
+                <HStack>
+                  <Box mt={-3} mr={0} ml={10} w="95%" >
+                    <Text fontSize={"xs"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
+                  </Box>
+                  <Box  mt={-2} ml={2}>
+                    <Text fontSize={"xx-small"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
+                  </Box>
+                </HStack>
+              </Box>
+              }
         </HStack>
 
           <Box h={isMobile ? 200 : 285} ml={isMobile ? "20px" : 0}  borderRadius={5} border="1px solid ivory" mb={5} w={isMobile ? "92%" : "99%"}>

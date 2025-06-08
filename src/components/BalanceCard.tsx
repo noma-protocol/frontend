@@ -100,10 +100,12 @@ const BalanceCard = ({
 
     let cardWidth = "94"; // Default width
     let marginLeft = isMobile ? -3 : 10;
+    let marginTop = 0;
     
     if (page === "exchange") {
         cardWidth = isMobile ? "98%" : "auto";
-        marginLeft = isMobile ? 0 : marginLeft; // Adjust margin for mobile
+        marginLeft = isMobile ? 0 : marginLeft;  
+        marginTop = isMobile ? 0 : 5; 
     } else if (page === "borrow") {
         if (isMobile) {
             marginLeft = -6;
@@ -131,6 +133,7 @@ const BalanceCard = ({
             minH="auto"
             borderRadius={5} 
             backgroundColor={"#222831"}
+            mt={marginTop}
         >
             <Text fontWeight="bold" fontSize={isMobile ? "xs" : "14px"} color="#a67c00" mb={2}>Wallet</Text>
             
