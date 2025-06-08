@@ -221,7 +221,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     >     
                     <GridItem colSpan={3} ml={2}>
                         <HStack h="30px">
-                            <Box w="220px">                                
+                            <Box w="140px">                                
                                 <Text fontSize={"13px"} color="#d6a700" >Spending&nbsp;</Text>
                             </Box>
                             <Box w="230px" bgColor={"#18181b"}   borderRadius={5} px={2} >
@@ -237,7 +237,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     </GridItem>
                     <GridItem colSpan={3} mt={-1} ml={2}>
                         <HStack h="30px">
-                            <Box  w="220px">                                
+                            <Box  w="140px">                                
                                 <Text fontSize={"13px"} color="#d6a700">Receiving</Text>
                             </Box>
                             <Box w="230px"  bgColor={"#18181b"}  color="white" fontWeight={"bold"} borderRadius={5} px={2} >
