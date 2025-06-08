@@ -258,8 +258,8 @@ const Exchange: React.FC = () => {
   
         const response = await axios.get(url, { params, headers });
 
-        console.log(response)
-        console.log(response.data)
+        // console.log(response)
+        // console.log(response.data)
 
         const freshPrice = response.data['binancecoin'].usd;
 
@@ -973,7 +973,7 @@ const Exchange: React.FC = () => {
 
     const handleSelectMarket = (event) => {
       console.log("Selected Market:", event.target.value);
-      
+
       setChartData(generateRandomData());
       setIsTokenInfoLoading(true); // Set loading state for initial load
       setSelectedVault(event.target.value);
