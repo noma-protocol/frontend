@@ -157,55 +157,16 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       return 0;
     }
 
-    const now = new Date().getTime();
-    let targetTime: number;
+    // Simple approach: compare first and last candles in the dataset
+    // The API should return data for the requested interval period
+    const firstPrice = ohlcData[0].y[3]; // close price of first candle
+    const lastPrice = ohlcData[ohlcData.length - 1].y[3]; // close price of last candle
 
-    // Calculate the target time based on the selected interval
-    switch (interval) {
-      case "15m":
-        targetTime = now - (15 * 60 * 1000); // 15 minutes ago
-        break;
-      case "1h":
-        targetTime = now - (60 * 60 * 1000); // 1 hour ago
-        break;
-      case "24h":
-        targetTime = now - (24 * 60 * 60 * 1000); // 24 hours ago
-        break;
-      default:
-        console.log(`[Debug] Using fallback calculation for interval: ${interval}`);
-        // Fallback to first candle if interval not recognized
-        const firstPrice = ohlcData[0].y[3];
-        const lastPrice = ohlcData[ohlcData.length - 1].y[3];
-        const fallbackChange = ((lastPrice - firstPrice) / firstPrice) * 100;
-        console.log(`[Debug] Fallback change: ${fallbackChange}%`);
-        return fallbackChange;
-    }
-
-    console.log(`[Debug] Target time: ${new Date(targetTime)}, Now: ${new Date(now)}`);
-
-    // Find the candle closest to the target time
-    let closestCandle = ohlcData[0];
-    let minTimeDiff = Math.abs(new Date(ohlcData[0].x).getTime() - targetTime);
-
-    for (const candle of ohlcData) {
-      const candleTime = new Date(candle.x).getTime();
-      const timeDiff = Math.abs(candleTime - targetTime);
-      
-      if (timeDiff < minTimeDiff) {
-        minTimeDiff = timeDiff;
-        closestCandle = candle;
-      }
-    }
-
-    // Use the close price of the closest candle as the starting point
-    const startPrice = closestCandle.y[3]; // close price
-    const currentPrice = ohlcData[ohlcData.length - 1].y[3]; // most recent close price
-
-    console.log(`[Debug] Closest candle time: ${new Date(closestCandle.x)}`);
-    console.log(`[Debug] Start price: ${startPrice}, Current price: ${currentPrice}`);
+    console.log(`[Debug] First candle: ${new Date(ohlcData[0].x)} - Price: ${firstPrice}`);
+    console.log(`[Debug] Last candle: ${new Date(ohlcData[ohlcData.length - 1].x)} - Price: ${lastPrice}`);
 
     // Calculate percentage change
-    const change = ((currentPrice - startPrice) / startPrice) * 100;
+    const change = ((lastPrice - firstPrice) / firstPrice) * 100;
     console.log(`[Debug] Calculated percentage change: ${change}%`);
     
     return change;
