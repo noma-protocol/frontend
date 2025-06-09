@@ -45,10 +45,11 @@ const Header: React.FC = () => {
         <Link href="https://oikos.cash" >
 
           <Image
+            mt={isMobile ? 0 : 2}
             src={Logo}
             alt="Noma Protocol"
-            style={{ width: "80px", height: "80px" }}
-            ml={isMobile ? "0" : "-40px"}
+            style={{ width: "60px", height: "60px" }}
+            ml={isMobile ? "0" : "-30px"}
           />
           </Link>
           {/* Remove mx-auto class and add justify-content-start to align items to the left */}
@@ -114,7 +115,7 @@ const Header: React.FC = () => {
                   : "Conectar billetera"}
                 </p>
               </Button>
-                &nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </li>
           </ul>
 
