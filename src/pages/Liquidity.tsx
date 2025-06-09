@@ -101,10 +101,6 @@ const Liquidity: React.FC = () => {
         value: "/markets",
       },
       {
-        label: "Liquidity",
-        value: "/liquidity",
-      },
-      {
         label: "Borrow",
         value: `/borrow?v=${selectedVault}`,
       },

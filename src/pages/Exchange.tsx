@@ -237,10 +237,6 @@ const Exchange: React.FC = () => {
   const _navigationSelectData = {
     items: [
       {
-        label: "Exchange",
-        value: "/exchange",
-      },
-      {
         label: "Markets",
         value: "/markets",
       },
