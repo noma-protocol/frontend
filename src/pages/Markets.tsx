@@ -31,6 +31,7 @@ import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
 import uniswapLogo from "../assets/images/uniswap.png";
 import pancakeLogo from "../assets/images/pancake.png";
+import walletIcon from '../assets/images/walletIcon.svg';
 import addressesBsc from "../assets/deployment.json";
 
 const addresses = config.chain === "local"
@@ -442,19 +443,46 @@ const Markets: React.FC = () => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   return (
-    <Container maxW="container.xl" py={12}>
+    <Container maxW="container.xl" py={12} ml={isConnected ? "2%" : "10%"}>
       <Toaster />
       {/* Prompt user to connect their wallet if not connected */}
       {!isConnected ? (
+        <>
         <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          color="white"
-          mt={"20%"}
-        >
-          <Heading as="h2">Connect your wallet</Heading>
-        </Box>
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            height="70vh"
+            color="white"
+            bg="#222831"
+            p={8}
+            borderRadius="xl"
+            boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
+            m={4}
+            border="1px solid #a67c00"
+            mt="100px"
+            ml={isMobile ? 5 : "7%"}
+            w="70%"
+            h="30%"
+            >
+            <Box
+                mb={6}
+                p={4}
+                borderRadius="full"
+                bg="rgba(166, 124, 0, 0.2)"
+                
+            >
+                <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
+            </Box>
+            <Heading as="h2" mb={4} fontSize="md" textAlign="center">Wallet Not Connected</Heading>
+            <Text fontSize="sm" textAlign="center" mb={6} color="gray.400">
+                Please connect your wallet to access the Markets page.
+            </Text>
+
+            </Box>
+            <Box h="50vh"><br /></Box>            
+        </>
       ) : (
         <Box
           color="white"
