@@ -210,6 +210,14 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     let startCandle = ohlcData[0]; // fallback to first candle
     let minTimeDiff = Infinity;
 
+    console.log(`[Debug] Looking for candle closest to: ${new Date(targetTime)}`);
+    console.log(`[Debug] Available candles:`);
+    ohlcData.forEach((candle, index) => {
+      const candleTime = new Date(candle.x).getTime();
+      const timeDiff = Math.abs(candleTime - targetTime);
+      console.log(`  [${index}] ${new Date(candle.x)} - Price: ${candle.y[3]} - Diff: ${(timeDiff / (60*60*1000)).toFixed(1)}h`);
+    });
+
     for (const candle of ohlcData) {
       const candleTime = new Date(candle.x).getTime();
       
@@ -222,6 +230,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         }
       }
     }
+
+    console.log(`[Debug] Selected start candle: ${new Date(startCandle.x)} (${(minTimeDiff / (60*60*1000)).toFixed(1)}h away from target)`);
 
     // Use the most recent candle as the end point
     const endCandle = ohlcData[ohlcData.length - 1];
