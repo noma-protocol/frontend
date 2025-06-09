@@ -488,7 +488,7 @@ const Markets: React.FC = () => {
           color="white"
           textAlign="left"
           mt={isMobile ? "18%" : "100px"}
-          ml={isMobile ? 0 : "2%"}
+          ml={isMobile ? 0 : "7%"}
           alignContent={"center"}
           alignItems={"center"}
         >
