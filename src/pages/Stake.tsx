@@ -594,7 +594,7 @@ const Stake = () => {
                                 </HStack>                               
                                 <Box px={2}  w="75px">     
                                     <HStack>
-                                        <Box fontSize="xs">
+                                        <Box mt={2} fontSize="xs">
                                         {commify(rewards, 2)}
                                         </Box>
                                         <Box  fontSize="xx-small" ml={-2} mt={2}>
@@ -773,7 +773,7 @@ const Stake = () => {
                                         ml={10}
                                         onClick={() => handleStake()}
                                         disabled={isLoading || !stakeAmount || stakeAmount === "" || Number(stakeAmount) <= 0}
-                                        w={"110px"}
+                                        w={"70px"}
                                     >
                                         {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"xs"} color="#a67c00">Stake</Text>}
                                     </Button>
