@@ -605,7 +605,7 @@ const Stake = () => {
                                         {commify(rewards, 2)}
                                         </Box>
                                         <Box  fontSize="xx-small" ml={-1} mt={2}>
-                                            {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xs" ml={-2}>&nbsp;{token0Info.tokenSymbol}</Text>}
+                                            {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xx-small" ml={-2}>&nbsp;{token0Info.tokenSymbol}</Text>}
                                         </Box> 
                                     </HStack>
                                 </Box>
@@ -616,7 +616,7 @@ const Stake = () => {
                                     h={"25px"}  
                                     borderColor={"#a67c00"} 
                                     variant="outline" 
-                                    ml={"60px"} 
+                                    ml={"70px"} 
                                     onClick={() => handleUnstake()}  
                                     disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
                                     w={"50%"}
