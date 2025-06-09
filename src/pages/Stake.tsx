@@ -571,7 +571,7 @@ const Stake = () => {
                                 w={isMobile ? "95%" : "352px"} 
                                 ml={2} 
                                 mr={2}
-                                gridTemplateColumns="65px 75px 75px 1fr" // wider Actions column
+                                gridTemplateColumns="65px 75px 65px 1fr" // wider Actions column
                             >               
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
@@ -598,7 +598,7 @@ const Stake = () => {
                                     {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xs" >s{token0Info.tokenSymbol}</Text>}
                                 </Box> 
                                 </HStack>                               
-                                <Box px={2}  w="75px">     
+                                <Box px={2}  w="65px">     
                                     <HStack>
                                         <Box mt={2} fontSize="xs">
                                         {commify(rewards, 2)}
@@ -615,7 +615,7 @@ const Stake = () => {
                                     h={"25px"}  
                                     borderColor={"#a67c00"} 
                                     variant="outline" 
-                                    ml={"65px"} 
+                                    ml={"60px"} 
                                     onClick={() => handleUnstake()}  
                                     disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
                                     w={"50%"}
