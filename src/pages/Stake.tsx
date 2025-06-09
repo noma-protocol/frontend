@@ -536,7 +536,7 @@ const Stake = () => {
                         <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
                     </Box>
                     <Heading as="h2" mb={4} fontSize="md" textAlign="center">Wallet Not Connected</Heading>
-                    <Text fontSize="sm" textAlign="center" mb={6} color="gray.400">
+                    <Text fontSize={isMobile ? "xs" : "sm"} textAlign="center" mb={6} color="gray.400">
                         Please connect your wallet to access the Borrow page.
                     </Text>
 
@@ -924,7 +924,7 @@ const Stake = () => {
                                 <>
                                 <Box px={2} mt={1} bgColor={"#18181b"}> 
                                     <HStack>
-                                        <Box  fontSize="sm" color="white">
+                                        <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
                                         {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
                                         </Box>
                                         <Box  fontSize="xx-small">
@@ -937,7 +937,7 @@ const Stake = () => {
                                 </Box>
                                 <Box px={2} mt={1} bgColor={"#18181b"}>     
                                     <HStack>
-                                        <Box  fontSize="sm" color="white">
+                                        <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
                                         {commify(rewards, 4)}
                                         </Box>
                                         <Box  fontSize="xx-small">
@@ -1006,10 +1006,10 @@ const Stake = () => {
                     <Text fontSize={"14px"} color="#a67c00"><b>New Position</b></Text>
                     <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"xs"}>
                         <Box w="500px" backgroundColor={"#bf9b30"}  mb={2}>
-                            <Text fontSize="sm">&nbsp;Amount</Text>
+                            <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;Amount</Text>
                         </Box> 
                         <Box backgroundColor={"#bf9b30"} mb={2}>
-                            <Text ml={5} fontSize="sm">Actions</Text>
+                            <Text ml={5} fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
                         </Box>
                         <Box w="auto">
                             <HStack>

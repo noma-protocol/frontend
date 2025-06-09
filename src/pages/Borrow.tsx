@@ -717,7 +717,7 @@ const Borrow = () => {
                   bg="#222831"
                   p={8}
                   borderRadius="xl"
-                  boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
+                  bosmhadow="0 4px 12px rgba(0, 0, 0, 0.5)"
                   m={4}
                   border="1px solid #a67c00"
                   mt="100px"
@@ -732,10 +732,10 @@ const Borrow = () => {
                     bg="rgba(166, 124, 0, 0.2)"
                     
                   >
-                    <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
+                    <Image src={walletIcon} alt="Wallet Icon" bosmize="50px" />
                   </Box>
                   <Heading as="h2" mb={4} fontSize="md" textAlign="center">Wallet Not Connected</Heading>
-                  <Text fontSize="sm" textAlign="center" mb={6} color="gray.400">
+                  <Text fontSize={isMobile ? "xs" : "sm"} textAlign="center" mb={6} color="gray.400">
                     Please connect your wallet to access the Borrow page.
                   </Text>
 
@@ -830,11 +830,11 @@ const Borrow = () => {
                         <Box p={2} mt={5} w={isMobile ? "90%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
                             <Text fontSize={"12px"}  color="#a67c00" ml={2}>Active Loan</Text>        
                            <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
-                                <Box fontSize="xs" w='95px' px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
-                                <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
-                                <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}> 
+                                <Box fontSize={isMobile ? "xs" : "sm"} w='95px' px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
+                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
+                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#a67c00"}> 
                                 <HStack>
-                                 <Box><Text fontSize="xs">LTV</Text></Box>
+                                 <Box><Text fontSize={isMobile ? "xs" : "sm"}>LTV</Text></Box>
                                  <Box>
                                     <Tooltip content="Loan to Value Ratio" placement="top">
                                         <Image src={placeholderLogo} w={15} />
@@ -842,35 +842,35 @@ const Borrow = () => {
                                  </Box>
                                 </HStack>
                                 </Box>
-                                <Box fontSize="xs" px={2} color="white" backgroundColor={"#a67c00"}>
+                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#a67c00"}>
                                 Expires
                                 </Box>
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="gray.800"  borderRadius="5px 0 0 5px" h="25px" borderRight="none">
                                         <HStack>
-                                            <Box  fontSize="xs" color="white">
+                                            <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
                                             {displayedCollateral}
                                             </Box>
                                             <Box  fontSize="xx-small" ml={-1} color="white">
-                                            {isTokenInfoLoading ? <Spinner size="xs" /> : token0Info.tokenSymbol}
+                                            {isTokenInfoLoading ? <Spinner size="sm" /> : token0Info.tokenSymbol}
                                             </Box>
                                         </HStack>
                                     </Box>
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="gray.800"  borderRadius="0"  h="25px" borderLeft="none" borderRight="none">
                                         <HStack>
-                                            <Box  fontSize="xs" color="white">
+                                            <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
                                             </Box>
                                             <Box  fontSize="xx-small" ml={-1} color="white">
-                                            {isTokenInfoLoading ? <Spinner size="xs" /> : token1Info.tokenSymbol}
+                                            {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info.tokenSymbol}
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white"  borderRadius="0"  h="25px" borderLeft="none" borderRight="none" fontSize="xs"> {commifyDecimals(ltv, 2)}</Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0 5px 5px 0" h="25px" borderLeft="none" fontSize="xs"> {getDaysLeft(`${loanData?.expires}`)} days</Box>
+                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white"  borderRadius="0"  h="25px" borderLeft="none" borderRight="none" fontSize={isMobile ? "xs" : "sm"}> {commifyDecimals(ltv, 2)}</Box>
+                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0 5px 5px 0" h="25px" borderLeft="none" fontSize={isMobile ? "xs" : "sm"}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
                                     <VStack w="100%">
-                                        <Box ml={-8} mt={4}><Text fontSize="xs" color="#a67c00">Actions</Text></Box>
+                                        <Box ml={-8} mt={4}><Text fontSize={isMobile ? "xs" : "sm"} color="#a67c00">Actions</Text></Box>
                                     <Box >                              
                                     <HStack alignItems="center" justifyContent="space-between" w="100%" pb={2} ml={isMobile ? "35%" : 0} mt={-2}>
                                     <Box>
@@ -922,7 +922,7 @@ const Borrow = () => {
                                             borderRadius={5}
                                             _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                                         >
-                                        {isRolling ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Roll</Text>}
+                                        {isRolling ? <Spinner size="sm" /> : <Text fontSize={isMobile ? "xs" : "sm"} color={"#f3f7c6"}>Roll</Text>}
                                         </Button>
                                         </DrawerTrigger>
                                         <DrawerBackdrop />
@@ -945,21 +945,21 @@ const Borrow = () => {
                                             <Box border="1px solid #a67c00" borderRadius="md" p={3} w="90%" >                              
 
                                                 <HStack>
-                                                    <Box w="120px"><Text fontSize="sm" color="#f3f7c6">New Duration:</Text></Box>
-                                                    <Box><Text fontSize="sm" color="white">{duration / 86400} days</Text></Box>
+                                                    <Box w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">New Duration:</Text></Box>
+                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{duration / 86400} days</Text></Box>
                                                 </HStack>
                                                 <HStack>
-                                                    <Box  w="120px"><Text fontSize="sm" c color="#f3f7c6">Expires On:</Text></Box>
-                                                    <Box><Text fontSize="sm" color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
+                                                    <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} c color="#f3f7c6">Expires On:</Text></Box>
+                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
                                                 </HStack>
                                                 <HStack>
-                                                    <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Amount:</Text></Box>
-                                                    <Box><Text fontSize="sm" color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
+                                                    <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">Amount:</Text></Box>
+                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
                                                 </HStack>
                                                 <HStack>
-                                                    <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Loan Fees:</Text></Box>
+                                                    <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">Loan Fees:</Text></Box>
                                                     <Box>
-                                                        <Text color="white" fontSize="sm">
+                                                        <Text color="white" fontSize={isMobile ? "xs" : "sm"}>
                                                         {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}&nbsp;
                                                         {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info.tokenSymbol}
                                                         </Text></Box>
@@ -986,7 +986,7 @@ const Borrow = () => {
                                     </HStack>
                                     </Box>
                                     </VStack>
-                                    </>) : <Box mt={2} mb={2} w="120px"><Text fontSize="xs" ml={2}>No active loan</Text></Box>
+                                    </>) : <Box mt={2} mb={2} w="120px"><Text fontSize={isMobile ? "xs" : "sm"} ml={2}>No active loan</Text></Box>
                                     }                                
                             </SimpleGrid>
                         </Box>
@@ -1000,12 +1000,12 @@ const Borrow = () => {
                                 backgroundColor={"#222831"} 
                             >
                                 <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>New Loan</Text>    
-                                <SimpleGrid columns={2} w={"94%"}  mt={-5} fontSize="xs" p={1} backgroundColor={"#222831"} ml={2} mr={2}>
+                                <SimpleGrid columns={2} w={"94%"}  mt={-5} fontSize={isMobile ? "xs" : "sm"} p={1} backgroundColor={"#222831"} ml={2} mr={2}>
                                     <Box backgroundColor={"#a67c00"} >
-                                        <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
+                                        <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;<b>Amount</b></Text>
                                     </Box>
                                     <Box  backgroundColor={"#a67c00"}>
-                                        <Text fontSize="xs" ml="40px">&nbsp;&nbsp;&nbsp;<b>Duration</b></Text>
+                                        <Text fontSize={isMobile ? "xs" : "sm"} ml="40px">&nbsp;&nbsp;&nbsp;<b>Duration</b></Text>
                                     </Box>
                                     <Box w="auto" mt={2}>
                                         <HStack>
@@ -1033,57 +1033,60 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                         <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
-                                            <Text ml={2} fontSize="xs" cursor="pointer" onClick={handleUseMax}>
+                                            <Text ml={2} fontSize={isMobile ? "xs" : "sm"} cursor="pointer" onClick={handleUseMax}>
                                                 Use max
                                             </Text>
                                         </VStack>
                                             <br />
                                             <Box>
-                                                <Text fontSize="xs" fontWeight={"bold"} color="#a67c00">Borrowing</Text>
+                                                <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">Borrowing</Text>
                                             </Box>
                                             <Box>
                                                 <HStack >
-                                                    <Box w="75px" textAlign={"left"}><Text fontSize={isMobile?"xs":"15px"}>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
+                                                    <Box w="75px" textAlign={"left"}><Text fontSize={isMobile?"sm":"15px"}>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
                                                     <Box>{token1Info.tokenSymbol}</Box>
                                                     <Box  w="120px" fontSize={"11px"} mt={"2px"}> <Text fontSize={"xx-small"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
                                                 </HStack>
                                             </Box>
                                             <Box mt={5}>
-                                                <Text  fontWeight={"bold"} color="#a67c00" fontSize={"xs"}>Collateral required</Text>
+                                                <Text  fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Collateral required</Text>
                                             </Box>
                                             <Box>
                                                 {isComputing ? (
-                                                    <Spinner size="xs" />
+                                                    <Spinner size="sm" />
                                                 ) : (
-                                                    <Text fontSize={"xs"}>{formatNumberPrecise(collateral || 4)} {token0Info.tokenSymbol}</Text>
+                                                    <Text fontSize={"sm"}>{formatNumberPrecise(collateral || 4)} {token0Info.tokenSymbol}</Text>
                                                 )}
                                             </Box>
-                                            <Box mt={5}>
+                                            <Box mt={5} fontSize={isMobile ? "xs" : "sm"}>
                                             <HStack>
-                                                <Box> <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"xs":"15px"}>Loan Fees</Text>    </Box>
-                                                <Box><Image src={placeholderLogo} w={3}></Image></Box>
+                                                <Box> <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    </Box>
+                                                <Box><Image src={placeholderLogo} w={15}></Image></Box>
                                             </HStack>
                                             </Box>
                                             <Box>
-                                                <Text fontSize={isMobile?"xs":"15px"}>{commifyDecimals(`${loanFees || 0}`, 4)} {token1Info.tokenSymbol}</Text>
+                                                <HStack>
+                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(`${loanFees || 0}`, 8)}</Text> </Box>
+                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"}> {token1Info.tokenSymbol}</Text>  </Box>
+                                                </HStack>
                                             </Box>
                                             <Box mt={5}> 
                                                     <HStack>
-                                                        <Box><Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"xs":"15px"}>IMV</Text> </Box>
-                                                        <Box><Image src={placeholderLogo} w={3}></Image></Box>
+                                                        <Box><Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>IMV</Text> </Box>
+                                                        <Box><Image src={placeholderLogo} w={15}></Image></Box>
                                                     </HStack>
                                                 <HStack>
-                                                    <Box>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Box>
+                                                    <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Text></Box>
                                                     <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
                                                 </HStack>
-                                            </Box> 
+                                            </Box>  
                                     </Box>
                                     <Box>
                                     <SelectRoot
                                         mt={3}
                                         ml={12}
                                         collection={durationChoices}
-                                        size="xs"
+                                        size="sm"
                                         width={"100px"}
                                         onChange={handleSetDuration}
                                         value={duration}
@@ -1131,7 +1134,7 @@ const Borrow = () => {
                                             parseFloat(formatEther(`${token0Info.balance}`)) < parseFloat(`${collateral}`)
                                         } 
                                         >
-                                            {isBorrowing ? <Spinner size="xs" color="#a67c00"/> :  <Text fontSize="xs" color="#a67c00">Borrow</Text>}
+                                            {isBorrowing ? <Spinner size="sm" color="#a67c00"/> :  <Text fontSize={isMobile ? "xs" : "sm"} color="#a67c00">Borrow</Text>}
                                         </Button>
                                     </Box>
                                     <Box>
@@ -1205,12 +1208,12 @@ const Borrow = () => {
                     >
                         <GridItem  mt={"-5"} w="90%" border={"1px solid white"} px={4} py={3} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                             <Text fontSize={isMobile?"12px":"15px"} color="#a67c00">Active Loan</Text>
-                            <SimpleGrid columns={5} mt={-5} fontSize="xs">
+                            <SimpleGrid columns={5} mt={-5} fontSize={isMobile ? "xs" : "sm"}>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> 
                                 <HStack>
-                                 <Box><Text fontSize="xs">LTV</Text></Box>
+                                 <Box><Text fontSize={isMobile ? "xs" : "sm"}>LTV</Text></Box>
                                  <Box>
                                     <Tooltip content="Loan to Value Ratio: LTV is the ratio of the loan amount to the value of the collateral" placement="top">
                                         <Image src={placeholderLogo} w={15} />
@@ -1227,7 +1230,7 @@ const Borrow = () => {
                                     <>
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="5px 0 0 5px" h="25px" borderRight="none">
                                         <HStack>
-                                            <Box  fontSize="sm">
+                                            <Box  fontSize={isMobile ? "xs" : "sm"}>
                                             {displayedCollateral}
                                             </Box>
                                             <Box  fontSize="xx-small" color="white">
@@ -1237,7 +1240,7 @@ const Borrow = () => {
                                     </Box>
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0" h="25px" borderLeft="none" borderRight="none">
                                         <HStack>
-                                            <Box  fontSize="sm" color="white">
+                                            <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
                                             </Box>
                                             <Box  fontSize="xx-small">
@@ -1245,7 +1248,7 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0" h="25px" borderLeft="none" borderRight="none" fontSize="sm">{commifyDecimals(ltv, 2)}</Box>
+                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0" h="25px" borderLeft="none" borderRight="none" fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(ltv, 2)}</Box>
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0 5px 5px 0" h="25px" borderLeft="none" fontSize={"sm"}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
                                     <Box px={2}  mt={1} ml={-10} > 
                                     <VStack ml={10}> 
@@ -1293,7 +1296,7 @@ const Borrow = () => {
                                         borderRadius={5}
                                         _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                                     >
-                                    {isRolling ? <Spinner size="sm" /> : <Text fontSize="xs" color={"#f3f7c6"}>Roll</Text>}
+                                    {isRolling ? <Spinner size="sm" /> : <Text fontSize={isMobile ? "xs" : "sm"} color={"#f3f7c6"}>Roll</Text>}
                                     </Button>
                                     </DrawerTrigger>
                                     <DrawerBackdrop />
@@ -1316,21 +1319,21 @@ const Borrow = () => {
                                         <Box border="1px solid #a67c00" borderRadius="md" p={3} w="90%" >                              
 
                                             <HStack>
-                                                <Box w="120px"><Text fontSize="sm" color="#f3f7c6">New Duration:</Text></Box>
-                                                <Box><Text fontSize="sm" color="white">{duration / 86400} days</Text></Box>
+                                                <Box w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">New Duration:</Text></Box>
+                                                <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{duration / 86400} days</Text></Box>
                                             </HStack>
                                             <HStack>
-                                                <Box  w="120px"><Text fontSize="sm" c color="#f3f7c6">Expires On:</Text></Box>
-                                                <Box><Text fontSize="sm" color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
+                                                <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} c color="#f3f7c6">Expires On:</Text></Box>
+                                                <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
                                             </HStack>
                                             <HStack>
-                                                <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Amount:</Text></Box>
-                                                <Box><Text fontSize="sm" color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
+                                                <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">Amount:</Text></Box>
+                                                <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
                                             </HStack>
                                             <HStack>
-                                                <Box  w="120px"><Text fontSize="sm" color="#f3f7c6">Loan Fees:</Text></Box>
+                                                <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">Loan Fees:</Text></Box>
                                                 <Box>
-                                                    <Text color="white" fontSize="sm">
+                                                    <Text color="white" fontSize={isMobile ? "xs" : "sm"}>
                                                     {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}&nbsp;
                                                     {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info.tokenSymbol}
                                                     </Text></Box>
@@ -1400,13 +1403,13 @@ const Borrow = () => {
                         <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">New Loan</Text>
                         <SimpleGrid columns={3} w="100%" mt={-5}>
                             <Box w="500px"backgroundColor={"#a67c00"}  mb={2}>
-                                <Text fontSize="xs">&nbsp;Amount</Text>
+                                <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;Amount</Text>
                             </Box>
                             <Box  >
-                                <Text fontSize="xs" ml="40px">&nbsp;&nbsp;&nbsp;Duration</Text>
+                                <Text fontSize={isMobile ? "xs" : "sm"} ml="40px">&nbsp;&nbsp;&nbsp;Duration</Text>
                             </Box>
                             <Box backgroundColor={"#a67c00"} mb={2}>
-                                <Text ml={5} fontSize="xs">Actions</Text>
+                                <Text ml={5} fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
                             </Box>
                             <Box w="auto">
                                 <HStack>
@@ -1432,7 +1435,7 @@ const Borrow = () => {
                                         <NumberInputField  h={"38px"} w={{ base: "", lg: "200px" }} />
                                         </NumberInputRoot>
                                         <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
-                                        <Text ml={2} fontSize="sm" cursor="pointer" onClick={handleUseMax}>
+                                        <Text ml={2} fontSize={isMobile ? "xs" : "sm"} cursor="pointer" onClick={handleUseMax}>
                                             Use max
                                         </Text>
                                         </VStack>
@@ -1443,41 +1446,47 @@ const Borrow = () => {
                                 </HStack>
                                     <br />
                                     <Box>
-                                        <Text fontWeight={"bold"} color="#a67c00">Borrowing</Text>
+                                        <Text fontWeight={"bold"}  color="#a67c00">Borrowing</Text>
                                     </Box>
                                     <Box w="380px">
                                         <HStack >
-                                            <Box w="95px" textAlign={"left"}><Text>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
-                                            <Box>{token1Info.tokenSymbol}</Box>
-                                            <Box  w="120px" fontSize={"11px"} mt={"2px"}> <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
+                                            <Box w="95px" textAlign={"left"}><Text fontSize={isMobile ? "xs" : "sm"}>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
+                                            <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{token1Info.tokenSymbol}</Text></Box>
+                                            <Box  w="120px" fontSize={isMobile ? "xx-small" : "xs"} mt={"2px"}> <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
                                         </HStack>
                                     </Box>
                                     <Box mt={5}>
-                                        <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"12px":"15px"}>Collateral required</Text>
+                                        <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Collateral required</Text>
                                     </Box>
                                     <Box>
                                         {isComputing ? (
                                             <Spinner size="sm" />
                                         ) : (
-                                            <Text>{formatNumberPrecise(collateral || 0)} {token0Info.tokenSymbol}</Text>    
+                                            <HStack>
+                                                <Box><Text fontSize={isMobile ? "xs" : "sm"}>{formatNumberPrecise(collateral || 0)}</Text> </Box>
+                                                <Box><Text fontSize={isMobile ? "xs" : "sm"}> {token0Info.tokenSymbol}</Text>  </Box>
+                                            </HStack>
                                         )}
                                     </Box>
-                                    <Box mt={5}>
+                                    <Box mt={5} fontSize={isMobile ? "xs" : "sm"}>
                                        <HStack>
-                                        <Box> <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"12px":"15px"}>Loan Fees</Text>    </Box>
+                                        <Box> <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    </Box>
                                         <Box><Image src={placeholderLogo} w={15}></Image></Box>
                                        </HStack>
                                     </Box>
                                     <Box>
-                                        <Text>{commifyDecimals(`${loanFees || 0}`, 8)} {token1Info.tokenSymbol}</Text>
+                                        <HStack>
+                                            <Box><Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(`${loanFees || 0}`, 8)}</Text> </Box>
+                                            <Box><Text fontSize={isMobile ? "xs" : "sm"}> {token1Info.tokenSymbol}</Text>  </Box>
+                                        </HStack>
                                     </Box>
                                     <Box mt={5}> 
                                             <HStack>
-                                                <Box><Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile?"12px":"15px"}>IMV</Text> </Box>
+                                                <Box><Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>IMV</Text> </Box>
                                                 <Box><Image src={placeholderLogo} w={15}></Image></Box>
                                             </HStack>
                                         <HStack>
-                                            <Box>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Box>
+                                            <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Text></Box>
                                             <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
                                         </HStack>
                                     </Box> 
