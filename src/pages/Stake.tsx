@@ -503,7 +503,7 @@ const Stake = () => {
 
     console.log(`Get time left ${getTimeLeft(lastOperationTimestamp, 3)}`);
     return (
-        <Container maxW="container.xl" py={12} pl={"0%"} ml={isConnected ? "15%" : "10%"}>
+        <Container maxW="container.xl" py={12} pl={"0%"} ml={isConnected ? "12%" : "10%"}>
             <Toaster />
 
             {!isConnected ? (
