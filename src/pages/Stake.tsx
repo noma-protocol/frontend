@@ -571,13 +571,14 @@ const Stake = () => {
                                 w={isMobile ? "96%" : "352px"} 
                                 ml={2} 
                                 mr={2}
+                                pr={2}
                                 gridTemplateColumns="65px 75px 70px 1fr" // wider Actions column
                             >               
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
                             {/* <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}></Box> */}
-                            <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> &nbsp;&nbsp;&nbsp;&nbsp;Actions </Box> 
+                            <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"} > &nbsp;&nbsp;&nbsp;Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
                                 <Box px={2} w="65px"> 
