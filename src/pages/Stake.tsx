@@ -653,7 +653,7 @@ const Stake = () => {
                                 backgroundColor={"#222831"} 
                             >
                             <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
-                            <SimpleGrid columns={2}  w={isMobile ? "96%" : "352px"}  mt={-5} fontSize={"xs"}>
+                            <SimpleGrid columns={2}  w={isMobile ? "98%" : "352px"}  mt={-5} fontSize={"xs"}>
                                 <Box  w="auto" backgroundColor={"#bf9b30"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>
