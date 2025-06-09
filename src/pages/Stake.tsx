@@ -693,7 +693,7 @@ const Stake = () => {
                                         </HStack>
                                         <HStack w="400px">
                                         <Box> <Text fontSize="xs"> To cooldown:</Text> </Box>
-                                        <Box>
+                                        <Box w="80px">
                                             {lastOperationTimestamp ? (
                                                 <CountdownTimer
                                                     startTsMs={Number(lastOperationTimestamp) * 1000}
@@ -703,12 +703,12 @@ const Stake = () => {
                                                 <Text fontSize="xs" color="gray">N/A</Text>
                                             )}
                                         </Box>
-                                        <Box>
+                                        <Box mt={-1}>
                                             <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogo} w={15}></Image></Tooltip>
                                         </Box>
                                         </HStack>
                                         <HStack w="400px">
-                                        <Box> <Text fontSize="xs"> Last operation:</Text> </Box>
+                                        <Box w="120px"> <Text fontSize="xs"> Last operation:</Text> </Box>
                                         <Box>
                                             <Text fontSize="xs" color="gray">
                                                 {lastOperationTimestamp ? new Date(Number(lastOperationTimestamp) * 1000).toLocaleString() : "N/A"}
