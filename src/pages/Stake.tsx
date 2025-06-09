@@ -564,17 +564,17 @@ const Stake = () => {
                                 page="stake"
                             />
                         </Box>
-                        <Box p={2} mt={5} w={"95%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={"-30px"} >
+                        <Box p={2} mt={5} w={"95%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={"-30px"} fontSize="xs">
                         <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Position</Text>
-                        <SimpleGrid columns={5} mt={-5} fontSize={"11px"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
-                            <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
-                            <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
-                            <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
+                        <SimpleGrid columns={5} mt={-5} fontSize={"11px"} w={isMobile ? "92%" : "352px"} ml={2} mr={2}>
+                            <Box w="75px" h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
+                            <Box w="95px" h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
+                            <Box w="75px" h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}></Box>
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
-                                <Box px={2}> 
+                                <Box px={2} w="75px" border="1px solid red"> 
                                     <HStack mt={2} >
                                         <Box  fontSize="xs">
                                         <Text fontSize="xs">{formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 2)}</Text>
@@ -584,15 +584,15 @@ const Stake = () => {
                                         </Box>
                                     </HStack>
                                 </Box>
-                                <HStack>
-                                <Box px={2}>
+                                <HStack w="95px">
+                                <Box px={2}  >
                                     <Text fontSize="xs">{formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 2)}</Text>
                                 </Box>
                                 <Box  fontSize="xx-small" ml={-3}>
                                     {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xs" >s{token0Info.tokenSymbol}</Text>}
                                 </Box> 
                                 </HStack>                               
-                                <Box px={2} >     
+                                <Box px={2}  w="75px">     
                                     <HStack>
                                         <Box mt={2}  fontSize="xs">
                                         {commify(rewards, 2)}
@@ -647,7 +647,7 @@ const Stake = () => {
                                 backgroundColor={"#222831"} 
                             >
                             <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
-                            <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"14px"} >
+                            <SimpleGrid columns={2} w="95%" mt={-5} fontSize={"14px"} >
                                 <Box w="340px" backgroundColor={"#bf9b30"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>
@@ -803,7 +803,7 @@ const Stake = () => {
                     >
                         <GridItem w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                             <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
-                            <SimpleGrid columns={4} mt={-5} fontSize={"14px"}>
+                            <SimpleGrid columns={4} mt={-5} fontSize={"14px"} >
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" /> : `s${token0Info.tokenSymbol}`} </Box>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
