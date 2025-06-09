@@ -218,12 +218,23 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       console.log(`  [${index}] ${new Date(candle.x)} - Price: ${candle.y[3]} - Diff: ${(timeDiff / (60*60*1000)).toFixed(1)}h`);
     });
 
+    // For 24h periods, prefer candles that are further back to capture actual daily change
+    // For shorter periods, use closest candle
     for (const candle of ohlcData) {
       const candleTime = new Date(candle.x).getTime();
+      const timeDiff = Math.abs(candleTime - targetTime);
+      const hoursAway = timeDiff / (60 * 60 * 1000);
       
-      // Only consider candles that are at or before our target time
-      if (candleTime <= targetTime) {
-        const timeDiff = Math.abs(candleTime - targetTime);
+      // For 24h intervals, prefer the candle that's closest to actually being 24h ago
+      // rather than just the closest candle
+      if (interval === "24h") {
+        // Look for a candle that's between 20-28 hours ago (closer to actual 24h)
+        if (hoursAway >= 20 && hoursAway <= 28 && hoursAway < minTimeDiff / (60 * 60 * 1000)) {
+          minTimeDiff = timeDiff;
+          startCandle = candle;
+        }
+      } else {
+        // For other intervals, use closest candle
         if (timeDiff < minTimeDiff) {
           minTimeDiff = timeDiff;
           startCandle = candle;
@@ -235,6 +246,25 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
     // Use the most recent candle as the end point
     const endCandle = ohlcData[ohlcData.length - 1];
+    
+    // If start and end candle are the same, use the previous candle as start
+    if (startCandle === endCandle && ohlcData.length > 1) {
+      // Find the candle before the end candle
+      for (let i = ohlcData.length - 2; i >= 0; i--) {
+        const candidateCandle = ohlcData[i];
+        const candidateTime = new Date(candidateCandle.x).getTime();
+        const timeDiff = Math.abs(candidateTime - targetTime);
+        const hoursAway = timeDiff / (60 * 60 * 1000);
+        
+        if (interval === "24h" && hoursAway >= 20 && hoursAway <= 30) {
+          startCandle = candidateCandle;
+          break;
+        } else if (interval !== "24h") {
+          startCandle = candidateCandle;
+          break;
+        }
+      }
+    }
     
     const startPrice = startCandle.y[3]; // close price
     const endPrice = endCandle.y[3]; // close price
