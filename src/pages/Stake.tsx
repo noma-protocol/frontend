@@ -923,7 +923,7 @@ const Stake = () => {
                     >
                         <GridItem w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                             <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
-                            <SimpleGrid columns={4} mt={-5} fontSize={"14px"} >
+                            <SimpleGrid columns={4} mt={-5} fontSize={"xs"} >
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" /> : `s${token0Info.tokenSymbol}`} </Box>
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
@@ -1012,13 +1012,13 @@ const Stake = () => {
                             />
                         </GridItem>
                         <GridItem mt={2} w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
-                        <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">New Position</Text>
-                        <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"14px"}>
+                        <Text fontSize={"14px"} color="#a67c00"><b>New Position</b></Text>
+                        <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"xs"}>
                             <Box w="500px" backgroundColor={"#bf9b30"}  mb={2}>
-                                <Text>&nbsp;<b>Amount</b></Text>
-                            </Box>
+                                <Text fontSize="sm">&nbsp;Amount</Text>
+                            </Box> 
                             <Box backgroundColor={"#bf9b30"} mb={2}>
-                                <Text ml={5}>Actions</Text>
+                                <Text ml={5} fontSize="sm">Actions</Text>
                             </Box>
                             <Box w="auto">
                                 <HStack>
