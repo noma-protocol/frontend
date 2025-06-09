@@ -92,7 +92,7 @@ const Wrap = ({
                                 <Text as="h3" color="#bf9b30">Wrap BNB</Text>
                             </DrawerTitle>
                             <DrawerCloseTrigger asChild mt="82%" mr={5}>
-                                <Button variant="ghost" size="sm" position="absolute" top={2} right={2} color="#dadada" _hover={{ bg: "#f44336", color: "white" }}><Text color="#dadada">×</Text></Button>
+                                <Button variant="ghost" size="sm" >×</Button>
                             </DrawerCloseTrigger>
                         </DrawerHeader>
                         <DrawerBody>

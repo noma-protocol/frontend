@@ -37,7 +37,6 @@ export const DrawerCloseTrigger = React.forwardRef<
       insetEnd="2"
       {...props}
       asChild
-      onClick={()=> setIsRolling(false)}
     >
       <CloseButton size="sm" ref={ref} />
     </ChakraDrawer.CloseTrigger>
