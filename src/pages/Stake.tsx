@@ -563,7 +563,7 @@ const Stake = () => {
                                 page="stake"
                             />
                         </Box>
-                        <Box p={2} mt={5} w={"95%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={"-30px"} fontSize="xs">
+                        <Box px={1} py={2} mt={5} w={"95%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={"-30px"} fontSize="xs">
                         <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Position</Text>
                             <SimpleGrid 
                                 mt={-5} 
@@ -643,8 +643,8 @@ const Stake = () => {
                         </SimpleGrid>                         
                         </Box>
                             <Box 
-                                p={2}
                                 px={4} 
+                                py={2}
                                 ml={"-30px"}  
                                 mt={5}  
                                 w={"95%"}   

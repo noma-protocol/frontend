@@ -127,7 +127,8 @@ const BalanceCard = ({
             ml={marginLeft}
             border={"1px solid white"} 
             borderColor="ivory" 
-            p={4}
+            px={3} 
+            py={2}
             {...props} 
             h={{ base: "auto", md: "280px" }}
             minH="auto"
