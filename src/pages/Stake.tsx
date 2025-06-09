@@ -811,7 +811,7 @@ const Stake = () => {
                                 <Box px={2} color="white" backgroundColor={"#bf9b30"}> Actions </Box> 
                                 {stakedBalance > 0 ? ( 
                                     <>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} borderRadius={5}> 
+                                    <Box px={2} mt={1} bgColor={"#18181b"}> 
                                         <HStack>
                                             <Box  fontSize="sm" color="white">
                                             {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
@@ -821,10 +821,10 @@ const Stake = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius={5}>
+                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white">
                                         {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 6)}
                                     </Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} borderRadius={5}>     
+                                    <Box px={2} mt={1} bgColor={"#18181b"}>     
                                         <HStack>
                                             <Box  fontSize="sm" color="white">
                                             {commify(rewards, 4)}
@@ -834,7 +834,7 @@ const Stake = () => {
                                             </Box>
                                         </HStack>
                                     </Box>
-                                    {/* <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius={5}>
+                                    {/* <Box px={2} mt={1} bgColor={"#18181b"} color="white">
                                         {"N/A"}
                                     </Box> */}
                                     <Box px={2}  mt={1} ml={-10}> 
