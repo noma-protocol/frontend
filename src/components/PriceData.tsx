@@ -228,20 +228,20 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       // For 24h intervals, prefer the candle that's closest to actually being 24h ago
       // rather than just the closest candle
       if (interval === "24h") {
-        // Look for a candle that's between 20-30 hours ago (closer to actual 24h)
-        if (hoursAway >= 20 && hoursAway <= 30 && hoursAway < minTimeDiff / (60 * 60 * 1000)) {
+        // Look for a candle that's between 20-50 hours ago (closer to actual 24h)
+        if (hoursAway >= 20 && hoursAway <= 50 && hoursAway < minTimeDiff / (60 * 60 * 1000)) {
+          minTimeDiff = timeDiff;
+          startCandle = candle;
+        }
+      } else if (interval === "1w") {
+        // For 1 week, look for data that's 5+ days old (200+ hours) - closer to beginning
+        if (hoursAway >= 200 && hoursAway > minTimeDiff / (60 * 60 * 1000)) {
           minTimeDiff = timeDiff;
           startCandle = candle;
         }
       } else if (interval === "1M") {
         // For 1 month, look for the oldest available data (furthest back)
         if (hoursAway > minTimeDiff / (60 * 60 * 1000)) {
-          minTimeDiff = timeDiff;
-          startCandle = candle;
-        }
-      } else if (interval === "1w") {
-        // For 1 week, look for data around 140-200 hours ago
-        if (hoursAway >= 140 && hoursAway <= 200 && hoursAway < minTimeDiff / (60 * 60 * 1000)) {
           minTimeDiff = timeDiff;
           startCandle = candle;
         }
@@ -253,8 +253,6 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         }
       }
     }
-
-    // console.log(`[Debug] Selected start candle: ${new Date(startCandle.x)} (${(minTimeDiff / (60*60*1000)).toFixed(1)}h away from target)`);
 
     // Use the most recent candle as the end point
     const endCandle = ohlcData[ohlcData.length - 1];
@@ -268,13 +266,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         const timeDiff = Math.abs(candidateTime - targetTime);
         const hoursAway = timeDiff / (60 * 60 * 1000);
         
-        if (interval === "24h" && hoursAway >= 20 && hoursAway <= 30) {
+        if (interval === "24h" && hoursAway >= 20 && hoursAway <= 50) {
+          startCandle = candidateCandle;
+          break;
+        } else if (interval === "1w" && hoursAway >= 200) { // 1 week = look for 200+ hours (5+ days)
           startCandle = candidateCandle;
           break;
         } else if (interval === "1M" && hoursAway >= 600) { // 1 month = ~720h, look for 600+ hours
-          startCandle = candidateCandle;
-          break;
-        } else if (interval === "1w" && hoursAway >= 140) { // 1 week = 168h, look for 140+ hours  
           startCandle = candidateCandle;
           break;
         } else if (interval !== "24h" && interval !== "1M" && interval !== "1w") {
@@ -287,15 +285,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     const startPrice = startCandle.y[3]; // close price
     const endPrice = endCandle.y[3]; // close price
 
-    // console.log(`[Debug] Start candle: ${new Date(startCandle.x)} - Price: ${startPrice}`);
-    // console.log(`[Debug] End candle: ${new Date(endCandle.x)} - Price: ${endPrice}`);
-    // console.log(`[Debug] Actual time span: ${((new Date(endCandle.x).getTime() - new Date(startCandle.x).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours`);
-    // console.log(`[Debug] Total data points in 24h dataset: ${ohlcData.length}`);
-    // console.log(`[Debug] Price range in dataset: min=${Math.min(...ohlcData.map(c => c.y[3]))}, max=${Math.max(...ohlcData.map(c => c.y[3]))}`);
-
     // Calculate percentage change using raw token prices
     const change = ((endPrice - startPrice) / startPrice) * 100;
-    // console.log(`[Debug] Calculated percentage change: ${change}%`);
     
     return change;
   };
