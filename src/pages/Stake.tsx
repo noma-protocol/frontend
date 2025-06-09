@@ -572,7 +572,7 @@ const Stake = () => {
                                 w={isMobile ? "95%" : "352px"} 
                                 ml={2} 
                                 mr={2}
-                                gridTemplateColumns="65px 65px 115px 1fr" // wider Actions column
+                                gridTemplateColumns="65px 65px 95px 1fr" // wider Actions column
                             >               
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
