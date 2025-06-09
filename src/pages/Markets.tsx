@@ -639,7 +639,7 @@ const Markets: React.FC = () => {
 
           </Box>
             <p
-              style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"25px" }}
+              style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft: isMobile ? "25px" : "12%"}}
               onClick={() => window.history.back()}
             >
               Go Back
