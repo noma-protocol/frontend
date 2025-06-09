@@ -1103,7 +1103,7 @@ const Exchange: React.FC = () => {
     }
 
   return (
-      <Container maxW="container.xl=" py={12}  ml={isConnected ? { sm: isMobile ? 1: "4%", base: isMobile ? 1: "4%", md: isMobile ? 1: "8%", xl: isMobile ? 1: "8%" } : "10%"} >
+      <Container maxW="container.xl=" py={12}  ml={isConnected ? { sm: isMobile ? 1: "4%", base: isMobile ? 1: "4%", md: isMobile ? 1: "5%", xl: isMobile ? 1: "5%" } : "10%"} >
       <Toaster />
 
       {!isConnected ? (
@@ -1157,7 +1157,7 @@ const Exchange: React.FC = () => {
           mt={"50px"}
           ml={isMobile ? "2%" : "5%"}
         >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : { base: "4%", md: "8%", xl: "8%" } } mr={isMobile ? "5" : "10%"} >
+          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : { base: "4%", md: "5%", xl: "5%" } } mr={isMobile ? "5" : "15%"} >
             <Box px={4}>
               {/* Header Section */}
               {/* <Heading as="h3">
