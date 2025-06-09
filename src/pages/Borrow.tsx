@@ -702,7 +702,7 @@ const Borrow = () => {
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) ;
     
     return (
-        <Container maxW="container.xl=" py={12} pl={"0%"} ml={"10%"}>
+        <Container maxW="container.xl=" py={12} pl={"0%"} ml={isConnected ? "15%" : "10%"}>
             <Toaster />
 
             {!isConnected ? (
@@ -1198,7 +1198,7 @@ const Borrow = () => {
                         templateColumns="repeat(2, 1fr)"
                         gap={1}
                         mb={20}
-                        mt={10}
+                        mt={5}
                         px={2}
                         py={4}
                         // border="1px solid yellow"
