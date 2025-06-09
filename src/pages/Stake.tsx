@@ -574,7 +574,7 @@ const Stake = () => {
                             <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
-                                <Box px={2} w="75px" border="1px solid red"> 
+                                <Box px={2} w="75px"> 
                                     <HStack mt={2} >
                                         <Box  fontSize="xs">
                                         <Text fontSize="xs">{formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 2)}</Text>
