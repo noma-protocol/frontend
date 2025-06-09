@@ -572,7 +572,7 @@ const Stake = () => {
                                 w={isMobile ? "95%" : "352px"} 
                                 ml={2} 
                                 mr={2}
-                                gridTemplateColumns="60px 75px 65px 1fr" // wider Actions column
+                                gridTemplateColumns="60px 75px 70px 1fr" // wider Actions column
                             >               
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
@@ -587,7 +587,7 @@ const Stake = () => {
                                         <Text fontSize="xs">{formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 2)}</Text>
                                         </Box>
                                         <Box ml={-1} fontSize="xx-small">
-                                        {isTokenInfoLoading ? <Spinner size="xs" /> :  <Text fontSize="xs">{token0Info.tokenSymbol}</Text>}
+                                        {isTokenInfoLoading ? <Spinner size="xs" /> :  <Text fontSize="xx-small">{token0Info.tokenSymbol}</Text>}
                                         </Box>
                                     </HStack>
                                 </Box>
@@ -596,7 +596,7 @@ const Stake = () => {
                                     <Text fontSize="xs">{formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 2)}</Text>
                                 </Box>
                                 <Box  fontSize="xx-small" ml={-3}>
-                                    {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xs" >s{token0Info.tokenSymbol}</Text>}
+                                    {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xx-small" >s{token0Info.tokenSymbol}</Text>}
                                 </Box> 
                                 </HStack>                               
                                 <Box px={2}  w="75px">     
