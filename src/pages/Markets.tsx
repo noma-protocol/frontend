@@ -638,6 +638,12 @@ const Markets: React.FC = () => {
             </Box>
 
           </Box>
+            <p
+              style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"25px" }}
+              onClick={() => window.history.back()}
+            >
+              Go Back
+            </p>  
         </Box>
       )}
     </Container>
