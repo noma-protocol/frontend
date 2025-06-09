@@ -136,30 +136,30 @@ const BalanceCard = ({
             backgroundColor={"#222831"}
             mt={marginTop}
         >
-            <Text fontWeight="bold" fontSize={isMobile ? "xs" : "14px"} color="#a67c00" mb={2}>Wallet</Text>
+            <Text fontWeight="bold" fontSize={isMobile ? "xs" : "sm"} color="#a67c00" mb={2}>Wallet</Text>
             
             <SimpleGrid columns={3} w="auto">
                 {/* Header Row */}
                 <Box color="white" background="#a67c00"  pl={3}>
-                    <Text  fontSize="xs">Asset</Text>
+                    <Text  fontSize={isMobile ? "xs" : "sm"}>Asset</Text>
                 </Box>
                 <Box  color="white" background="#a67c00" textAlign="left" ml={-2} >
-                    <Text  fontSize="xs">Balance</Text> 
+                    <Text  fontSize={isMobile ? "xs" : "sm"}>Balance</Text> 
                 </Box>
                 
                 <Box color="white" background="#a67c00" textAlign="center"> 
-                    <Text  fontSize="xs">Actions</Text>
+                    <Text  fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
                 </Box>
                 
                 {/* BNB Row */}
                 <Box p={2} height="42px" display="flex" alignItems="center" w="70px">
                     <HStack spacing={2}>
                         <Image src={bnbLogo} w="40px" alt="BNB" ml={-2} />
-                        <Text fontSize="xs" mt={"-2px"} fontWeight={"bold"} ml={2}>BNB</Text>
+                        <Text fontSize={isMobile ? "xs" : "sm"} mt={"-2px"} fontWeight={"bold"} ml={2}>BNB</Text>
                     </HStack>
                 </Box>
                 <Box ml={-2} bgColor={"#18181b"} px={2} borderRadius={5}  mt={3} h="20px" w={isMobile ? "100px" : "130px"} fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
-                    <Text fontSize={fontSize} color="white"  h={"20px"}>{commify(formattedEthBalance)}</Text>
+                    <Text fontSize={isMobile ? "xs" : "sm"} color="white"  h={"20px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Wrap 
                     wrapAmount={wrapAmount}
@@ -179,12 +179,12 @@ const BalanceCard = ({
                         <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2}>
                             <Image src={bnbLogo} w="40px" alt={token1Symbol || 'Token'} ml={-2} />
-                            <Text fontSize="xs" fontWeight={"bold"} ml={2} mt={"-2px"}>{token1Symbol || <Spinner size="sm" />}</Text>
+                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} ml={2} mt={"-2px"}>{token1Symbol || <Spinner size="sm" />}</Text>
                         </HStack>
                     }
                 </Box>
                 <Box  ml={-2} bgColor={"#18181b"} w={isMobile ? "100px" : "130px"}  color="gray.800"  px={2} borderRadius={5}  mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
-                    <Text color="white" fontSize="xs">{commify(formatEther(`${token1Balance || 0}`))}</Text>
+                    <Text color="white" fontSize={isMobile ? "xs" : "sm"}>{commify(formatEther(`${token1Balance || 0}`))}</Text>
                 </Box>
                 
                 <Unwrap
@@ -214,13 +214,13 @@ const BalanceCard = ({
                             />
                             </Box>
                             <Box ml={2}>
-                               <Text fontWeight="bold" ml={token0Symbol == "OKS" ? "-20px" : 0} fontSize="xs">&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
+                               <Text fontWeight="bold" ml={token0Symbol == "OKS" ? "-20px" : 0} fontSize={isMobile ? "xs" : "sm"}>&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
                             </Box>
                         </HStack>
                     }
                 </Box>
                 <Box ml={-2} bgColor={"#18181b"} w={isMobile ? "100px" : "130px"}  color="gray.800" px={2} borderRadius={5} mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
-                    <Text fontSize="xs" color="white">{commify(formatEther(`${token0Balance || 0}`))}</Text>
+                    <Text fontSize={isMobile ? "xs" : "sm"} color="white">{commify(formatEther(`${token0Balance || 0}`))}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center"  mt={2}>
                     {page == "exchange" ?
