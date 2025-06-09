@@ -106,7 +106,7 @@ const Header: React.FC = () => {
             <li className="nav-item ml-2">
               <Button  onClick={() => open()} variant="outline" h="40px" w="220px" mt={5} >
                 <p style={{color:"#a67c00", fontSize:(isMobile ? "12px" : "16px"), marginLeft: "5px"}}>
-                <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>
+                <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>&nbsp;&nbsp;
                 {isConnected
                   ? `${address?.slice(0, 6)}...${address?.slice(-6)}`
                   : !ctx.isSpanishCountry
