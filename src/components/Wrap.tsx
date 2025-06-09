@@ -23,6 +23,9 @@ import {
     DrawerActionTrigger,
 } from '../components/ui/drawer';
 import { ethers } from 'ethers';
+import { formatEther, parseEther } from "viem";
+
+ 
 
 //declare types of props
 type WrapProps = {
@@ -53,7 +56,7 @@ const Wrap = ({
 
     const handleUseMax = () => {
         if (bnbBalance) {
-            setWrapAmount(ethers.utils.formatEther(bnbBalance));
+            setWrapAmount(formatEther(bnbBalance));
         }
     };
 

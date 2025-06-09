@@ -820,6 +820,7 @@ const Borrow = () => {
                                             isLoading={isLoading}
                                             setIsLoading={setIsLoading}
                                             isTokenInfoLoading={isTokenInfoLoading}
+                                            token0Balance={token0Info?.balance}
                                         />
                                     </Box>
                                     <Box>
@@ -1152,6 +1153,7 @@ const Borrow = () => {
                                         isLoading={isLoading}
                                         setIsLoading={setIsLoading}
                                         isTokenInfoLoading={isTokenInfoLoading}
+                                        token0Balance={token0Info?.balance}
                                     />
                                     <LoanRepay
                                         size="lg"
