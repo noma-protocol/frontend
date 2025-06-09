@@ -568,7 +568,7 @@ const Stake = () => {
                             <SimpleGrid 
                                 mt={-5} 
                                 fontSize={"11px"} 
-                                w={isMobile ? "92%" : "352px"} 
+                                w={isMobile ? "90%" : "352px"} 
                                 ml={2} 
                                 mr={2}
                                 gridTemplateColumns="65px 75px 70px 1fr" // wider Actions column
@@ -643,7 +643,7 @@ const Stake = () => {
                         </SimpleGrid>                         
                         </Box>
                             <Box 
-                                px={4} 
+                                px={3} 
                                 py={2}
                                 ml={"-30px"}  
                                 mt={5}  
