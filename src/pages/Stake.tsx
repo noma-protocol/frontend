@@ -568,7 +568,7 @@ const Stake = () => {
                             <SimpleGrid 
                                 mt={-5} 
                                 fontSize={"11px"} 
-                                w={isMobile ? "90%" : "352px"} 
+                                w={isMobile ? "96%" : "352px"} 
                                 ml={2} 
                                 mr={2}
                                 gridTemplateColumns="65px 75px 70px 1fr" // wider Actions column
@@ -653,7 +653,7 @@ const Stake = () => {
                                 backgroundColor={"#222831"} 
                             >
                             <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
-                            <SimpleGrid columns={2}  w={isMobile ? "95%" : "352px"}  mt={-5} fontSize={"xs"}>
+                            <SimpleGrid columns={2}  w={isMobile ? "96%" : "352px"}  mt={-5} fontSize={"xs"}>
                                 <Box  w="auto" backgroundColor={"#bf9b30"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>
