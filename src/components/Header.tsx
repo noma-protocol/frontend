@@ -114,7 +114,7 @@ const Header: React.FC = () => {
                   : "Conectar billetera"}
                 </p>
               </Button>
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;
             </li>
           </ul>
 
