@@ -232,6 +232,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     console.log(`[Debug] Start candle: ${new Date(startCandle.x)} - Price: ${startPrice}`);
     console.log(`[Debug] End candle: ${new Date(endCandle.x)} - Price: ${endPrice}`);
     console.log(`[Debug] Actual time span: ${((new Date(endCandle.x).getTime() - new Date(startCandle.x).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours`);
+    console.log(`[Debug] Total data points in 24h dataset: ${ohlcData.length}`);
+    console.log(`[Debug] Price range in dataset: min=${Math.min(...ohlcData.map(c => c.y[3]))}, max=${Math.max(...ohlcData.map(c => c.y[3]))}`);
 
     // Calculate percentage change using raw token prices
     const change = ((endPrice - startPrice) / startPrice) * 100;
