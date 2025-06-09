@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import {Text, Button } from '@chakra-ui/react';
+import { Box, Text, Button } from '@chakra-ui/react';
 import { LanguageContext, LanguageContextType } from "../core/LanguageProvider";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount } from "wagmi";
@@ -40,7 +40,7 @@ const Header: React.FC = () => {
     
     <header id="header">
       <nav className="navbar navbar-expand navbar-fixed-top" >
-        <div className="container header">
+        <div className="container header" style={{ marginLeft: "15%"}}>
           
         <Link href="https://oikos.cash" >
 
@@ -102,22 +102,22 @@ const Header: React.FC = () => {
               </Link>
             </li>                          */}
           </ul>
-
-          <ul className="navbar-nav action">
-            <li className="nav-item ml-2">
-              <Button  onClick={() => open()} variant="outline" h="40px" w="220px" mt={5} >
-                <p style={{color:"#a67c00", fontSize:(isMobile ? "12px" : "16px"), marginLeft: "5px"}}>
-                <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>&nbsp;&nbsp;
-                {isConnected
-                  ? `${address?.slice(0, 6)}...${address?.slice(-6)}`
-                  : !ctx.isSpanishCountry
-                  ? "Connect wallet"
-                  : "Conectar billetera"}
-                </p>
-              </Button>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-            </li>
-          </ul>
+            <Box>
+              <ul className="navbar-nav action">
+              <li className="nav-item ml-2">
+                <Button  onClick={() => open()} variant="outline" h="40px" w="220px" mt={5} >
+                  <p style={{color:"#a67c00", fontSize:(isMobile ? "12px" : "16px"), marginLeft: "5px"}}>
+                  <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>&nbsp;&nbsp;
+                  {isConnected
+                    ? `${address?.slice(0, 6)}...${address?.slice(-6)}`
+                    : !ctx.isSpanishCountry
+                    ? "Connect wallet"
+                    : "Conectar billetera"}
+                  </p>
+                </Button>
+              </li>
+            </ul>
+            </Box>
 
           <ul className="navbar-nav toggle">
             <li className="nav-item">
