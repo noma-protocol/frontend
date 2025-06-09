@@ -516,7 +516,7 @@ const Liquidity: React.FC = () => {
                       <SelectRoot
                         ml={isMobile ? "-20px" : 5}
                         mb={isMobile ? 2 : 0}
-                        mt={isMobile ? 0  : 2}
+                        mt={isMobile ? 2  : 2}
                         collection={vaultsSelectData}
                         size="sm"
                         width={isMobile ? "165px" : "160px"}
