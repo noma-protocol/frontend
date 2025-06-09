@@ -913,7 +913,7 @@ const Stake = () => {
                         h="600px"
                         templateRows="repeat(2, 1fr)"
                         templateColumns="repeat(2, 1fr)"
-                        gap={3}
+                        gap={1}
                         mb={20}
                         mt={2}
                         px={2}
@@ -1011,7 +1011,7 @@ const Stake = () => {
                                 page="stake" 
                             />
                         </GridItem>
-                        <GridItem  w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
+                        <GridItem mt={2} w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                         <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">New Position</Text>
                         <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"14px"}>
                             <Box w="500px" backgroundColor={"#bf9b30"}  mb={2}>

@@ -676,9 +676,9 @@ const Borrow = () => {
         approveToken1();
     }
 
-    const handleSetExtraCollateral = (e) => {
-        setExtraCollateral(e);
-        setCollateral(e);
+    const handleSetExtraCollateral = (value) => {
+        setExtraCollateral(value);
+        setCollateral(value);
         // setIsAdding(true);
     };
 
@@ -687,6 +687,15 @@ const Borrow = () => {
          
         window.location = event.target.value;
     }
+
+    const handleUseMax = () => {
+        if (token0Info?.balance) {
+            const oneEth = ethers.BigNumber.from("1000000000000000000");
+            let maxBorrowAmount = (token0Info?.balance).mul(IMV).div(oneEth);
+            console.log(`${token0Info?.balance} * ${IMV} = ${maxBorrowAmount}`);
+            setBorrowAmount(formatEther(`${maxBorrowAmount}`));
+        }
+    };
 
     const displayedCollateral = Number(formatEther(`${loanData?.collateralAmount || 0}`)) > 1000000 ?
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) :
@@ -1034,13 +1043,18 @@ const Borrow = () => {
                                                 <Image src={bnbLogo} w="25px"></Image>
                                             </Box>
                                         </HStack>
+                                        <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
+                                            <Text ml={2} fontSize="xs" cursor="pointer" onClick={handleUseMax}>
+                                                Use max
+                                            </Text>
+                                        </VStack>
                                             <br />
                                             <Box>
                                                 <Text fontSize="xs" fontWeight={"bold"} color="#a67c00">Borrowing</Text>
                                             </Box>
                                             <Box>
                                                 <HStack >
-                                                    <Box w="50px" textAlign={"left"}><Text fontSize={isMobile?"xs":"15px"}>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
+                                                    <Box w="75px" textAlign={"left"}><Text fontSize={isMobile?"xs":"15px"}>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
                                                     <Box>{token1Info.tokenSymbol}</Box>
                                                     <Box  w="120px" fontSize={"11px"} mt={"2px"}> <Text fontSize={"xx-small"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
                                                 </HStack>
@@ -1193,14 +1207,14 @@ const Borrow = () => {
                         h="600px"
                         templateRows="repeat(2, 1fr)"
                         templateColumns="repeat(2, 1fr)"
-                        gap={3}
+                        gap={1}
                         mb={20}
                         mt={10}
                         px={2}
                         py={4}
                         // border="1px solid yellow"
                     >
-                        <GridItem w="90%" border={"1px solid white"} p={4} px={6} ml={5} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem  mt={"-5"} w="90%" border={"1px solid white"} p={4} px={6} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                             <Text fontSize={isMobile?"12px":"15px"} color="#a67c00">Active Loan</Text>
                             <SimpleGrid columns={5} mt={-5} fontSize="xs">
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
@@ -1370,6 +1384,7 @@ const Borrow = () => {
                             </SimpleGrid>
                         </GridItem>
                         <GridItem ml={"-6vh"}>
+                        <Box mt={-5}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
@@ -1390,8 +1405,9 @@ const Borrow = () => {
                                 vaultAddress={vaultAddress}
                                 page="borrow" 
                             />
+                        </Box>
                         </GridItem>
-                        <GridItem w="90%" border={"1px solid white"} p={4} px={6} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem mt={2} w="90%" border={"1px solid white"} p={4} px={6} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                         <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">New Loan</Text>
                         <SimpleGrid columns={3} w="100%" mt={-5}>
                             <Box w="500px"backgroundColor={"#a67c00"}  mb={2}>
@@ -1406,26 +1422,31 @@ const Borrow = () => {
                             <Box w="auto">
                                 <HStack>
                                     <Box w="auto">
-                                    <NumberInputRoot
-                                        isMobile={isMobile}
-                                        min={0}
-                                        max={999999999}
-                                        step={0.1}
-                                        onChange={handleSetAmountToBorrow}
-                                        marginRight={"5px"}
-                                        value={borrowAmount === '0' ? '' : borrowAmount}
-                                        setTokenSupply={(() => {})}
-                                        setPrice={setBorrowAmount}
-                                        setFloorPrice={(() => {})}
-                                        height={"38px"}
-                                        mt={1}
-                                        borderRadius={5}
-                                        // backgroundColor={"#F5F5DC"}
-                                        // color="gray.800"
-                                    >
+                                        <NumberInputRoot
+                                            isMobile={isMobile}
+                                            min={0}
+                                            max={999999999}
+                                            step={0.1}
+                                            onChange={handleSetAmountToBorrow}
+                                            marginRight={"5px"}
+                                            value={borrowAmount === '0' ? '' : borrowAmount}
+                                            setTokenSupply={(() => {})}
+                                            setPrice={setBorrowAmount}
+                                            setFloorPrice={(() => {})}
+                                            height={"38px"}
+                                            mt={1}
+                                            borderRadius={5}
+                                            // backgroundColor={"#F5F5DC"}
+                                            // color="gray.800"
+                                        >
                                         <NumberInputLabel  h={"38px"} w={{ base: "", lg: "auto" }} />
                                         <NumberInputField  h={"38px"} w={{ base: "", lg: "200px" }} />
-                                    </NumberInputRoot>
+                                        </NumberInputRoot>
+                                        <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
+                                        <Text ml={2} fontSize="sm" cursor="pointer" onClick={handleUseMax}>
+                                            Use max
+                                        </Text>
+                                        </VStack>
                                     </Box>
                                     <Box>
                                         <Image src={bnbLogo}></Image>
