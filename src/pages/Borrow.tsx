@@ -784,7 +784,7 @@ const Borrow = () => {
                                             <Box  fontSize="xs" color="white">
                                             {displayedCollateral}
                                             </Box>
-                                            <Box  fontSize="xx-small" ml={-1}>
+                                            <Box  fontSize="xx-small" ml={-1} color="white">
                                             {isTokenInfoLoading ? <Spinner size="xs" /> : token0Info.tokenSymbol}
                                             </Box>
                                         </HStack>
@@ -794,7 +794,7 @@ const Borrow = () => {
                                             <Box  fontSize="xs" color="white">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
                                             </Box>
-                                            <Box  fontSize="xx-small" ml={-1}>
+                                            <Box  fontSize="xx-small" ml={-1} color="white">
                                             {isTokenInfoLoading ? <Spinner size="xs" /> : token1Info.tokenSymbol}
                                             </Box>
                                         </HStack>
@@ -1120,14 +1120,14 @@ const Borrow = () => {
                                             <Box  fontSize="sm">
                                             {displayedCollateral}
                                             </Box>
-                                            <Box  fontSize="xx-small">
+                                            <Box  fontSize="xx-small" color="white">
                                             {token0Info.tokenSymbol}
                                             </Box>
                                         </HStack>
                                     </Box>
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0" h="25px" borderLeft="none" borderRight="none">
                                         <HStack>
-                                            <Box  fontSize="sm">
+                                            <Box  fontSize="sm" color="white">
                                             {commify(formatEther(`${loanData.borrowAmount}`), 4)}
                                             </Box>
                                             <Box  fontSize="xx-small">
