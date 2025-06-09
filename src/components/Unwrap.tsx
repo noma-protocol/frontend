@@ -23,6 +23,7 @@ import {
     DrawerActionTrigger,
 } from '../components/ui/drawer';
 import { ethers } from 'ethers';
+import { formatEther, parseEther } from "viem";
 
 //declare types of props
 type UnwrapProps = {
@@ -52,7 +53,7 @@ const Unwrap = ({
 
     const handleUseMax = () => {
         if (token1Balance) {
-            setWrapAmount(ethers.utils.formatEther(token1Balance));
+            setWrapAmount(formatEther(token1Balance));
         }
     };
 

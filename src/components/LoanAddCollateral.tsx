@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {  VStack, HStack, Box, Button, Spinner, Text } from "@chakra-ui/react";
 import { formatNumberPrecise, commifyDecimals, commify } from '../utils';
+import { formatEther, parseEther } from "viem";
 
 import {
     DrawerRoot,
@@ -33,7 +34,8 @@ const LoadAddCollateral = ({
     setIsLoading, 
     isTokenInfoLoading, 
     isAdding, 
-    handleClickAdd, 
+    handleClickAdd,
+    token0Balance, 
     ...props
 }) => {
     
@@ -49,6 +51,13 @@ const LoadAddCollateral = ({
     }
 
     const displayCollateral = extraCollateral >= 1000000 ? formatNumberPrecise(extraCollateral, 5) : commify(extraCollateral, 4);
+
+    const handleUseMax = () => {
+        if (token0Balance) {
+            handleSetCollateral(formatEther(token0Balance));
+            handleSetExtraCollateral(formatEther(token0Balance));
+        }
+    };
 
     return (
         <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
@@ -100,12 +109,18 @@ const LoadAddCollateral = ({
                             marginRight={"5px"}
                             targetValue={extraCollateral}
                             customStep={0.1}
+                            value={extraCollateral}
                         >
                             <NumberInputLabel h={"38px"} w={{ base: "", lg: "auto" }} />
                             <NumberInputField h={"38px"} w={{ base: "", lg: "200px" }} />
                         </NumberInputRoot>
                         </Box>
                     </HStack>
+                    <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
+                    <Text ml={2} fontSize="sm" cursor="pointer" onClick={handleUseMax}>
+                        Use max
+                    </Text>
+                    </VStack>
                 </Box>
                 <Box>
                     <VStack border="1px solid #a67c00" borderRadius="md" p={3} mt={5} spacing={2} w="80%" alignItems="flex-start">
