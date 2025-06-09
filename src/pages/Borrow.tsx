@@ -1214,7 +1214,7 @@ const Borrow = () => {
                         py={4}
                         // border="1px solid yellow"
                     >
-                        <GridItem  mt={"-5"} w="90%" border={"1px solid white"} p={4} px={6} ml={5} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem  mt={"-5"} w="90%" border={"1px solid white"} px={4} py={3} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                             <Text fontSize={isMobile?"12px":"15px"} color="#a67c00">Active Loan</Text>
                             <SimpleGrid columns={5} mt={-5} fontSize="xs">
                                 <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
@@ -1407,17 +1407,17 @@ const Borrow = () => {
                             />
                         </Box>
                         </GridItem>
-                        <GridItem mt={2} w="90%" border={"1px solid white"} p={4} px={6} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem mt={2} w="90%" border={"1px solid white"} py={3} px={4} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                         <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">New Loan</Text>
                         <SimpleGrid columns={3} w="100%" mt={-5}>
                             <Box w="500px"backgroundColor={"#a67c00"}  mb={2}>
-                                <Text>&nbsp;<b>Amount</b></Text>
+                                <Text fontSize="xs">&nbsp;Amount</Text>
                             </Box>
                             <Box  >
-                                <Text ml="40px">&nbsp;&nbsp;&nbsp;<b>Duration</b></Text>
+                                <Text fontSize="xs" ml="40px">&nbsp;&nbsp;&nbsp;Duration</Text>
                             </Box>
                             <Box backgroundColor={"#a67c00"} mb={2}>
-                                <Text ml={5}>Actions</Text>
+                                <Text ml={5} fontSize="xs">Actions</Text>
                             </Box>
                             <Box w="auto">
                                 <HStack>
