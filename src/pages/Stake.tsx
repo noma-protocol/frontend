@@ -556,7 +556,7 @@ const Stake = () => {
                     textAlign="left"
                     position="relative"
                     mt={"50px"}
-                    ml={isMobile ? 0 : "-2vw"}
+                    ml={isMobile ? -3 : "-2vw"}
                     mb={"15%"}
                 >
                  {isAddress(vaultAddress) ? (
