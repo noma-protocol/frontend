@@ -519,6 +519,7 @@ const Stake = () => {
                     boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
                     border="1px solid #a67c00"
                     mt="100px"
+                    ml={isMobile ? 5 : "15%"}
                 >
                     <Box
                         mb={6}
