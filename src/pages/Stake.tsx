@@ -568,7 +568,7 @@ const Stake = () => {
                             <SimpleGrid 
                                 mt={-5} 
                                 fontSize={"11px"} 
-                                w={isMobile ? "93%" : "352px"} 
+                                w={isMobile ? "92%" : "352px"} 
                                 ml={2} 
                                 mr={2}
                                 gridTemplateColumns="65px 75px 70px 1fr" // wider Actions column
@@ -683,7 +683,7 @@ const Stake = () => {
                                         </NumberInputRoot>
                                         </Box>
                                         <Box>
-                                            <Image src={oksLogo} w="65px"></Image>
+                                            <Image ml={-2} src={oksLogo} w="65px"></Image>
                                         </Box>
                                     </HStack>
                                         <HStack mt={5}>
