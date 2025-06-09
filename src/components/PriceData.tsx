@@ -210,13 +210,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     let startCandle = ohlcData[0]; // fallback to first candle
     let minTimeDiff = Infinity;
 
-    console.log(`[Debug] Looking for candle closest to: ${new Date(targetTime)}`);
-    console.log(`[Debug] Available candles:`);
-    ohlcData.forEach((candle, index) => {
-      const candleTime = new Date(candle.x).getTime();
-      const timeDiff = Math.abs(candleTime - targetTime);
-      console.log(`  [${index}] ${new Date(candle.x)} - Price: ${candle.y[3]} - Diff: ${(timeDiff / (60*60*1000)).toFixed(1)}h`);
-    });
+    // console.log(`[Debug] Looking for candle closest to: ${new Date(targetTime)}`);
+    // console.log(`[Debug] Available candles:`);
+    // ohlcData.forEach((candle, index) => {
+    //   const candleTime = new Date(candle.x).getTime();
+    //   const timeDiff = Math.abs(candleTime - targetTime);
+    //   console.log(`  [${index}] ${new Date(candle.x)} - Price: ${candle.y[3]} - Diff: ${(timeDiff / (60*60*1000)).toFixed(1)}h`);
+    // });
 
     // For 24h periods, prefer candles that are further back to capture actual daily change
     // For shorter periods, use closest candle
@@ -254,7 +254,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       }
     }
 
-    console.log(`[Debug] Selected start candle: ${new Date(startCandle.x)} (${(minTimeDiff / (60*60*1000)).toFixed(1)}h away from target)`);
+    // console.log(`[Debug] Selected start candle: ${new Date(startCandle.x)} (${(minTimeDiff / (60*60*1000)).toFixed(1)}h away from target)`);
 
     // Use the most recent candle as the end point
     const endCandle = ohlcData[ohlcData.length - 1];
@@ -287,15 +287,15 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     const startPrice = startCandle.y[3]; // close price
     const endPrice = endCandle.y[3]; // close price
 
-    console.log(`[Debug] Start candle: ${new Date(startCandle.x)} - Price: ${startPrice}`);
-    console.log(`[Debug] End candle: ${new Date(endCandle.x)} - Price: ${endPrice}`);
-    console.log(`[Debug] Actual time span: ${((new Date(endCandle.x).getTime() - new Date(startCandle.x).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours`);
-    console.log(`[Debug] Total data points in 24h dataset: ${ohlcData.length}`);
-    console.log(`[Debug] Price range in dataset: min=${Math.min(...ohlcData.map(c => c.y[3]))}, max=${Math.max(...ohlcData.map(c => c.y[3]))}`);
+    // console.log(`[Debug] Start candle: ${new Date(startCandle.x)} - Price: ${startPrice}`);
+    // console.log(`[Debug] End candle: ${new Date(endCandle.x)} - Price: ${endPrice}`);
+    // console.log(`[Debug] Actual time span: ${((new Date(endCandle.x).getTime() - new Date(startCandle.x).getTime()) / (1000 * 60 * 60)).toFixed(2)} hours`);
+    // console.log(`[Debug] Total data points in 24h dataset: ${ohlcData.length}`);
+    // console.log(`[Debug] Price range in dataset: min=${Math.min(...ohlcData.map(c => c.y[3]))}, max=${Math.max(...ohlcData.map(c => c.y[3]))}`);
 
     // Calculate percentage change using raw token prices
     const change = ((endPrice - startPrice) / startPrice) * 100;
-    console.log(`[Debug] Calculated percentage change: ${change}%`);
+    // console.log(`[Debug] Calculated percentage change: ${change}%`);
     
     return change;
   };
