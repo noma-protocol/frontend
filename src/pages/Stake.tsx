@@ -474,7 +474,7 @@ const Stake = () => {
 
     console.log(`Get time left ${getTimeLeft(lastOperationTimestamp, 3)}`);
     return (
-        <Container maxW="container.xl" py={12} pl={"0%"} ml={"10%"}>
+        <Container maxW="container.xl" py={12} pl={"0%"} ml={isConnected ? "10%" : "2%"}>
             <Toaster />
 
             {!isConnected ? (
@@ -489,7 +489,6 @@ const Stake = () => {
                     p={8}
                     borderRadius="xl"
                     boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
-                    m={4}
                     border="1px solid #a67c00"
                     mt="100px"
                 >
@@ -572,7 +571,7 @@ const Stake = () => {
                                 w={isMobile ? "95%" : "352px"} 
                                 ml={2} 
                                 mr={2}
-                                gridTemplateColumns="60px 75px 75px 1fr" // wider Actions column
+                                gridTemplateColumns="65px 75px 75px 1fr" // wider Actions column
                             >               
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
@@ -581,7 +580,7 @@ const Stake = () => {
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> &nbsp;&nbsp;&nbsp;&nbsp;Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
-                                <Box px={2} w="75px"> 
+                                <Box px={2} w="65px"> 
                                     <HStack mt={2} >
                                         <Box  fontSize="xs">
                                         <Text fontSize="xs">{formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 2)}</Text>
@@ -591,7 +590,7 @@ const Stake = () => {
                                         </Box>
                                     </HStack>
                                 </Box>
-                                <HStack w="95px">
+                                <HStack w="75px">
                                 <Box px={2}  >
                                     <Text fontSize="xs">{formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 2)}</Text>
                                 </Box>
@@ -629,7 +628,7 @@ const Stake = () => {
                                 </>
                             ) : (
                                 <>
-                                <Box p={2}>
+                                <Box p={2} w="120px">
                                 No Data
                                 </Box>
                                 <Box>
