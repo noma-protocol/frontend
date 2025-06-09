@@ -147,7 +147,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
                   <Text fontWeight="bold" color="gray">Token Address</Text>
                 </Box>
                 <Box>
-                  <Text><Link href={bscscanLink}>{`${tokenAddress?.slice(0, 6)}...${tokenAddress?.slice(-6)}`}</Link></Text>
+                  <Text><Link target="_blank" href={bscscanLink}>{`${tokenAddress?.slice(0, 6)}...${tokenAddress?.slice(-6)}`}</Link></Text>
                 </Box>
               </HStack>             
               <HStack>
