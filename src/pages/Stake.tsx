@@ -566,12 +566,19 @@ const Stake = () => {
                         </Box>
                         <Box p={2} mt={5} w={"95%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={"-30px"} fontSize="xs">
                         <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Position</Text>
-                        <SimpleGrid columns={4} mt={-5} fontSize={"11px"} w={isMobile ? "95%" : "352px"} ml={2} mr={2}>
+                            <SimpleGrid 
+                                mt={-5} 
+                                fontSize={"11px"} 
+                                w={isMobile ? "95%" : "352px"} 
+                                ml={2} 
+                                mr={2}
+                                gridTemplateColumns="65px 65px 115px 1fr" // wider Actions column
+                            >               
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
                             {/* <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}></Box> */}
-                            <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Actions </Box> 
+                            <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> &nbsp;&nbsp;&nbsp;&nbsp;Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
                                 <Box px={2} w="75px"> 
@@ -609,10 +616,10 @@ const Stake = () => {
                                     h={"25px"}  
                                     borderColor={"#a67c00"} 
                                     variant="outline" 
-                                    ml={10} 
+                                    ml={"60px"} 
                                     onClick={() => handleUnstake()}  
                                     disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
-                                    w={"70px"}
+                                    w={"90px"}
                                     
                                 >
                                     {isUnstaking ? <Spinner size="xs" color="#a67c00" /> : <Text fontSize={"xs"} color="#a67c00">Unstake</Text>}
@@ -773,7 +780,7 @@ const Stake = () => {
                                         ml={10}
                                         onClick={() => handleStake()}
                                         disabled={isLoading || !stakeAmount || stakeAmount === "" || Number(stakeAmount) <= 0}
-                                        w={"70px"}
+                                        w={"90px"}
                                     >
                                         {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"xs"} color="#a67c00">Stake</Text>}
                                     </Button>
