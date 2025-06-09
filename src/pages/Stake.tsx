@@ -761,7 +761,7 @@ const Stake = () => {
                                         </HStack>
                                         <HStack w="400px">
                                         <Box> <Text fontSize="xs"> To cooldown:</Text> </Box>
-                                        <Box w="25%">
+                                        <Box w="30%">
                                             {lastOperationTimestamp ? (
                                                 <CountdownTimer
                                                     startTsMs={Number(lastOperationTimestamp) * 1000}
