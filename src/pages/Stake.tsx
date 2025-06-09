@@ -656,7 +656,7 @@ const Stake = () => {
                                 </Box>
                                 <Box w="auto">
                                     <HStack>
-                                        <Box w="auto">
+                                        <Box w="auto" mt={-2}>
                                         <NumberInputRoot
                                             isMobile={isMobile}
                                             min={0}
@@ -676,8 +676,8 @@ const Stake = () => {
                                             <NumberInputField h={"25px"} w={{ base: "", lg: "200px" }} placeholder="Enter amount" />
                                         </NumberInputRoot>
                                         </Box>
-                                        <Box mt={2}>
-                                            <Image src={placeholderLogo} w="25px"></Image>
+                                        <Box>
+                                            <Image src={oksLogo} w="65px"></Image>
                                         </Box>
                                     </HStack>
                                         <HStack mt={5}>
