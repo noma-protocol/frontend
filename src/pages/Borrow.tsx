@@ -734,8 +734,8 @@ const Borrow = () => {
                   >
                     <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
                   </Box>
-                  <Heading as="h2" mb={4} fontSize="2xl" textAlign="center">Wallet Not Connected</Heading>
-                  <Text fontSize="md" textAlign="center" mb={6} color="gray.400">
+                  <Heading as="h2" mb={4} fontSize="md" textAlign="center">Wallet Not Connected</Heading>
+                  <Text fontSize="sm" textAlign="center" mb={6} color="gray.400">
                     Please connect your wallet to access the Borrow page.
                   </Text>
 

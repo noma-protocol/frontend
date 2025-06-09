@@ -103,18 +103,18 @@ const Header: React.FC = () => {
           </ul>
 
           <ul className="navbar-nav action">
-            <li className="nav-item ml-2" >
+            <li className="nav-item ml-2">
               <Button  onClick={() => open()} variant="outline" h="40px" w="220px" mt={5} >
-                <p style={{color:"#a67c00", fontSize:(isMobile ? "12px" : "16px")}}>
+                <p style={{color:"#a67c00", fontSize:(isMobile ? "12px" : "16px"), marginLeft: "5px"}}>
                 <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>
-                &nbsp;&nbsp;{isConnected
+                {isConnected
                   ? `${address?.slice(0, 6)}...${address?.slice(-6)}`
                   : !ctx.isSpanishCountry
                   ? "Connect wallet"
                   : "Conectar billetera"}
                 </p>
               </Button>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 
             </li>
           </ul>
 

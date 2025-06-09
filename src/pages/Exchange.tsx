@@ -1103,7 +1103,7 @@ const Exchange: React.FC = () => {
     }
 
   return (
-      <Container maxW="container.xl=" py={12} pl={"0%"} ml={"10%"}>
+      <Container maxW="container.xl=" py={12} pl={"0%"} ml={isConnected ? "5%" : "10%"}>
       <Toaster />
 
       {!isConnected ? (
@@ -1135,8 +1135,8 @@ const Exchange: React.FC = () => {
                   >
                     <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
                   </Box>
-                  <Heading as="h2" mb={4} fontSize="2xl" textAlign="center">Wallet Not Connected</Heading>
-                  <Text fontSize="md" textAlign="center" mb={6} color="gray.400">
+                  <Heading as="h2" mb={4} fontSize="md" textAlign="center">Wallet Not Connected</Heading>
+                  <Text fontSize="sm" textAlign="center" mb={6} color="gray.400">
                     Please connect your wallet to access the Exchange page.
                   </Text>
 
@@ -1170,7 +1170,7 @@ const Exchange: React.FC = () => {
               <Box mt={8}>
               {isAllVaultsLoading ? (
                 <>
-                <HStack>
+                <HStack >
                   <Box>
                     <Text fontSize={isMobile ? "13px" : "14px"}>
                       Loading vaults...
@@ -1372,7 +1372,7 @@ const Exchange: React.FC = () => {
                 </Box>) : 
                     (
                     <Grid
-                        h="200px"
+                        h="70%"
                         templateRows="repeat(2, 1fr)"
                         templateColumns="repeat(2, 1fr)"
                         gap={1}
@@ -1473,6 +1473,7 @@ const Exchange: React.FC = () => {
                             
                         </GridItem>                             
                     </Grid>
+                    
                   )
                 }
                 </Flex>
@@ -1483,7 +1484,6 @@ const Exchange: React.FC = () => {
                 </Box>
             </Box>
           </SimpleGrid>
-
         </Box>
       )}
     </Container>
