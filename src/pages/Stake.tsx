@@ -100,6 +100,28 @@ const Stake = () => {
     const [token1, setToken1] = useState("");
 
     const [vaultDescription, setVaultDescription] = useState({});
+    const [selectedDestination, setSelectedDestination] = useState("Exchange");
+
+    const _navigationSelectData = {
+        items: [
+        {
+            label: "Exchange",
+            value: "/exchange",
+        },            
+        {
+            label: "Markets",
+            value: "/markets",
+        },
+        {
+            label: "Liquidity",
+            value: "/liquidity",
+        },
+        {
+            label: "Borrow",
+            value: `/borrow?v=${vaultAddress}`,
+        },
+        ],
+    };
 
     // Reference to track if component is mounted
     const isMounted = React.useRef(true);
@@ -469,6 +491,12 @@ const Stake = () => {
         approveSnoma();
     }
 
+    const handleSelectDestination = (event) => {
+        console.log(`Selected destination: ${event.target.value}`);
+         
+        window.location = event.target.value;
+    }
+
     // console.log(`sNoma Balance: ${sNomaBalance} stakedBalance: ${stakedBalance}`);
     const rewards = formatEther(`${sNomaBalance || 0}`) - formatEther(`${stakedBalance || 0}`);
 
@@ -543,7 +571,49 @@ const Stake = () => {
                  {isAddress(vaultAddress) ? (
                     isMobile ? (
                         <Flex direction="column">
-                        <Box mt={10} ml={-2}>
+                        <Box  ml="-5">
+                            <HStack mt={10} >
+                            <Box w="80px">
+                                <Text> Go to:</Text>
+                            </Box>
+                            <Box>
+                            <SelectRoot
+                                mt={0}
+                                ml={5}
+                                mb={2}
+                                collection={createListCollection(_navigationSelectData )}
+                                size="sm"
+                                width={isMobile ? "125px" : "150px"}
+                                onChange={handleSelectDestination}
+                                value={selectedDestination} // Bind the selected value to the state
+                                
+                            >
+                                <SelectTrigger>
+                                {_navigationSelectData.items.map((data, index) => {
+                                if (index > 0) return;
+                                    return (
+                                    <SelectValueText placeholder={data.label}>
+                                    </SelectValueText>
+                                    );
+                                })}                  
+                                </SelectTrigger>
+                                <SelectContent>
+                                {_navigationSelectData.items
+                                .slice()          // make a shallow copy
+                                .reverse()        // reverse the copy 
+                                .map((data) => {
+                                    return (
+                                    <SelectItem item={data} key={data.value}>
+                                        {data.label}
+                                    </SelectItem>
+                                    );
+                                })}
+                                </SelectContent>
+                            </SelectRoot>
+                            </Box>
+                        </HStack>  
+                        </Box>
+                        <Box mt={2} ml={-2}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance} 
@@ -796,13 +866,56 @@ const Stake = () => {
                         </Flex>
                     ) : ( 
                     <Box w="99%">
+                    <Box mt={10} ml={"5%"}>
+                        <HStack>
+                            <Box w="80px" >
+                                <Text> Go to:</Text>
+                            </Box>
+                            <Box>
+                            <SelectRoot
+                                mt={isMobile ? "-60px" : 0}
+                                ml={5}
+                                mb={2}
+                                collection={createListCollection(_navigationSelectData )}
+                                size="sm"
+                                width={isMobile ? "185px" : "150px"}
+                                onChange={handleSelectDestination}
+                                value={selectedDestination} // Bind the selected value to the state
+                                
+                            >
+                                <SelectTrigger>
+                                {_navigationSelectData.items.map((data, index) => {
+                                if (index > 0) return;
+                                    return (
+                                    <SelectValueText placeholder={data.label}>
+                                    </SelectValueText>
+                                    );
+                                })}                  
+                                </SelectTrigger>
+                                <SelectContent>
+                                {_navigationSelectData.items
+                                .slice()          // make a shallow copy
+                                .reverse()        // reverse the copy 
+                                .map((data) => {
+                                    return (
+                                    <SelectItem item={data} key={data.value}>
+                                        {data.label}
+                                    </SelectItem>
+                                    );
+                                })}
+                                </SelectContent>
+                            </SelectRoot>
+                            </Box>
+                        </HStack>
+                    
+                    </Box>  
                     <Grid
                         h="600px"
                         templateRows="repeat(2, 1fr)"
                         templateColumns="repeat(2, 1fr)"
                         gap={3}
                         mb={20}
-                        mt={10}
+                        mt={2}
                         px={2}
                         py={4}
                         // border="1px solid red"

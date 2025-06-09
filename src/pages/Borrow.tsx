@@ -117,8 +117,30 @@ const Borrow = () => {
     const [repayAmount, setRepayAmount] = useState("0");
     const [isComputing, setIsComputing] = useState(false);
     const [ltv, setLtv] = useState(0);
+    const [selectedDestination, setSelectedDestination] = useState("Exchange");
 
     let loanData ;
+
+    const _navigationSelectData = {
+        items: [
+        {
+            label: "Exchange",
+            value: "/exchange",
+        },            
+        {
+            label: "Markets",
+            value: "/markets",
+        },
+        {
+            label: "Liquidity",
+            value: "/liquidity",
+        },
+        {
+            label: "Stake",
+            value: `/stake?v=${vaultAddress}`,
+        },
+        ],
+    };
 
     if (token1Info?.tokenSymbol == "WMON") {
         setToken1Info({
@@ -660,6 +682,12 @@ const Borrow = () => {
         // setIsAdding(true);
     };
 
+    const handleSelectDestination = (event) => {
+        console.log(`Selected destination: ${event.target.value}`);
+         
+        window.location = event.target.value;
+    }
+
     const displayedCollateral = Number(formatEther(`${loanData?.collateralAmount || 0}`)) > 1000000 ?
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) :
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) ;
@@ -737,7 +765,49 @@ const Borrow = () => {
                 {isAddress(vaultAddress) ? (
                     isMobile ? (
                         <Flex direction="column">
-                        <Box mt={10} ml={2}>
+                        <Box  ml="-5">
+                            <HStack mt={10} >
+                            <Box w="80px">
+                                <Text> Go to:</Text>
+                            </Box>
+                            <Box>
+                            <SelectRoot
+                                mt={0}
+                                ml={5}
+                                mb={2}
+                                collection={createListCollection(_navigationSelectData )}
+                                size="sm"
+                                width={isMobile ? "125px" : "150px"}
+                                onChange={handleSelectDestination}
+                                value={selectedDestination} // Bind the selected value to the state
+                                
+                            >
+                                <SelectTrigger>
+                                {_navigationSelectData.items.map((data, index) => {
+                                if (index > 0) return;
+                                    return (
+                                    <SelectValueText placeholder={data.label}>
+                                    </SelectValueText>
+                                    );
+                                })}                  
+                                </SelectTrigger>
+                                <SelectContent>
+                                {_navigationSelectData.items
+                                .slice()          // make a shallow copy
+                                .reverse()        // reverse the copy 
+                                .map((data) => {
+                                    return (
+                                    <SelectItem item={data} key={data.value}>
+                                        {data.label}
+                                    </SelectItem>
+                                    );
+                                })}
+                                </SelectContent>
+                            </SelectRoot>
+                            </Box>
+                        </HStack>  
+                        </Box>                            
+                        <Box mt={2} ml={2}>
                         <BalanceCard 
                             ethBalance={ethBalance}
                             token0Balance={token0Info?.balance} 
@@ -1076,12 +1146,49 @@ const Borrow = () => {
                                                  
                     ) : (
                     <Box  w="99%">
-                    {/* <Heading as="h2">
-                        Borrow
-                    <Text fontSize="md">
-                        Borrow from liquidity using your collateral
-                    </Text>
-                    </Heading>                         */}
+                    <Box mt={10} ml={"5%"}>
+                        <HStack>
+                            <Box w="80px" >
+                                <Text> Go to:</Text>
+                            </Box>
+                            <Box>
+                            <SelectRoot
+                                mt={isMobile ? "-60px" : 0}
+                                ml={5}
+                                mb={2}
+                                collection={createListCollection(_navigationSelectData )}
+                                size="sm"
+                                width={isMobile ? "185px" : "150px"}
+                                onChange={handleSelectDestination}
+                                value={selectedDestination} // Bind the selected value to the state
+                                
+                            >
+                                <SelectTrigger>
+                                {_navigationSelectData.items.map((data, index) => {
+                                if (index > 0) return;
+                                    return (
+                                    <SelectValueText placeholder={data.label}>
+                                    </SelectValueText>
+                                    );
+                                })}                  
+                                </SelectTrigger>
+                                <SelectContent>
+                                {_navigationSelectData.items
+                                .slice()          // make a shallow copy
+                                .reverse()        // reverse the copy 
+                                .map((data) => {
+                                    return (
+                                    <SelectItem item={data} key={data.value}>
+                                        {data.label}
+                                    </SelectItem>
+                                    );
+                                })}
+                                </SelectContent>
+                            </SelectRoot>
+                            </Box>
+                        </HStack>
+                    
+                    </Box>
                     <Grid
                         h="600px"
                         templateRows="repeat(2, 1fr)"
