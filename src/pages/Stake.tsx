@@ -568,10 +568,10 @@ const Stake = () => {
                             <SimpleGrid 
                                 mt={-5} 
                                 fontSize={"11px"} 
-                                w={isMobile ? "94%" : "352px"} 
+                                w={isMobile ? "93%" : "352px"} 
                                 ml={2} 
                                 mr={2}
-                                gridTemplateColumns="65px 75px 65px 1fr" // wider Actions column
+                                gridTemplateColumns="65px 75px 70px 1fr" // wider Actions column
                             >               
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
                             <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
@@ -598,7 +598,7 @@ const Stake = () => {
                                     {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xs" >s{token0Info.tokenSymbol}</Text>}
                                 </Box> 
                                 </HStack>                               
-                                <Box px={2}  w="65px">     
+                                <Box px={2}  w="70px">     
                                     <HStack>
                                         <Box mt={2} fontSize="xs">
                                         {commify(rewards, 2)}
