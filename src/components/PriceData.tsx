@@ -228,8 +228,20 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       // For 24h intervals, prefer the candle that's closest to actually being 24h ago
       // rather than just the closest candle
       if (interval === "24h") {
-        // Look for a candle that's between 20-28 hours ago (closer to actual 24h)
-        if (hoursAway >= 20 && hoursAway <= 28 && hoursAway < minTimeDiff / (60 * 60 * 1000)) {
+        // Look for a candle that's between 20-30 hours ago (closer to actual 24h)
+        if (hoursAway >= 20 && hoursAway <= 30 && hoursAway < minTimeDiff / (60 * 60 * 1000)) {
+          minTimeDiff = timeDiff;
+          startCandle = candle;
+        }
+      } else if (interval === "1M") {
+        // For 1 month, look for the oldest available data (furthest back)
+        if (hoursAway > minTimeDiff / (60 * 60 * 1000)) {
+          minTimeDiff = timeDiff;
+          startCandle = candle;
+        }
+      } else if (interval === "1w") {
+        // For 1 week, look for data around 140-200 hours ago
+        if (hoursAway >= 140 && hoursAway <= 200 && hoursAway < minTimeDiff / (60 * 60 * 1000)) {
           minTimeDiff = timeDiff;
           startCandle = candle;
         }
@@ -259,7 +271,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         if (interval === "24h" && hoursAway >= 20 && hoursAway <= 30) {
           startCandle = candidateCandle;
           break;
-        } else if (interval !== "24h") {
+        } else if (interval === "1M" && hoursAway >= 600) { // 1 month = ~720h, look for 600+ hours
+          startCandle = candidateCandle;
+          break;
+        } else if (interval === "1w" && hoursAway >= 140) { // 1 week = 168h, look for 140+ hours  
+          startCandle = candidateCandle;
+          break;
+        } else if (interval !== "24h" && interval !== "1M" && interval !== "1w") {
           startCandle = candidateCandle;
           break;
         }
