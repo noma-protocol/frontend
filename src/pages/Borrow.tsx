@@ -12,7 +12,7 @@ import ethLogo from '../assets/images/weth.svg';
 import bnbLogo from '../assets/images/bnb.png';
 import LoanAddCollateral from '../components/LoanAddCollateral';
 import LoanRepay from '../components/LoanRepay';
-
+import walletIcon from '../assets/images/walletIcon.svg';
 import placeholderLogo from '../assets/images/question.svg';
 import {
     SelectContent,
@@ -706,6 +706,7 @@ const Borrow = () => {
             <Toaster />
 
             {!isConnected ? (
+            <>
                 <Box
                   display="flex"
                   flexDirection="column"
@@ -720,39 +721,27 @@ const Borrow = () => {
                   m={4}
                   border="1px solid #a67c00"
                   mt="100px"
+                  ml={isMobile ? 5 : "7%"}
+                  w="70%"
+                  h="30%"
                 >
                   <Box
                     mb={6}
                     p={4}
                     borderRadius="full"
                     bg="rgba(166, 124, 0, 0.2)"
+                    
                   >
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M19 7H5C3.89543 7 3 7.89543 3 9V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V9C21 7.89543 20.1046 7 19 7Z" stroke="#a67c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M3 10H21" stroke="#a67c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M7 15H7.01" stroke="#a67c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M11 15H13" stroke="#a67c00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
                   </Box>
                   <Heading as="h2" mb={4} fontSize="2xl" textAlign="center">Wallet Not Connected</Heading>
                   <Text fontSize="md" textAlign="center" mb={6} color="gray.400">
-                    Please connect your wallet to access the Oikos Borrowing features
+                    Please connect your wallet to access the Borrow page.
                   </Text>
-                  <Box
-                    p={1}
-                    bgGradient="linear(to-r, #a67c00, #e2c058, #a67c00)"
-                    borderRadius="md"
-                  >
-                    <Box
-                      bg="#222831"
-                      borderRadius="md"
-                      px={6}
-                      py={2}
-                    >
-                      <Text fontWeight="bold" color="#a67c00">Connect Wallet</Text>
-                    </Box>
-                  </Box>
+
                 </Box>
+                <Box h="50vh"><br /></Box>            
+            </>
             ) : isMobile && isLandscape ? (
                 <RotateDeviceMessage />
             ) : (
