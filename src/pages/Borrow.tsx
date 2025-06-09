@@ -756,7 +756,7 @@ const Borrow = () => {
                     position="relative"
                     mt={"50px"}
                     mb={"15%"}
-                    ml={isMobile ? 0 : "-2vw"}
+                    ml={isMobile ? -3 : "-2vw"}
                     // ml={isMobile ? "20px" : 0}
                     // border="1px solid red"
                 >
