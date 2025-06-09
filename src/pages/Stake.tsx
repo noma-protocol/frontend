@@ -612,7 +612,7 @@ const Stake = () => {
                                     ml={10} 
                                     onClick={() => handleUnstake()}  
                                     disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
-                                    w={"80px"}
+                                    w={"70px"}
                                     
                                 >
                                     {isUnstaking ? <Spinner size="xs" color="#a67c00" /> : <Text fontSize={"xs"} color="#a67c00">Unstake</Text>}
@@ -647,11 +647,11 @@ const Stake = () => {
                                 backgroundColor={"#222831"} 
                             >
                             <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
-                            <SimpleGrid columns={2} w="98%" mt={-5} fontSize={"14px"} >
-                                <Box  w="340px" backgroundColor={"#bf9b30"}  mb={2}>
+                            <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"xs"}>
+                                <Box  w="auto" backgroundColor={"#bf9b30"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>
-                                <Box   backgroundColor={"#bf9b30"} mb={2}>
+                                <Box   w="auto"  backgroundColor={"#bf9b30"} mb={2}>
                                     <Text fontSize="xs" ml={10}>Actions</Text>
                                 </Box>
                                 <Box w="auto">
@@ -775,7 +775,7 @@ const Stake = () => {
                                         disabled={isLoading || !stakeAmount || stakeAmount === "" || Number(stakeAmount) <= 0}
                                         w={"120px"}
                                     >
-                                        {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"13px"} color="#a67c00">Stake</Text>}
+                                        {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"xs"} color="#a67c00">Stake</Text>}
                                     </Button>
                                 </Box>
                             </SimpleGrid>                        
