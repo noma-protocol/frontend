@@ -1297,7 +1297,7 @@ const Exchange: React.FC = () => {
                 </HStack>
 
                 {isMobile ? 
-                <Box mt={10}>
+                (<Box mt={10}>
                     <Flex direction="column">
                     <Box mt={10}>
                         {/* <Line options={options} data={chartData} /> */}
@@ -1382,7 +1382,8 @@ const Exchange: React.FC = () => {
                         isLoading={isTokenInfoLoading}
                       />
                      </Flex>
-                </Box> : 
+                </Box>) : 
+                    (
                     <Grid
                         h="200px"
                         templateRows="repeat(2, 1fr)"
@@ -1485,6 +1486,7 @@ const Exchange: React.FC = () => {
                             
                         </GridItem>                             
                     </Grid>
+                  )
                 }
                 </Flex>
 
