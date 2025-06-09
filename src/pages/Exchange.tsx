@@ -1103,7 +1103,7 @@ const Exchange: React.FC = () => {
     }
 
   return (
-      <Container maxW="container.xl=" py={12} pl={"0%"} ml={isConnected ? "5%" : "10%"}>
+      <Container maxW="container.xl=" py={12} pl={"0%"} ml={isConnected ? "2%" : "10%"}>
       <Toaster />
 
       {!isConnected ? (
