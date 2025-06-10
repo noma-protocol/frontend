@@ -1033,9 +1033,15 @@ const Borrow = () => {
                                             </Box>
                                         </HStack>
                                         <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
-                                            <Text ml={2} fontSize={isMobile ? "xs" : "sm"} cursor="pointer" onClick={handleUseMax}>
-                                                Use max
-                                            </Text>
+                                        <Text
+                                            ml={2}
+                                            fontSize={isMobile ? "xs" : "sm"}
+                                            cursor="pointer"
+                                            textDecoration="underline"
+                                            onClick={handleUseMax}
+                                        >
+                                            Use max
+                                        </Text>
                                         </VStack>
                                             <br />
                                             <Box>
@@ -1152,7 +1158,7 @@ const Borrow = () => {
                                                  
                     ) : (
                     <Box  w="99%">
-                    <Box mt={10} ml={"5%"}>
+                    <Box mt={10} ml={"2%"}>
                         <HStack>
                             <Box w="80px" >
                                 <Text> Go to:</Text>
@@ -1435,7 +1441,13 @@ const Borrow = () => {
                                         <NumberInputField  h={"38px"} w={{ base: "", lg: "200px" }} />
                                         </NumberInputRoot>
                                         <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
-                                        <Text ml={2} fontSize={isMobile ? "xs" : "sm"} cursor="pointer" onClick={handleUseMax}>
+                                        <Text
+                                            ml={2}
+                                            fontSize={isMobile ? "xs" : "sm"}
+                                            cursor="pointer"
+                                            textDecoration="underline"
+                                            onClick={handleUseMax}
+                                        >
                                             Use max
                                         </Text>
                                         </VStack>

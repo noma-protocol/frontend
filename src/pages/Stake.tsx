@@ -501,7 +501,12 @@ const Stake = () => {
     // console.log(`sNoma Balance: ${sNomaBalance} stakedBalance: ${stakedBalance}`);
     const rewards = formatEther(`${sNomaBalance || 0}`) - formatEther(`${stakedBalance || 0}`);
 
-    console.log(`Get time left ${getTimeLeft(lastOperationTimestamp, 3)}`);
+    const handleUseMax = () => {
+        if (token0Info?.balance) {
+            setStakeAmount(formatEther(token0Info.balance));
+        }
+    };
+
     return (
         <Container maxW="container.xl" py={12} pl={"0%"} ml={isConnected ? "13%" : "10%"}>
             <Toaster />
@@ -857,7 +862,7 @@ const Stake = () => {
                         </Flex>
                     ) : ( 
                     <Box w="99%">
-                    <Box mt={10} ml={"5%"}>
+                    <Box mt={10} ml={"2%"}>
                         <HStack>
                             <Box w="80px" >
                                 <Text> Go to:</Text>
@@ -1004,7 +1009,7 @@ const Stake = () => {
                     </GridItem>
                     <GridItem mt={2} w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                     <Text fontSize={"14px"} color="#a67c00"><b>New Position</b></Text>
-                    <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"xs"}>
+                    <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"sm"}>
                         <Box w="500px" backgroundColor={"#bf9b30"}  mb={2}>
                             <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;Amount</Text>
                         </Box> 
@@ -1027,6 +1032,7 @@ const Stake = () => {
                                     setPrice={setStakeAmount}
                                     setFloorPrice={(() => {})}
                                     h="25px"
+
                                 >
                                     <NumberInputLabel h={"25px"} w={{ base: "", lg: "auto" }} />
                                     <NumberInputField h={"25px"} w={{ base: "", lg: "200px" }} placeholder="Enter amount" />
@@ -1036,6 +1042,17 @@ const Stake = () => {
                                     <Image src={oksLogo} w="40px"></Image>
                                 </Box>
                             </HStack>
+                            <VStack textAlign="left" alignItems="left" spacing={1}>
+                            <Text
+                                ml={2}
+                                fontSize={isMobile ? "xs" : "sm"}
+                                cursor="pointer"
+                                textDecoration="underline"
+                                onClick={handleUseMax}
+                            >
+                                Use max
+                            </Text>
+                            </VStack>
                             <VStack alignItems={"left"}>
                                     <HStack mt={10} ml={2}>
                                 <Box>

@@ -114,9 +114,9 @@ const BalanceCard = ({
             cardWidth = "60%"; 
         }
     } else if (page === "stake") {
-        cardWidth = isMobile ? "90%" : "60%"; 
+        cardWidth = isMobile ? "94%" : "60%"; 
         if (isMobile) {
-            marginLeft = -4;
+            marginLeft = -6;
         }
     }
 
