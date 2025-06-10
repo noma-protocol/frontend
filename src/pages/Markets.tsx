@@ -443,7 +443,7 @@ const Markets: React.FC = () => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   return (
-    <Container maxW="container.xl" py={12} ml={isConnected ? "2%" : "10%"}>
+    <Container maxW="container.xl" py={12} ml={isConnected ? "2%" : "8%"}>
       <Toaster />
       {/* Prompt user to connect their wallet if not connected */}
       {!isConnected ? (
