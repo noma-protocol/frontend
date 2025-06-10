@@ -48,7 +48,7 @@ const Header: React.FC = () => {
             src={Logo}
             alt="Noma Protocol"
             style={{ width: "60px", height: "60px" }}
-            ml={isMobile ? -6 : "-30px"}
+            ml={isMobile ? 1 : "-45px"}
           />
           </Box>
           </Link>
