@@ -1053,27 +1053,24 @@ const Stake = () => {
                                 Use max
                             </Text>
                             </VStack>
+                            <SimpleGrid columns={2} mt={2} fontSize={"xs"} w="100%" mt={5}>
+                                <GridItem w="220px" >
                             <VStack alignItems={"left"}>
-                                    <HStack mt={10} ml={2}>
+                                    <HStack ml={2}>
                                 <Box>
-                                    <Text>Staking:</Text>
+                                    <Text color="#a67c00">Staking:</Text>
                                 </Box>
-                                <Box>
                                 <HStack>
                                         <Box w="auto"><Text>{stakeAmount ? formatNumberPrecise(stakeAmount, 4) : "0.0000"} </Text></Box>
                                         <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info.tokenSymbol}</Box>
                                 </HStack>
-                                </Box>
-                                {/* <Box> <Text> Last operation:</Text> </Box>
-                                <Box>
-                                    <Text fontSize="xs" color="gray">
-                                        {lastOperationTimestamp ? new Date(Number(lastOperationTimestamp) * 1000).toLocaleTimeString() : "N/A"}
-                                    </Text>
-                                </Box> */}
 
                                 </HStack>
-                                <HStack w="400px" ml={2}>
-                                    <Box> <Text> To cooldown:</Text> </Box>
+                            </VStack>
+                                </GridItem>
+                                <GridItem  ml={150}>
+                                   <HStack w="400px">
+                                    <Box> <Text color="#a67c00"> To cooldown:</Text> </Box>
                                     <Box>
                                         {lastOperationTimestamp && lastOperationTimestamp > 0 ? (
                                             <CountdownTimer
@@ -1081,37 +1078,15 @@ const Stake = () => {
                                                 intervalDays={3}
                                             />
                                         ) : (
-                                            <Text fontSize="xs" color="#a67c00">N/A</Text>
+                                            <Text fontSize="xs" >N/A</Text>
                                         )}
                                     </Box>
                                     <Box>
                                         <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogo} w={15}></Image></Tooltip>
                                     </Box>
                                 </HStack>
-                            </VStack>
-
-                                {/* <Box mt={5}>
-                                    <Text fontWeight={"bold"} color="gray">Collateral required</Text>
-                                </Box>
-                                <Box>
-                                    <Text>{commify(collateral || 0)} {token0Info.tokenSymbol}</Text>
-                                </Box>
-                                <Box mt={5}>
-                                    <HStack>
-                                    <Box> <Text fontWeight={"bold"} color="gray">Loan Fees</Text>    </Box>
-                                    <Box><Image src={placeholderLogo} w={15}></Image></Box>
-                                    </HStack>
-                                </Box>
-                                <Box>
-                                    <Text>{commifyDecimals(formatEther(`${1 || 0}`), 6)} {token1Info.tokenSymbol}</Text>
-                                </Box>
-                                <Box mt={5}> 
-                                    <HStack>
-                                        <Box><Text fontWeight={"bold"} color="gray">IMV</Text> </Box>
-                                        <Box>{commifyDecimals(formatEther(`${1 || 0}`) || 0, 4)}</Box>
-                                        <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info?.tokenSymbol}/{token1Info?.tokenSymbol}</Box>
-                                    </HStack>
-                                </Box>  */}
+                                </GridItem>
+                                </SimpleGrid>
                         </Box>
                         <Box>
                         {/* <SelectRoot
