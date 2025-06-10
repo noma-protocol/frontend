@@ -1144,7 +1144,7 @@ header .navbar-expand {
   top: 0;
   z-index: 2;
   width: 100%;
-  padding: 20px 25px;
+  /* padding: 20px 25px; */
 }
 
 header .navbar-expand .navbar-brand {
