@@ -65,8 +65,8 @@ const Header: React.FC = () => {
                     : "Conectar billetera"}
                   </p>
                 </Button>
-                {isMobile && (
-                  <>&nbsp;&nbsp;&nbsp;&nbsp;</>
+                {!isMobile && (
+                  <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</>
                   )}
               </li>
             </ul>
