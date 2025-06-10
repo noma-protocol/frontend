@@ -55,7 +55,7 @@ function CountdownTimer({ startTsMs, intervalDays }) {
 
   return (
     <Box>
-      <Text fontSize={isMobile ? "xs" : "md"} color="#a67c00">
+      <Text fontSize={isMobile ? "xs" : "md"} >
         {timeLeft}
       </Text>
     </Box>
