@@ -1518,6 +1518,7 @@ const Borrow = () => {
                             </Button>
                             </Box>
                         </SimpleGrid>
+                        <Box ml={-2}>
                         <SimpleGrid 
                         columns={3}
                         w="98%"
@@ -1607,7 +1608,8 @@ const Borrow = () => {
                                 <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text>
                             </Box>
                         </GridItem>
-                        </SimpleGrid>
+                        </SimpleGrid>                            
+                        </Box>
                         </GridItem>
 
                         <p
