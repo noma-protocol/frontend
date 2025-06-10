@@ -1541,7 +1541,9 @@ const Borrow = () => {
                                 <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    
                             </Box>
                             <Box>
-                                <Image src={placeholderLogo} w={15}></Image>
+                                <Tooltip content="Loan fees are 0.027% per diem charged upfront" placement="top">
+                                    <Image src={placeholderLogo} w={15} />
+                                </Tooltip>
                             </Box>
                             </HStack>   
                         </Box>
@@ -1573,23 +1575,13 @@ const Borrow = () => {
                                 )}                              
                             </Text>
                         </Box>
-
                         <Box>
                             <HStack>
                                 <Box><Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(`${loanFees || 0}`, 8)}</Text> </Box>
                                 <Box><Text fontSize={isMobile ? "xs" : "sm"}> {token1Info.tokenSymbol}</Text>  </Box>
                             </HStack>                             
                         </Box>
-
-                        {/* <Box>
-                            <HStack>
-                                <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Text></Box>
-                                <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
-                            </HStack>
-                        </Box> */}
-
                         </SimpleGrid>
-                        
                         <SimpleGrid columns={2} w="65%" mt={2} fontSize={isMobile ? "xs" : "sm"} p={1} backgroundColor="#222831" ml={2} mr={2}>
                         <GridItem>
                             <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">IMV</Text>
