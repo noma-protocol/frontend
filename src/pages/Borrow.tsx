@@ -1605,7 +1605,7 @@ const Borrow = () => {
                         </GridItem>
                         <GridItem>
                             <Box fontSize={isMobile ? "xx-small" : "xs"} mt={"2px"}> 
-                                <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text>
+                                <Text fontSize={"sm"}>{duration / 86400} days</Text>
                             </Box>
                         </GridItem>
                         </SimpleGrid>                            
