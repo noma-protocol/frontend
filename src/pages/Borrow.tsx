@@ -1456,52 +1456,6 @@ const Borrow = () => {
                                         <Image src={bnbLogo}></Image>
                                     </Box>
                                 </HStack>
-                                    <br />
-                                    <Box>
-                                        <Text fontWeight={"bold"}  color="#a67c00">Borrowing</Text>
-                                    </Box>
-                                    <Box w="380px">
-                                        <HStack >
-                                            <Box w="95px" textAlign={"left"}><Text fontSize={isMobile ? "xs" : "sm"}>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
-                                            <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{token1Info.tokenSymbol}</Text></Box>
-                                            <Box  w="120px" fontSize={isMobile ? "xx-small" : "xs"} mt={"2px"}> <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
-                                        </HStack>
-                                    </Box>
-                                    <Box mt={5}>
-                                        <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Collateral required</Text>
-                                    </Box>
-                                    <Box>
-                                        {isComputing ? (
-                                            <Spinner size="sm" />
-                                        ) : (
-                                            <HStack>
-                                                <Box><Text fontSize={isMobile ? "xs" : "sm"}>{formatNumberPrecise(collateral || 0)}</Text> </Box>
-                                                <Box><Text fontSize={isMobile ? "xs" : "sm"}> {token0Info.tokenSymbol}</Text>  </Box>
-                                            </HStack>
-                                        )}
-                                    </Box>
-                                    <Box mt={5} fontSize={isMobile ? "xs" : "sm"}>
-                                       <HStack>
-                                        <Box> <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    </Box>
-                                        <Box><Image src={placeholderLogo} w={15}></Image></Box>
-                                       </HStack>
-                                    </Box>
-                                    <Box>
-                                        <HStack>
-                                            <Box><Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(`${loanFees || 0}`, 8)}</Text> </Box>
-                                            <Box><Text fontSize={isMobile ? "xs" : "sm"}> {token1Info.tokenSymbol}</Text>  </Box>
-                                        </HStack>
-                                    </Box>
-                                    <Box mt={5}> 
-                                            <HStack>
-                                                <Box><Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>IMV</Text> </Box>
-                                                <Box><Image src={placeholderLogo} w={15}></Image></Box>
-                                            </HStack>
-                                        <HStack>
-                                            <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Text></Box>
-                                            <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
-                                        </HStack>
-                                    </Box> 
                             </Box>
                             <Box>
                             <SelectRoot
@@ -1564,8 +1518,98 @@ const Borrow = () => {
                             </Button>
                             </Box>
                         </SimpleGrid>
-
+                        <SimpleGrid 
+                        columns={3}
+                        w="98%"
+                        mt={2}
+                        fontSize={isMobile ? "xs" : "sm"}
+                        p={1}
+                        backgroundColor="#222831"
+                        ml={2}
+                        mr={2}
+                        >
+                        <GridItem >
+                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">Borrowing</Text>
                         </GridItem>
+                        <Box>
+                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">Collateral</Text>
+                        </Box>
+                        <Box>
+                            <HStack>
+                            <Box> 
+                                <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    
+                            </Box>
+                            <Box>
+                                <Image src={placeholderLogo} w={15}></Image>
+                            </Box>
+                            </HStack>   
+                        </Box>
+                        <Box>
+                            <Text fontSize={isMobile ? "xs" : "sm"}>
+                            <HStack >
+                                <Box textAlign={"left"}>
+                                    <Text fontSize={isMobile ? "xs" : "sm"}>{formatNumberPrecise(borrowAmount, 2)} </Text>
+                                </Box>
+                                <Box> 
+                                    <Text fontSize={isMobile ? "xs" : "sm"}>{token1Info.tokenSymbol}</Text>
+                                </Box>
+                            </HStack>                                
+                            </Text>
+                        </Box>
+                        <Box>
+                            <Text fontSize={isMobile ? "xs" : "sm"}>
+                                {isComputing ? (
+                                    <Spinner size="sm" />
+                                ) : (
+                                    <HStack>
+                                        <Box>
+                                            <Text fontSize={isMobile ? "xs" : "sm"}>{formatNumberPrecise(collateral || 0)}</Text> 
+                                        </Box>
+                                        <Box>
+                                            <Text fontSize={isMobile ? "xs" : "sm"}> {token0Info.tokenSymbol}</Text>  
+                                        </Box>
+                                    </HStack>
+                                )}                              
+                            </Text>
+                        </Box>
+
+                        <Box>
+                            <HStack>
+                                <Box><Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(`${loanFees || 0}`, 8)}</Text> </Box>
+                                <Box><Text fontSize={isMobile ? "xs" : "sm"}> {token1Info.tokenSymbol}</Text>  </Box>
+                            </HStack>                             
+                        </Box>
+
+                        {/* <Box>
+                            <HStack>
+                                <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Text></Box>
+                                <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
+                            </HStack>
+                        </Box> */}
+
+                        </SimpleGrid>
+                        
+                        <SimpleGrid columns={2} w="65%" mt={2} fontSize={isMobile ? "xs" : "sm"} p={1} backgroundColor="#222831" ml={2} mr={2}>
+                        <GridItem>
+                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">IMV</Text>
+                        </GridItem>
+                        <GridItem>
+                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">Duration</Text>
+                        </GridItem>
+                        <GridItem>
+                            <HStack>
+                                <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Text></Box>
+                                <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
+                            </HStack>
+                        </GridItem>
+                        <GridItem>
+                            <Box fontSize={isMobile ? "xx-small" : "xs"} mt={"2px"}> 
+                                <Text fontSize={"sm"} color="#f3f7c6">({duration / 86400} days)</Text>
+                            </Box>
+                        </GridItem>
+                        </SimpleGrid>
+                        </GridItem>
+
                         <p
                                 style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
                                 onClick={() => window.history.back()}
