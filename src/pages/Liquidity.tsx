@@ -509,7 +509,7 @@ const Liquidity: React.FC = () => {
                           {isMobile ? (
                             <></>
                             ) : (
-                              <GridItem  mt={isMobile ? 0 : "10px"}><Text fontSize="sm">Choose vault:</Text></GridItem>
+                              <GridItem  mt={isMobile ? 0 : "10px"}><Text fontSize="sm">Market:</Text></GridItem>
                             )
                           }
                       <GridItem colSpan={isMobile ? 2 : 1}>
