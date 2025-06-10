@@ -40,10 +40,9 @@ const Header: React.FC = () => {
     
     <header id="header">
       <nav className="navbar navbar-expand navbar-fixed-top" >
-        <div className="container header" style={{ marginLeft: "15%"}}>
-          
+        <div className="container header">
         <Link href="https://oikos.cash" >
-
+          <Box w="60px">
           <Image
             mt={isMobile ? 2 : 2}
             src={Logo}
@@ -51,6 +50,7 @@ const Header: React.FC = () => {
             style={{ width: "60px", height: "60px" }}
             ml={isMobile ? -6 : "-30px"}
           />
+          </Box>
           </Link>
             <Box>
               <ul className="navbar-nav action">
@@ -71,7 +71,6 @@ const Header: React.FC = () => {
               </li>
             </ul>
             </Box>
-
           <ul className="navbar-nav toggle">
             <li className="nav-item">
               <a
@@ -83,7 +82,6 @@ const Header: React.FC = () => {
               </a>
             </li>
           </ul>
-
         </div>
       </nav>
       {/* Mobile Modal */}
