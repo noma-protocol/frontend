@@ -210,6 +210,8 @@ const Footer: React.FC = (
                         fontSize: "12px",
                         cursor: "pointer",
                         transition: "all 0.2s ease-in-out",
+                        marginLeft: "-55px",
+                        marginBottom: "40px"
                       }}
                       onMouseOver={(e) => {
                         e.currentTarget.style.backgroundColor = "rgba(248, 189, 69, 0.2)";
