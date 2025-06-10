@@ -1381,7 +1381,7 @@ const Borrow = () => {
                                 )}
                             </SimpleGrid>
                         </GridItem>
-                        <GridItem ml={"-6vh"}>
+                        <GridItem ml={"-5vh"}>
                         <Box mt={-5}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
