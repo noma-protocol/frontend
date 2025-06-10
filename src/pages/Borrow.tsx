@@ -922,7 +922,7 @@ const Borrow = () => {
                                             borderRadius={5}
                                             _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                                         >
-                                        {isRolling ? <Spinner size="sm" /> : <Text fontSize={isMobile ? "xs" : "sm"} color={"#f3f7c6"}>Roll</Text>}
+                                        {isRolling ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Roll</Text>}
                                         </Button>
                                         </DrawerTrigger>
                                         <DrawerBackdrop />
@@ -1302,7 +1302,7 @@ const Borrow = () => {
                                         borderRadius={5}
                                         _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
                                     >
-                                    {isRolling ? <Spinner size="sm" /> : <Text fontSize={isMobile ? "xs" : "sm"} color={"#f3f7c6"}>Roll</Text>}
+                                    {isRolling ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Roll</Text>}
                                     </Button>
                                     </DrawerTrigger>
                                     <DrawerBackdrop />
