@@ -61,7 +61,6 @@ import PriceData from "../components/PriceData";
 // import useUniswapPrice from "../hooks/useUniswapPrice"; // Not needed anymore
 import config from '../config'; 
 import addressesLocal   from "../assets/deployment.json";
-import addressesMonad from "../assets/deployment_monad.json";
 import addressesBsc   from "../assets/deployment.json";
 
 const { utils } = ethers;
@@ -1219,9 +1218,9 @@ const Exchange: React.FC = () => {
                     </SelectContent>
                 </SelectRoot>
                 </Box>
-                <Box mt={-2} ml={isMobile? 7 : 2}>
+                <Box mt={-2} ml={isMobile? 7 : 2} maxHeight={"auto"}>
                     {isMobile ?
-                    <VStack alignItems={"right"} ml={"35px"} textAlign={"right"} spacing={0}>
+                    <VStack alignItems={"right"} ml={"35px"} textAlign={"right"} gap={-1}>
                       <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT</Text></Box>
                       <Box><Text fontSize="xs">{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
                       <Box><Text  fontSize="xs">{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>

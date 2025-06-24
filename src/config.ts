@@ -3,7 +3,7 @@ const chain = import.meta.env.VITE_CHAIN;
 const RPC_URL = import.meta.env.VITE_RPC_URL;
 const feeTiers = [3000, 10000];
 
-const oksVault = "0x5EffFAD2602DCe520C09c58fa88b0e06609C52b8";
+const oksVault = "0x3AA2Ea2aca5DD788140aE78906Ded9C4e6524d11";
 const presaleContractAddress = "0x99b32151E3C0c8432c4c6C9b6F3213123e443F06";
 
 const vault2ProtocolMap = {
@@ -11,7 +11,7 @@ const vault2ProtocolMap = {
 };
 
 const protocolAddresses = {
-    uniswapV3Factory: "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7",
+    uniswapV3Factory: "0x961235a9020B05C44DF1026D956D1F4D78014276",
     pancakeV3Factory: "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865", // PancakeSwap V3 Factory
     pancakeQuoterV2: "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997", 
     uniswapQuoterV2: "0x78D78E420Da98ad378D7799bE8f4AF69033EB077",

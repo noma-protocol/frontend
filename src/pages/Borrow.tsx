@@ -142,14 +142,14 @@ const Borrow = () => {
         ],
     };
 
-    if (token1Info?.tokenSymbol == "WMON") {
-        setToken1Info({
-            tokenName: "Wrapped BNB",
-            tokenSymbol: "WBNB",
-            tokenDecimals: 18,
-            balance: token1Info?.balance || "0",
-        });
-    }
+    // if (token1Info?.tokenSymbol == "WMON") {
+    //     setToken1Info({
+    //         tokenName: "Wrapped BNB",
+    //         tokenSymbol: "WBNB",
+    //         tokenDecimals: 18,
+    //         balance: token1Info?.balance || "0",
+    //     });
+    // }
 
     const durationChoices = createListCollection({
         items: [
