@@ -23,7 +23,6 @@ import RotateDeviceMessage from '../components/RotateDeviceMessage';
 
 import config from '../config'; 
 import addressesLocal   from "../assets/deployment.json";
-import addressesMonad from "../assets/deployment_monad.json";
 import { formatEther } from "viem";
 import { formatNumberPrecise, getContractAddress, commify } from "../utils";
 import { Toaster, toaster } from "../components/ui/toaster";
@@ -31,7 +30,7 @@ import metamaskLogo from "../assets/images/metamask.svg";
 
 const addresses = config.chain === "local"
   ? addressesLocal
-  : addressesMonad;
+  : [];
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :

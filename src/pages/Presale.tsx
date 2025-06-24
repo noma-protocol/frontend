@@ -31,7 +31,7 @@ import { Toaster, toaster } from "../components/ui/toaster"
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
 import { commify, commifyDecimals, generateBytes32String, getContractAddress, generateReferralCode } from "../utils";
-import Logo from "../assets/images/noma_logo_transparent.png";
+import Logo from "../assets/images/noma.png";
 import { ethers } from "ethers"; // Import ethers.js
 import { ProgressLabel, ProgressBar, ProgressRoot, ProgressValueText } from "../components/ui/progress"
 import PresaleDetails from "../components/PresaleDetails";
@@ -43,7 +43,6 @@ import config from '../config';
 import bnbLogo from "../assets/images/bnb.png";
 
 import addressesLocal   from "../assets/deployment.json";
-import addressesMonad from "../assets/deployment_monad.json";
 import addressesBsc   from "../assets/deployment.json";
 
 import { Badge } from "reactstrap";

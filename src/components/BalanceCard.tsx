@@ -26,6 +26,7 @@ import { ethers } from 'ethers';
 import { commify } from '../utils';
 // import monadLogo from '../assets/images/monad.png';
 import bnbLogo from '../assets/images/bnb.png';
+import monadLogo from '../assets/images/monad.png'; 
 import oksLogo from '../assets/images/logo_dark.png';
 import placeHolder from '../assets/images/question.svg';
 import Wrap from './Wrap'; // Assuming Wrap component is in the same directory
@@ -151,11 +152,11 @@ const BalanceCard = ({
                     <Text  fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
                 </Box>
                 
-                {/* BNB Row */}
+                {/* MON Row */}
                 <Box p={2} height="42px" display="flex" alignItems="center" w="70px">
                     <HStack spacing={2}>
-                        <Image src={bnbLogo} w="40px" alt="BNB" ml={-2} />
-                        <Text fontSize={isMobile ? "xs" : "sm"} mt={"-2px"} fontWeight={"bold"} ml={2}>BNB</Text>
+                        <Image src={monadLogo} w="25px" alt="MON" ml={-2} />
+                        <Text fontSize={isMobile ? "xs" : "sm"} mt={"-2px"} fontWeight={"bold"} ml={2}>MON</Text>
                     </HStack>
                 </Box>
                 <Box ml={-2} bgColor={"#18181b"} px={2} borderRadius={5}  mt={3} h="20px" w={isMobile ? "100px" : "130px"} fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
@@ -178,7 +179,7 @@ const BalanceCard = ({
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
                         <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2}>
-                            <Image src={bnbLogo} w="40px" alt={token1Symbol || 'Token'} ml={-2} />
+                            <Image src={monadLogo} w="25px" alt={token1Symbol || 'Token'} ml={-2} />
                             <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} ml={2} mt={"-2px"}>{token1Symbol || <Spinner size="sm" />}</Text>
                         </HStack>
                     }
@@ -203,18 +204,18 @@ const BalanceCard = ({
                 <Box p={2}  display="flex" alignItems="center" mt={-10}>
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
                         <Spinner size="sm" ml={"3px"} /> :
-                        <HStack spacing={2} >
+                        <HStack spacing={2} ml={"3px"}>
                             <Box >
                              <Image
-                                src={token0Symbol == "OKS" ? oksLogo : placeHolder}
-                                w={token0Symbol == "OKS" ? "55px" : "25px"}
-                                ml={token0Symbol == "OKS" ? "-10px" : 0}
+                                src={token0Symbol == "NOMA" ? monadLogo : placeHolder}
+                                w={token0Symbol == "NOMA" ? "35px" : "25px"}
+                                ml={token0Symbol == "NOMA" ? "-10px" : 0}
                                 alt={token0Symbol || 'Token'}
                                 
                             />
                             </Box>
                             <Box ml={2}>
-                               <Text fontWeight="bold" ml={token0Symbol == "OKS" ? "-20px" : 0} fontSize={isMobile ? "xs" : "sm"}>&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
+                               <Text fontWeight="bold" ml={token0Symbol == "NOMA" ? "-20px" : 0} fontSize={isMobile ? "xs" : "sm"}>&nbsp;{token0Symbol || <Spinner size="sm" />}</Text>
                             </Box>
                         </HStack>
                     }

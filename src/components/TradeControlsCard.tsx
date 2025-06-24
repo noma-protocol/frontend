@@ -291,7 +291,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <>
             <Text ml={7} fontSize="xs" color="#a67c00" >
               {sliderMax === 0
-                ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
+                ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "MON") : token0Symbol} balance available`
                 : (
                   <HStack>
                     <Box>
@@ -303,7 +303,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                       </Badge> 
                     </Box>
                     <Box ml={8}>
-                      <Text fontSize="xs" color="white">{tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}</Text>
+                      <Text fontSize="xs" color="white">{tradeMode === "BUY" ? (useWeth ? token1Symbol : "MON") : token0Symbol}</Text>
                     </Box>
                   </HStack>                  
                 ) }
@@ -495,7 +495,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 isChecked={useWeth === true}
                 onChange={() => setUseWeth(true)}
               >
-                <b>WBNB</b>
+                <b>WMON</b>
               </CustomRadio>
               <CustomRadio
                 value="0"
@@ -503,7 +503,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 isChecked={useWeth === false}
                 onChange={() => setUseWeth(false)}
               >
-                <b>BNB</b>
+                <b>MON</b>
               </CustomRadio>
             </HStack>
             </Box>
@@ -547,7 +547,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               <>
             <Text ml={5} fontSize="xs" color="#a67c00" >
               {sliderMax === 0
-                ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol} balance available`
+                ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "MON") : token0Symbol} balance available`
                 : (
                   <HStack>
                     <Box>
@@ -559,7 +559,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                       </Badge> 
                     </Box>
                     <Box ml={8}>
-                      <Text fontSize="xs" color="white">{tradeMode === "BUY" ? (useWeth ? token1Symbol : "BNB") : token0Symbol}</Text>
+                      <Text fontSize="xs" color="white">{tradeMode === "BUY" ? (useWeth ? token1Symbol : "MON") : token0Symbol}</Text>
                     </Box>
                   </HStack>
                 )

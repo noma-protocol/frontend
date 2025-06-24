@@ -3,7 +3,7 @@ import { Box, Text, Button } from '@chakra-ui/react';
 import { LanguageContext, LanguageContextType } from "../core/LanguageProvider";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount } from "wagmi";
-import Logo from "../assets/images/logo.svg";
+import Logo from "../assets/images/noma.png";
 import { isMobile } from 'react-device-detect';
 import { Link, Image } from '@chakra-ui/react';
 import { useMenu } from "../hooks/MenuContext";
@@ -44,18 +44,18 @@ const Header: React.FC = () => {
         <Link href="https://oikos.cash" >
           <Box w="60px">
           <Image
-            mt={isMobile ? 2 : 2}
+            mt={isMobile ? 2 : 3}
             src={Logo}
             alt="Noma Protocol"
-            style={{ width: "60px", height: "60px" }}
-            ml={isMobile ? 1 : "-65px"}
+            style={{ width: "40px", height: "40px" }}
+            ml={isMobile ? 1 : "-2px"}
           />
           </Box>
           </Link>
             <Box>
               <ul className="navbar-nav action">
               <li className="nav-item ml-2">
-                <Button  onClick={() => open()} variant="outline" h="40px" w="220px" mt={1} mr={5}>
+                <Button  onClick={() => open()} variant="outline" h="40px" w="220px" mt={1} mr={-5}>
                   <p style={{color:"#a67c00", fontSize:(isMobile ? "12px" : "16px"), marginLeft: "5px"}}>
                   <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>&nbsp;&nbsp;
                   {isConnected

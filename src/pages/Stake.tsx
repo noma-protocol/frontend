@@ -8,8 +8,10 @@ import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import { Toaster, toaster } from "../components/ui/toaster";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import BalanceCard from '../components/BalanceCard';
+
 import ethLogo from '../assets/images/weth.svg';
-import oksLogo from '../assets/images/logo_dark.png';
+import nomaLogo from '../assets/images/noma.png';
+
 import walletIcon from '../assets/images/walletIcon.svg';
 import placeholderLogo from '../assets/images/question.svg';
 import {
@@ -750,7 +752,7 @@ const Stake = () => {
                                         </NumberInputRoot>
                                         </Box>
                                         <Box>
-                                            <Image ml={-2} src={oksLogo} w="65px"></Image>
+                                            <Image ml={-2} src={nomaLogo} w="25px"></Image>
                                         </Box>
                                     </HStack>
                                         <HStack mt={5}>
@@ -1016,7 +1018,7 @@ const Stake = () => {
                         <Box backgroundColor={"#bf9b30"} mb={2}>
                             <Text ml={5} fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
                         </Box>
-                        <Box w="auto">
+                        <Box w="auto" mt={2}>
                             <HStack>
                                 <Box w="auto" mt={-2}>
                                 <NumberInputRoot
@@ -1039,12 +1041,13 @@ const Stake = () => {
                                 </NumberInputRoot>
                                 </Box>
                                 <Box mt={-1}>
-                                    <Image src={oksLogo} w="40px"></Image>
+                                    <Image src={nomaLogo} w="25px"></Image>
                                 </Box>
                             </HStack>
-                            <VStack textAlign="left" alignItems="left" spacing={1}>
+                            <VStack textAlign="left" alignItems="left" gap={1} mt={2}>
                             <Text
                                 ml={2}
+                                
                                 fontSize={isMobile ? "xs" : "sm"}
                                 cursor="pointer"
                                 textDecoration="underline"
