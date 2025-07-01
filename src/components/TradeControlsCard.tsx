@@ -426,7 +426,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 isChecked={tradeMode == "BUY"}
                 onChange={() => setTradeMode("BUY")}
               >
-                <b>BUY</b>
+                <Text fontSize="xs">WMON</Text> 
               </CustomRadio>
               <CustomRadio
                 tradeMode={tradeMode}
@@ -436,7 +436,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 onChange={() => setTradeMode("SELL")}
                  border="1px solid red"
               >
-                <b>SELL</b>
+                <Text fontSize="xs">WMON</Text> 
               </CustomRadio>
             </HStack> 
         </Box>
@@ -474,13 +474,13 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             top="0"
             left="0"
             bg={"#4ade80"}
-            color="white"
+            color="black"
             px={2}
             py={1}
             fontSize="xs"
             borderRight="2px solid"
             borderBottom="2px solid"
-            borderColor={"#4ade80"}
+            borderColor={"#00412b"}
             borderRadius="0"
             fontSize="9px"
             w={isMobile ? "25%" : "auto"}
@@ -495,15 +495,16 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 isChecked={useWeth === true}
                 onChange={() => setUseWeth(true)}
               >
-                <b>WMON</b>
+                <Text fontSize="xs" color={useWeth ? "black" : "white"}>WMON</Text> 
               </CustomRadio>
               <CustomRadio
                 value="0"
                 name="useWeth"
                 isChecked={useWeth === false}
                 onChange={() => setUseWeth(false)}
+                
               >
-                <b>MON</b>
+               <Text fontSize="xs" color={!useWeth ? "black" : "white"}>MON</Text> 
               </CustomRadio>
             </HStack>
             </Box>
