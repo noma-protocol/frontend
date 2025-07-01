@@ -152,7 +152,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
             <Text
                 fontWeight="bold"
                 fontSize={isMobile ? "xs" : "sm"}
-                color="#a67c00"
+                color="#4ade80"
                 w="100%"                 // ensure the red border spans whole column
                 ml={isMobile ? 2 : 0}
             >
@@ -171,21 +171,21 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     <>
                     <VStack mt={5} ml={2}>
                         <HStack h="30px">
-                            <Box w="90px" textAlign={"left"} ><Text fontSize={"xs"} color="#d6a700">{firstContent}</Text></Box>
+                            <Box w="90px" textAlign={"left"} ><Text fontSize={"xs"} color="#4ade80">{firstContent}</Text></Box>
                             <Box w="120px"><Text fontSize={"13px"} >{tradeMode == "BUY" ?  formatNumberPrecise(amountToBuy, 4) : formatNumberPrecise(amountToSell, 4) }</Text></Box>
                             <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} </Box>
                             <Box h="auto" >
-                                <Image w="35px" src={tradeMode == "BUY" ? monadLogo : nomaLogo } alt="Token Logo" />
+                                <Image w="25px" src={tradeMode == "BUY" ? monadLogo : nomaLogo } alt="Token Logo" />
                             </Box>
                         </HStack>
                         <HStack h="30px">
-                            <Box w="90px" textAlign={"left"} ><Text fontSize={"xs"} color="#d6a700">{secondContent}</Text></Box>
+                            <Box w="90px" textAlign={"left"} ><Text fontSize={"xs"} color="#4ade80">{secondContent}</Text></Box>
                             <Box w="120px" ><Text fontSize={"13px"}>{tradeMode == "BUY" ?
                                 (bidRate && bidRate !== 0 ? formatNumberPrecise(amountToBuy / bidRate, 4) : "0") :
                                 (askRate ? formatNumberPrecise(amountToSell * askRate, 4) : "0")}</Text></Box>
                             <Box  w="40px" fontSize={"13px"}>{tradeMode == "BUY" ? token0Info.tokenSymbol : (useWeth == 1 ? token1Info.tokenSymbol : useWeth == 0 ? "MON" : "WMON")} </Box>
                             <Box h="auto" >
-                                <Image w="35px" src={tradeMode == "BUY" ? nomaLogo : monadLogo } alt="Token Logo" />
+                                <Image w="25px" src={tradeMode == "BUY" ? nomaLogo : monadLogo } alt="Token Logo" />
                             </Box>
                         </HStack>                        
                     </VStack>
@@ -193,7 +193,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                 ) :
                     // <SimpleGrid columns={2} w="250px"   >
                     //     <Box  w="250px" border="1px solid yellow" >
-                    //         <Text fontSize={"13px"} color="#d6a700" >Spending</Text>
+                    //         <Text fontSize={"13px"} color="#4ade80" >Spending</Text>
                     //     </Box>
                     //     <Box w="350px" border="1px solid white">
                     //         <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
@@ -202,7 +202,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     //         {tradeMode == "BUY" ? (useWeth == 1 ? token1Info.tokenSymbol : "MON"): token0Info.tokenSymbol} 
                     //     </Box>
                     //     {/* <Box w="110px" >
-                    //         <Text fontSize={"13px"} color="#d6a700">Receiving</Text>
+                    //         <Text fontSize={"13px"} color="#4ade80">Receiving</Text>
                     //     </Box>
                     //     <Box>
                     //         <Text fontSize={"13px"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy / bidRate) : formatNumberPrecise(amountToSell * askRate)}</Text>
@@ -224,7 +224,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     <GridItem colSpan={3} ml={2}>
                         <HStack h="30px">
                             <Box w="140px">                                
-                                <Text fontSize={"sm"} color="#d6a700" >Spending&nbsp;</Text>
+                                <Text fontSize={"sm"} color="#4ade80" >Spending&nbsp;</Text>
                             </Box>
                             <Box w="230px" bgColor={"#18181b"}   borderRadius={5} px={2} >
                                 <Text color="white" fontWeight={"bold"}  fontSize={"sm"}>&nbsp;{tradeMode == "BUY" ? formatNumberPrecise(amountToBuy) : formatNumberPrecise(amountToSell) }</Text>
@@ -240,7 +240,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     <GridItem colSpan={3} mt={-1} ml={2}>
                         <HStack h="30px">
                             <Box  w="140px">                                
-                                <Text fontSize={"sm"} color="#d6a700">Receiving</Text>
+                                <Text fontSize={"sm"} color="#4ade80">Receiving</Text>
                             </Box>
                             <Box w="230px"  bgColor={"#18181b"}  color="white" fontWeight={"bold"} borderRadius={5} px={2} >
                                 <Text fontSize={"sm"} color="white" fontWeight={"bold"} >&nbsp;{tradeMode == "BUY" ?
@@ -279,7 +279,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     <DrawerTitle>
                         <Grid templateColumns="repeat(2, 1fr)" templateRows={5} gap={4} mt={-8}>
                             <GridItem colSpan={2}>
-                            <Text as="h4" color="#bf9b30">Set slippage</Text>
+                            <Text as="h4" color="#4ade80">Set slippage</Text>
                             </GridItem>
                             <GridItem colSpan={2}>
                             <Stat.Root>
@@ -350,7 +350,7 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                     <DrawerTitle>
                         <Grid templateColumns="repeat(2, 1fr)" templateRows={5} gap={4} mt={-8}>
                             <GridItem colSpan={2}>
-                            <Text as="h4" color="#bf9b30">Set slippage</Text>
+                            <Text as="h4" color="#4ade80">Set slippage</Text>
                             </GridItem>
                             <GridItem colSpan={2}>
                             <Stat.Root>
