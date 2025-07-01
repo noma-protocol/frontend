@@ -154,8 +154,8 @@ const generateRandomData = () => {
         {
           label: 'Dataset 1',
           data: labels.map(() => faker.number.int({ min: -1000, max: 1000 })),
-          borderColor: 'cyan',
-          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          borderColor: '#4ade80',
+          backgroundColor: 'rgba(74, 222, 128, 0.5)',
         }
       ],
     };
@@ -1119,7 +1119,7 @@ const Exchange: React.FC = () => {
                   borderRadius="xl"
                   boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
                   m={4}
-                  border="1px solid #a67c00"
+                  border="1px solid #4ade80"
                   mt="100px"
                   ml={isMobile ? 5 : "7%"}
                   w="70%"
@@ -1129,7 +1129,7 @@ const Exchange: React.FC = () => {
                     mb={6}
                     p={4}
                     borderRadius="full"
-                    bg="rgba(166, 124, 0, 0.2)"
+                    bg="rgba(74, 222, 128, 0.2)"
                     
                   >
                     <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
@@ -1221,7 +1221,7 @@ const Exchange: React.FC = () => {
                 <Box mt={-2} ml={isMobile? 7 : 2} maxHeight={"auto"}>
                     {isMobile ?
                     <VStack alignItems={"right"} ml={"35px"} textAlign={"right"} gap={-1}>
-                      <Box><Text color="#a67c00" fontWeight="bold" fontSize="sm">SPOT</Text></Box>
+                      <Box><Text color="#4ade80" fontWeight="bold" fontSize="sm">SPOT</Text></Box>
                       <Box><Text fontSize="xs">{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
                       <Box><Text  fontSize="xs">{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
                       <Box><Text  fontSize="xs">(${commifyDecimals(priceUSD > 0 && spotPrice > 0 ? formatEther(`${spotPrice}`) * priceUSD : 0)})</Text></Box>
@@ -1229,7 +1229,7 @@ const Exchange: React.FC = () => {
                     </VStack>
                     : 
                     <HStack>
-                      <Box><Text color="#a67c00" fontWeight="bold">SPOT</Text></Box> 
+                      <Box><Text color="#4ade80" fontWeight="bold">SPOT</Text></Box> 
                       <Box><Text>{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
                       <Box w="120px"><Text>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`}</Text></Box>
                       <Box><Text>(${commifyDecimals(priceUSD > 0 && spotPrice > 0 ? formatEther(`${spotPrice}`) * priceUSD : 0)})</Text></Box>

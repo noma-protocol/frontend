@@ -719,7 +719,7 @@ const Borrow = () => {
                   borderRadius="xl"
                   bosmhadow="0 4px 12px rgba(0, 0, 0, 0.5)"
                   m={4}
-                  border="1px solid #a67c00"
+                  border="1px solid #4ade80"
                   mt="100px"
                   ml={isMobile ? 5 : "7%"}
                   w="70%"
@@ -729,7 +729,7 @@ const Borrow = () => {
                     mb={6}
                     p={4}
                     borderRadius="full"
-                    bg="rgba(166, 124, 0, 0.2)"
+                    bg="rgba(74, 222, 128, 0.2)"
                     
                   >
                     <Image src={walletIcon} alt="Wallet Icon" bosmize="50px" />
@@ -828,11 +828,11 @@ const Borrow = () => {
                             />
                         </Box>
                         <Box p={2} mt={5} w={isMobile ? "90%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
-                            <Text fontSize={"12px"}  color="#a67c00" ml={2}>Active Loan</Text>        
+                            <Text fontSize={"12px"}  color="#4ade80" ml={2}>Active Loan</Text>        
                            <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
-                                <Box fontSize={isMobile ? "xs" : "sm"} w='95px' px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
-                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
-                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#a67c00"}> 
+                                <Box fontSize={isMobile ? "xs" : "sm"} w='95px' px={2} color="white" backgroundColor={"#4ade80"}> Collateral </Box>
+                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#4ade80"}> Borrowed </Box>
+                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#4ade80"}> 
                                 <HStack>
                                  <Box><Text fontSize={isMobile ? "xs" : "sm"}>LTV</Text></Box>
                                  <Box>
@@ -842,7 +842,7 @@ const Borrow = () => {
                                  </Box>
                                 </HStack>
                                 </Box>
-                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#a67c00"}>
+                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#4ade80"}>
                                 Expires
                                 </Box>
                                 {loanData?.borrowAmount > 0 ? ( 
@@ -870,7 +870,7 @@ const Borrow = () => {
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="white"  borderRadius="0"  h="25px" borderLeft="none" borderRight="none" fontSize={isMobile ? "xs" : "sm"}> {commifyDecimals(ltv, 2)}</Box>
                                     <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0 5px 5px 0" h="25px" borderLeft="none" fontSize={isMobile ? "xs" : "sm"}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
                                     <VStack w="100%">
-                                        <Box ml={-8} mt={4}><Text fontSize={isMobile ? "xs" : "sm"} color="#a67c00">Actions</Text></Box>
+                                        <Box ml={-8} mt={4}><Text fontSize={isMobile ? "xs" : "sm"} color="#4ade80">Actions</Text></Box>
                                     <Box >                              
                                     <HStack alignItems="center" justifyContent="space-between" w="100%" pb={2} ml={isMobile ? "35%" : 0} mt={-2}>
                                     <Box>
@@ -920,7 +920,7 @@ const Borrow = () => {
                                             w={"80px"}
                                             border="1px solid #f3f7c6"
                                             borderRadius={5}
-                                            _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
+                                            _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
                                         >
                                         {isRolling ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Roll</Text>}
                                         </Button>
@@ -930,7 +930,7 @@ const Borrow = () => {
                                             <Box mt="80%" ml={5}>
                                             <DrawerHeader>
                                                 <DrawerTitle>
-                                                    <Text as="h3" color="#a67c00">Roll Loan</Text>
+                                                    <Text as="h3" color="#4ade80">Roll Loan</Text>
                                                 </DrawerTitle>
                                                 <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
                                                     <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
@@ -942,7 +942,7 @@ const Borrow = () => {
                                                     // onChange={(e) => setWrapAmount(e.target.value)}
                                                     w="80%"
                                                 /> */}
-                                            <Box border="1px solid #a67c00" borderRadius="md" p={3} w="90%" >                              
+                                            <Box border="1px solid #4ade80" borderRadius="md" p={3} w="90%" >                              
 
                                                 <HStack>
                                                     <Box w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">New Duration:</Text></Box>
@@ -999,12 +999,12 @@ const Borrow = () => {
                                 borderRadius={10} 
                                 backgroundColor={"#222831"} 
                             >
-                                <Text fontSize={"12px"} fontWeight={"bold"} color="#a67c00" ml={2}>New Loan</Text>    
+                                <Text fontSize={"12px"} fontWeight={"bold"} color="#4ade80" ml={2}>New Loan</Text>    
                                 <SimpleGrid columns={2} w={"94%"}  mt={-5} fontSize={isMobile ? "xs" : "sm"} p={1} backgroundColor={"#222831"} ml={2} mr={2}>
-                                    <Box backgroundColor={"#a67c00"} >
+                                    <Box backgroundColor={"#4ade80"} >
                                         <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;<b>Amount</b></Text>
                                     </Box>
-                                    <Box  backgroundColor={"#a67c00"}>
+                                    <Box  backgroundColor={"#4ade80"}>
                                         <Text fontSize={isMobile ? "xs" : "sm"} ml="40px">&nbsp;&nbsp;&nbsp;<b>Duration</b></Text>
                                     </Box>
                                     <Box w="auto" mt={2}>
@@ -1045,7 +1045,7 @@ const Borrow = () => {
                                         </VStack>
                                             <br />
                                             <Box>
-                                                <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">Borrowing</Text>
+                                                <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">Borrowing</Text>
                                             </Box>
                                             <Box>
                                                 <HStack >
@@ -1055,7 +1055,7 @@ const Borrow = () => {
                                                 </HStack>
                                             </Box>
                                             <Box mt={5}>
-                                                <Text  fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Collateral required</Text>
+                                                <Text  fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>Collateral required</Text>
                                             </Box>
                                             <Box>
                                                 {isComputing ? (
@@ -1066,7 +1066,7 @@ const Borrow = () => {
                                             </Box>
                                             <Box mt={5} fontSize={isMobile ? "xs" : "sm"}>
                                             <HStack>
-                                                <Box> <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    </Box>
+                                                <Box> <Text fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    </Box>
                                                 <Box><Image src={placeholderLogo} w={15}></Image></Box>
                                             </HStack>
                                             </Box>
@@ -1078,7 +1078,7 @@ const Borrow = () => {
                                             </Box>
                                             <Box mt={5}> 
                                                     <HStack>
-                                                        <Box><Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>IMV</Text> </Box>
+                                                        <Box><Text fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>IMV</Text> </Box>
                                                         <Box><Image src={placeholderLogo} w={15}></Image></Box>
                                                     </HStack>
                                                 <HStack>
@@ -1128,8 +1128,8 @@ const Borrow = () => {
                                      <Button 
                                         mt={6} 
                                         w={"100px"}
-                                        h={"25px"}  
-                                        borderColor={"#a67c00"} 
+                                        h={"25px"}
+                                        border="2px solid #4ade80"
                                         variant="outline" 
                                         ml={12} 
                                         onClick={() => handleBorrow()}  
@@ -1138,9 +1138,22 @@ const Borrow = () => {
                                             loanData?.borrowAmount > 0 || 
                                             borrowAmount == 0 || 
                                             parseFloat(formatEther(`${token0Info.balance}`)) < parseFloat(`${collateral}`)
-                                        } 
+                                        }
+                                        background={isBorrowing ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
+                                        boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
+                                        transition="all 0.3s ease"
+                                        _hover={{
+                                          background: isBorrowing ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
+                                          borderColor: "#65f343",
+                                          transform: "translateY(-1px)",
+                                          boxShadow: "0 4px 12px rgba(74, 222, 128, 0.25)"
+                                        }}
+                                        _active={{
+                                          transform: "translateY(0px)",
+                                          boxShadow: "0 2px 6px rgba(74, 222, 128, 0.2)"
+                                        }}
                                         >
-                                            {isBorrowing ? <Spinner size="sm" color="#a67c00"/> :  <Text fontSize={isMobile ? "xs" : "sm"} color="#a67c00">Borrow</Text>}
+                                            {isBorrowing ? <Spinner size="sm" color="#4ade80"/> :  <Text fontSize={isMobile ? "xs" : "sm"} color="#4ade80">Borrow</Text>}
                                         </Button>
                                     </Box>
                                     <Box>
@@ -1213,11 +1226,11 @@ const Borrow = () => {
                         // border="1px solid yellow"
                     >
                         <GridItem  mt={"-5"} w="90%" border={"1px solid white"} px={4} py={3} ml={5} borderRadius={10} backgroundColor={"#222831"}>
-                            <Text fontSize={isMobile?"12px":"15px"} color="#a67c00">Active Loan</Text>
+                            <Text fontSize={isMobile?"12px":"15px"} color="#4ade80">Active Loan</Text>
                             <SimpleGrid columns={5} mt={-5} fontSize={isMobile ? "xs" : "sm"}>
-                                <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
-                                <Box px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
-                                <Box px={2} color="white" backgroundColor={"#a67c00"}> 
+                                <Box px={2} color="white" backgroundColor={"#4ade80"}> Collateral </Box>
+                                <Box px={2} color="white" backgroundColor={"#4ade80"}> Borrowed </Box>
+                                <Box px={2} color="white" backgroundColor={"#4ade80"}> 
                                 <HStack>
                                  <Box><Text fontSize={isMobile ? "xs" : "sm"}>LTV</Text></Box>
                                  <Box>
@@ -1227,10 +1240,10 @@ const Borrow = () => {
                                  </Box>
                                 </HStack>
                                 </Box>
-                                <Box px={2} color="white" backgroundColor={"#a67c00"}>
+                                <Box px={2} color="white" backgroundColor={"#4ade80"}>
                                 Expires
                                 </Box>
-                                <Box px={2} color="white" backgroundColor={"#a67c00"}> &nbsp;&nbsp;&nbsp;Actions </Box>
+                                <Box px={2} color="white" backgroundColor={"#4ade80"}> &nbsp;&nbsp;&nbsp;Actions </Box>
                                 
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
@@ -1300,7 +1313,7 @@ const Borrow = () => {
                                         w={"90px"}
                                         border="1px solid #f3f7c6"
                                         borderRadius={5}
-                                        _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
+                                        _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
                                     >
                                     {isRolling ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Roll</Text>}
                                     </Button>
@@ -1310,7 +1323,7 @@ const Borrow = () => {
                                         <Box mt="80%" ml={5}>
                                         <DrawerHeader>
                                             <DrawerTitle>
-                                                <Text as="h3" color="#a67c00">Roll Loan</Text>
+                                                <Text as="h3" color="#4ade80">Roll Loan</Text>
                                             </DrawerTitle>
                                             <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
                                                 <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
@@ -1322,7 +1335,7 @@ const Borrow = () => {
                                                 // onChange={(e) => setWrapAmount(e.target.value)}
                                                 w="80%"
                                             /> */}
-                                        <Box border="1px solid #a67c00" borderRadius="md" p={3} w="90%" >                              
+                                        <Box border="1px solid #4ade80" borderRadius="md" p={3} w="90%" >                              
 
                                             <HStack>
                                                 <Box w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">New Duration:</Text></Box>
@@ -1406,15 +1419,15 @@ const Borrow = () => {
                         </Box>
                         </GridItem>
                         <GridItem mt={2} w="90%" border={"1px solid white"} py={3} px={4} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
-                        <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">New Loan</Text>
+                        <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#4ade80">New Loan</Text>
                         <SimpleGrid columns={3} w="100%" mt={-5}>
-                            <Box w="500px"backgroundColor={"#a67c00"}  mb={2}>
+                            <Box w="500px"backgroundColor={"#4ade80"}  mb={2}>
                                 <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;Amount</Text>
                             </Box>
                             <Box  >
                                 <Text fontSize={isMobile ? "xs" : "sm"} ml="40px">&nbsp;&nbsp;&nbsp;Duration</Text>
                             </Box>
-                            <Box backgroundColor={"#a67c00"} mb={2}>
+                            <Box backgroundColor={"#4ade80"} mb={2}>
                                 <Text ml={5} fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
                             </Box>
                             <Box w="auto">
@@ -1502,7 +1515,7 @@ const Borrow = () => {
                                 mt={2} 
                                 w="150px"
                                 h={"30px"}  
-                                borderColor={"#a67c00"} 
+                                borderColor={"#4ade80"} 
                                 variant="outline" 
                                 ml={5} 
                                 onClick={() => handleBorrow()}  
@@ -1514,7 +1527,7 @@ const Borrow = () => {
                                 } 
                                 borderRadius={5}
                             >
-                               {isBorrowing ? <Spinner size="sm" color="#a67c00"/> :  <Text color="#a67c00">Borrow</Text>}
+                               {isBorrowing ? <Spinner size="sm" color="#4ade80"/> :  <Text color="#4ade80">Borrow</Text>}
                             </Button>
                             </Box>
                         </SimpleGrid>
@@ -1530,15 +1543,15 @@ const Borrow = () => {
                         mr={2}
                         >
                         <GridItem >
-                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">Borrowing</Text>
+                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">Borrowing</Text>
                         </GridItem>
                         <Box>
-                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">Collateral</Text>
+                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">Collateral</Text>
                         </Box>
                         <Box>
                             <HStack>
                             <Box> 
-                                <Text fontWeight={"bold"} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    
+                                <Text fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    
                             </Box>
                             <Box>
                                 <Tooltip content="Loan fees are 0.027% per diem charged upfront" placement="top">
@@ -1584,10 +1597,10 @@ const Borrow = () => {
                         </SimpleGrid>
                         <SimpleGrid columns={2} w="65%" mt={2} fontSize={isMobile ? "xs" : "sm"} p={1} backgroundColor="#222831" ml={2} mr={2}>
                         <GridItem>
-                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">IMV</Text>
+                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">IMV</Text>
                         </GridItem>
                         <GridItem>
-                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#a67c00">Duration</Text>
+                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">Duration</Text>
                         </GridItem>
                         <GridItem>
                             <HStack>

@@ -619,14 +619,14 @@ const Presale: React.FC = () => {
               </HStack>
                {presaleInfo?.deployer == address /*&& hasExpired*/ && !finalized ? (
                     <Box 
-                      border="1px solid #a67c00" 
+                      border="1px solid #4ade80" 
                       p={4} 
                       mt={5}               
                       w={"auto"} 
                       h="150px"
                       bgColor={"#222831"} borderRadius={10}
                       >
-                      <Text color="#a67c00"><b>Admin Controls</b></Text>
+                      <Text color="#4ade80"><b>Admin Controls</b></Text>
                         <HStack>
                         <Button 
                           disabled={finalized}

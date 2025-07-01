@@ -60,9 +60,9 @@ const PriceRangeVisualization = ({ data, width, height }) => {
 
   // Define the bar heights and colors
   const barProperties = {
-    Floor: { height: yMax, color: '#ffdc73', width: 4 },
-    Anchor: { height: 50, color: '#ffcf40' },
-    Discovery: { height: 80, color: '#a67c00' },
+    Floor: { height: yMax, color: '#4ade80', width: 4 },
+    Anchor: { height: 50, color: '#22c55e' },
+    Discovery: { height: 80, color: '#86efac' },
   };
 
   return (

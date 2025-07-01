@@ -500,8 +500,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     plotOptions: {
       candlestick: {
         colors: {
-          upward: "#00B746",
-          downward: "#EF403C"
+          upward: "#4ade80",
+          downward: "#22c55e"
         },
         wick: {
           useFillColor: true,
@@ -540,13 +540,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         ? [
             {
               y: spotPrice,
-              borderColor: "#FF4560",
+              borderColor: "#86efac",
               strokeDashArray: 4,
               label: {
-                borderColor: "#FF4560",
+                borderColor: "#86efac",
                 style: {
                   color: "#fff",
-                  background: "#FF4560",
+                  background: "#86efac",
                   fontSize: '6px',
                   fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
                   cssClass: 'small-text-annotation',
@@ -718,10 +718,10 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                         px={3}
                         py={1}
                         borderRadius="md"
-                        bg={selectedInterval === int ? "#00ffc0" : "gray.700"}
+                        bg={selectedInterval === int ? "#4ade80" : "gray.700"}
                         cursor="pointer"
                         onClick={() => handleIntervalChange(int)}
-                        _hover={{ bg: selectedInterval === int ? "cyan.600" : "gray.600" }}
+                        _hover={{ bg: selectedInterval === int ? "#22c55e" : "gray.600" }}
                         transition="all 0.2s"
                         position="relative"
                       >

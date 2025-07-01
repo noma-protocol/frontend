@@ -255,7 +255,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
          w="100%" 
         //  ml={5}
         >
-          <Text fontWeight={"bold"} ml={isMobile?5:10} fontSize={isMobile ? "xs" : "sm"} color="#a67c00">
+          <Text fontWeight={"bold"} ml={isMobile?5:10} fontSize={isMobile ? "xs" : "sm"} color="#4ade80">
                 Trade Amount
             </Text>
           <NumberInputRoot
@@ -289,7 +289,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           </NumberInputRoot>
           {isMobile && (
             <>
-            <Text ml={7} fontSize="xs" color="#a67c00" >
+            <Text ml={7} fontSize="xs" color="#4ade80" >
               {sliderMax === 0
                 ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "MON") : token0Symbol} balance available`
                 : (
@@ -373,7 +373,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           ml={isMobile ? 2 : 6}
          >
         <VStack w="90%" alignItems={"left"} px={5} mt={isMobile ? 4 : 0}>
-          <Box><Text pb={2} ml={isMobile ? 0 : -4} color="#a67c00" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text></Box>
+          <Box><Text pb={2} ml={isMobile ? 0 : -4} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}><b>Controls</b></Text></Box>
          <Box>
         <RadioGroup 
           id="tradeMode"
@@ -459,7 +459,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
           <Box
             position="relative"
             border="1px solid"
-            borderColor={"#a67c00"}
+            borderColor={"#4ade80"}
             px={12}
             w={isMobile ?"70vw":"90%"}
             h="35px"
@@ -473,14 +473,14 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             position="absolute"
             top="0"
             left="0"
-            bg={"#a67c00"}
+            bg={"#4ade80"}
             color="white"
             px={2}
             py={1}
             fontSize="xs"
             borderRight="2px solid"
             borderBottom="2px solid"
-            borderColor={"#bf9b30"}
+            borderColor={"#4ade80"}
             borderRadius="0"
             fontSize="9px"
             w={isMobile ? "25%" : "auto"}
@@ -522,17 +522,28 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
               mt={6}
               mb={20}
               variant="outline"
-              backgroundColor={isLoadingExecuteTrade ? "#a67c00" : "transparent"}
+              background={isLoadingExecuteTrade ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
               w={isMobile ? "90%" : "210px"}
               onClick={() => {
                 handleExecuteTrade();
               }}
               h={"40px"}
               disabled={isLoadingExecuteTrade || isTokenInfoLoading || tradeMode === "BUY" ? amountToBuy <= 0 : amountToSell <= 0}
-              border="1px solid #a67c00"
-              _hover={{ backgroundColor: isLoadingExecuteTrade ? "#a67c00" : "#a67c0020" }}
+              border="2px solid #4ade80"
+              boxShadow={isLoadingExecuteTrade ? "0 4px 15px rgba(74, 222, 128, 0.4)" : "0 2px 8px rgba(74, 222, 128, 0.1)"}
+              transition="all 0.3s ease"
+              _hover={{ 
+                background: isLoadingExecuteTrade ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34325 100%)", 
+                borderColor: "#65f343", 
+                transform: "translateY(-2px)",
+                boxShadow: "0 6px 20px rgba(74, 222, 128, 0.3)"
+              }}
+              _active={{
+                transform: "translateY(0px)",
+                boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
+              }}
             >
-              {isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#a67c00">Execute</Text>}
+              {isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#4ade80">Execute</Text>}
             </Button>
             <br />       <br />       <br />            
             </>
@@ -545,7 +556,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
             <Box w="90%" mt={-2}>
             {!isMobile && (
               <>
-            <Text ml={5} fontSize="xs" color="#a67c00" >
+            <Text ml={5} fontSize="xs" color="#4ade80" >
               {sliderMax === 0
                 ? `No ${tradeMode === "BUY" ? (useWeth ? token1Symbol : "MON") : token0Symbol} balance available`
                 : (
@@ -593,16 +604,27 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                     mt={2}
                     mb={2}
                     variant="outline"
-                    backgroundColor={isLoadingExecuteTrade ? "#a67c00" : "transparent"}
+                    background={isLoadingExecuteTrade ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
                     w={isMobile ? "140px" : "160px"}
                     onClick={() => {
                       handleExecuteTrade();
                     }}
                   disabled={isLoadingExecuteTrade || isLoading || tradeMode === "BUY" ? amountToBuy <= 0 : amountToSell <= 0}
-                    border="1px solid #a67c00"
-                    _hover={{ backgroundColor: isLoadingExecuteTrade ? "#a67c00" : "#a67c0020" }}
+                    border="2px solid #4ade80"
+                    boxShadow={isLoadingExecuteTrade ? "0 4px 15px rgba(74, 222, 128, 0.4)" : "0 2px 8px rgba(74, 222, 128, 0.1)"}
+                    transition="all 0.3s ease"
+                    _hover={{ 
+                      background: isLoadingExecuteTrade ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34325 100%)", 
+                      borderColor: "#65f343", 
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 20px rgba(74, 222, 128, 0.3)"
+                    }}
+                    _active={{
+                      transform: "translateY(0px)",
+                      boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
+                    }}
                   >
-                    {isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#a67c00">Execute</Text>}
+                    {isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#4ade80">Execute</Text>}
                 </Button>
                 )}
 

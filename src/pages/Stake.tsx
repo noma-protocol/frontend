@@ -527,7 +527,7 @@ const Stake = () => {
                     borderRadius="xl"
                     boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
                     m={4}
-                    border="1px solid #a67c00"
+                    border="1px solid #4ade80"
                     mt="100px"
                     ml={isMobile ? 5 : "7%"}
                     w="70%"
@@ -537,7 +537,7 @@ const Stake = () => {
                         mb={6}
                         p={4}
                         borderRadius="full"
-                        bg="rgba(166, 124, 0, 0.2)"
+                        bg="rgba(74, 222, 128, 0.2)"
                         
                     >
                         <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
@@ -632,7 +632,7 @@ const Stake = () => {
                             />
                         </Box>
                         <Box px={1} py={2} mt={5} w={"95%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={"-30px"} fontSize="xs">
-                        <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00" ml={2}>Active Position</Text>
+                        <Text fontSize={"xs"} fontWeight={"bold"} color="#4ade80" ml={2}>Active Position</Text>
                             <SimpleGrid 
                                 mt={-5} 
                                 fontSize={"11px"} 
@@ -642,11 +642,11 @@ const Stake = () => {
                                 pr={2}
                                 gridTemplateColumns="65px 75px 70px 1fr" // wider Actions column
                             >               
-                            <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
-                            <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
-                            <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
-                            {/* <Box h="20px" px={2} color="white" backgroundColor={"#bf9b30"}></Box> */}
-                            <Box  h="20px" px={2} color="white" backgroundColor={"#bf9b30"} > &nbsp;&nbsp;&nbsp;Actions </Box> 
+                            <Box  h="20px" px={2} color="white" backgroundColor={"#4ade80"}> Staked </Box>
+                            <Box  h="20px" px={2} color="white" backgroundColor={"#4ade80"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
+                            <Box  h="20px" px={2} color="white" backgroundColor={"#4ade80"}> Rewards </Box>
+                            {/* <Box h="20px" px={2} color="white" backgroundColor={"#4ade80"}></Box> */}
+                            <Box  h="20px" px={2} color="white" backgroundColor={"#4ade80"} > &nbsp;&nbsp;&nbsp;Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
                                 <Box px={2} w="65px"> 
@@ -681,16 +681,28 @@ const Stake = () => {
                                 </Box> */}
                                 <Box px={1} mt={2} ml={-10}> 
                                 <Button 
-                                    h={"25px"}  
-                                    borderColor={"#a67c00"} 
+                                    h={"25px"}
+                                    border="2px solid #4ade80"
                                     variant="outline" 
                                     ml={"60px"} 
                                     onClick={() => handleUnstake()}  
                                     disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
                                     w={"50%"}
-                                    
+                                    background="transparent"
+                                    boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
+                                    transition="all 0.3s ease"
+                                    _hover={{
+                                      background: "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
+                                      borderColor: "#65f343",
+                                      transform: "translateY(-1px)",
+                                      boxShadow: "0 4px 12px rgba(74, 222, 128, 0.25)"
+                                    }}
+                                    _active={{
+                                      transform: "translateY(0px)",
+                                      boxShadow: "0 2px 6px rgba(74, 222, 128, 0.2)"
+                                    }}
                                 >
-                                    {isUnstaking ? <Spinner size="xs" color="#a67c00" /> : <Text fontSize={"xs"} color="#a67c00">Unstake</Text>}
+                                    {isUnstaking ? <Spinner size="xs" color="#4ade80" /> : <Text fontSize={"xs"} color="#4ade80">Unstake</Text>}
                                 </Button>
                                 </Box>
 
@@ -721,12 +733,12 @@ const Stake = () => {
                                 borderRadius={10} 
                                 backgroundColor={"#222831"} 
                             >
-                            <Text fontSize={"xs"} fontWeight={"bold"} color="#a67c00">New Position</Text>
+                            <Text fontSize={"xs"} fontWeight={"bold"} color="#4ade80">New Position</Text>
                             <SimpleGrid columns={2}  w={isMobile ? "98%" : "352px"}  mt={-5} fontSize={"xs"}>
-                                <Box  w="auto" backgroundColor={"#bf9b30"}  mb={2}>
+                                <Box  w="auto" backgroundColor={"#4ade80"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>
-                                <Box   w="auto"  backgroundColor={"#bf9b30"} mb={2}>
+                                <Box   w="auto"  backgroundColor={"#4ade80"} mb={2}>
                                     <Text fontSize="xs" ml={10}>Actions</Text>
                                 </Box>
                                 <Box w="auto">
@@ -843,14 +855,27 @@ const Stake = () => {
                                     <Button
                                         mt={1}
                                         h={"25px"}
-                                        borderColor={"#a67c00"}
+                                        border="2px solid #4ade80"
                                         variant="outline"
                                         ml={10}
                                         onClick={() => handleStake()}
                                         disabled={isLoading || !stakeAmount || stakeAmount === "" || Number(stakeAmount) <= 0}
                                         w={"50%"}
+                                        background={isStaking ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
+                                        boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
+                                        transition="all 0.3s ease"
+                                        _hover={{
+                                          background: isStaking ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
+                                          borderColor: "#65f343",
+                                          transform: "translateY(-1px)",
+                                          boxShadow: "0 4px 12px rgba(74, 222, 128, 0.25)"
+                                        }}
+                                        _active={{
+                                          transform: "translateY(0px)",
+                                          boxShadow: "0 2px 6px rgba(74, 222, 128, 0.2)"
+                                        }}
                                     >
-                                        {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"xs"} color="#a67c00">Stake</Text>}
+                                        {isStaking ? <Spinner size="sm" color="#4ade80" /> : <Text fontSize={"xs"} color="#4ade80">Stake</Text>}
                                     </Button>
                                 </Box>
                             </SimpleGrid>                        
@@ -920,13 +945,13 @@ const Stake = () => {
 
                     >
                     <GridItem w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
-                        <Text fontSize={"14px"} fontWeight={"bold"} color="#a67c00">Active Position</Text>
+                        <Text fontSize={"14px"} fontWeight={"bold"} color="#4ade80">Active Position</Text>
                         <SimpleGrid columns={4} mt={-5} fontSize={"xs"} >
-                            <Box px={2} color="white" backgroundColor={"#bf9b30"}> Staked </Box>
-                            <Box px={2} color="white" backgroundColor={"#bf9b30"}> {isTokenInfoLoading ? <Spinner size="xs" /> : `s${token0Info.tokenSymbol}`} </Box>
-                            <Box px={2} color="white" backgroundColor={"#bf9b30"}> Rewards </Box>
-                            {/* <Box px={2} color="white" backgroundColor={"#bf9b30"}> APR</Box> */}
-                            <Box px={2} color="white" backgroundColor={"#bf9b30"}> Actions </Box> 
+                            <Box px={2} color="white" backgroundColor={"#4ade80"}> Staked </Box>
+                            <Box px={2} color="white" backgroundColor={"#4ade80"}> {isTokenInfoLoading ? <Spinner size="xs" /> : `s${token0Info.tokenSymbol}`} </Box>
+                            <Box px={2} color="white" backgroundColor={"#4ade80"}> Rewards </Box>
+                            {/* <Box px={2} color="white" backgroundColor={"#4ade80"}> APR</Box> */}
+                            <Box px={2} color="white" backgroundColor={"#4ade80"}> Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
                                 <Box px={2} mt={1} bgColor={"#18181b"}> 
@@ -958,7 +983,7 @@ const Stake = () => {
                                 <Box px={2}  mt={1} ml={-10}> 
                                 <Button 
                                     h={"25px"}  
-                                    borderColor={"#a67c00"} 
+                                    borderColor={"#4ade80"} 
                                     variant="outline" 
                                     ml={10} 
                                     onClick={() => handleUnstake()}  
@@ -966,7 +991,7 @@ const Stake = () => {
                                     w={"100px"}
                                     
                                 >
-                                    {isUnstaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"13px"} color="#a67c00">Unstake</Text>}
+                                    {isUnstaking ? <Spinner size="sm" color="#4ade80" /> : <Text fontSize={"13px"} color="#4ade80">Unstake</Text>}
                                 </Button>
                                 </Box>
 
@@ -1010,12 +1035,12 @@ const Stake = () => {
                         />
                     </GridItem>
                     <GridItem mt={2} w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
-                    <Text fontSize={"14px"} color="#a67c00"><b>New Position</b></Text>
+                    <Text fontSize={"14px"} color="#4ade80"><b>New Position</b></Text>
                     <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"sm"}>
-                        <Box w="500px" backgroundColor={"#bf9b30"}  mb={2}>
+                        <Box w="500px" backgroundColor={"#4ade80"}  mb={2}>
                             <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;Amount</Text>
                         </Box> 
-                        <Box backgroundColor={"#bf9b30"} mb={2}>
+                        <Box backgroundColor={"#4ade80"} mb={2}>
                             <Text ml={5} fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
                         </Box>
                         <Box w="auto" mt={2}>
@@ -1061,7 +1086,7 @@ const Stake = () => {
                             <VStack alignItems={"left"}>
                                     <HStack ml={2}>
                                 <Box>
-                                    <Text color="#a67c00">Staking:</Text>
+                                    <Text color="#4ade80">Staking:</Text>
                                 </Box>
                                 <HStack>
                                         <Box w="auto"><Text>{stakeAmount ? formatNumberPrecise(stakeAmount, 4) : "0.0000"} </Text></Box>
@@ -1073,7 +1098,7 @@ const Stake = () => {
                                 </GridItem>
                                 <GridItem  ml={150}>
                                    <HStack w="400px">
-                                    <Box> <Text color="#a67c00"> To cooldown:</Text> </Box>
+                                    <Box> <Text color="#4ade80"> To cooldown:</Text> </Box>
                                     <Box>
                                         {lastOperationTimestamp && lastOperationTimestamp > 0 ? (
                                             <CountdownTimer
@@ -1121,12 +1146,12 @@ const Stake = () => {
                             <Button
                                 mt={1} 
                                 h={"25px"}
-                                borderColor={"#a67c00"}
+                                borderColor={"#4ade80"}
                                 variant="outline" ml={5}
                                 onClick={() => handleStake()}
                                 disabled={isLoading || !stakeAmount || stakeAmount === "" || Number(stakeAmount) <= 0} w={"120px"}
                             >
-                                {isStaking ? <Spinner size="sm" color="#a67c00" /> : <Text fontSize={"13px"} color="#a67c00">Stake</Text>}
+                                {isStaking ? <Spinner size="sm" color="#4ade80" /> : <Text fontSize={"13px"} color="#4ade80">Stake</Text>}
                             </Button>
                         </Box>
                     </SimpleGrid>
