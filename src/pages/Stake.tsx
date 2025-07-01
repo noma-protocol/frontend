@@ -735,7 +735,7 @@ const Stake = () => {
                             >
                             <Text fontSize={"xs"} fontWeight={"bold"} color="#4ade80">New Position</Text>
                             <SimpleGrid columns={2}  w={isMobile ? "98%" : "352px"}  mt={-5} fontSize={"xs"}>
-                                <Box  w="auto" backgroundColor={"#4ade80"}  mb={2}>
+                                <Box w="auto" backgroundColor={"#4ade80"}  mb={2}>
                                     <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
                                 </Box>
                                 <Box   w="auto"  backgroundColor={"#4ade80"} mb={2}>
@@ -1034,7 +1034,7 @@ const Stake = () => {
                             page="stake" 
                         />
                     </GridItem>
-                    <GridItem mt={2} w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
+                    <GridItem mt={2} w="90%" border={"1px solid gray"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10} mt={5}>
                     <Text fontSize={"14px"} color="#4ade80"><b>New Position</b></Text>
                     <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"sm"}>
                         <Box w="500px" backgroundColor={"#4ade80"}  mb={2}>
