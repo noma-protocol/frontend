@@ -35,10 +35,10 @@ return (
           p={2}   
         >
           <Box w="120px" textAlign="left" >
-            <Text color="#a67c00" fontSize={isMobile?"xs":"13px"}>Circulating</Text>
+            <Text color="#4ade80" fontSize={isMobile?"xs":"13px"}>Circulating</Text>
           </Box>
           <Box w="auto" textAlign="right">
-            <Text color="#a67c00" fontSize={isMobile?"xs":"13px"}>
+            <Text color="#4ade80" fontSize={isMobile?"xs":"13px"}>
             {isMobile ? "L.R." : "Liquidity Ratio"}
             </Text>
             </Box>
@@ -50,7 +50,7 @@ return (
           </Box>
 
           <Box w="auto" textAlign="left" mt={2}>
-              <Text color="#a67c00" fontSize={isMobile?"xs":"13px"}>Spot</Text>
+              <Text color="#4ade80" fontSize={isMobile?"xs":"13px"}>Spot</Text>
               <Box mt={-6} fontSize={isMobile?"xs":"13px"}>
               <label>{commifyPatched(formatEther(spotPrice))}</label>
               <Text mt={isMobile ? 0 : -1} fontSize={"small"} fontSize={isMobile?"xs":"13px"}>WBNB/{tokenSymbol}</Text>
@@ -70,9 +70,9 @@ return (
               <Table.Header>
                 <Table.Row style={{marginLeft:"120px"}}>
                   <Table.ColumnHeader></Table.ColumnHeader>
-                  <Table.ColumnHeader isNumeric><Text color="#a67c00">Floor</Text> </Table.ColumnHeader>
-                  <Table.ColumnHeader isNumeric><Text color="#a67c00">Anchor</Text></Table.ColumnHeader>
-                  <Table.ColumnHeader isNumeric><Text color="#a67c00">Discovery</Text></Table.ColumnHeader>
+                  <Table.ColumnHeader isNumeric><Text color="#4ade80">Floor</Text> </Table.ColumnHeader>
+                  <Table.ColumnHeader isNumeric><Text color="#4ade80">Anchor</Text></Table.ColumnHeader>
+                  <Table.ColumnHeader isNumeric><Text color="#4ade80">Discovery</Text></Table.ColumnHeader>
                   {/* <Table.ColumnHeader isNumeric>Unused</Table.ColumnHeader> */}
                   {/* <Table.ColumnHeader isNumeric>Total</Table.ColumnHeader> */}
                   {/* <Table.ColumnHeader isNumeric>Fees</Table.ColumnHeader> */}
@@ -80,7 +80,7 @@ return (
               </Table.Header>
               <Table.Body style={{ color: "ivory" }}>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Reserves (WBNB)</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80">&nbsp;&nbsp;&nbsp;Reserves (WBNB)</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1))}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount1))}</Table.Cell>
                   {/* <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount1))}</Table.Cell>
@@ -98,7 +98,7 @@ return (
                   <Table.Cell isNumeric>{commify(formatEther(accumulatedFees[1]))}</Table.Cell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Reserves ({tokenSymbol})</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80">&nbsp;&nbsp;&nbsp;Reserves ({tokenSymbol})</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount0), 2)}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount0), 2)}</Table.Cell>
                    <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount0), 2)}</Table.Cell>
@@ -116,7 +116,7 @@ return (
                   {/* <Table.Cell isNumeric>{commify(formatEther(accumulatedFees[0]))}</Table.Cell> */}
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Capacity ({tokenSymbol})</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80">&nbsp;&nbsp;&nbsp;Capacity ({tokenSymbol})</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1 || 0) / formatEther(`${imvPrice || 0}`) || 0)}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(capacity?.anchor))}</Table.Cell>
                   <Table.Cell isNumeric>{"n/a"}</Table.Cell>
@@ -124,7 +124,7 @@ return (
                   <Table.Cell></Table.Cell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Tick Lower</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80">&nbsp;&nbsp;&nbsp;Tick Lower</Text></Table.Cell>
                   <Table.Cell isNumeric fontSize="sm"> 
                     {commifyPatched(tickToPrice(data["Floor"]?.lowerTick)[0])} (${commify(tickToPrice(data["Floor"]?.lowerTick || 0)[0]  * priceUSD)})
                     <Text color="gray" fontSize="13px">
@@ -146,7 +146,7 @@ return (
                   <Table.Cell></Table.Cell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00">&nbsp;&nbsp;&nbsp;Tick Upper</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80">&nbsp;&nbsp;&nbsp;Tick Upper</Text></Table.Cell>
                   <Table.Cell isNumeric fontSize="sm">
                     {commifyPatched(tickToPrice(data["Floor"]?.upperTick))} (${commify(tickToPrice(data["Floor"]?.upperTick || 0)[0]  * priceUSD)})
                     <Text color="gray" fontSize="13px">
@@ -176,9 +176,9 @@ return (
               <Table.Header>
                 <Table.Row>
                   <Table.ColumnHeader></Table.ColumnHeader>
-                  <Table.ColumnHeader isNumeric><Text color="#a67c00" fontSize="xs">Floor</Text></Table.ColumnHeader>
-                  <Table.ColumnHeader isNumeric><Text color="#a67c00" fontSize="xs">Anchor</Text></Table.ColumnHeader>
-                  <Table.ColumnHeader isNumeric><Text color="#a67c00" fontSize="xs">Discovery</Text></Table.ColumnHeader>
+                  <Table.ColumnHeader isNumeric><Text color="#4ade80" fontSize="xs">Floor</Text></Table.ColumnHeader>
+                  <Table.ColumnHeader isNumeric><Text color="#4ade80" fontSize="xs">Anchor</Text></Table.ColumnHeader>
+                  <Table.ColumnHeader isNumeric><Text color="#4ade80" fontSize="xs">Discovery</Text></Table.ColumnHeader>
                   {/* <Table.ColumnHeader isNumeric>Unused</Table.ColumnHeader> */}
                   {/* <Table.ColumnHeader isNumeric>Total</Table.ColumnHeader> */}
                   {/* <Table.ColumnHeader isNumeric>Fees</Table.ColumnHeader> */}
@@ -186,7 +186,7 @@ return (
               </Table.Header>
               <Table.Body style={{ color: "ivory" }}>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00" fontSize="xs">Reserves (WBNB)</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80" fontSize="xs">Reserves (WBNB)</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1), 2)}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount1), 2)}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount1), 2)}</Table.Cell>
@@ -204,7 +204,7 @@ return (
                   {/* <Table.Cell isNumeric>{commify(formatEther(accumulatedFees[1]))}</Table.Cell> */}
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00" fontSize="xs">Reserves ({tokenSymbol})</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80" fontSize="xs">Reserves ({tokenSymbol})</Text></Table.Cell>
                   <Table.Cell  fontSize="xs" isNumeric>{commify(formatEther(data["Floor"]?.amount0), 2)}</Table.Cell>
                   <Table.Cell fontSize="xs"  isNumeric>{commify(formatEther(data["Anchor"]?.amount0), 2)}</Table.Cell>
                    <Table.Cell fontSize="xs" isNumeric>{commify(formatEther(data["Discovery"]?.amount0), 2)}</Table.Cell>
@@ -222,7 +222,7 @@ return (
                   {/* <Table.Cell isNumeric>{commify(formatEther(accumulatedFees[0]))}</Table.Cell> */}
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00" fontSize="xs">Capacity ({tokenSymbol})</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80" fontSize="xs">Capacity ({tokenSymbol})</Text></Table.Cell>
                   <Table.Cell fontSize="xs" isNumeric>{commify(formatEther(data["Floor"]?.amount1 || 0) / formatEther(`${imvPrice || 0}`) || 0)}</Table.Cell>
                   <Table.Cell  fontSize="xs" isNumeric>{commify(formatEther(capacity?.anchor), 2)}</Table.Cell>
                   <Table.Cell  fontSize="xs" isNumeric>{"n/a"}</Table.Cell>
@@ -230,7 +230,7 @@ return (
                   <Table.Cell></Table.Cell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00" fontSize="xs">Tick Lower</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80" fontSize="xs">Tick Lower</Text></Table.Cell>
                   <Table.Cell isNumeric>
                     {commifyPatched(tickToPrice(data["Floor"]?.lowerTick)[0])}
                     <Text color="gray" fontSize="xs">
@@ -252,7 +252,7 @@ return (
                   <Table.Cell></Table.Cell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell><Text color="#a67c00" fontSize="xs">Tick Upper</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80" fontSize="xs">Tick Upper</Text></Table.Cell>
                   <Table.Cell isNumeric>
                     {commifyPatched(tickToPrice(data["Floor"]?.upperTick))}
                     <Text color="gray" fontSize="xs">
