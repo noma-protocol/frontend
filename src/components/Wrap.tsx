@@ -68,7 +68,7 @@ const Wrap = ({
                     <Button 
                         disabled={isWrapping}
                         border="1px solid"
-                        borderColor={actionType === 'wrap' ? "#a67c00" : "gray"}
+                        borderColor={actionType === 'wrap' ? "#4ade80" : "gray"}
                         variant={"outline"}
                         h={size == "lg" ? 8 : 6}
                         ml={size == "lg" ? 0 : 2}
@@ -77,7 +77,7 @@ const Wrap = ({
                         onClick={() => setActionType('wrap')}
                         color="white"
                         borderRadius={5}
-                        _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
+                        _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
                     >
                         {/* <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center"> */}
                             {isWrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Wrap</Text>}
@@ -89,7 +89,7 @@ const Wrap = ({
                     <Box  mt="80%" ml={5} >
                         <DrawerHeader>
                             <DrawerTitle>
-                                <Text as="h3" color="#bf9b30">Wrap BNB</Text>
+                                <Text as="h3" color="#4ade80">Wrap BNB</Text>
                             </DrawerTitle>
                             <DrawerCloseTrigger asChild mt="82%" mr={5}>
                                 <Button variant="ghost" size="sm" >×</Button>

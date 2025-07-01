@@ -99,8 +99,8 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
           variant="outline"
           size="sm"
           fontSize={["xs", "sm", "md"]}
-          borderColor="#a67c00"
-          color="#a67c00"
+          borderColor="#4ade80"
+          color="#4ade80"
           width={{base: "80px", md: "100px"}}
           ml={"-25px"}
         >
