@@ -50,7 +50,7 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
             w={size == "lg" ? "90px" : "80px"}
             border="1px solid #f3f7c6"
             borderRadius={5}
-            _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
+            _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
         >
         {isRepaying  ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Repay</Text>}
         </Button>
@@ -60,7 +60,7 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
             <Box mt="80%" ml={5}>
             <DrawerHeader>
                 <DrawerTitle>
-                    <Text as="h3" color="#a67c00">Repay loan</Text>
+                    <Text as="h3" color="#4ade80">Repay loan</Text>
                 </DrawerTitle>
                 <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRepaying}>
                     <Button variant="ghost" size="sm" onClick={() => setIsRepaying(false)}>×</Button>
@@ -96,15 +96,15 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                     </Text>
                     </Box>
                 </HStack>
-                <VStack border="1px solid #a67c00" borderRadius="md" p={3} mt={5} spacing={2} w="80%" alignItems="flex-start">
+                <VStack border="1px solid #4ade80" borderRadius="md" p={3} mt={5} spacing={2} w="80%" alignItems="flex-start">
                 <Box>
-                    <Text color="#a67c00" fontSize="sm">Repaying:</Text>
+                    <Text color="#4ade80" fontSize="sm">Repaying:</Text>
                 </Box>
                 <Box>
                     <Text color="#f3f7c6" ml={2} fontSize="sm">{repayAmount == 0 ? commify(formatEther(`${loanAmount}`), 4) : commify(`${repayAmount}`)} {isLoading ? <Spinner size="sm" /> : "WBNB"}</Text>
                 </Box>                
                 <Box>
-                    <Text color="#a67c00" fontSize="sm">Withdrawing:</Text>
+                    <Text color="#4ade80" fontSize="sm">Withdrawing:</Text>
                 </Box>
                 <Box>
                     <Text color="#f3f7c6" ml={2} fontSize="sm">{commify(collateral)} {isLoading ? <Spinner size="sm" /> : token0Symbol}</Text>

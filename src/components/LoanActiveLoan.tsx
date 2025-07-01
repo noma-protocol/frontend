@@ -10,20 +10,20 @@ const LoanActiveLoan = ({}) => {
 
     return (
         <>
-            <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#a67c00">Active Loan</Text>
+            <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#4ade80">Active Loan</Text>
             <SimpleGrid columns={5} mt={-5}>
-                <Box px={2} color="white" backgroundColor={"#a67c00"}> Collateral </Box>
-                <Box px={2} color="white" backgroundColor={"#a67c00"}> Borrowed </Box>
-                <Box px={2} color="white" backgroundColor={"#a67c00"}> 
+                <Box px={2} color="white" backgroundColor={"#4ade80"}> Collateral </Box>
+                <Box px={2} color="white" backgroundColor={"#4ade80"}> Borrowed </Box>
+                <Box px={2} color="white" backgroundColor={"#4ade80"}> 
                 <HStack>
                     <Box><Text>LTV</Text></Box>
                     <Box><Image src={placeholderLogo} w={15} /></Box>
                 </HStack>
                 </Box>
-                <Box px={2} color="white" backgroundColor={"#a67c00"}>
+                <Box px={2} color="white" backgroundColor={"#4ade80"}>
                 Expires
                 </Box>
-                <Box px={2} color="white" backgroundColor={"#a67c00"}> Actions </Box>
+                <Box px={2} color="white" backgroundColor={"#4ade80"}> Actions </Box>
                 
                 {loanData?.borrowAmount > 0 ? ( 
                     <>
@@ -87,7 +87,7 @@ const LoanActiveLoan = ({}) => {
                         disabled={isRolling || isLoading || isTokenInfoLoading || ltv <= 1}
                         w={"120px"}
                         border="1px solid #f3f7c6"
-                        _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
+                        _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
                     >
                     {isLoading ? <Spinner size="sm" /> : <Text color={"#f3f7c6"}>Roll</Text>}
                     </Button>
@@ -97,7 +97,7 @@ const LoanActiveLoan = ({}) => {
                         <Box mt="80%" ml={5}>
                         <DrawerHeader>
                             <DrawerTitle>
-                                <Text as="h3" color="#a67c00">Roll Loan</Text>
+                                <Text as="h3" color="#4ade80">Roll Loan</Text>
                             </DrawerTitle>
                             <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
                                 <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
@@ -109,7 +109,7 @@ const LoanActiveLoan = ({}) => {
                                 // onChange={(e) => setWrapAmount(e.target.value)}
                                 w="80%"
                             /> */}
-                        <Box border="1px solid #a67c00" borderRadius="md" p={3} w="90%" >                              
+                        <Box border="1px solid #4ade80" borderRadius="md" p={3} w="90%" >                              
 
                             <HStack>
                                 <Box w="120px"><Text fontSize="sm" color="#f3f7c6">New Duration:</Text></Box>
