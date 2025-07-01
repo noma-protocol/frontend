@@ -2,7 +2,7 @@ import { type Chain } from 'viem'
 import config from '../config'
 
 export const monad = {
-  id: 56,
+  id: 10143,
   name: 'Monad Testnet',
   nativeCurrency: {
     name: 'Monad',
