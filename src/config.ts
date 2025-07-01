@@ -3,7 +3,7 @@ const chain = import.meta.env.VITE_CHAIN;
 const RPC_URL = import.meta.env.VITE_RPC_URL;
 const feeTiers = [3000, 10000];
 
-const oksVault = "0x3AA2Ea2aca5DD788140aE78906Ded9C4e6524d11";
+const oksVault = "0xA67cecf712b725557F7C7Ae41bc542a6FAb2cD40";
 const presaleContractAddress = "0x99b32151E3C0c8432c4c6C9b6F3213123e443F06";
 
 const vault2ProtocolMap = {
