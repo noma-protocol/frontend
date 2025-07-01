@@ -460,7 +460,7 @@ const Markets: React.FC = () => {
             borderRadius="xl"
             boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
             m={4}
-            border="1px solid #a67c00"
+            border="1px solid #4ade80"
             mt="100px"
             ml={isMobile ? 5 : "7%"}
             w="70%"
@@ -470,7 +470,7 @@ const Markets: React.FC = () => {
                 mb={6}
                 p={4}
                 borderRadius="full"
-                bg="rgba(166, 124, 0, 0.2)"
+                bg="rgba(74, 222, 128, 0.2)"
                 
             >
                 <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
@@ -497,17 +497,45 @@ const Markets: React.FC = () => {
               <HStack spacing={4}>
                 <Button
                   onClick={() => handleSetView("all")}
-                  colorScheme={view === "all" ? "blue" : "gray"}
                   variant={view === "all" ? "solid" : "outline"}
+                  background={view === "all" ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
+                  border="2px solid #4ade80"
+                  color={view === "all" ? "white" : "#4ade80"}
+                  boxShadow={view === "all" ? "0 4px 15px rgba(74, 222, 128, 0.4)" : "0 2px 8px rgba(74, 222, 128, 0.1)"}
+                  transition="all 0.3s ease"
+                  _hover={{
+                    background: view === "all" ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
+                    borderColor: "#65f343",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 6px 20px rgba(74, 222, 128, 0.3)"
+                  }}
+                  _active={{
+                    transform: "translateY(0px)",
+                    boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
+                  }}
                 >
-                  All Markets
+                  <Text fontSize="sm" color={view == "all" ? "black" : "white"}>All Markets</Text>
                 </Button>
                 <Button
                   onClick={() => handleSetView("my")}
-                  colorScheme={view === "my" ? "blue" : "gray"}
                   variant={view === "my" ? "solid" : "outline"}
+                  background={view === "my" ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
+                  border="2px solid #4ade80"
+                  color={view === "my" ? "white" : "#4ade80"}
+                  boxShadow={view === "my" ? "0 4px 15px rgba(74, 222, 128, 0.4)" : "0 2px 8px rgba(74, 222, 128, 0.1)"}
+                  transition="all 0.3s ease"
+                  _hover={{
+                    background: view === "my" ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
+                    borderColor: "#65f343",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 6px 20px rgba(74, 222, 128, 0.3)"
+                  }}
+                  _active={{
+                    transform: "translateY(0px)",
+                    boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
+                  }}
                 >
-                  My Markets
+                  <Text fontSize="sm" color={view == "my" ? "black" : "white"}>My Markets</Text>
                 </Button>
               </HStack>
             </Box>
@@ -523,8 +551,8 @@ const Markets: React.FC = () => {
             >
               {isAllVaultsLoading ? (
                 <Box textAlign="center" w="100%" p={10}>
-                  <Spinner size="md" color="#bf9b30" thickness="3px" />
-                  <Text mt={3} color="#bf9b30">Loading markets...</Text>
+                  <Spinner size="md" color="#4ade80" thickness="3px" />
+                  <Text mt={3} color="#4ade80">Loading markets...</Text>
                 </Box>
               ) : isAllVaultsError || error ? (
                 <Text color="red">Error fetching vaults</Text>
@@ -534,24 +562,24 @@ const Markets: React.FC = () => {
                 <VStack align="start" spacing={6} width="100%">
                   <Box width="95%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4}>
                     <Box>
-                      <Text fontWeight="bold" color="#bf9b30">&nbsp;Name</Text>
+                      <Text fontWeight="bold" color="#4ade80">&nbsp;Name</Text>
                     </Box>
                     <Box>
-                      <Text fontWeight="bold" color="#bf9b30">Symbol</Text>
+                      <Text fontWeight="bold" color="#4ade80">Symbol</Text>
                     </Box>
                     {!isMobile && (
                       <>
                       <Box>
-                        <Text fontWeight="bold" color="#bf9b30">Reserve Asset</Text>
+                        <Text fontWeight="bold" color="#4ade80">Reserve Asset</Text>
                       </Box>
                       <Box>
-                        <Text fontWeight="bold" color="#bf9b30">Protocol</Text>
+                        <Text fontWeight="bold" color="#4ade80">Protocol</Text>
                       </Box>
                       <Box>
-                        <Text fontWeight="bold" color="#bf9b30">Presale</Text>
+                        <Text fontWeight="bold" color="#4ade80">Presale</Text>
                       </Box>
                       <Box>
-                        <Text fontWeight="bold" color="#bf9b30">Action</Text>
+                        <Text fontWeight="bold" color="#4ade80">Action</Text>
                       </Box>
                       </>
                     )}
@@ -573,7 +601,7 @@ const Markets: React.FC = () => {
                         key={index}
                         p={4}
                         border="1px solid"
-                        borderColor={isMobile? vault.presaleContract != zeroAddress ? "#a67c00" : "gray" : "gray"}
+                        borderColor={isMobile? vault.presaleContract != zeroAddress ? "#4ade80" : "gray" : "gray"}
                         borderRadius="md"
                         w="98%"
                         cursor="pointer"
@@ -628,17 +656,17 @@ const Markets: React.FC = () => {
                               </Box>
 
                               {/* Presale Status */}
-                              <Box textAlign="center" ml={2}>
+                              <Box textAlign="center" ml={-20}>
                                 {hasPresale ? (
                                   <Link href={`/presale?a=${vault.presaleContract}`} target="_blank">
                                     {vault.finalized ? (
-                                      <Text color="#a67c00" fontSize="sm" ml={"-80px"}><b>Finalized</b></Text>
+                                      <Text color="#4ade80" fontSize="sm" ml={"-80px"}><b>Finalized</b></Text>
                                     ) : vault.expired ? (
                                       <Text color="red" fontSize="sm"><b>Expired</b></Text>
                                     ) : (
                                       <VStack>
-                                        <Text color="#1ad000" fontSize="sm"><b>In progress</b></Text>
-                                        <Text color="white" fontSize="xs"><b>Click to view</b></Text>
+                                        <Box><Text color="#1ad000" fontSize="sm"><b>In progress</b></Text></Box>
+                                        <Box><Text color="white" fontSize="xs"><b>Click to view</b></Text></Box>
                                       </VStack>
                                     )}
                                   </Link>

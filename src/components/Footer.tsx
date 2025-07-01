@@ -86,7 +86,7 @@ const Footer: React.FC = (
         bottom:    0,
         left:      0,
         width:     "100%",
-        borderTop: "1px solid #f8bd45",
+        borderTop: "1px solid #4ade80",
         background: "#000",     // or whatever bg you want
         zIndex:    2400
       }}>
@@ -95,14 +95,14 @@ const Footer: React.FC = (
           <Col md="3" style={{paddingTop: isMobile?25:0}}>
 
             <VStack>
-              <img
+              {/* <img
                 src={Logo}
                 style={{
                   maxWidth: "10vh",
                   marginLeft: isMobile ? "36%" : 20,
                   marginTop: isMobile? 30 : 50
                 }}
-              />
+              /> */}
                <Box mt={2}>
 
                </Box>
@@ -114,14 +114,14 @@ const Footer: React.FC = (
                 <Box>
                 <NavItem>
                 <a href="https://docs.oikos.cash" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px"}}>
-                  <><p style={{color:"#f3f7c6"}}>Docs</p></>
+                  <><p style={{color:"#4ade80"}}>Docs</p></>
                 </a>
               </NavItem>
                 </Box>
                 <Box>
                 <NavItem>
                 <a href="https://oikoscash.medium.com/" target="_blank" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px", color:"#f3f7c6"}}>
-                   <><p style={{color:"#f3f7c6"}}>Blog</p></>
+                   <><p style={{color:"#4ade80"}}>Blog</p></>
                 </a>
               </NavItem>
                 </Box>
@@ -131,8 +131,8 @@ const Footer: React.FC = (
           <Col md="3" xs="6">
             <Nav style={{margin:'5vh'}}>
               <NavItem>
-                <Link to="/Terms" style={{fontSize:isMobile?"12px": "14px", color:"#f3f7c6"}}>
-                 <><p style={{color:"#f3f7c6"}}>Terms of Use</p></>
+                <Link to="/Terms" style={{fontSize:isMobile?"12px": "14px", color:"#4ade80"}}>
+                 <><p style={{color:"#4ade80"}}>Terms of Use</p></>
                  </Link>
               </NavItem>
               {/* <NavItem>
@@ -214,19 +214,19 @@ const Footer: React.FC = (
                         marginBottom: "40px"
                       }}
                       onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = "rgba(248, 189, 69, 0.2)";
-                        e.currentTarget.style.borderColor = "#f8bd45";
+                        e.currentTarget.style.backgroundColor = "rgba(74, 222, 128, 0.2)";
+                        e.currentTarget.style.borderColor = "#4ade80";
                         e.currentTarget.style.transform = "translateY(-2px)";
                       }}
                       onMouseOut={(e) => {
                         e.currentTarget.style.backgroundColor = "transparent";
-                        e.currentTarget.style.borderColor = "ivory";
+                        e.currentTarget.style.borderColor = "#4ade80";
                         e.currentTarget.style.transform = "translateY(0)";
                       }}
                       >
                       <div style={{ marginLeft: "10%", display: "flex", alignItems: "center" }}>
                           <img src={metamaskLogo} style={{ width: "15px", marginRight: "5px" }} />
-                          <span style={{ fontSize: "11px", color: "white" }}>Add OKS to Metamask</span>
+                          <span style={{ fontSize: "11px", color: "white" }}>Add NOMA to Metamask</span>
                       </div>
                 </button>    
           </Col>
