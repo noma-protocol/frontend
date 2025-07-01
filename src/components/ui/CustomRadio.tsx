@@ -5,7 +5,7 @@ import { isMobile } from "react-device-detect"
 const CustomRadio = (props) => {
   const { value, name, children, isDisabled, isChecked, onChange } = props;
   
-  let bgColor = "#a67c00"; 
+  let bgColor = "#4ade80"; 
 
   const handleClick = () => {
     if (!isDisabled && onChange) {
@@ -15,7 +15,7 @@ const CustomRadio = (props) => {
 
   if (name == "useWeth") {
      if (isChecked) {
-      bgColor = "#a67c00"; // Highlight color for checked state
+      bgColor = "#4ade80"; // Highlight color for checked state
     } else {
       bgColor = "transparent"; // Default color for unchecked state
     }
