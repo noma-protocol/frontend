@@ -3,7 +3,7 @@ import { Box, Text, Button } from '@chakra-ui/react';
 import { LanguageContext, LanguageContextType } from "../core/LanguageProvider";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount } from "wagmi";
-import Logo from "../assets/images/noma.png";
+import Logo from "../assets/images/logo.svg";
 import { isMobile } from 'react-device-detect';
 import { Link, Image } from '@chakra-ui/react';
 import { useMenu } from "../hooks/MenuContext";
@@ -41,7 +41,7 @@ const Header: React.FC = () => {
     <header id="header">
       <nav className="navbar navbar-expand navbar-fixed-top" >
         <div className="container header">
-        <Link href="https://oikos.cash" >
+        <Link href="https://noma.money" >
           <Box w="60px">
           <Image
             mt={isMobile ? 2 : 3}
@@ -56,7 +56,7 @@ const Header: React.FC = () => {
               <ul className="navbar-nav action">
               <li className="nav-item ml-2">
                 <Button  onClick={() => open()} variant="outline" h="40px" w="220px" mt={1} mr={-5}>
-                  <p style={{color:"#a67c00", fontSize:(isMobile ? "12px" : "16px"), marginLeft: "5px"}}>
+                  <p style={{color:"#4ade80", fontSize:(isMobile ? "12px" : "16px"), marginLeft: "5px"}}>
                   <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>&nbsp;&nbsp;
                   {isConnected
                     ? `${address?.slice(0, 6)}...${address?.slice(-6)}`

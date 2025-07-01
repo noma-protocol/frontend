@@ -137,18 +137,18 @@ const BalanceCard = ({
             backgroundColor={"#222831"}
             mt={marginTop}
         >
-            <Text fontWeight="bold" fontSize={isMobile ? "xs" : "sm"} color="#a67c00" mb={2}>Wallet</Text>
+            <Text fontWeight="bold" fontSize={isMobile ? "xs" : "sm"} color="#4ade80" mb={2}>Wallet</Text>
             
             <SimpleGrid columns={3} w="auto">
                 {/* Header Row */}
-                <Box color="white" background="#a67c00"  pl={3}>
+                <Box color="black" background="#4ade80"  pl={3}>
                     <Text  fontSize={isMobile ? "xs" : "sm"}>Asset</Text>
                 </Box>
-                <Box  color="white" background="#a67c00" textAlign="left" ml={-2} >
+                <Box  color="black" background="#4ade80" textAlign="left" ml={-2} >
                     <Text  fontSize={isMobile ? "xs" : "sm"}>Balance</Text> 
                 </Box>
                 
-                <Box color="white" background="#a67c00" textAlign="center"> 
+                <Box color="black" background="#4ade80" textAlign="center"> 
                     <Text  fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
                 </Box>
                 
@@ -236,10 +236,23 @@ const BalanceCard = ({
                                 mt={-2}
                                 ml={2}
                                 mb={1}
-                                borderColor={withBg ? "gray" : "none"}
-                                color="white"
+                                border="2px solid #4ade80"
+                                background="transparent"
+                                color="#4ade80"
                                 borderRadius={5}
-                                _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
+                                boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
+                                transition="all 0.3s ease"
+                                _hover={{ 
+                                  background: "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)", 
+                                  borderColor: "#65f343", 
+                                  color: "#65f343",
+                                  transform: "translateY(-1px)",
+                                  boxShadow: "0 4px 12px rgba(74, 222, 128, 0.25)"
+                                }}
+                                _active={{
+                                  transform: "translateY(0px)",
+                                  boxShadow: "0 2px 6px rgba(74, 222, 128, 0.2)"
+                                }}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Borrow
@@ -254,10 +267,23 @@ const BalanceCard = ({
                                 fontSize={fontSize}
                                 ml={2}
                                 mt={0}
-                                borderColor={withBg ? "gray" : "none"}
-                                color="white"
+                                border="2px solid #4ade80"
+                                background="transparent"
+                                color="#4ade80"
                                 borderRadius={5}
-                                _hover={{ bg: "#a67c00aa", borderColor: "#a67c00", color: "white" }}
+                                boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
+                                transition="all 0.3s ease"
+                                _hover={{ 
+                                  background: "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)", 
+                                  borderColor: "#65f343", 
+                                  color: "#65f343",
+                                  transform: "translateY(-1px)",
+                                  boxShadow: "0 4px 12px rgba(74, 222, 128, 0.25)"
+                                }}
+                                _active={{
+                                  transform: "translateY(0px)",
+                                  boxShadow: "0 2px 6px rgba(74, 222, 128, 0.2)"
+                                }}
                             >
                                 <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center">
                                     Stake
