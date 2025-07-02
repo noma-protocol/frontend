@@ -1394,7 +1394,7 @@ const Borrow = () => {
                                 )}
                             </SimpleGrid>
                         </GridItem>
-                        <GridItem ml={"-5vh"}>
+                        <GridItem ml={"-5vh"} >
                         <Box mt={-5}>
                             <BalanceCard 
                                 ethBalance={ethBalance}
@@ -1418,7 +1418,7 @@ const Borrow = () => {
                             />
                         </Box>
                         </GridItem>
-                        <GridItem mt={2} w="90%" border={"1px solid white"} py={3} px={4} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
+                        <GridItem mt={5} w="90%" border={"1px solid white"} py={3} px={4} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                         <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#4ade80">New Loan</Text>
                         <SimpleGrid columns={3} w="100%" mt={-5}>
                             <Box w="500px"backgroundColor={"#4ade80"}  mb={2}>
