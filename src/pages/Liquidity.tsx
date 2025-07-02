@@ -317,7 +317,7 @@ const Liquidity: React.FC = () => {
           token0Address,
           token1Address,
           newFloorPrice
-        ] = await VaultContract.getVaultInfo();
+        ] = await VaultContract.getVaultInfo(true);
   
         
         setCirculatingSupply(circulatingSupply);
