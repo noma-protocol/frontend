@@ -39,6 +39,8 @@ import usePresaleContract from '../hooks/usePresaleContract';
 
 import metamaskLogo from "../assets/images/metamask.svg";
 import placeholderLogo from "../assets/images/question.svg";
+import monadLogo from "../assets/images/monad.png";
+
 import config from '../config'; 
 import bnbLogo from "../assets/images/bnb.png";
 
@@ -74,7 +76,7 @@ const Presale: React.FC = () => {
 
   useEffect(() => {
     if (contractAddress == "0x0000000000000000000000000000000000000000") {
-      window.location.href = "https://oikos.cash"
+      window.location.href = "https://noma.money"
     }
 
   }, [contractAddress]);
@@ -96,7 +98,7 @@ const Presale: React.FC = () => {
   
   const presaleUrl = `${environment == "development" ? 
     `http://localhost:5173/presale?a=${contractAddress}r=${referralCode}`:
-    "https://presale.oikos.cash"}/presale?a=${contractAddress}r=${referralCode}`;
+    "https://presale.noma.money"}/presale?a=${contractAddress}r=${referralCode}`;
   
 
   const AddToMetaMaskButton = ({ contractAddress, tokenSymbol, tokenDecimals }) => {
@@ -915,11 +917,11 @@ const Presale: React.FC = () => {
                       </Text>
                   </Box>
                   <Box w="auto">
-                      <Image h={5} src={bnbLogo} />
+                      <Image h={5} src={monadLogo} />
                   </Box>
                   <Box w="auto">
                       <Text fontWeight="bold" fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}>
-                          &nbsp;BNB
+                          &nbsp;MON
                       </Text>
                   </Box>
               </HStack>
@@ -939,7 +941,7 @@ const Presale: React.FC = () => {
                           {commify(tokensPurchased, 2)}
                       </Text>
                   </Box>
-                  <Box w="auto" ml={1}>
+                  <Box w="auto" ml={"1px"}>
                       <Image h={4} src={placeholderLogo} />
                   </Box>
                   <Box w="auto">
