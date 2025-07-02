@@ -25,7 +25,7 @@ import VaultModal from "../components/VaultModal";
 import { set } from "react-ga";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import placeholderLogo from "../assets/images/question.svg";
-import nomaLogo from "../assets/images/noma_logo_transparent.png";
+import nomaLogo from "../assets/images/noma.png";
 import oksLogo from "../assets/images/logo_dark.png";
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
@@ -621,8 +621,8 @@ const Markets: React.FC = () => {
                               <Box><Text mr={2} >{vault.tokenSymbol}</Text></Box>
                               <Box>
                                <Image
-                                w={vault.tokenSymbol == "OKS" ? "40px" : "20px"}
-                                src={vault.tokenSymbol == "OKS" ? oksLogo : placeholderLogo}
+                                w={vault.tokenSymbol == "NOMA" ? "25px" : "20px"}
+                                src={vault.tokenSymbol == "NOMA" ? nomaLogo : placeholderLogo}
                                 alt="token logo"
                               />
                               </Box>
@@ -660,7 +660,7 @@ const Markets: React.FC = () => {
                                 {hasPresale ? (
                                   <Link href={`/presale?a=${vault.presaleContract}`} target="_blank">
                                     {vault.finalized ? (
-                                      <Text color="#4ade80" fontSize="sm" ml={"-80px"}><b>Finalized</b></Text>
+                                      <Text color="#4ade80" fontSize="sm" ml={"20px"}><b>Finalized</b></Text>
                                     ) : vault.expired ? (
                                       <Text color="red" fontSize="sm"><b>Expired</b></Text>
                                     ) : (
