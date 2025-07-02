@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Container, Box, Text, Button, VStack, HStack, Link } from "@chakra-ui/react"
 import {
   DialogActionTrigger,
@@ -25,6 +26,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
 
   const bscscanLink = `https://bscscan.com/token/${tokenAddress}`;
   const tokenDecimals = vaultInfo.tokenDecimals || 0;
+  const [symbol, setSymbol] = useState("NOMA");
 
      const {
         data: totalSupply
@@ -38,7 +40,6 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
     const addTokenToMetaMask = async () => {
 
       const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488"; // Replace with your token's contract address
-
       try {
         // Create a provider using MetaMask's injected web3 provider
         if (typeof window.ethereum !== 'undefined') {
@@ -65,7 +66,8 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
           const decimals = await tokenContract.decimals();
 
           // Prepare the token information for MetaMask
-          const formattedSymbol = symbol || "OKS";
+          const formattedSymbol = symbol || "NOMA";
+          setSymbol(formattedSymbol);
           const formattedDecimals = decimals || 18; // Default to 18 if not specified
 
           const hexValue = ethers.utils.parseUnits('1', formattedDecimals);
@@ -213,7 +215,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
                   >
                   <div style={{ marginLeft: "10%", display: "flex", alignItems: "center" }}>
                       <img src={metamaskLogo} style={{ width: "15px", marginRight: "5px" }} />
-                      <span style={{ fontSize: "11px", color: "white" }}>Add OKS to Metamask</span>
+                      <span style={{ fontSize: "11px", color: "white" }}>{`Add ${symbol} to Metamask`}</span>
                   </div>
                 </button>                    
                 </Box>
