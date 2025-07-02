@@ -1395,7 +1395,7 @@ const Exchange: React.FC = () => {
                           </Box>
                         </GridItem>
                         <GridItem>
-                            <Box mt={10}>
+                            <Box mt={10} ml={-5}>
                             <BalanceCard
                                 ethBalance={ethBalance}
                                 token0Balance={token0Info?.balance}
@@ -1419,7 +1419,7 @@ const Exchange: React.FC = () => {
                                 />
                             </Box>
                         </GridItem>
-                        <GridItem colSpan={1} mt={10}> 
+                        <GridItem colSpan={1} mt={5}> 
                             {/* <Box w="100%" h="300px" border={isMobile ? "":"1px solid gray"}> */}
                             <TradeControlsCard 
                                 ethBalance={ethBalance}
@@ -1449,7 +1449,7 @@ const Exchange: React.FC = () => {
                                 />
                             {/* </Box> */}
                         </GridItem> 
-                        <GridItem colSpan={1} mt={10} ml={"35px"}> 
+                        <GridItem colSpan={1} mt={5} ml={"22px"}> 
                             <Box w="100%" h="auto" /*border={isMobile ? "":"1px solid gray"}*/  pt={8} >
                               <TradeSimulationCard 
                                 setQuote={setQuote}
