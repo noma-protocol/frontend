@@ -501,7 +501,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       candlestick: {
         colors: {
           upward: "#4ade80",
-          downward: "#22c55e"
+          downward: "#ef4444"
         },
         wick: {
           useFillColor: true,
@@ -751,7 +751,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 </Box>
               </VStack>
               ) : 
-              <Box w="100%" >
+              <Box w="120%">
                 <HStack>
                   <Box mt={-3} mr={0} ml={10} w="95%" >
                     <Text fontSize={"xs"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
