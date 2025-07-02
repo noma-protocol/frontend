@@ -42,7 +42,7 @@ return (
             {isMobile ? "L.R." : "Liquidity Ratio"}
             </Text>
             </Box>
-          <Box w="auto" textAlign={isMobile ? "right" : "left"} fontSize={isMobile?"xs":"13px"}>
+          <Box w="auto" textAlign={isMobile ? "right" : "left"} fontSize={isMobile?"xs":"13px"} mt={-4}>
             <label>{commify(formatEther(circulatingSupply), 2)}</label>
           </Box>
           <Box w="auto" textAlign="right" fontSize={isMobile?"xs":"13px"} >
