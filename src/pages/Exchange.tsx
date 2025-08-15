@@ -1167,7 +1167,7 @@ const Exchange: React.FC = () => {
                   All tokens launched with the Noma protocol in one place 🚀
                 </Text>
               </Heading> */}
-                <Box p={2} w={isMobile ? "120%" : "200%"} bg="#4ade80" ml={isMobile ? -10 : "-25%"} mt={10} fontSize={isMobile ? "xx-small" : "xs"} color="black">
+                {/* <Box p={2} w={isMobile ? "120%" : "200%"} bg="#4ade80" ml={isMobile ? -10 : "-25%"} mt={10} fontSize={isMobile ? "xx-small" : "xs"} color="black">
                   <Text ml="5%" fontSize={isMobile ? "xx-small" : "xs"} color="black">
                     NOMA is live on Monad testnet! More information at this {" "}
                       <Link
@@ -1181,7 +1181,7 @@ const Exchange: React.FC = () => {
                     </Link>
                   </Text>
 
-                </Box>  
+                </Box>   */}
               <Box mt={8}>
               {isAllVaultsLoading ? (
                 <>
