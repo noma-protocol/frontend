@@ -116,9 +116,9 @@ const WETHAbi = [
 ];
 
 // NomaFactory contract address
-const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
-const exchangeHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Exchange");
-const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "ModelHelper");
+const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const exchangeHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Exchange");
+const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 
 ChartJS.register(
@@ -626,7 +626,9 @@ const Exchange: React.FC = () => {
         );
   
         let data = {};
-  
+        
+        const includeStaked = true; // Set to true to include staked data
+        
         const [
           liquidityRatio,
           circulatingSupply,
@@ -1183,10 +1185,11 @@ const Exchange: React.FC = () => {
               ) : vaultsSelectData?.items?.length > 0 ? (
               <Flex direction="column" alignItems="left">
                 <HStack>
+                  {isMobile ? (<></>) : (<Box w="80px"><Text fontSize="sm">Market</Text></Box>)}
                 <Box>
                 <SelectRoot
                     mt={isMobile ? "-60px" : 0}
-                    ml={5}
+                    ml={isMobile ? 0 : 5}
                     mb={2}
                     collection={vaultsSelectData}
                     size="sm"
@@ -1218,9 +1221,9 @@ const Exchange: React.FC = () => {
                     </SelectContent>
                 </SelectRoot>
                 </Box>
-                <Box mt={-2} ml={isMobile? 7 : 2} maxHeight={"auto"}>
+                <Box mt={-2} ml={isMobile? 4 : 2} maxHeight={"auto"}>
                     {isMobile ?
-                    <VStack alignItems={"right"} ml={"35px"} textAlign={"right"} gap={-1}>
+                    <VStack alignItems={"right"} ml={"55px"} textAlign={"right"} gap={-1}>
                       <Box><Text color="#4ade80" fontWeight="bold" fontSize="sm">SPOT</Text></Box>
                       <Box><Text fontSize="xs">{commifyDecimals(formatEther(`${spotPrice || 0}`), 8)}</Text></Box>
                       <Box><Text  fontSize="xs">{isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Info?.tokenSymbol}/${token0Info?.tokenSymbol}`} </Text></Box>
@@ -1237,10 +1240,10 @@ const Exchange: React.FC = () => {
                     </HStack>                    
                     }
                 </Box>
-                <Box ml={"15%"}>
+                <Box ml={"10%"}>
                     <HStack>
                       <Box w="80px" >
-                          <Text> Go to:</Text>
+                          {isMobile ? <></> : <Text> Go to:</Text>}
                       </Box>
                       <Box>
                         <SelectRoot

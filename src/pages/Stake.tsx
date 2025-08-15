@@ -71,8 +71,8 @@ const GonsTokenArtifact = await import(`../assets/GonsToken.json`);
 const GonsTokenAbi = GonsTokenArtifact.abi;
 
 // NomaFactory contract address
-const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
-const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "ModelHelper");
+const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 const Stake = () => {
     const { address, isConnected } = useAccount();

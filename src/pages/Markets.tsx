@@ -55,7 +55,7 @@ const uniswapV3FactoryABI = [
 ];
 
 // NomaFactory contract address
-const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
+const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const feeTier = 3000;
 
 const Markets: React.FC = () => {
