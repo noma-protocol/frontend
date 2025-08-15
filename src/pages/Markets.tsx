@@ -80,7 +80,7 @@ const Markets: React.FC = () => {
   const [modalFocus, setModalFocus] = useState<boolean>(false);
 
   const reserveAssetsMap = {
-    [config.protocolAddresses.WBNB] : "WBNB",
+    [config.protocolAddresses.WMON] : "WMON",
     [config.protocolAddresses.WMON] : "WMON",
   };
 
@@ -115,7 +115,7 @@ const Markets: React.FC = () => {
 
   const labelToLogoMap = {
     WMON: monadLogo,
-    WBNB: bnbLogo,
+    WMON: bnbLogo,
   };
 
   // fetch logo for reserve asset

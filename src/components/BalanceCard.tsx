@@ -174,7 +174,7 @@ const BalanceCard = ({
                     bnbBalance={ethBalance}
                 />
                 
-                {/* WBNB Row */}
+                {/* WMON Row */}
                 <Box p={2} height="42px" display="flex" alignItems="center" ml={3}>
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
                         <Spinner size="sm" ml={"3px"} /> :

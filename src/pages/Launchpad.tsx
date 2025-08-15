@@ -119,7 +119,7 @@ const Launchpad: React.FC = () => {
                 presale: presale.toString()
             },
         ],
-        value: parseEther(`${1}`), // 0.1 BNB for deployment
+        value: parseEther(`${1}`), // 0.1 MON for deployment
         gasLimit: 30000000, // Increase gas limit
         onSuccess(data) {
         console.log(`transaction successful: ${data.hash}`);
@@ -378,7 +378,7 @@ const Launchpad: React.FC = () => {
     const assets = createListCollection({
         items: [
           { label: "WMON", value: "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701" }, // WMON
-            { label: "WBNB", value: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" }, // WBNB
+            { label: "WMON", value: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" }, // WMON
         ],
       })
     
@@ -830,7 +830,7 @@ const Launchpad: React.FC = () => {
                                 <Text>{floorPrice}</Text>
                             </Box>
                             <Box>
-                                <Text>WBNB</Text>
+                                <Text>WMON</Text>
                             </Box>
                             </HStack>
                             {presale == 1 ? (
@@ -841,7 +841,7 @@ const Launchpad: React.FC = () => {
                                 <Text>{commify(price)}</Text>
                             </Box>
                             <Box>
-                                <Text>WBNB</Text>
+                                <Text>WMON</Text>
                             </Box>
                             </HStack> 
                             <HStack>
@@ -850,7 +850,7 @@ const Launchpad: React.FC = () => {
                                 <Text>{commify(softCap, 0)}</Text>
                             </Box>
                             <Box>
-                                <Text>WBNB</Text>
+                                <Text>WMON</Text>
                             </Box>
                             </HStack>
                             <HStack>

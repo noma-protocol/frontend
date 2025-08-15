@@ -39,7 +39,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                     // ml={isMobile ? -4 : -6}
                     fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
                      >
-                        {isMobile ? "" : <>&nbsp;</>}BNB
+                        {isMobile ? "" : <>&nbsp;</>}MON
                     </Text>
                 </Box>
             </HStack>
@@ -78,7 +78,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                         fontWeight="bold" 
                         fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
                     >
-                        {isMobile ? "" : <>&nbsp;</>}BNB
+                        {isMobile ? "" : <>&nbsp;</>}MON
                     </Text>
                 </Box>
             </HStack>
@@ -121,7 +121,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                       // ml={isMobile ? -4 : -2} 
                         fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
                     >
-                        {isMobile ? "" : <>&nbsp;</>}BNB
+                        {isMobile ? "" : <>&nbsp;</>}MON
                     </Text>
                 </Box>
             </HStack>            

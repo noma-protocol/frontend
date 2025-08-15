@@ -89,7 +89,7 @@ const Wrap = ({
                     <Box  mt="80%" ml={5} >
                         <DrawerHeader>
                             <DrawerTitle>
-                                <Text as="h3" color="#4ade80">Wrap BNB</Text>
+                                <Text as="h3" color="#4ade80">Wrap MON</Text>
                             </DrawerTitle>
                             <DrawerCloseTrigger asChild mt="82%" mr={5}>
                                 <Button variant="ghost" size="sm" >×</Button>

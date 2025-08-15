@@ -804,7 +804,7 @@ const Exchange: React.FC = () => {
                 setIsLoadingExecuteTrade(false);
                 toaster.create({
                     title: "Success",
-                    description: `Spent ${commifyDecimals(ethDiff, 4)} BNB.\nReceived ${commify(tokenDiff, 4)} ${token0Info.tokenSymbol}`,
+                    description: `Spent ${commifyDecimals(ethDiff, 4)} MON.\nReceived ${commify(tokenDiff, 4)} ${token0Info.tokenSymbol}`,
                 });
               };
               fetchBalances();
@@ -858,7 +858,7 @@ const Exchange: React.FC = () => {
                 setIsLoadingExecuteTrade(false);
                 toaster.create({
                     title: "Success",
-                    description: `Spent ${commifyDecimals(wethDiff, 4)} WBNB.\nReceived ${commify(tokenDiff, 4)} ${token0Info.tokenSymbol}`,
+                    description: `Spent ${commifyDecimals(wethDiff, 4)} WMON.\nReceived ${commify(tokenDiff, 4)} ${token0Info.tokenSymbol}`,
                 });
               };
               fetchBalances();
@@ -900,7 +900,7 @@ const Exchange: React.FC = () => {
                   ERC20Abi,
                   localProvider
                 );
-                console.log(`Balance WETH/BNB before transaction : ${formatEther(`${balanceBeforePurchase}`)}`);
+                console.log(`Balance WETH/MON before transaction : ${formatEther(`${balanceBeforePurchase}`)}`);
                 console.log(`Token0 Balance before transaction : ${formatEther(`${balanceBeforeSale}`)}`);
 
                 const ethBalance = await localProvider.getBalance(address);
@@ -912,14 +912,14 @@ const Exchange: React.FC = () => {
 
                 let  tokenDiff = Number(formatEther(`${balanceBeforeSale}`)) - formatEther(`${balance}`);
 
-                console.log(`Balance WETH/BNB before transaction : ${formatEther(`${balanceBeforePurchase}`)} diff : ${wethDiff} WETH/BNB`);
+                console.log(`Balance WETH/MON before transaction : ${formatEther(`${balanceBeforePurchase}`)} diff : ${wethDiff} WETH/MON`);
 
                 // console.log(`ethDiff: ${ethDiff} ETH, tokenDiff: ${tokenDiff} ${token0Info.tokenSymbol}`);
                 setIsLoading(false);
                 setIsLoadingExecuteTrade(false);
                 toaster.create({
                     title: "Success",
-                    description: `Sold  ${commify(tokenDiff, 4)} ${token0Info.tokenSymbol}.\nReceived ${commify(wethDiff, 4)} ${useWeth == 1 ? token1Info.tokenSymbol : "BNB"}`,
+                    description: `Sold  ${commify(tokenDiff, 4)} ${token0Info.tokenSymbol}.\nReceived ${commify(wethDiff, 4)} ${useWeth == 1 ? token1Info.tokenSymbol : "MON"}`,
                 });
               };
               fetchBalances();
