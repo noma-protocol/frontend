@@ -46,7 +46,7 @@ const addresses = config.chain === "local"
   ? addressesLocal
   : addressesBsc;
 
-const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "ModelHelper");
+const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 const localProvider = new JsonRpcProvider(
   config.chain == "local" ? "http://localhost:8545" :
@@ -67,7 +67,7 @@ const ERC20Abi = [
 ];
 
 // NomaFactory contract address
-const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory");
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const feeTier = 3000;
 
 const Liquidity: React.FC = () => {
@@ -317,7 +317,7 @@ const Liquidity: React.FC = () => {
           token0Address,
           token1Address,
           newFloorPrice
-        ] = await VaultContract.getVaultInfo(true);
+        ] = await VaultContract.getVaultInfo();
   
         
         setCirculatingSupply(circulatingSupply);

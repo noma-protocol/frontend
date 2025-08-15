@@ -55,7 +55,7 @@ const addresses = config.chain === "local"
   ? addressesLocal
   : addressesBsc;
 
-const tokenAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Proxy");
+const tokenAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
 
 const { environment, presaleContractAddress } = config;
 

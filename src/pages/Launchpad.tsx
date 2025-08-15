@@ -67,7 +67,7 @@ const { environment, presaleContractAddress } = config;
 
 const FactoryArtifact = await import(`../assets/OikosFactory.json`);
 const FactoryAbi = FactoryArtifact.abi;
-const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "56", "Factory"); 
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory"); 
 
 const Launchpad: React.FC = () => {
     const { address, isConnected } = useAccount();
