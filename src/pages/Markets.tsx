@@ -34,11 +34,13 @@ import pancakeLogo from "../assets/images/pancake.png";
 import walletIcon from '../assets/images/walletIcon.svg';
 import addressesBsc from "../assets/deployment.json";
 
+const zeroAddress = "0x0000000000000000000000000000000000000000";
+
 const addresses = config.chain === "local"
   ? addressesLocal
   : addressesBsc;
 
-const { formatEther, ZeroAddress } = ethers.utils;
+const { formatEther } = ethers.utils;
 const {JsonRpcProvider} = ethers.providers;
 
 const localProvider = new JsonRpcProvider(
@@ -148,7 +150,7 @@ const Markets: React.FC = () => {
       setTimeout(() => {
 
         const fetchPresaleDetails = async ({ presaleContract }) => {
-          if (presaleContract === ZeroAddress) {
+          if (presaleContract === zeroAddress) {
             return false;
           }
       
@@ -261,7 +263,7 @@ const Markets: React.FC = () => {
                         // if (tokenSymbol != "OKS") {
                         //   return null; // Skip this vault
                         // }
-                        const hasPresale = vaultDescriptionData[7] !== "0x0000000000000000000000000000000000000000";
+                        const hasPresale = vaultDescriptionData[7] !== zeroAddress;
                         let isPresaleFinalized = false;
                         let expired = false;
                         
@@ -352,7 +354,7 @@ const Markets: React.FC = () => {
                         const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
                         // console.log("Vault Description Data:", vaultDescriptionData);
     
-                        const hasPresale = vaultDescriptionData[7] !== "0x0000000000000000000000000000000000000000";
+                        const hasPresale = vaultDescriptionData[7] !== zeroAddress;
                         let isPresaleFinalized = false;
                         let expired = false;
     
@@ -427,7 +429,7 @@ const Markets: React.FC = () => {
   // Handle vault selection click
   const handleVaultClick = (vault) => {
     // setSelectedVault(vaultAddress);
-    if (vault.presaleContract != ZeroAddress && isMobile) {
+    if (vault.presaleContract != zeroAddress && isMobile) {
       window.location.href = `/presale?a=${vault.presaleContract}`;
     }
   };
@@ -440,7 +442,6 @@ const Markets: React.FC = () => {
 
   const vaultsDataArray = view === "all" ? vaultDescriptions : userVaults;
   
-  const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   return (
     <Container maxW="container.xl" py={12} ml={isConnected ? "2%" : "8%"}>
