@@ -10,6 +10,7 @@ import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import BalanceCard from '../components/BalanceCard';
 import ethLogo from '../assets/images/weth.svg';
 import bnbLogo from '../assets/images/bnb.png';
+import monadLogo from '../assets/images/monad.png';
 import LoanAddCollateral from '../components/LoanAddCollateral';
 import LoanRepay from '../components/LoanRepay';
 import walletIcon from '../assets/images/walletIcon.svg';
@@ -1029,7 +1030,7 @@ const Borrow = () => {
                                             </NumberInputRoot>
                                             </Box>
                                             <Box mt={2}>
-                                                <Image src={bnbLogo} w="25px"></Image>
+                                                <Image src={monadLogo} w="25px"></Image>
                                             </Box>
                                         </HStack>
                                         <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
@@ -1466,7 +1467,7 @@ const Borrow = () => {
                                         </VStack>
                                     </Box>
                                     <Box>
-                                        <Image src={bnbLogo}></Image>
+                                        <Image src={monadLogo}></Image>
                                     </Box>
                                 </HStack>
                             </Box>
