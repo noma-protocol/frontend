@@ -24,7 +24,7 @@ const tokenAddress = "0x550e4395567137f42857659a1A0F1b3b268Bb11F"; // Replace wi
 
 const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...rest}) => {
 
-  const bscscanLink = `https://bscscan.com/token/${tokenAddress}`;
+  const bscscanLink = `https://testnet.monadexplorer.com/token/${tokenAddress}`;
   const tokenDecimals = vaultInfo.tokenDecimals || 0;
   const [symbol, setSymbol] = useState("NOMA");
 
@@ -126,7 +126,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
                 </Box>
                 <Box>
                   <Text>
-                    <a href={`https://bscscan.com/address/${vaultInfo.vault}`} target="_blank" rel="noreferrer">
+                    <a href={`https://testnet.monadexplorer.com/address/${vaultInfo.vault}`} target="_blank" rel="noreferrer">
                     {`${vaultInfo.vault?.slice(0, 6)}...${vaultInfo.vault?.slice(-6)}`}
                     </a>
                   </Text>
@@ -138,7 +138,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
                 </Box>
                 <Box>
                   <Text>
-                    <a href={`https://bscscan.com/address/${vaultInfo.poolAddress}`} target="_blank" rel="noreferrer">
+                    <a href={`https://testnet.monadexplorer.com/address/${vaultInfo.poolAddress}`} target="_blank" rel="noreferrer">
                     {`${vaultInfo.poolAddress?.slice(0, 6)}...${vaultInfo.poolAddress?.slice(-6)}`}
                     </a>
                   </Text>
