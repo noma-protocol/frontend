@@ -101,7 +101,7 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                     <Text color="#4ade80" fontSize="sm">Repaying:</Text>
                 </Box>
                 <Box>
-                    <Text color="#f3f7c6" ml={2} fontSize="sm">{repayAmount == 0 ? commify(formatEther(`${loanAmount}`), 4) : commify(`${repayAmount}`)} {isLoading ? <Spinner size="sm" /> : "WBNB"}</Text>
+                    <Text color="#f3f7c6" ml={2} fontSize="sm">{repayAmount == 0 ? commify(formatEther(`${loanAmount}`), 4) : commify(`${repayAmount}`)} {isLoading ? <Spinner size="sm" /> : "WMON"}</Text>
                 </Box>                
                 <Box>
                     <Text color="#4ade80" fontSize="sm">Withdrawing:</Text>

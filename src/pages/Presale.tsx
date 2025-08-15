@@ -715,7 +715,7 @@ const Presale: React.FC = () => {
                   <Box>
                 {isMobile ? <></> :
                   <Text fontStyle="italic" color="gray" fontSize={"11px"}>
-                  &nbsp;<b>({commify(Number(hardCap), 2)} BNB)</b>
+                  &nbsp;<b>({commify(Number(hardCap), 2)} MON)</b>
                 </Text>}
                   </Box>
                   </HStack>
@@ -734,7 +734,7 @@ const Presale: React.FC = () => {
                   <Box ml={2}>
                   {isMobile ? <></>:
                     <Text fontStyle="italic" color="gray" fontSize={"11px"}>
-                    <b>({Number(softCap).toFixed(2)} BNB)</b>
+                    <b>({Number(softCap).toFixed(2)} MON)</b>
                   </Text>}
                   </Box>
                   </HStack>
@@ -756,7 +756,7 @@ const Presale: React.FC = () => {
                           Contribution Amount
                         </StatLabel>
                         <Text fontSize={13}  fontStyle={"italic"} m={2} mt={-2}>
-                          Choose a contribution amount {isMobile?<br />:<></>} (min <Badge fontSize="sm">{commifyDecimals(hardCap / 200, 2)}</Badge> max <Badge fontSize="sm">{commify(hardCap / 25, 2)}</Badge> BNB)
+                          Choose a contribution amount {isMobile?<br />:<></>} (min <Badge fontSize="sm">{commifyDecimals(hardCap / 200, 2)}</Badge> max <Badge fontSize="sm">{commify(hardCap / 25, 2)}</Badge> MON)
                         </Text>
                       </StatRoot>
                       <HStack spacing={4} align="center" justify="center" mt={2}>
@@ -847,7 +847,7 @@ const Presale: React.FC = () => {
                           disabled={!isConnected || !contributionAmount || parseFloat(contributionAmount) === 0 || contributing || balance == 0}
                           onClick={() => {
                             // if (contributionAmount < 0.25 || contributionAmount > 5) {
-                            //   setErrorMessage("Contribution must be between 0.25 and 5 BNB.");
+                            //   setErrorMessage("Contribution must be between 0.25 and 5 MON.");
                             //   return;
                             // }
                             setErrorMessage(""); // Clear any previous error
@@ -1027,7 +1027,7 @@ const Presale: React.FC = () => {
                     </Box>
                     <Box color="#f3b500" >
                       {Number(commify(formatEther(totalReferred) * 0.03)).toFixed(4)}
-                    </Box><b>BNB</b>
+                    </Box><b>MON</b>
                   </HStack>              
                   <Box w={isMobile?"100%":"75%"} mt={4} ml={1} >
                     {isConnected ? (

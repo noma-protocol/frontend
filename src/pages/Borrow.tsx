@@ -144,8 +144,8 @@ const Borrow = () => {
 
     // if (token1Info?.tokenSymbol == "WMON") {
     //     setToken1Info({
-    //         tokenName: "Wrapped BNB",
-    //         tokenSymbol: "WBNB",
+    //         tokenName: "Wrapped MON",
+    //         tokenSymbol: "WMON",
     //         tokenDecimals: 18,
     //         balance: token1Info?.balance || "0",
     //     });

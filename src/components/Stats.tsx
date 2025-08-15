@@ -124,7 +124,7 @@ import { isMobile } from "react-device-detect";
           >
             <StatsCard
               title={'Oracle Free'} 
-              stat={"Noma's value tracks BNB regardless of its price and it's free from oracle dependencies. "}/>&nbsp;&nbsp;
+              stat={"Noma's value tracks MON regardless of its price and it's free from oracle dependencies. "}/>&nbsp;&nbsp;
             <StatsCard 
               title={'Capital Efficient'} 
               stat={"Noma's loans are emitted 1:1 with the collateral's IMV, yielding 100% capital efficiency without liquidations."}/>&nbsp;&nbsp;
