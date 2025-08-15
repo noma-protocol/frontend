@@ -20,7 +20,7 @@ import { ethers } from "ethers";
 const ERC20Artifact = await import(`../assets/ERC20.json`);
 const ERC20Abi = ERC20Artifact.abi;
 
-const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488"; // Replace with your token's contract address
+const tokenAddress = "0x550e4395567137f42857659a1A0F1b3b268Bb11F"; // Replace with your token's contract address
 
 const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...rest}) => {
 
@@ -39,7 +39,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
 
     const addTokenToMetaMask = async () => {
 
-      const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488"; // Replace with your token's contract address
+      const tokenAddress = "0x550e4395567137f42857659a1A0F1b3b268Bb11F"; // Replace with your token's contract address
       try {
         // Create a provider using MetaMask's injected web3 provider
         if (typeof window.ethereum !== 'undefined') {
@@ -81,7 +81,7 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
                 address: tokenAddress,
                 symbol: formattedSymbol,
                 decimals: formattedDecimals,
-                image: `http://app.oikos.cash/src/assets/images/logo.svg`, 
+                image: `http://app.noma.money/src/assets/images/logo.svg`, 
               },
             },
           });
