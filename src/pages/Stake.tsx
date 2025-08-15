@@ -109,7 +109,7 @@ const Stake = () => {
         items: [
         {
             label: "Exchange",
-            value: "/exchange",
+            value: "/",
         },            
         {
             label: "Markets",

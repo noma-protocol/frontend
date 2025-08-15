@@ -125,7 +125,7 @@ const Borrow = () => {
         items: [
         {
             label: "Exchange",
-            value: "/exchange",
+            value: "/",
         },            
         {
             label: "Markets",

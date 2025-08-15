@@ -20,12 +20,12 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
+      // {
+      //   index: true, // This means path === "/"
+      //   element: <Navigate to="/exchange" replace />,
+      // },
       {
-        index: true, // This means path === "/"
-        element: <Navigate to="/exchange" replace />,
-      },
-      {
-        path: "/exchange",
+        path: "/",
         element: <Exchange />,
       },
       {
