@@ -81,7 +81,7 @@ const Markets: React.FC = () => {
 
   const reserveAssetsMap = {
     [config.protocolAddresses.WMON] : "WMON",
-    [config.protocolAddresses.WMON] : "WMON",
+    // [config.protocolAddresses.WMON] : "WMON",
   };
 
   const fetchPoolAddress = async (token0: string, token1: string) => {
@@ -115,7 +115,7 @@ const Markets: React.FC = () => {
 
   const labelToLogoMap = {
     WMON: monadLogo,
-    WMON: bnbLogo,
+    MON: bnbLogo,
   };
 
   // fetch logo for reserve asset
