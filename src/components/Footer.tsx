@@ -113,14 +113,14 @@ const Footer: React.FC = (
               <VStack>
                 <Box>
                 <NavItem>
-                <a href="https://docs.oikos.cash" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px"}}>
+                <a href="https://docs.noma.money" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px"}}>
                   <><p style={{color:"#4ade80"}}>Docs</p></>
                 </a>
               </NavItem>
                 </Box>
                 <Box>
                 <NavItem>
-                <a href="https://oikoscash.medium.com/" target="_blank" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px", color:"#f3f7c6"}}>
+                <a href="https://nomaprotocol.medium.com/" target="_blank" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px", color:"#f3f7c6"}}>
                    <><p style={{color:"#4ade80"}}>Blog</p></>
                 </a>
               </NavItem>
@@ -143,7 +143,7 @@ const Footer: React.FC = (
           <Col md="3" style={{marginTop:'50px', paddingLeft:"100px", marginLeft:isMobile? "5%": 0}}>
             <h3 className="title" color="white">Follow us:</h3>
               <a
-                href="https://twitter.com/oikos_cash"
+                href="https://twitter.com/nomaprotocol"
                 id="tooltip39661217"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -157,7 +157,7 @@ const Footer: React.FC = (
               </UncontrolledTooltip>
 
               <a
-                href="https://github.com/orgs/oikos-cash/"
+                href="https://github.com/noma-protocol"
                 id="tooltip206037619"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -171,7 +171,7 @@ const Footer: React.FC = (
               </UncontrolledTooltip>
 
               <a
-                href="https://discord.gg/VVDu6Er"
+                href="https://discord.gg/nomaprotocol"
                 id="tooltip750293512"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -185,7 +185,7 @@ const Footer: React.FC = (
               </UncontrolledTooltip>
 
               <a
-                href="https://t.me/oikoscash"
+                href="https://t.me/nomaprotocol"
                 id="tooltip750293512"
                 target="_blank"
                 rel="noopener noreferrer"
