@@ -426,7 +426,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 isChecked={tradeMode == "BUY"}
                 onChange={() => setTradeMode("BUY")}
               >
-                <Text fontSize="xs">WMON</Text> 
+                <Text fontSize="xs">BUY</Text> 
               </CustomRadio>
               <CustomRadio
                 tradeMode={tradeMode}
@@ -436,7 +436,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 onChange={() => setTradeMode("SELL")}
                  border="1px solid red"
               >
-                <Text fontSize="xs">WMON</Text> 
+                <Text fontSize="xs">SELL</Text> 
               </CustomRadio>
             </HStack> 
         </Box>
