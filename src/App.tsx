@@ -25,11 +25,11 @@ function App() {
   const TRACKING_ID = "UA-XXXXX-X"; // OUR_TRACKING_ID
   ReactGA.initialize(TRACKING_ID);
 
-  const projectId = "7820402434e60ca8c323d77ae01be61d";
+  const projectId = "a49d90d6ef89c4f94f1629f5821784a5";
   const metadata = {
-    name: "Oikos",
+    name: "Noma",
     description: "Next-gen Launchpad",
-    url: "https://app.oikos.cash",
+    url: "https://app.noma.money",
     icons: ["https://avatars.githubusercontent.com/u/37784886"],
   };
 
