@@ -94,7 +94,7 @@ const Liquidity: React.FC = () => {
     items: [
       {
         label: "Exchange",
-        value: "/exchange",
+        value: "/",
       },
       {
         label: "Markets",
