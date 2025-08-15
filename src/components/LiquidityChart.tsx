@@ -53,7 +53,7 @@ return (
               <Text color="#4ade80" fontSize={isMobile?"xs":"13px"}>Spot</Text>
               <Box mt={-6} fontSize={isMobile?"xs":"13px"}>
               <label>{commifyPatched(formatEther(spotPrice))}</label>
-              <Text mt={isMobile ? 0 : -1} fontSize={"small"} fontSize={isMobile?"xs":"13px"}>WBNB/{tokenSymbol}</Text>
+              <Text mt={isMobile ? 0 : -1} fontSize={"small"} fontSize={isMobile?"xs":"13px"}>WMON/{tokenSymbol}</Text>
               </Box>
               <Box>
                 <Text fontSize={isMobile?"xs":"13px"}>${commify(Number(formatEther(spotPrice)) * priceUSD, 4)}</Text>
@@ -80,7 +80,7 @@ return (
               </Table.Header>
               <Table.Body style={{ color: "ivory" }}>
                 <Table.Row>
-                  <Table.Cell><Text color="#4ade80">&nbsp;&nbsp;&nbsp;Reserves (WBNB)</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80">&nbsp;&nbsp;&nbsp;Reserves (WMON)</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1))}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount1))}</Table.Cell>
                   {/* <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount1))}</Table.Cell>
@@ -186,7 +186,7 @@ return (
               </Table.Header>
               <Table.Body style={{ color: "ivory" }}>
                 <Table.Row>
-                  <Table.Cell><Text color="#4ade80" fontSize="xs">Reserves (WBNB)</Text></Table.Cell>
+                  <Table.Cell><Text color="#4ade80" fontSize="xs">Reserves (WMON)</Text></Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Floor"]?.amount1), 2)}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Anchor"]?.amount1), 2)}</Table.Cell>
                   <Table.Cell isNumeric>{commify(formatEther(data["Discovery"]?.amount1), 2)}</Table.Cell>

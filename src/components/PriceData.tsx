@@ -1,10 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import Chart from "react-apexcharts";
-import { Box, HStack, Text, Spinner, VStack } from "@chakra-ui/react";
+import { Box, HStack, Text, Spinner, VStack, createListCollection } from "@chakra-ui/react";
 import { css, Global } from "@emotion/react";
 import { ethers } from "ethers";
 import { isMobile } from "react-device-detect";
 import { isWithinPercentageDifference } from "../utils";
+import {
+  SelectContent,
+  SelectItem,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText,
+} from "./ui/select";
 const { formatEther } = ethers.utils;
 
 // Set default font size for all ApexCharts
@@ -15,7 +22,7 @@ if (typeof window !== "undefined") {
     {
       chart: {
         fontSize: 8,
-        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
       }
     },
     false,
@@ -58,7 +65,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   isTokenInfoLoading,
   imv,
   priceUSD,
-  interval = "24h", // Default to 24h interval
+  interval = "1M", // Default to 1M interval
   setPercentChange = () => {}, // Default no-op function
   onPercentChange,
 }) => {
@@ -68,11 +75,44 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   }]);
   const [spotPrice, setSpotPrice] = useState<number | null>(null);
   const [availableIntervals, setAvailableIntervals] = useState<string[]>([]);
-  const [selectedInterval, setSelectedInterval] = useState<string>(interval);
+  const [selectedInterval, setSelectedInterval] = useState<string>(interval || "1M");
+  // Set appropriate default granularity based on timeframe
+  const getDefaultGranularity = (timeframe: string) => {
+    switch (timeframe) {
+      case "15m": return "5m";
+      case "1h": return "30m";
+      case "24h": return "1h";
+      case "1w": return "24h";
+      case "1M": return "24h";
+      default: return "24h";
+    }
+  };
+  
+  const [selectedGranularity, setSelectedGranularity] = useState<string>(() => {
+    const defaultGran = getDefaultGranularity(interval || "1M");
+    console.log(`[Debug] Initial granularity for ${interval || "1M"}: ${defaultGran}`);
+    return defaultGran;
+  });
   const [apiError, setApiError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const lastPrice = useRef<number | null>(null);
   const lastRefreshTime = useRef<number | null>(null);
-  const API_BASE_URL = "https://prices.oikos.cash"; // API base URL
+  const API_BASE_URL = "https://pricefeed.noma.money"; //"https://prices.oikos.cash"; // API base URL
+
+  // Helper function to convert interval string to milliseconds
+  const getIntervalMs = (interval: string): number => {
+    switch (interval) {
+      case "1m": return 60 * 1000;
+      case "5m": return 5 * 60 * 1000;
+      case "15m": return 15 * 60 * 1000;
+      case "30m": return 30 * 60 * 1000;
+      case "1h": return 60 * 60 * 1000;
+      case "6h": return 6 * 60 * 60 * 1000;
+      case "12h": return 12 * 60 * 60 * 1000;
+      case "24h": return 24 * 60 * 60 * 1000;
+      default: return 60 * 60 * 1000; // Default 1h
+    }
+  };
 
   // Fetch latest price
   const fetchLatestPrice = async () => {
@@ -115,30 +155,66 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     }
   };
 
-  // Map user-friendly intervals to API endpoints
-  const mapIntervalToEndpoint = (interval: string) => {
-    switch (interval) {
-      case "15m": return "15m";
-      case "1h": return "1h"; 
-      case "24h": return "24h";
-      case "1w": return "24h"; // Use 24h data for 1w calculation
-      case "1M": return "24h"; // Use 24h data for 1M calculation
-      default: return interval;
+  // Calculate timestamp range and interval based on timeframe and granularity
+  const getTimeParams = (timeframe: string, granularity: string = selectedGranularity) => {
+    const now = Date.now();
+    let fromTimestamp: number;
+    let interval: string;
+
+    switch (timeframe) {
+      case "15m":
+        fromTimestamp = now - (15 * 60 * 1000); // 15 minutes ago
+        interval = granularity; // Use selected granularity (1m, 5m, 15m)
+        break;
+      case "1h":
+        fromTimestamp = now - (60 * 60 * 1000); // 1 hour ago
+        interval = granularity; // Use selected granularity (5m, 15m, 30m)
+        break;
+      case "24h":
+        fromTimestamp = now - (24 * 60 * 60 * 1000); // 24 hours ago
+        interval = granularity; // Use selected granularity (30m, 1h, 6h, 12h)
+        break;
+      case "1w":
+        fromTimestamp = now - (7 * 24 * 60 * 60 * 1000); // 1 week ago
+        interval = granularity; // Use selected granularity (1h, 6h, 12h, 24h)
+        break;
+      case "1M":
+        fromTimestamp = now - (30 * 24 * 60 * 60 * 1000); // 30 days ago
+        interval = granularity; // Use selected granularity (6h, 12h, 24h)
+        break;
+      default:
+        fromTimestamp = now - (24 * 60 * 60 * 1000); // Default to 24h
+        interval = "1h";
     }
+
+    return {
+      from_timestamp: fromTimestamp, // Keep in milliseconds
+      to_timestamp: now, // Keep in milliseconds
+      interval
+    };
   };
 
   // Fetch OHLC data from API
-  const fetchOHLCData = async (interval: string) => {
+  const fetchOHLCData = async (timeframe: string) => {
     try {
-      const apiEndpoint = mapIntervalToEndpoint(interval);
-      // Use the OHLC endpoint
-      // console.log(`[Debug] Fetching OHLC data from: ${API_BASE_URL}/api/price/ohlc/${apiEndpoint} (for interval: ${interval})`);
-      const response = await fetch(`${API_BASE_URL}/api/price/ohlc/${apiEndpoint}`);
+      const { from_timestamp, to_timestamp, interval } = getTimeParams(timeframe, selectedGranularity);
+      
+      // Build the API URL with query parameters
+      const url = new URL(`${API_BASE_URL}/api/price/ohlc`);
+      url.searchParams.append('from_timestamp', from_timestamp.toString());
+      url.searchParams.append('to_timestamp', to_timestamp.toString());
+      url.searchParams.append('interval', interval);
+      
+      console.log(`[Debug] Fetching OHLC data from: ${url.toString()}`);
+      console.log(`[Debug] Time range: ${new Date(from_timestamp)} to ${new Date(to_timestamp)} (${((to_timestamp - from_timestamp) / (1000 * 60 * 60)).toFixed(1)} hours)`);
+      console.log(`[Debug] Expected datapoints with ${interval} intervals: ~${Math.ceil((to_timestamp - from_timestamp) / getIntervalMs(interval))}`);
+      const response = await fetch(url.toString());
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
 
       const responseJson = await response.json();
+      console.log(`[Debug] API Response:`, responseJson);
 
       // Check if we have OHLC data
       if (responseJson && responseJson.ohlc && Array.isArray(responseJson.ohlc)) {
@@ -148,16 +224,21 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
           y: [candle.open, candle.high, candle.low, candle.close]
         }));
 
+        console.log(`[Debug] Formatted OHLC data (${ohlcData.length} candles):`, ohlcData.slice(0, 3));
+
         // Update last refresh time
         lastRefreshTime.current = Date.now();
+        setIsLoading(false); // Data fetched successfully
 
         return ohlcData;
       } else {
-        console.error("API response doesn't contain valid OHLC data:", responseJson);
+        console.log("API response contains empty OHLC data - this is normal for test environment");
+        setIsLoading(false); // Mark as loaded even if empty
         return [];
       }
     } catch (error) {
       console.error("Error fetching OHLC data:", error);
+      setIsLoading(false); // Mark as loaded on error
       return [];
     }
   };
@@ -301,35 +382,37 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       // Fetch the latest price
       const latestPrice = await fetchLatestPrice();
 
+      // Always display OHLC data if available, regardless of latest price
+      if (ohlcData.length > 0) {
+        console.log(`[Debug] Setting series data with ${ohlcData.length} data points`);
+        setSeries([{
+          name: `${token0Symbol}/${token1Symbol}`,
+          data: ohlcData
+        }]);
+
+        // Calculate and set percentage change
+        const change = calculatePercentChange(ohlcData, selectedInterval);
+        setPercentChange(change);
+
+        // Notify parent component if callback provided
+        if (onPercentChange) {
+          onPercentChange(change);
+        }
+      } else {
+        // Set empty data array when no history is available
+        setSeries([{ name: `${token0Symbol}/${token1Symbol}`, data: [] }]);
+        setPercentChange(0);
+
+        // Notify parent with zero change
+        if (onPercentChange) {
+          onPercentChange(0);
+        }
+      }
+
+      // Set spot price if latest price is available
       if (latestPrice !== null) {
         lastPrice.current = latestPrice;
         setSpotPrice(latestPrice);
-
-        // Only display actual price history data
-        if (ohlcData.length > 0) {
-          setSeries([{
-            name: `${token0Symbol}/${token1Symbol}`,
-            data: ohlcData
-          }]);
-
-          // Calculate and set percentage change
-          const change = calculatePercentChange(ohlcData, selectedInterval);
-          setPercentChange(change);
-
-          // Notify parent component if callback provided
-          if (onPercentChange) {
-            onPercentChange(change);
-          }
-        } else {
-          // Set empty data array when no history is available
-          setSeries([{ name: `${token0Symbol}/${token1Symbol}`, data: [] }]);
-          setPercentChange(0);
-
-          // Notify parent with zero change
-          if (onPercentChange) {
-            onPercentChange(0);
-          }
-        }
       }
 
       // Set up polling for price updates
@@ -381,7 +464,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
     startFetching();
     return () => clearInterval(pollInterval);
-  }, [poolAddress, providerUrl, token0Symbol, token1Symbol, selectedInterval]);
+  }, [poolAddress, providerUrl, token0Symbol, token1Symbol, selectedInterval, selectedGranularity]);
 
   // Compute the minimum y value from your series data
   const computedMinY = series[0].data.length > 0
@@ -416,7 +499,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         style: {
           colors: "#f8f8f8",
           fontSize: '6px', // Try smaller font size for better compatibility
-          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         },
         datetimeUTC: false,
       },
@@ -428,24 +511,31 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       },
       labels: {
         formatter: (val: number) => {
-          // Only show values near our annotations
-          if (spotPrice && (
-              Math.abs(val - spotPrice) / spotPrice < 0.005 ||
-              Math.abs(val - Number(formatEther(`${imv || 0}`))) / Number(formatEther(`${imv || 0}`)) < 0.005
-            )) {
-            return val.toFixed(8);
+          // Format with appropriate precision and remove trailing zeros
+          let formatted;
+          if (val < 0.0001) {
+            formatted = val.toFixed(6);
+          } else if (val < 0.01) {
+            formatted = val.toFixed(4);
+          } else if (val < 1) {
+            formatted = val.toFixed(3);
+          } else {
+            formatted = val.toFixed(2);
           }
-          return ''; // Hide other y-axis labels
+          // Remove trailing zeros and unnecessary decimal point
+          return parseFloat(formatted).toString();
         },
         offsetX: -10, // This will effectively move the labels left (negative X direction)
         style: {
           colors: "#f8f8f8",
           fontSize: '6px',
-          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         }
       },
-      tickAmount: 5,
+      tickAmount: 6,
       floating: false,
+      forceNiceScale: true, // Enable nice scaling to avoid gaps
+      decimalsInFloat: 4, // Reduce decimal places
     },
     tooltip: {
       enabled: true,
@@ -510,7 +600,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     },
     legend: {
       fontSize: '8px',
-      fontFamily: 'Helvetica, Arial, sans-serif',
+      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
       labels: {
         colors: "#f8f8f8",
         useSeriesColors: false
@@ -531,7 +621,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       enabled: false,
       style: {
         fontSize: '8px',
-        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         colors: ['#f8f8f8']
       }
     },
@@ -548,7 +638,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                   color: "#fff",
                   background: "#86efac",
                   fontSize: '6px',
-                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
                   cssClass: 'small-text-annotation',
                 },
                 text: ``, // `Spot Price: ${typeof spotPrice === 'number' ? spotPrice.toFixed(9) : '0.00'}`,
@@ -573,6 +663,11 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
     // Update the selected interval state
     setSelectedInterval(newInterval);
+    // Set appropriate default granularity for the new timeframe
+    const newGranularity = getDefaultGranularity(newInterval);
+    console.log(`[Debug] Changing to ${newInterval} timeframe, setting granularity to: ${newGranularity}`);
+    setSelectedGranularity(newGranularity);
+    setIsLoading(true);
 
     // Fetch new OHLC data immediately when interval changes
     const ohlcData = await fetchOHLCData(newInterval);
@@ -604,14 +699,69 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
     lastRefreshTime.current = Date.now();
   };
 
+  const handleGranularityChange = async (newGranularity: string) => {
+    // Only proceed if the granularity is actually changing
+    if (newGranularity === selectedGranularity) {
+      return;
+    }
+
+    // Update the selected granularity state
+    setSelectedGranularity(newGranularity);
+    setIsLoading(true);
+
+    // Fetch new OHLC data immediately when granularity changes
+    const ohlcData = await fetchOHLCData(selectedInterval);
+
+    // Always update the series, even if empty
+    setSeries([{
+      name: `${token0Symbol}/${token1Symbol}`,
+      data: ohlcData
+    }]);
+
+    // Calculate and set percentage change for new granularity
+    if (ohlcData.length > 0) {
+      const change = calculatePercentChange(ohlcData, selectedInterval);
+      setPercentChange(change);
+
+      // Notify parent component if callback provided
+      if (onPercentChange) {
+        onPercentChange(change);
+      }
+    } else {
+      // Set zero change if no data available
+      setPercentChange(0);
+      if (onPercentChange) {
+        onPercentChange(0);
+      }
+    }
+
+    // Update the last refresh time
+    lastRefreshTime.current = Date.now();
+  };
+
   // Define predefined time intervals
   const predefinedIntervals = ["15m", "1h", "24h", "1w", "1M"];
+  
+  // Map intervals to display names
+  const getIntervalDisplayName = (interval: string) => {
+    switch (interval) {
+      case "1M": return "1m";
+      default: return interval;
+    }
+  };
 
   // Update error handlers
   useEffect(() => {
     const checkApiConnection = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/price/ohlc/15m`);
+        // Test with a simple 1h timeframe
+        const { from_timestamp, to_timestamp, interval } = getTimeParams("1h", selectedGranularity);
+        const url = new URL(`${API_BASE_URL}/api/price/ohlc`);
+        url.searchParams.append('from_timestamp', from_timestamp.toString());
+        url.searchParams.append('to_timestamp', to_timestamp.toString());
+        url.searchParams.append('interval', interval);
+        
+        const response = await fetch(url.toString());
         setApiError(!response.ok);
       } catch (error) {
         console.error("API connection error:", error);
@@ -627,7 +777,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
   // console.log(Number(formatEther(`${imv || 0}`)) * Number(priceUSD), "IMV in USD");
   return (
-    <Box ml={isMobile ? -5 : 0} mt={isMobile ? 0 : "-5px"}>
+    <Box ml={isMobile ? -5 : 0} mt={isMobile ? 0 : "-55px"}>
       <Global styles={css`
         .apexcharts-text tspan,
         .apexcharts-label,
@@ -692,10 +842,112 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
         <Box h="30px" bg="red.800" p={2} borderRadius="md">
           <Text fontSize="sm" color="white">API connection error. Please check that the price API is running.</Text>
         </Box>
-      ) : series[0].data.length === 0 ? (
+      ) : isLoading ? (
         <Box h="30px"><Text fontSize="sm" ml={isMobile ? 5 : 0}>Loading price data... </Text></Box>
+      ) : series[0].data.length === 0 ? (
+        <Box h="30px"><Text fontSize="sm" ml={isMobile ? 5 : 0}>No price data available for this timeframe</Text></Box>
       ) : (
         <>
+        <VStack alignItems="left" mt={-5} >
+          <Box mb={2} ml={isMobile ? 5 : 0}>
+            <HStack>
+              <Box w="80px"><Text fontSize="sm">Interval</Text></Box>
+              <Box>
+                {/* Granularity Selector - show different options based on timeframe */}
+                {(selectedInterval === "15m" || selectedInterval === "1h" || selectedInterval === "24h" || selectedInterval === "1w" || selectedInterval === "1M") && (
+                  <Box ml="auto">
+                    <SelectRoot
+                      ml={-2}
+                      fontSize="xs"
+                      key={`${selectedInterval}-${selectedGranularity}`}
+                      collection={createListCollection({
+                        items: selectedInterval === "15m" 
+                          ? [
+                              { label: "1m", value: " 1m" },
+                              { label: "5m", value: " 5m" },
+                              { label: "15m", value: " 15m" }
+                            ]
+                          : selectedInterval === "1h"
+                          ? [
+                              { label: "5m", value: " 5m" },
+                              { label: "15m", value: " 15m" },
+                              { label: "30m", value: " 30m" }
+                            ]
+                          : selectedInterval === "24h" 
+                          ? [
+                              { label: "30m", value: " 30m" },
+                              { label: "1h", value: " 1h" },
+                              { label: "6h", value: " 6h" },
+                              { label: "12h", value: " 12h" }
+                            ]
+                          : selectedInterval === "1w"
+                          ? [
+                              { label: "1h", value: " 1h" },
+                              { label: "6h", value: " 6h" },
+                              { label: "12h", value: " 12h" },
+                              { label: "24h", value: " 24h" }
+                            ]
+                          : [
+                              { label: "6h", value: " 6h" },
+                              { label: "12h", value: " 12h" },
+                              { label: "24h", value: " 24h" }
+                            ]
+                      })}
+                      size="xs"
+                      width="80px"
+                      value={[selectedGranularity]}
+                      onValueChange={(details) => {
+                        handleGranularityChange(details.value[0]);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValueText placeholder={selectedGranularity} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(selectedInterval === "15m" 
+                          ? [
+                              { label: "1m", value: "1m" },
+                              { label: "5m", value: "5m" },
+                              { label: "15m", value: "15m" }
+                            ]
+                          : selectedInterval === "1h"
+                          ? [
+                              { label: "5m", value: "5m" },
+                              { label: "15m", value: "15m" },
+                              { label: "30m", value: "30m" }
+                            ]
+                          : selectedInterval === "24h" 
+                          ? [
+                              { label: "30m", value: "30m" },
+                              { label: "1h", value: "1h" },
+                              { label: "6h", value: "6h" },
+                              { label: "12h", value: "12h" }
+                            ]
+                          : selectedInterval === "1w"
+                          ? [
+                              { label: "1h", value: "1h" },
+                              { label: "6h", value: "6h" },
+                              { label: "12h", value: "12h" },
+                              { label: "24h", value: "24h" }
+                            ]
+                          : [
+                              { label: "6h", value: "6h" },
+                              { label: "12h", value: "12h" },
+                              { label: "24h", value: "24h" }
+                            ]
+                        ).map((item) => (
+                          <SelectItem key={item.value} item={item}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </SelectRoot>
+                  </Box>
+                )}                  
+              </Box>
+            </HStack>
+          </Box>
+          <Box>
         <HStack justifyContent="space-between">
           <Box w="100%">
             <Box
@@ -709,36 +961,38 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               h="40px"
               w="100%"
             >
-              {availableIntervals.length > 0 && (
-                <Box display="flex" gap={3} alignItems="left">
-                  {availableIntervals.map((int) => {
-                    return (
-                      <Box
-                        key={int}
-                        px={3}
-                        py={1}
-                        borderRadius="md"
-                        bg={selectedInterval === int ? "#4ade80" : "gray.700"}
-                        cursor="pointer"
-                        onClick={() => handleIntervalChange(int)}
-                        _hover={{ bg: selectedInterval === int ? "#22c55e" : "gray.600" }}
-                        transition="all 0.2s"
-                        position="relative"
-                      >
-                        <Text
-                          mt={-4}
-                          fontSize="xs"
-                          fontWeight={selectedInterval === int ? "bold" : "normal"}
-                          color={selectedInterval === int ? "black" : "white"}
+              <HStack spacing={4} w="100%" mt={1}>
+                {availableIntervals.length > 0 && (
+                  <Box display="flex" gap={3} alignItems="left">
+                    {availableIntervals.map((int) => {
+                      return (
+                        <Box
+                          key={int}
+                          px={3}
+                          py={1}
+                          borderRadius="md"
+                          bg={selectedInterval === int ? "#4ade80" : "gray.700"}
+                          cursor="pointer"
+                          onClick={() => handleIntervalChange(int)}
+                          _hover={{ bg: selectedInterval === int ? "#22c55e" : "gray.600" }}
+                          transition="all 0.2s"
+                          position="relative"
                         >
-                          {int}
-                        </Text>
-                      </Box>
-                    );
-                  })}
-                </Box>
-              )}
+                          <Text
+                            mt={-4}
+                            fontSize="xs"
+                            fontWeight={selectedInterval === int ? "bold" : "normal"}
+                            color={selectedInterval === int ? "black" : "white"}
+                          >
+                            {getIntervalDisplayName(int)}
+                          </Text>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
 
+              </HStack>
             </Box>
           </Box>
               {isMobile ? (
@@ -762,11 +1016,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
                 </HStack>
               </Box>
               }
-        </HStack>
-
-          <Box h={isMobile ? 200 : 285} ml={isMobile ? "20px" : 0}  borderRadius={5} border="1px solid ivory" mb={5} w={isMobile ? "92%" : "99%"}>
+        </HStack>            
+          </Box>
+        </VStack>
+          <Box h={isMobile ? 200 : 285} ml={isMobile ? "20px" : 0}  borderRadius={5} border="1px solid ivory" mb={5} w={isMobile ? "92%" : "99%"} mt={1}>
             <Box
               ml={1}
+              
             >
               <Chart
                 options={chartOptions}

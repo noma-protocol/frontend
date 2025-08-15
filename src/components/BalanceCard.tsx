@@ -153,13 +153,13 @@ const BalanceCard = ({
                 </Box>
                 
                 {/* MON Row */}
-                <Box p={2} height="42px" display="flex" alignItems="center" w="70px">
+                <Box p={2} height="42px" display="flex" alignItems="center" w="70px" ml={3}>
                     <HStack spacing={2}>
                         <Image src={monadLogo} w="25px" alt="MON" ml={-2} />
                         <Text fontSize={isMobile ? "xs" : "sm"} mt={"-2px"} fontWeight={"bold"} ml={2}>MON</Text>
                     </HStack>
                 </Box>
-                <Box ml={-2} bgColor={"#18181b"} px={2} borderRadius={5}  mt={3} h="20px" w={isMobile ? "100px" : "130px"} fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
+                <Box ml={-2} bgColor={"#18181b"} px={2} borderRadius={5}  mt={3} h="20px" w={isMobile ? "100px" : "160px"} fontSize={fontSize} textAlign="left" display="flex" alignItems="left" justifyContent="left">
                     <Text fontSize={isMobile ? "xs" : "sm"} color="white"  h={"20px"}>{commify(formattedEthBalance)}</Text>
                 </Box>
                 <Wrap 
@@ -175,7 +175,7 @@ const BalanceCard = ({
                 />
                 
                 {/* WBNB Row */}
-                <Box p={2} height="42px" display="flex" alignItems="center">
+                <Box p={2} height="42px" display="flex" alignItems="center" ml={3}>
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
                         <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2}>
@@ -184,7 +184,7 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box  ml={-2} bgColor={"#18181b"} w={isMobile ? "100px" : "130px"}  color="gray.800"  px={2} borderRadius={5}  mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                <Box  ml={-2} bgColor={"#18181b"} w={isMobile ? "100px" : "160px"}  color="gray.800"  px={2} borderRadius={5}  mt={3} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     <Text color="white" fontSize={isMobile ? "xs" : "sm"}>{commify(formatEther(`${token1Balance || 0}`))}</Text>
                 </Box>
                 
@@ -201,7 +201,7 @@ const BalanceCard = ({
                 />
 
                 {/* Token Row */}
-                <Box p={2}  display="flex" alignItems="center" mt={-10}>
+                <Box p={2}  display="flex" alignItems="center" mt={-10} ml={3}>
                     {isTokenInfoLoading && !isRefreshingTokenInfo ?
                         <Spinner size="sm" ml={"3px"} /> :
                         <HStack spacing={2} ml={"3px"}>
@@ -220,7 +220,7 @@ const BalanceCard = ({
                         </HStack>
                     }
                 </Box>
-                <Box ml={-2} bgColor={"#18181b"} w={isMobile ? "100px" : "130px"}  color="gray.800" px={2} borderRadius={5} mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
+                <Box ml={-2} bgColor={"#18181b"} w={isMobile ? "100px" : "160px"}  color="gray.800" px={2} borderRadius={5} mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     <Text fontSize={isMobile ? "xs" : "sm"} color="white">{commify(formatEther(`${token0Balance || 0}`))}</Text>
                 </Box>
                 <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center"  mt={2}>
