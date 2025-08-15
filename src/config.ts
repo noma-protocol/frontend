@@ -16,7 +16,7 @@ const protocolAddresses = {
     pancakeQuoterV2: "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997", 
     uniswapQuoterV2: "0x1b4E313fEF15630AF3e6F2dE550Dbf4cC9D3081d",
     WMON: "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701",
-    WMON: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+    // WMON: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
 }
 
 export default {
