@@ -15,6 +15,8 @@ import LoanAddCollateral from '../components/LoanAddCollateral';
 import LoanRepay from '../components/LoanRepay';
 import walletIcon from '../assets/images/walletIcon.svg';
 import placeholderLogo from '../assets/images/question.svg';
+import placeholderLogoDark from '../assets/images/question_white.svg';
+
 import {
     SelectContent,
     SelectItem,
@@ -1068,7 +1070,7 @@ const Borrow = () => {
                                             <Box mt={5} fontSize={isMobile ? "xs" : "sm"}>
                                             <HStack>
                                                 <Box> <Text fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    </Box>
-                                                <Box><Image src={placeholderLogo} w={15}></Image></Box>
+                                                <Box><Image src={placeholderLogoDark} w={15}></Image></Box>
                                             </HStack>
                                             </Box>
                                             <Box>
@@ -1080,7 +1082,7 @@ const Borrow = () => {
                                             <Box mt={5}> 
                                                     <HStack>
                                                         <Box><Text fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>IMV</Text> </Box>
-                                                        <Box><Image src={placeholderLogo} w={15}></Image></Box>
+                                                        <Box><Image src={placeholderLogoDark} w={15}></Image></Box>
                                                     </HStack>
                                                 <HStack>
                                                     <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Text></Box>
@@ -1229,9 +1231,9 @@ const Borrow = () => {
                         <GridItem  mt={"-5"} w="90%" border={"1px solid white"} px={4} py={3} ml={5} borderRadius={10} backgroundColor={"#222831"}>
                             <Text fontSize={isMobile?"12px":"15px"} color="#4ade80">Active Loan</Text>
                             <SimpleGrid columns={5} mt={-5} fontSize={isMobile ? "xs" : "sm"}>
-                                <Box px={2} color="white" backgroundColor={"#4ade80"}> Collateral </Box>
-                                <Box px={2} color="white" backgroundColor={"#4ade80"}> Borrowed </Box>
-                                <Box px={2} color="white" backgroundColor={"#4ade80"}> 
+                                <Box px={2} color="black" backgroundColor={"#4ade80"}> Collateral </Box>
+                                <Box px={2} color="black" backgroundColor={"#4ade80"}> Borrowed </Box>
+                                <Box px={2} color="black" backgroundColor={"#4ade80"}> 
                                 <HStack>
                                  <Box><Text fontSize={isMobile ? "xs" : "sm"}>LTV</Text></Box>
                                  <Box>
@@ -1241,10 +1243,10 @@ const Borrow = () => {
                                  </Box>
                                 </HStack>
                                 </Box>
-                                <Box px={2} color="white" backgroundColor={"#4ade80"}>
+                                <Box px={2} color="black" backgroundColor={"#4ade80"}>
                                 Expires
                                 </Box>
-                                <Box px={2} color="white" backgroundColor={"#4ade80"}> &nbsp;&nbsp;&nbsp;Actions </Box>
+                                <Box px={2} color="black" backgroundColor={"#4ade80"}> &nbsp;&nbsp;&nbsp;Actions </Box>
                                 
                                 {loanData?.borrowAmount > 0 ? ( 
                                     <>
@@ -1423,13 +1425,13 @@ const Borrow = () => {
                         <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#4ade80">New Loan</Text>
                         <SimpleGrid columns={3} w="100%" mt={-5}>
                             <Box w="500px"backgroundColor={"#4ade80"}  mb={2}>
-                                <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;Amount</Text>
+                                <Text fontSize={isMobile ? "xs" : "sm"} color="black">&nbsp;Amount</Text>
                             </Box>
                             <Box  >
-                                <Text fontSize={isMobile ? "xs" : "sm"} ml="40px">&nbsp;&nbsp;&nbsp;Duration</Text>
+                                <Text fontSize={isMobile ? "xs" : "sm"} ml="40px"  color="black">&nbsp;&nbsp;&nbsp;Duration</Text>
                             </Box>
                             <Box backgroundColor={"#4ade80"} mb={2}>
-                                <Text ml={5} fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
+                                <Text ml={5} fontSize={isMobile ? "xs" : "sm"}  color="black">Actions</Text>
                             </Box>
                             <Box w="auto">
                                 <HStack>
@@ -1556,7 +1558,7 @@ const Borrow = () => {
                             </Box>
                             <Box>
                                 <Tooltip content="Loan fees are 0.027% per diem charged upfront" placement="top">
-                                    <Image src={placeholderLogo} w={15} />
+                                    <Image src={placeholderLogoDark} w={15} />
                                 </Tooltip>
                             </Box>
                             </HStack>   

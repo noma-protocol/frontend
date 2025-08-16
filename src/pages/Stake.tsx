@@ -14,6 +14,8 @@ import nomaLogo from '../assets/images/noma.png';
 
 import walletIcon from '../assets/images/walletIcon.svg';
 import placeholderLogo from '../assets/images/question.svg';
+import placeholderLogoDark from '../assets/images/question_white.svg';
+
 import {
     SelectContent,
     SelectItem,
@@ -764,7 +766,7 @@ const Stake = () => {
                                         </NumberInputRoot>
                                         </Box>
                                         <Box>
-                                            <Image ml={-2} src={nomaLogo} w="25px"></Image>
+                                            <Image ml={-2} src={nomaLogo} w="20px"></Image>
                                         </Box>
                                     </HStack>
                                         <HStack mt={5}>
@@ -791,7 +793,7 @@ const Stake = () => {
                                             )}
                                         </Box>
                                         <Box mt={-1}>
-                                            <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogo} w={15}></Image></Tooltip>
+                                            <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogoDark} w={15}></Image></Tooltip>
                                         </Box>
                                         </HStack>
                                         <HStack w="400px">
@@ -947,11 +949,11 @@ const Stake = () => {
                     <GridItem w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
                         <Text fontSize={"14px"} fontWeight={"bold"} color="#4ade80">Active Position</Text>
                         <SimpleGrid columns={4} mt={-5} fontSize={"xs"} >
-                            <Box px={2} color="white" backgroundColor={"#4ade80"}> Staked </Box>
-                            <Box px={2} color="white" backgroundColor={"#4ade80"}> {isTokenInfoLoading ? <Spinner size="xs" /> : `s${token0Info.tokenSymbol}`} </Box>
-                            <Box px={2} color="white" backgroundColor={"#4ade80"}> Rewards </Box>
+                            <Box px={2} color="black" backgroundColor={"#4ade80"}> Staked </Box>
+                            <Box px={2} color="black" backgroundColor={"#4ade80"}> {isTokenInfoLoading ? <Spinner size="xs" /> : `s${token0Info.tokenSymbol}`} </Box>
+                            <Box px={2} color="black" backgroundColor={"#4ade80"}> Rewards </Box>
                             {/* <Box px={2} color="white" backgroundColor={"#4ade80"}> APR</Box> */}
-                            <Box px={2} color="white" backgroundColor={"#4ade80"}> Actions </Box> 
+                            <Box px={2} color="black" backgroundColor={"#4ade80"}> Actions </Box> 
                             {stakedBalance > 0 ? ( 
                                 <>
                                 <Box px={2} mt={1} bgColor={"#18181b"}> 
@@ -1038,10 +1040,10 @@ const Stake = () => {
                     <Text fontSize={"14px"} color="#4ade80"><b>New Position</b></Text>
                     <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"sm"}>
                         <Box w="500px" backgroundColor={"#4ade80"}  mb={2}>
-                            <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;Amount</Text>
+                            <Text fontSize={isMobile ? "xs" : "sm"} color="black">&nbsp;Amount</Text>
                         </Box> 
                         <Box backgroundColor={"#4ade80"} mb={2}>
-                            <Text ml={5} fontSize={isMobile ? "xs" : "sm"}>Actions</Text>
+                            <Text ml={5} fontSize={isMobile ? "xs" : "sm"} color="black">Actions</Text>
                         </Box>
                         <Box w="auto" mt={2}>
                             <HStack>
@@ -1065,8 +1067,8 @@ const Stake = () => {
                                     <NumberInputField h={"25px"} w={{ base: "", lg: "200px" }} placeholder="Enter amount" />
                                 </NumberInputRoot>
                                 </Box>
-                                <Box mt={-1}>
-                                    <Image src={nomaLogo} w="25px"></Image>
+                                <Box mt={-2}>
+                                    <Image src={nomaLogo} w="20px"></Image>
                                 </Box>
                             </HStack>
                             <VStack textAlign="left" alignItems="left" gap={1} mt={2}>
@@ -1110,7 +1112,7 @@ const Stake = () => {
                                         )}
                                     </Box>
                                     <Box>
-                                        <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogo} w={15}></Image></Tooltip>
+                                        <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogoDark} w={15}></Image></Tooltip>
                                     </Box>
                                 </HStack>
                                 </GridItem>
