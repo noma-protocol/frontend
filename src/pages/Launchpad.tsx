@@ -53,7 +53,7 @@ import usePresaleContract from '../hooks/usePresaleContract';
 import { set } from "react-ga";
 import placeholderLogo from "../assets/images/question.svg";
 import wethLogo from "../assets/images/weth.svg";
-import bnbLogo from "../assets/images/bnb.png";
+import monadLogo from "../assets/images/monad.png";
 import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
@@ -472,7 +472,7 @@ const Launchpad: React.FC = () => {
                     <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="400px" backgroundColor="#222831">
                         <Heading as={"h4"} color="white" mr={8}>
                             <HStack>
-                                <Text fontSize={"21px"} color="#d6a700">Step 1 - </Text>Token Info
+                                <Text fontSize={"21px"} color="#4ade80">Step 1 - </Text>Token Info
                             </HStack>
                         </Heading>
                         <Box w={"100%"}>
@@ -482,7 +482,7 @@ const Launchpad: React.FC = () => {
                                     <Input
                                         border={isFirstSel == true ? "1px solid #00FF00" : "1px solid #000000"}
                                         id="name"
-                                        placeholder="e.g. Oikos Token"
+                                        placeholder="e.g. Noma Token"
                                         h={"40px"}
                                         w={{ base: "", lg: "200px" }}
                                         onChange={handleSetTokenName}
@@ -498,7 +498,7 @@ const Launchpad: React.FC = () => {
                                 <Box mt={2}>
                                     <Input
                                         id="symbol"
-                                        placeholder="e.g. OKS"
+                                        placeholder="e.g. NOMA"
                                         h={"40px"}
                                         w={{ base: "", lg: "200px" }}
                                         onChange={handleSetTokenSymbol}
@@ -573,7 +573,7 @@ const Launchpad: React.FC = () => {
                     <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="350px" backgroundColor="#222831"  mt={"80px"}>
                         <Heading as={"h4"} color="white" mr={8}>
                             <HStack>
-                                <Text fontSize={"21px"} color="#d6a700">Step 2 - </Text>Pool Info
+                                <Text fontSize={"21px"} color="#4ade80">Step 2 - </Text>Pool Info
                             </HStack>
                         </Heading>
                         <Box w={"100%"}>
@@ -605,7 +605,7 @@ const Launchpad: React.FC = () => {
                                 <Box>
                                 <Image
                                     w="25px"
-                                    src={bnbLogo}
+                                    src={monadLogo}
                                     alt="reserve asset logo"
                                     mt={-2}
                                     ml={2}
@@ -690,7 +690,7 @@ const Launchpad: React.FC = () => {
                     <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="350px"  backgroundColor="#222831" mt={"80px"}>
                         <Heading as={"h4"} color="white" mr={8}>
                             <HStack>
-                                <Text fontSize={"21px"} color="#d6a700">Step 3 - </Text>Presale Info
+                                <Text fontSize={"21px"} color="#4ade80">Step 3 - </Text>Presale Info
                             </HStack>
                         </Heading>
                         <Box w={"100%"}>
@@ -712,7 +712,7 @@ const Launchpad: React.FC = () => {
                                 <Box>
                                 <Image
                                     w="25px"
-                                    src={bnbLogo}
+                                    src={monadLogo}
                                     alt="reserve asset logo"
                                     ml={2}
                                     />
@@ -741,7 +741,7 @@ const Launchpad: React.FC = () => {
                                 <Box>
                                 <Image
                                     w="25px"
-                                    src={bnbLogo}
+                                    src={monadLogo}
                                     alt="reserve asset logo"
                                     ml={2}
                                     />
@@ -795,7 +795,7 @@ const Launchpad: React.FC = () => {
                     <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="450px" backgroundColor="#222831" mt={"80px"}>
                         <Heading as={"h4"} color="white" mr={8}>
                             <HStack>
-                                <Text fontSize={"21px"} color="#d6a700">Step {presale == 0 ? "3" : "4"} - </Text>Confirm {isMobile ? "" : "Deploy"}
+                                <Text fontSize={"21px"} color="#4ade80">Step {presale == 0 ? "3" : "4"} - </Text>Confirm {isMobile ? "" : "Deploy"}
                             </HStack>
                         </Heading>
 
@@ -880,7 +880,7 @@ const Launchpad: React.FC = () => {
                                 <Box>
                                 <Image
                                 w="25px"
-                                src={bnbLogo}
+                                src={monadLogo}
                                 alt="reserve asset logo"
                                 ml={2}
                                 />
