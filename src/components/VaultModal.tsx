@@ -104,7 +104,6 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
           borderColor="#4ade80"
           color="#4ade80"
           width={{base: "80px", md: "100px"}}
-          ml={"-25px"}
         >
           Details
         </Button>
