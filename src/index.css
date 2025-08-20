@@ -1,5 +1,24 @@
 body {
   background-color: black;
+  padding-top: 65px; /* Compensate for fixed header */
+}
+
+/* Prevent layout shift when modal opens */
+html {
+  overflow-y: scroll; /* Always show scrollbar space */
+}
+
+body.modal-open {
+  overflow-y: scroll !important; /* Keep scrollbar when modal opens */
+  padding-right: 0 !important; /* Prevent right shift */
+}
+
+/* Ensure Web3Modal doesn't cause layout shifts */
+w3m-modal, 
+wcm-modal,
+[data-w3m-id="w3m-modal"] {
+  position: fixed !important;
+  z-index: 99999 !important;
 }
 
 a {
@@ -79,12 +98,13 @@ input::placeholder {
   color: white !important;
 }
 
-.modal-backdrop.show {
+/* Modal backdrop - removed conflicting styles that cause layout shifts */
+/* .modal-backdrop.show {
   opacity: 0.2 !important;
 }
 .modal-backdrop {
   display: none !important;
-}
+} */
 .loader {
   position: absolute;
   top: 0;
