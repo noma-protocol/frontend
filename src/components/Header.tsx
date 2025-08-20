@@ -69,7 +69,7 @@ const Header: React.FC = () => {
         </Link>
         
         {/* Navigation Links - Desktop */}
-        {!isMobile && (
+        {/* {!isMobile && (
           <Box display="flex" gap={6} flex={1} justifyContent="center">
             <Link href="/" _hover={{ color: "#4ade80" }} color="white" fontWeight="500">
               Exchange
@@ -84,7 +84,7 @@ const Header: React.FC = () => {
               Launchpad
             </Link>
           </Box>
-        )}
+        )} */}
         
         {/* Wallet Connect Button */}
         <Box display="flex" alignItems="center" gap={3}>
@@ -134,7 +134,7 @@ const Header: React.FC = () => {
             <div className="menu modal-body">
               <div className="row w-100">
                 <div className="items p-0 col-12 text-center">
-                  <ul className="navbar-nav items mx-auto">
+                  {/* <ul className="navbar-nav items mx-auto">
                     <li
                       className="nav-item"
                       data-bs-dismiss="modal"
@@ -195,7 +195,7 @@ const Header: React.FC = () => {
                         Launchpad
                       </a>
                     </li>
-                  </ul>
+                  </ul> */}
                 </div>
               </div>
             </div>

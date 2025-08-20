@@ -47,11 +47,27 @@ import { Toaster, toaster } from "../components/ui/toaster"
 
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
-import { unCommify, commify, generateBytes32String, getContractAddress } from "../utils";
+import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress } from "../utils";
 import Logo from "../assets/images/noma_logo_transparent.png";
 import { ethers } from "ethers"; // Import ethers.js
 import { formatEther, parseEther } from "viem";
 const { utils, providers } = ethers;
+
+// Import Exchange Helper ABI
+const ExchangeHelperArtifact = await import(`../assets/ExchangeHelper.json`);
+const ExchangeHelperAbi = ExchangeHelperArtifact.abi;
+
+// Import QuoterV2 ABI
+const QuoterArtifact = await import(`../assets/QuoterV2.json`);
+const QuoterAbi = QuoterArtifact.abi;
+
+// Import ERC20 ABI
+const ERC20Artifact = await import(`../assets/ERC20.json`);
+const ERC20Abi = ERC20Artifact.abi;
+
+// Import IWETH ABI
+const IWETHArtifact = await import(`../assets/IWETH.json`);
+const IWETHAbi = IWETHArtifact.abi;
 
 import { ProgressLabel, ProgressBar, ProgressRoot, ProgressValueText } from "../components/ui/progress"
 import PresaleDetails from "../components/PresaleDetails";
@@ -88,22 +104,12 @@ const feeTier = 3000;
 
 import ReactApexChart from 'react-apexcharts'; 
 
-// Contract ABIs
-const ERC20Abi = [
-    "function totalSupply() view returns (uint)",
-    "function balanceOf(address) view returns (uint)",
-    "function decimals() view returns (uint)",
-    "function symbol() view returns (string)",
-    "function name() view returns (string)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-    "function allowance(address owner, address spender) view returns (uint256)"
-];
-
-const IWETHAbi = [
-    "function deposit() payable external",
-    "function withdraw(uint256) external",
-    "function balanceOf(address) view returns (uint)"
-];
+// Get ExchangeHelper address
+const exchangeHelperAddress = getContractAddress(
+    config.chain === "local" ? addressesLocal : addressesBsc, 
+    config.chain === "local" ? "1337" : "10143", 
+    "Exchange"
+);
 
 // Provider setup
 const localProvider = new providers.JsonRpcProvider(
@@ -134,6 +140,8 @@ const Launchpad: React.FC = () => {
     const [tokens, setTokens] = useState([]);
     const [isTokensLoading, setIsTokensLoading] = useState(true);
     const [vaultDescriptions, setVaultDescriptions] = useState([]);
+    const [token1Symbol, setToken1Symbol] = useState("ETH"); // Default to ETH
+    const [priceUSD, setPriceUSD] = useState(0); // Price of token1 in USD
     
     // Trade history data
     const [tradeHistory] = useState([
@@ -154,6 +162,15 @@ const Launchpad: React.FC = () => {
     const [chartTimeframe, setChartTimeframe] = useState("24h");
     const [chartGranularity, setChartGranularity] = useState("1h");
     const [isChartLoading, setIsChartLoading] = useState(false);
+    const [ethPriceUSD, setEthPriceUSD] = useState(3500); // Default ETH price
+    
+    // Trade execution states
+    const [buyArgs, setBuyArgs] = useState([]);
+    const [sellArgs, setSellArgs] = useState([]);
+    const [poolInfo, setPoolInfo] = useState({ poolAddress: null });
+    const [isLoadingExecuteTrade, setIsLoadingExecuteTrade] = useState(false);
+    const [balanceBeforePurchase, setBalanceBeforePurchase] = useState(0);
+    const [balanceBeforeSale, setBalanceBeforeSale] = useState(0);
     
     // Chart options with professional styling
     const [chartOptions] = useState({
@@ -461,22 +478,67 @@ const Launchpad: React.FC = () => {
             // Validate data before setting
             if (ohlcData && ohlcData.length > 0) {
                 setChartSeries([{
-                    name: `${selectedToken.symbol}/ETH`,
+                    name: `${selectedToken.symbol}/${token1Symbol}`,
                     data: ohlcData
                 }]);
                 
-                // Calculate percentage change
-                const firstPrice = ohlcData[0].y[0];
-                const lastPrice = ohlcData[ohlcData.length - 1].y[3];
-                if (isFinite(firstPrice) && isFinite(lastPrice) && firstPrice > 0) {
-                    const change = ((lastPrice - firstPrice) / firstPrice) * 100;
-                    setPercentChange(isFinite(change) ? change : 0);
-                } else {
-                    setPercentChange(0);
-                }
+                // Calculate percentage change based on timeframe
+                const calculatePercentChange = (data, timeframe) => {
+                    if (!data || data.length < 2) return 0;
+                    
+                    const now = new Date().getTime();
+                    let targetTimeAgo;
+                    
+                    // Calculate how far back to look based on the timeframe
+                    switch (timeframe) {
+                        case "15m":
+                            targetTimeAgo = 15 * 60 * 1000; // 15 minutes
+                            break;
+                        case "1h":
+                            targetTimeAgo = 60 * 60 * 1000; // 1 hour
+                            break;
+                        case "24h":
+                            targetTimeAgo = 24 * 60 * 60 * 1000; // 24 hours
+                            break;
+                        case "1w":
+                            targetTimeAgo = 7 * 24 * 60 * 60 * 1000; // 1 week
+                            break;
+                        case "1M":
+                            targetTimeAgo = 30 * 24 * 60 * 60 * 1000; // 30 days
+                            break;
+                        default:
+                            targetTimeAgo = 24 * 60 * 60 * 1000; // Default to 24h
+                    }
+                    
+                    const targetTime = now - targetTimeAgo;
+                    
+                    // Find the candle closest to our target time
+                    let targetCandle = data[0];
+                    for (const candle of data) {
+                        const candleTime = candle.x.getTime();
+                        if (candleTime >= targetTime) {
+                            break;
+                        }
+                        targetCandle = candle;
+                    }
+                    
+                    const firstPrice = targetCandle.y[0]; // Open price of target candle
+                    const lastPrice = data[data.length - 1].y[3]; // Close price of latest candle
+                    
+                    if (isFinite(firstPrice) && isFinite(lastPrice) && firstPrice > 0) {
+                        const change = ((lastPrice - firstPrice) / firstPrice) * 100;
+                        return isFinite(change) ? change : 0;
+                    }
+                    
+                    return 0;
+                };
+                
+                const change = calculatePercentChange(ohlcData, chartTimeframe);
+                console.log("Calculated percentage change:", change, "for timeframe:", chartTimeframe);
+                setPercentChange(change);
             } else {
                 setChartSeries([{
-                    name: `${selectedToken.symbol}/ETH`,
+                    name: `${selectedToken.symbol}/${token1Symbol}`,
                     data: []
                 }]);
                 setPercentChange(0);
@@ -492,6 +554,97 @@ const Launchpad: React.FC = () => {
         
         return () => clearInterval(interval);
     }, [selectedToken, chartTimeframe, chartGranularity]);
+
+    // Fetch token1 symbol and spot price when token is selected
+    useEffect(() => {
+        if (!selectedToken || !selectedToken.token1 || !selectedToken.vault) return;
+        
+        const fetchTokenInfo = async () => {
+            try {
+                // Fetch token1 info
+                const token1Contract = new ethers.Contract(
+                    selectedToken.token1,
+                    ERC20Abi,
+                    localProvider
+                );
+                
+                const symbol = await token1Contract.symbol();
+                setToken1Symbol(symbol);
+                
+                // If token1 is WETH/WMON, set it as MON for display
+                if (symbol === "WMON" || symbol === "WETH") {
+                    setToken1Symbol("MON");
+                }
+                
+                // Fetch spot price from vault contract
+                const VaultAbi = [
+                    "function getVaultInfo() view returns (uint256, uint256, uint256, uint256, uint256, uint256, address, address, uint256)"
+                ];
+                
+                const vaultContract = new ethers.Contract(
+                    selectedToken.vault,
+                    VaultAbi,
+                    localProvider
+                );
+                
+                try {
+                    const vaultInfo = await vaultContract.getVaultInfo();
+                    // Based on Exchange.tsx, the order is:
+                    // [liquidityRatio, circulatingSupply, spotPrice, anchorCapacity, floorCapacity, token0Address, token1Address, newFloorPrice]
+                    const spotPriceFromContract = vaultInfo[2]; // spotPrice is at index 2
+                    
+                    const formattedPrice = formatEther(spotPriceFromContract);
+                    const numericPrice = parseFloat(formattedPrice);
+                    
+                    if (!isNaN(numericPrice) && isFinite(numericPrice) && numericPrice > 0) {
+                        setSpotPrice(numericPrice);
+                    } else {
+                        console.warn("Invalid spot price from contract, using fallback");
+                        setSpotPrice(selectedToken.price || 0.0000186);
+                    }
+                } catch (error) {
+                    console.error("Error fetching vault info:", error);
+                    // Fallback to token price if vault info fails
+                    setSpotPrice(selectedToken.price || 0.0000186);
+                }
+                
+                // Fetch pool address
+                if (selectedToken.token0 && selectedToken.token1) {
+                    try {
+                        const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1);
+                        setPoolInfo({ poolAddress });
+                    } catch (error) {
+                        console.error("Error fetching pool address:", error);
+                    }
+                }
+                
+                // Fetch USD price for the token1
+                const fetchToken1Price = async () => {
+                    try {
+                        // For now, assume MON price is similar to BNB
+                        // In production, this should query actual price feeds
+                        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd');
+                        const data = await response.json();
+                        if (data.binancecoin && data.binancecoin.usd) {
+                            setPriceUSD(data.binancecoin.usd);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching token1 price:', error);
+                        setPriceUSD(300); // Default fallback price
+                    }
+                };
+                
+                fetchToken1Price();
+            } catch (error) {
+                console.error("Error fetching token info:", error);
+                // Default to ETH if error
+                setToken1Symbol("ETH");
+                setSpotPrice(selectedToken.price);
+            }
+        };
+        
+        fetchTokenInfo();
+    }, [selectedToken]);
 
     const filteredTokens = tokens.filter(token => 
         token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -570,6 +723,23 @@ const Launchpad: React.FC = () => {
                                     try {
                                         const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
                                         
+                                        // Fetch spot price from vault
+                                        let spotPriceWei = "0";
+                                        try {
+                                            const VaultAbi = [
+                                                "function getVaultInfo() view returns (uint256, uint256, uint256, uint256, uint256, uint256, address, address, uint256)"
+                                            ];
+                                            const vaultContract = new ethers.Contract(
+                                                vaultDescriptionData[6],
+                                                VaultAbi,
+                                                localProvider
+                                            );
+                                            const vaultInfo = await vaultContract.getVaultInfo();
+                                            spotPriceWei = vaultInfo[2].toString(); // spotPrice is at index 2
+                                        } catch (error) {
+                                            console.error("Error fetching vault spot price:", error);
+                                        }
+                                        
                                         return {
                                             tokenName: vaultDescriptionData[0],
                                             tokenSymbol: vaultDescriptionData[1],
@@ -583,6 +753,7 @@ const Launchpad: React.FC = () => {
                                                 vaultDescriptionData[3], 
                                                 vaultDescriptionData[4]
                                             ),
+                                            spotPrice: spotPriceWei,
                                         };
                                     } catch (error) {
                                         console.error("Error fetching vault description:", error);
@@ -605,7 +776,7 @@ const Launchpad: React.FC = () => {
                     id: index + 1,
                     name: vault.tokenName,
                     symbol: vault.tokenSymbol,
-                    price: 0.0000186 + Math.random() * 0.001, // Mock price for now
+                    price: vault.spotPrice ? parseFloat(formatEther(vault.spotPrice)) : 0.0000186, // Use actual spot price
                     change24h: (Math.random() - 0.5) * 20, // Mock 24h change
                     volume24h: Math.floor(Math.random() * 1000000),
                     marketCap: Math.floor(Math.random() * 10000000),
@@ -615,7 +786,8 @@ const Launchpad: React.FC = () => {
                     token0: vault.token0,
                     token1: vault.token1,
                     vault: vault.vault,
-                    poolAddress: vault.poolAddress
+                    poolAddress: vault.poolAddress,
+                    spotPrice: vault.spotPrice // Keep the raw spot price
                 }));
                 
                 // Ensure minimum loading time for better UX
@@ -959,77 +1131,386 @@ const Launchpad: React.FC = () => {
     
     // Calculate quote and price impact
     useEffect(() => {
-        if (!tradeAmount || !selectedToken || parseFloat(tradeAmount) === 0) {
+        if (!tradeAmount || !selectedToken || parseFloat(tradeAmount) === 0 || !poolInfo.poolAddress) {
             setQuote("");
             setPriceImpact("0");
             return;
         }
         
-        // Mock quote calculation (replace with real DEX quote)
-        const amount = parseFloat(tradeAmount);
-        if (isBuying) {
-            const estimatedTokens = amount / selectedToken.price;
-            setQuote(estimatedTokens.toFixed(2));
-            setPriceImpact((amount * 0.003).toFixed(2)); // Mock 0.3% impact
-        } else {
-            const estimatedETH = amount * selectedToken.price;
-            setQuote(estimatedETH.toFixed(6));
-            setPriceImpact((amount * 0.002).toFixed(2)); // Mock 0.2% impact
-        }
-    }, [tradeAmount, selectedToken, isBuying]);
-    
-    const handleBuy = async () => {
-        if (isLoading || !selectedToken || !tradeAmount) return;
+        const calculateQuote = async () => {
+            try {
+                const quoterAddress = config.protocolAddresses.uniswapQuoterV2;
+                const quoterContract = new ethers.Contract(quoterAddress, QuoterAbi, localProvider);
+                
+                // Build swap path
+                const feeTier = 3000;
+                let swapPath;
+                
+                if (isBuying) {
+                    // Buying token with ETH/WETH
+                    swapPath = utils.solidityPack(
+                        ["address", "uint24", "address"],
+                        [selectedToken.token1, feeTier, selectedToken.token0]
+                    );
+                    
+                    try {
+                        // Get amount of tokens out for ETH in
+                        const result = await quoterContract.quoteExactInput(swapPath, parseEther(tradeAmount));
+                        const amountOut = formatEther(result[0]);
+                        setQuote(parseFloat(amountOut).toFixed(6));
+                        
+                        // Calculate price impact
+                        const expectedOut = parseFloat(tradeAmount) / selectedToken.price;
+                        const actualOut = parseFloat(amountOut);
+                        const impact = Math.abs((expectedOut - actualOut) / expectedOut * 100);
+                        setPriceImpact(impact.toFixed(2));
+                    } catch (error) {
+                        console.error("Error getting buy quote:", error);
+                        // Fallback to simple calculation
+                        const estimatedTokens = parseFloat(tradeAmount) / selectedToken.price;
+                        setQuote(estimatedTokens.toFixed(6));
+                        setPriceImpact("0.3");
+                    }
+                } else {
+                    // Selling token for ETH/WETH
+                    swapPath = utils.solidityPack(
+                        ["address", "uint24", "address"],
+                        [selectedToken.token0, feeTier, selectedToken.token1]
+                    );
+                    
+                    try {
+                        // Get amount of ETH out for tokens in
+                        const result = await quoterContract.quoteExactInput(swapPath, parseEther(tradeAmount));
+                        const amountOut = formatEther(result[0]);
+                        setQuote(parseFloat(amountOut).toFixed(6));
+                        
+                        // Calculate price impact
+                        const expectedOut = parseFloat(tradeAmount) * selectedToken.price;
+                        const actualOut = parseFloat(amountOut);
+                        const impact = Math.abs((expectedOut - actualOut) / expectedOut * 100);
+                        setPriceImpact(impact.toFixed(2));
+                    } catch (error) {
+                        console.error("Error getting sell quote:", error);
+                        // Fallback to simple calculation
+                        const estimatedETH = parseFloat(tradeAmount) * selectedToken.price;
+                        setQuote(estimatedETH.toFixed(6));
+                        setPriceImpact("0.2");
+                    }
+                }
+            } catch (error) {
+                console.error("Error calculating quote:", error);
+                // Fallback calculation
+                const amount = parseFloat(tradeAmount);
+                if (isBuying) {
+                    const estimatedTokens = amount / selectedToken.price;
+                    setQuote(estimatedTokens.toFixed(6));
+                    setPriceImpact("0.3");
+                } else {
+                    const estimatedETH = amount * selectedToken.price;
+                    setQuote(estimatedETH.toFixed(6));
+                    setPriceImpact("0.2");
+                }
+            }
+        };
         
-        setIsLoading(true);
-        try {
-            // Mock buy logic - in real implementation, this would call the exchange contract
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate transaction
-            
+        calculateQuote();
+    }, [tradeAmount, selectedToken, isBuying, poolInfo.poolAddress]);
+    
+    // Contract write hooks for trading
+    const {
+        write: buyTokensETH
+    } = useContractWrite({
+        address: exchangeHelperAddress,
+        abi: ExchangeHelperAbi,
+        functionName: "buyTokens",
+        onSuccess(data) {
+            setTimeout(() => {
+                const fetchBalances = async () => {
+                    if (!selectedToken) return;
+                    
+                    const tokenContract = new ethers.Contract(
+                        selectedToken.token0,
+                        ERC20Abi,
+                        localProvider
+                    );
+
+                    const ethBalance = await localProvider.getBalance(address);
+                    const balance = await tokenContract.balanceOf(address);
+
+                    setEthBalance(formatEther(ethBalance));
+
+                    const ethDiff = Number(formatEther(balanceBeforeSale)) - Number(formatEther(ethBalance));
+                    const tokenDiff = Number(formatEther(balance)) - Number(formatEther(balanceBeforePurchase));
+
+                    setIsLoading(false);
+                    setIsLoadingExecuteTrade(false);
+                    toaster.create({
+                        title: "Success",
+                        description: `Spent ${commifyDecimals(ethDiff, 4)} ${token1Symbol}.\nReceived ${commify(tokenDiff, 4)} ${selectedToken.symbol}`,
+                    });
+                    
+                    setTradeAmount("");
+                    setQuote("");
+                };
+                fetchBalances();
+            }, 6000);
+        },
+        onError(error) {
+            console.error(`transaction failed: ${error.message}`);
+            setIsLoading(false);
+            setIsLoadingExecuteTrade(false);
+            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation" :
+                        error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
-                title: "Trade Executed",
-                description: `Bought ${quote} ${selectedToken.symbol} for ${tradeAmount} ${useWeth ? 'WETH' : 'ETH'}`,
-                status: "success"
+                title: "Error",
+                description: msg,
+            });         
+        }
+    });
+    
+    const {
+        write: buyTokensWETH
+    } = useContractWrite({
+        address: exchangeHelperAddress,
+        abi: ExchangeHelperAbi,
+        functionName: "buyTokensWETH",
+        onSuccess(data) {
+            setTimeout(() => {
+                const fetchBalances = async () => {
+                    if (!selectedToken) return;
+                    
+                    const token0Contract = new ethers.Contract(
+                        selectedToken.token0,
+                        ERC20Abi,
+                        localProvider
+                    );
+                    const token1Contract = new ethers.Contract(
+                        selectedToken.token1,
+                        ERC20Abi,
+                        localProvider
+                    );
+
+                    const wethBalance = await token1Contract.balanceOf(address);
+                    const balance = await token0Contract.balanceOf(address);
+
+                    const wethDiff = Number(formatEther(balanceBeforeSale)) - Number(formatEther(wethBalance));
+                    const tokenDiff = Number(formatEther(balance)) - Number(formatEther(balanceBeforePurchase));
+
+                    setIsLoading(false);
+                    setIsLoadingExecuteTrade(false);
+                    toaster.create({
+                        title: "Success",
+                        description: `Spent ${commifyDecimals(wethDiff, 4)} W${token1Symbol}.\nReceived ${commify(tokenDiff, 4)} ${selectedToken.symbol}`,
+                    });
+                    
+                    setTradeAmount("");
+                    setQuote("");
+                };
+                fetchBalances();
+            }, 6000);
+        },
+        onError(error) {
+            console.error(`transaction failed: ${error.message}`);
+            setIsLoading(false);
+            setIsLoadingExecuteTrade(false);
+            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation" :
+                        error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
+            toaster.create({
+                title: "Error",
+                description: msg,
+            });         
+        }
+    });
+
+    const {
+        write: sellTokens
+    } = useContractWrite({
+        address: exchangeHelperAddress,
+        abi: ExchangeHelperAbi,
+        functionName: useWeth ? "sellTokens" : "sellTokensETH",
+        onSuccess(data) {
+            setTimeout(() => {
+                const fetchBalances = async () => {
+                    if (!selectedToken) return;
+                    
+                    const token0Contract = new ethers.Contract(
+                        selectedToken.token0,
+                        ERC20Abi,
+                        localProvider
+                    );
+                    const token1Contract = new ethers.Contract(
+                        selectedToken.token1,
+                        ERC20Abi,
+                        localProvider
+                    );
+
+                    const ethBalance = await localProvider.getBalance(address);
+                    const wethBalance = await token1Contract.balanceOf(address);
+                    const balance = await token0Contract.balanceOf(address);
+
+                    const wethDiff = (useWeth ? Number(formatEther(wethBalance)) : Number(formatEther(ethBalance))) - Number(formatEther(balanceBeforePurchase));
+                    const tokenDiff = Number(formatEther(balanceBeforeSale)) - Number(formatEther(balance));
+
+                    setIsLoading(false);
+                    setIsLoadingExecuteTrade(false);
+                    toaster.create({
+                        title: "Success",
+                        description: `Sold ${commify(tokenDiff, 4)} ${selectedToken.symbol}.\nReceived ${commify(wethDiff, 4)} ${useWeth ? "W" + token1Symbol : token1Symbol}`,
+                    });
+                    
+                    setTradeAmount("");
+                    setQuote("");
+                };
+                fetchBalances();
+            }, 6000);
+        },
+        onError(error) {
+            console.error(`transaction failed: ${error.message}`);
+            setIsLoading(false);
+            setIsLoadingExecuteTrade(false); 
+            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation" :
+                        error.message.toString().indexOf("0xe450d38c") > -1 ? "Not enough balance" :
+                        error.message.toString().indexOf("Amount must be greater than 0") > -1 ? "Invalid amount" :
+                        error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
+            toaster.create({
+                title: "Error",
+                description: msg,
+            });         
+        }
+    });
+    
+    const {
+        write: approve,
+        isLoading: isApproving
+    } = useContractWrite({
+        address: selectedToken?.token0 as `0x${string}` || zeroAddress,
+        abi: ERC20Abi,
+        functionName: "approve" as const,
+        onSuccess(data) {
+            sellTokens({
+                args: sellArgs
             });
-            
-            setTradeAmount("");
-            setQuote("");
-        } catch (error) {
+        },
+        onError(error) {
+            console.error(`transaction failed: ${error.message}`);
+            setIsLoading(false);
+            setIsLoadingExecuteTrade(false);
+            const msg = error.message.toString().indexOf("User rejected the request.") > -1 ? "Rejected operation" : error.message;
             toaster.create({
-                title: "Trade Failed",
-                description: error.message || "Transaction failed",
+                title: "Error",
+                description: msg,
+            });         
+        }
+    });
+
+    const {
+        write: approveWeth,
+        isLoading: isApprovingWeth
+    } = useContractWrite({
+        address: (selectedToken?.token1 || WETH_ADDRESS) as `0x${string}`,
+        abi: ERC20Abi,
+        functionName: "approve" as const,
+        onSuccess(data) {
+            buyTokensWETH({
+                args: buyArgs
+            });
+        },
+        onError(error) {
+            console.error(`transaction failed: ${error.message}`);
+            setIsLoading(false);
+            setIsLoadingExecuteTrade(false);
+            const msg = error.message.toString().indexOf("User rejected the request.") > -1 ? "Rejected operation" : error.message;
+            toaster.create({
+                title: "Error",
+                description: msg,
+            });         
+        }
+    });
+    
+    const handleBuy = () => {
+        if (isLoading || !selectedToken || !tradeAmount || !poolInfo.poolAddress) return;
+        
+        // Validate token addresses
+        if (!selectedToken.token0 || !selectedToken.token1) {
+            toaster.create({
+                title: "Error",
+                description: "Invalid token addresses. Please select a different token.",
                 status: "error"
             });
-        } finally {
-            setIsLoading(false);
+            return;
+        }
+
+        // Get spot price from selectedToken's vault
+        const spotPriceWei = selectedToken.spotPrice || parseEther(spotPrice.toString());
+
+        const args = [
+            poolInfo.poolAddress,
+            spotPriceWei.toString(),
+            parseEther(tradeAmount),
+            address,
+            false
+        ];
+
+        setIsLoading(true);
+        setIsLoadingExecuteTrade(true);
+        
+        if (useWeth) {
+            setBalanceBeforePurchase(parseEther(tokenBalance));
+            setBalanceBeforeSale(parseEther(wethBalance));
+            setBuyArgs(args);
+            approveWeth({
+                args: [
+                    exchangeHelperAddress,
+                    parseEther(tradeAmount)
+                ]
+            });
+        } else {
+            setBalanceBeforePurchase(parseEther(tokenBalance));
+            setBalanceBeforeSale(parseEther(ethBalance));
+            setBuyArgs(args);
+            buyTokensETH({
+                args: args,
+                value: parseEther(tradeAmount)
+            });
         }
     };
     
-    const handleSell = async () => {
-        if (isLoading || !selectedToken || !tradeAmount) return;
+    const handleSell = () => {
+        if (isLoading || !selectedToken || !tradeAmount || !poolInfo.poolAddress) return;
         
-        setIsLoading(true);
-        try {
-            // Mock sell logic - in real implementation, this would call the exchange contract
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate transaction
-            
+        // Validate token addresses
+        if (!selectedToken.token0 || !selectedToken.token1) {
             toaster.create({
-                title: "Trade Executed",
-                description: `Sold ${tradeAmount} ${selectedToken.symbol} for ${quote} ${useWeth ? 'WETH' : 'ETH'}`,
-                status: "success"
-            });
-            
-            setTradeAmount("");
-            setQuote("");
-        } catch (error) {
-            toaster.create({
-                title: "Trade Failed",
-                description: error.message || "Transaction failed",
+                title: "Error",
+                description: "Invalid token addresses. Please select a different token.",
                 status: "error"
             });
-        } finally {
-            setIsLoading(false);
+            return;
         }
+
+        // Get spot price from selectedToken's vault
+        const spotPriceWei = selectedToken.spotPrice || parseEther(spotPrice.toString());
+
+        const args = [
+            poolInfo.poolAddress,
+            spotPriceWei.toString(),
+            parseEther(tradeAmount),
+            address,
+            false
+        ];
+
+        setBalanceBeforePurchase(useWeth ? parseEther(wethBalance) : parseEther(ethBalance));
+        setBalanceBeforeSale(parseEther(tokenBalance));
+
+        setIsLoading(true);
+        setIsLoadingExecuteTrade(true);
+        setSellArgs(args);
+        approve({
+            args: [
+                exchangeHelperAddress,
+                parseEther(tradeAmount)
+            ]
+        });
     };
 
 
@@ -1270,29 +1751,50 @@ const Launchpad: React.FC = () => {
                             <SimpleGrid columns={isMobile ? 2 : 4} gap={isMobile ? 2 : 4} w="100%">
                                 <Box bg="#1a1a1a" p={4} borderRadius="lg">
                                     <Text color="#888" fontSize="sm" mb={2}>Price</Text>
-                                    <HStack alignItems="baseline" gap={isMobile ? 2 : 3}>
-                                        <Box>
-                                            <Text color="white" fontSize={isMobile ? "md" : "xl"} fontWeight="bold">
-                                                ${formatPrice(selectedToken.price)}
-                                            </Text>
-                                        </Box>
-                                        <Box>
-                                            <HStack gap={1}>
-                                                <Box>
-                                                    {percentChange > 0 ? (
-                                                        <FaArrowTrendUp color="#4ade80" size={isMobile ? "10" : "14"} />
-                                                    ) : (
-                                                        <FaArrowTrendDown color="#ef4444" size={isMobile ? "10" : "14"} />
-                                                    )}
-                                                </Box>
-                                                <Box>
-                                                    <Text color={percentChange > 0 ? "#4ade80" : "#ef4444"} fontSize={isMobile ? "xs" : "sm"} fontWeight="600">
-                                                        {percentChange > 0 ? "+" : ""}{percentChange.toFixed(2)}%
-                                                    </Text>
-                                                </Box>
-                                            </HStack>
-                                        </Box>
-                                    </HStack>
+                                    <VStack align="flex-start" spacing={1}>
+                                        <HStack spacing={2}>
+                                            <Box>
+                                                <Text color="#4ade80" fontWeight="bold" fontSize="sm">SPOT</Text>
+                                            </Box>
+                                            <Box>
+                                                <Text color="white" fontSize={isMobile ? "lg" : "xl"} fontWeight="bold">
+                                                    {spotPrice > 0 ? commifyDecimals(spotPrice, 8) : commifyDecimals(selectedToken.price || 0, 8)}
+                                                </Text>
+                                            </Box>
+                                        </HStack>
+                                        <HStack spacing={2}>
+                                            <Box>
+                                                <Text color="#888" fontSize="xs">
+                                                    {selectedToken.symbol}/{token1Symbol}
+                                                </Text>
+                                            </Box>
+                                            <Box>
+                                                <Text color="#888" fontSize="xs">
+                                                    (${commifyDecimals((spotPrice > 0 ? spotPrice : (selectedToken.price || 0)) * (priceUSD || 0), 2)})
+                                                </Text>
+                                            </Box>
+                                            <Box>
+                                                <HStack spacing={1}>
+                                                    <Box>
+                                                        {percentChange > 0 ? (
+                                                            <FaArrowTrendUp color="#4ade80" size={isMobile ? "10" : "12"} />
+                                                        ) : percentChange < 0 ? (
+                                                            <FaArrowTrendDown color="#ef4444" size={isMobile ? "10" : "12"} />
+                                                        ) : null}
+                                                    </Box>
+                                                    <Box>
+                                                        <Text 
+                                                            color={percentChange < 0 ? "#ef4444" : percentChange > 0 ? "#4ade80" : "#888"} 
+                                                            fontSize="xs" 
+                                                            fontWeight="bold"
+                                                        >
+                                                            ({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)
+                                                        </Text>
+                                                    </Box>
+                                                </HStack>
+                                            </Box>
+                                        </HStack>
+                                    </VStack>
                                 </Box>
                                 
                                 <Box bg="#1a1a1a" p={4} borderRadius="lg">
@@ -1327,10 +1829,10 @@ const Launchpad: React.FC = () => {
                             <Box bg="#1a1a1a" p={isMobile ? 2 : 4} borderRadius="lg" w="100%" h={isMobile ? "350px" : "450px"}>
                                 <HStack justifyContent="space-between" w="100%" mb={4}>
                                     <Box>
-                                        <HStack spacing={4}>
+                                        <HStack spacing={2} alignItems="center">
                                             <Box>
-                                                <Text color="white" fontSize="lg" fontWeight="bold">
-                                                    {selectedToken.symbol}/ETH
+                                                <Text color="#888" fontSize="sm">
+                                                    Interval
                                                 </Text>
                                             </Box>
                                             <Box>
