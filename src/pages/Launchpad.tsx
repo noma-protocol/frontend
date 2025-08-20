@@ -1129,6 +1129,43 @@ const Launchpad: React.FC = () => {
         return () => clearInterval(interval);
     }, [address, selectedToken]);
     
+    // Build swap path for quotes
+    const [swapPath, setSwapPath] = useState("");
+    
+    useEffect(() => {
+        if (!selectedToken?.token0 || !selectedToken?.token1) return;
+        
+        const feeTier = 3000;
+        if (isBuying) {
+            // Buying token with ETH/WETH
+            const buyPath = utils.solidityPack(
+                ["address", "uint24", "address"],
+                [selectedToken.token1, feeTier, selectedToken.token0]
+            );
+            setSwapPath(buyPath);
+        } else {
+            // Selling token for ETH/WETH
+            const sellPath = utils.solidityPack(
+                ["address", "uint24", "address"],
+                [selectedToken.token0, feeTier, selectedToken.token1]
+            );
+            setSwapPath(sellPath);
+        }
+    }, [selectedToken, isBuying]);
+    
+    // Fetch quotes using wagmi hooks
+    const quoterAddress = config.protocolAddresses?.uniswapQuoterV2;
+    
+    const { data: quoteData } = useContractRead({
+        address: quoterAddress,
+        abi: QuoterAbi,
+        functionName: "quoteExactInput",
+        args: swapPath && tradeAmount && parseFloat(tradeAmount) > 0 ? 
+            [swapPath, parseEther(tradeAmount)] : undefined,
+        enabled: !!swapPath && !!tradeAmount && parseFloat(tradeAmount) > 0 && !!quoterAddress,
+        watch: true,
+    });
+    
     // Calculate quote and price impact
     useEffect(() => {
         if (!tradeAmount || !selectedToken || parseFloat(tradeAmount) === 0) {
@@ -1137,22 +1174,38 @@ const Launchpad: React.FC = () => {
             return;
         }
         
-        // For now, use simple calculation until we properly configure the quoter
-        const amount = parseFloat(tradeAmount);
-        if (isBuying) {
-            const estimatedTokens = amount / selectedToken.price;
-            setQuote(estimatedTokens.toFixed(6));
-            setPriceImpact("0.3"); // Mock 0.3% impact
+        if (quoteData && quoteData[0]) {
+            // Use actual quote from contract
+            const amountOut = formatEther(quoteData[0]);
+            setQuote(parseFloat(amountOut).toFixed(6));
+            
+            // Calculate price impact
+            const amount = parseFloat(tradeAmount);
+            if (isBuying) {
+                const expectedOut = amount / selectedToken.price;
+                const actualOut = parseFloat(amountOut);
+                const impact = Math.abs((expectedOut - actualOut) / expectedOut * 100);
+                setPriceImpact(impact.toFixed(2));
+            } else {
+                const expectedOut = amount * selectedToken.price;
+                const actualOut = parseFloat(amountOut);
+                const impact = Math.abs((expectedOut - actualOut) / expectedOut * 100);
+                setPriceImpact(impact.toFixed(2));
+            }
         } else {
-            const estimatedETH = amount * selectedToken.price;
-            setQuote(estimatedETH.toFixed(6));
-            setPriceImpact("0.2"); // Mock 0.2% impact
+            // Fallback to simple calculation if quote not available
+            const amount = parseFloat(tradeAmount);
+            if (isBuying) {
+                const estimatedTokens = amount / selectedToken.price;
+                setQuote(estimatedTokens.toFixed(6));
+                setPriceImpact("0.3");
+            } else {
+                const estimatedETH = amount * selectedToken.price;
+                setQuote(estimatedETH.toFixed(6));
+                setPriceImpact("0.2");
+            }
         }
-        
-        // TODO: Implement actual quote fetching from Quoter contract
-        // This requires proper configuration of the quoter address and ensuring
-        // the contract is deployed on the current network
-    }, [tradeAmount, selectedToken, isBuying]);
+    }, [tradeAmount, selectedToken, isBuying, quoteData]);
     
     // Contract write hooks for trading
     const {
