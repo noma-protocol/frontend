@@ -100,6 +100,14 @@ const uniswapV3FactoryABI = [
   "function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool)",
 ];
 
+// Uniswap V3 Pool ABI for events and slot0
+const uniswapV3PoolABI = [
+    "event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)",
+    "function slot0() external view returns (uint160 sqrtPriceX96, int24 tick, uint16 observationIndex, uint16 observationCardinality, uint16 observationCardinalityNext, uint8 feeProtocol, bool unlocked)",
+    "function token0() external view returns (address)",
+    "function token1() external view returns (address)"
+];
+
 const feeTier = 3000;
 
 import ReactApexChart from 'react-apexcharts'; 
@@ -135,6 +143,7 @@ const Launchpad: React.FC = () => {
     const [slippage, setSlippage] = useState("1");
     const [quote, setQuote] = useState("");
     const [priceImpact, setPriceImpact] = useState("0");
+    const [showQuoteLoading, setShowQuoteLoading] = useState(false);
     
     // Token data from blockchain
     const [tokens, setTokens] = useState([]);
@@ -143,14 +152,54 @@ const Launchpad: React.FC = () => {
     const [token1Symbol, setToken1Symbol] = useState("ETH"); // Default to ETH
     const [priceUSD, setPriceUSD] = useState(0); // Price of token1 in USD
     
-    // Trade history data
-    const [tradeHistory] = useState([
-        { id: 1, type: "buy", token: "CLOWN", amount: 50000, price: 0.0000186, total: 0.93, time: new Date(Date.now() - 60000), txHash: "0x1234...5678" },
-        { id: 2, type: "sell", token: "DOGE", amount: 100, price: 0.08523, total: 8.523, time: new Date(Date.now() - 180000), txHash: "0x2345...6789" },
-        { id: 3, type: "buy", token: "PEPE", amount: 1000000, price: 0.0000012, total: 1.2, time: new Date(Date.now() - 300000), txHash: "0x3456...7890" },
-        { id: 4, type: "buy", token: "CLOWN", amount: 25000, price: 0.0000182, total: 0.455, time: new Date(Date.now() - 600000), txHash: "0x4567...8901" },
-        { id: 5, type: "sell", token: "SHIB", amount: 10000, price: 0.0000089, total: 0.089, time: new Date(Date.now() - 900000), txHash: "0x5678...9012" },
-    ]);
+    // Trade history data with local storage persistence
+    const [tradeHistory, setTradeHistory] = useState([]);
+    const [processedTxHashes] = useState(() => new Set());
+    
+    // Load trade history from local storage on mount
+    useEffect(() => {
+        const loadTradeHistory = () => {
+            try {
+                const stored = localStorage.getItem('oikos_trade_history');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    // Convert time strings back to Date objects
+                    const history = parsed.map(trade => ({
+                        ...trade,
+                        time: new Date(trade.time)
+                    }));
+                    setTradeHistory(history);
+                    // Add loaded tx hashes to processed set
+                    history.forEach(trade => {
+                        if (trade.fullTxHash) {
+                            processedTxHashes.add(trade.fullTxHash);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading trade history:", error);
+            }
+        };
+        loadTradeHistory();
+    }, []);
+    
+    // Save trade history to local storage whenever it changes
+    useEffect(() => {
+        if (tradeHistory.length > 0) {
+            try {
+                localStorage.setItem('oikos_trade_history', JSON.stringify(tradeHistory));
+            } catch (error) {
+                console.error("Error saving trade history:", error);
+            }
+        }
+    }, [tradeHistory]);
+    
+    // Function to clear trade history
+    const clearTradeHistory = () => {
+        setTradeHistory([]);
+        processedTxHashes.clear();
+        localStorage.removeItem('oikos_trade_history');
+    };
     
     // Mock data for price chart
     const mockPoolAddress = "0x1234567890123456789012345678901234567890";
@@ -163,6 +212,7 @@ const Launchpad: React.FC = () => {
     const [chartGranularity, setChartGranularity] = useState("1h");
     const [isChartLoading, setIsChartLoading] = useState(false);
     const [ethPriceUSD, setEthPriceUSD] = useState(3500); // Default ETH price
+    const [chartUpdateTrigger, setChartUpdateTrigger] = useState(0); // Trigger chart updates
     
     // Trade execution states
     const [buyArgs, setBuyArgs] = useState([]);
@@ -176,19 +226,9 @@ const Launchpad: React.FC = () => {
     const [chartOptions] = useState({
         chart: {
             type: 'candlestick',
-            background: 'transparent',
+            background: '#1a1a1a',
             toolbar: {
-                show: true,
-                tools: {
-                    download: false,
-                    selection: false,
-                    zoom: true,
-                    zoomin: true,
-                    zoomout: true,
-                    pan: false,
-                    reset: true
-                },
-                autoSelected: 'zoom'
+                show: false
             },
             zoom: {
                 enabled: true,
@@ -202,34 +242,41 @@ const Launchpad: React.FC = () => {
                     enabled: true,
                     delay: 150
                 }
-            }
+            },
+            dropShadow: {
+                enabled: false
+            },
+            foreColor: '#888'
         },
         grid: {
-            borderColor: '#1a1a1a',
-            strokeDashArray: 4,
+            show: true,
+            borderColor: '#2a2a2a',
+            strokeDashArray: 0,
             xaxis: {
                 lines: {
-                    show: true
+                    show: true,
+                    color: '#252525'
                 }
             },
             yaxis: {
                 lines: {
-                    show: true
+                    show: true,
+                    color: '#252525'
                 }
             },
             padding: {
-                top: 10,
-                right: 20,
-                bottom: 10,
-                left: 10
+                top: 0,
+                right: 10,
+                bottom: 0,
+                left: 0
             }
         },
         xaxis: {
             type: 'datetime',
             labels: {
                 style: {
-                    colors: '#666',
-                    fontSize: '11px',
+                    colors: '#4a4a4a',
+                    fontSize: '10px',
                     fontFamily: 'inherit'
                 },
                 datetimeFormatter: {
@@ -237,8 +284,7 @@ const Launchpad: React.FC = () => {
                 }
             },
             axisBorder: {
-                show: true,
-                color: '#1a1a1a'
+                show: false
             },
             axisTicks: {
                 show: false
@@ -251,8 +297,8 @@ const Launchpad: React.FC = () => {
             opposite: true,
             labels: {
                 style: {
-                    colors: '#666',
-                    fontSize: '11px',
+                    colors: '#4a4a4a',
+                    fontSize: '10px',
                     fontFamily: 'inherit'
                 },
                 formatter: (value) => {
@@ -272,7 +318,7 @@ const Launchpad: React.FC = () => {
         plotOptions: {
             candlestick: {
                 colors: {
-                    upward: '#4ade80',
+                    upward: '#22c55e',
                     downward: '#ef4444'
                 },
                 wick: {
@@ -280,11 +326,16 @@ const Launchpad: React.FC = () => {
                 }
             }
         },
+        stroke: {
+            show: true,
+            colors: ['#999'],
+            width: 1
+        },
         tooltip: {
             enabled: true,
             theme: 'dark',
             style: {
-                fontSize: '12px',
+                fontSize: '11px',
                 fontFamily: 'inherit'
             },
             x: {
@@ -303,15 +354,15 @@ const Launchpad: React.FC = () => {
                         if (!val || isNaN(val)) return '0';
                         if (val < 0.00001) return val.toExponential(4);
                         if (val < 0.01) return val.toFixed(8);
-                        return val.toFixed(2);
+                        return val.toFixed(4);
                     };
                     
-                    return '<div class="apexcharts-tooltip-candlestick" style="padding: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px;">' +
-                        '<div style="color: #888; font-size: 11px; margin-bottom: 4px;">OHLC</div>' +
-                        '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">Open:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(o) + '</span></div>' +
-                        '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">High:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(h) + '</span></div>' +
-                        '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">Low:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(l) + '</span></div>' +
-                        '<div style="display: flex; justify-content: space-between;"><span style="color: #666;">Close:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(c) + '</span></div>' +
+                    return '<div class="apexcharts-tooltip-candlestick" style="padding: 10px; background: #000; border: 1px solid #333; border-radius: 6px;">' +
+                        '<div style="color: #666; font-size: 10px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">OHLC</div>' +
+                        '<div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span style="color: #666; font-size: 11px;">Open:</span> <span style="color: #fff; margin-left: 20px; font-size: 11px;">' + formatValue(o) + '</span></div>' +
+                        '<div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span style="color: #666; font-size: 11px;">High:</span> <span style="color: #22c55e; margin-left: 20px; font-size: 11px;">' + formatValue(h) + '</span></div>' +
+                        '<div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span style="color: #666; font-size: 11px;">Low:</span> <span style="color: #dc2626; margin-left: 20px; font-size: 11px;">' + formatValue(l) + '</span></div>' +
+                        '<div style="display: flex; justify-content: space-between;"><span style="color: #666; font-size: 11px;">Close:</span> <span style="color: #fff; margin-left: 20px; font-size: 11px;">' + formatValue(c) + '</span></div>' +
                     '</div>';
                 } catch (e) {
                     return '';
@@ -466,28 +517,35 @@ const Launchpad: React.FC = () => {
     useEffect(() => {
         if (!selectedToken) {
             setChartSeries([]);
+            setPercentChange(0);
             return;
         }
         
-        setIsChartLoading(true);
+        // Reset chart when token changes
+        setChartSeries([]);
         
         // Fetch data from API
         const loadChartData = async () => {
-            const ohlcData = await fetchOHLCData(chartTimeframe, chartGranularity);
+            console.log("Loading chart data for token:", selectedToken.symbol, "timeframe:", chartTimeframe);
+            setIsChartLoading(true);
             
-            // Validate data before setting
-            if (ohlcData && ohlcData.length > 0) {
-                setChartSeries([{
-                    name: `${selectedToken.symbol}/${token1Symbol}`,
-                    data: ohlcData
-                }]);
+            try {
+                const ohlcData = await fetchOHLCData(chartTimeframe, chartGranularity);
                 
-                // Calculate percentage change based on timeframe
-                const calculatePercentChange = (data, timeframe) => {
-                    if (!data || data.length < 2) return 0;
+                // Validate data before setting
+                if (ohlcData && ohlcData.length > 0) {
+                    console.log("Chart data loaded:", ohlcData.length, "candles");
+                    setChartSeries([{
+                        name: `${selectedToken.symbol}/${token1Symbol}`,
+                        data: ohlcData
+                    }]);
                     
-                    const now = new Date().getTime();
-                    let targetTimeAgo;
+                    // Calculate percentage change based on timeframe
+                    const calculatePercentChange = (data, timeframe) => {
+                        if (!data || data.length < 2) return 0;
+                        
+                        const now = new Date().getTime();
+                        let targetTimeAgo;
                     
                     // Calculate how far back to look based on the timeframe
                     switch (timeframe) {
@@ -537,23 +595,193 @@ const Launchpad: React.FC = () => {
                 console.log("Calculated percentage change:", change, "for timeframe:", chartTimeframe);
                 setPercentChange(change);
             } else {
+                console.log("No chart data available");
                 setChartSeries([{
                     name: `${selectedToken.symbol}/${token1Symbol}`,
                     data: []
                 }]);
                 setPercentChange(0);
             }
-            
-            setIsChartLoading(false);
+            } catch (error) {
+                console.error("Error loading chart data:", error);
+                setChartSeries([{
+                    name: `${selectedToken.symbol}/${token1Symbol}`,
+                    data: []
+                }]);
+                setPercentChange(0);
+            } finally {
+                setIsChartLoading(false);
+            }
         };
         
+        // Load data immediately
         loadChartData();
         
-        // Refresh data every 30 seconds
-        const interval = setInterval(loadChartData, 30000);
+        // Refresh chart every 30 seconds to get latest candles
+        const interval = setInterval(() => {
+            loadChartData();
+        }, 30000);
         
         return () => clearInterval(interval);
-    }, [selectedToken, chartTimeframe, chartGranularity]);
+        
+    }, [selectedToken, chartTimeframe, chartGranularity, token1Symbol, chartUpdateTrigger]);
+
+    // Listen to Uniswap pool events for real-time price updates
+    useEffect(() => {
+        if (!poolInfo.poolAddress || poolInfo.poolAddress === zeroAddress) return;
+        
+        console.log("Setting up event listener for pool:", poolInfo.poolAddress);
+        
+        const poolContract = new ethers.Contract(
+            poolInfo.poolAddress,
+            uniswapV3PoolABI,
+            localProvider
+        );
+        
+        // Function to update price from sqrtPriceX96
+        const updatePriceFromSqrtPriceX96 = (sqrtPriceX96) => {
+            try {
+                // Convert sqrtPriceX96 to price
+                // price = (sqrtPriceX96 / 2^96)^2
+                const sqrtPrice = parseFloat(sqrtPriceX96.toString()) / Math.pow(2, 96);
+                const price = Math.pow(sqrtPrice, 2);
+                
+                // If token0 is WETH/ETH, we need to invert the price
+                const isToken0Weth = selectedToken?.token1?.toLowerCase() === config.protocolAddresses.WMON?.toLowerCase();
+                const finalPrice = isToken0Weth ? price : 1 / price;
+                
+                console.log("Price updated from pool event:", finalPrice);
+                
+                // Update the selected token's price
+                if (selectedToken) {
+                    setSelectedToken(prev => ({
+                        ...prev,
+                        price: finalPrice,
+                        spotPrice: parseEther(finalPrice.toString())
+                    }));
+                    
+                    // Update tokens list
+                    setTokens(prevTokens => 
+                        prevTokens.map(token => 
+                            token.id === selectedToken.id 
+                                ? { ...token, price: finalPrice, spotPrice: parseEther(finalPrice.toString()) }
+                                : token
+                        )
+                    );
+                    
+                    // Trigger chart update
+                    setChartUpdateTrigger(prev => prev + 1);
+                }
+            } catch (error) {
+                console.error("Error updating price from event:", error);
+            }
+        };
+        
+        // Listen to Swap events
+        const handleSwap = async (sender, recipient, amount0, amount1, sqrtPriceX96, liquidity, tick, event) => {
+            console.log("Swap event detected");
+            updatePriceFromSqrtPriceX96(sqrtPriceX96);
+            
+            // Add transaction to trade history
+            try {
+                const txHash = event.transactionHash;
+                
+                // Check if we've already processed this transaction
+                if (processedTxHashes.has(txHash)) {
+                    console.log("Transaction already processed:", txHash);
+                    return;
+                }
+                
+                // Skip if no actual amounts were swapped
+                if (amount0.isZero() && amount1.isZero()) {
+                    return;
+                }
+                
+                // Mark as processed immediately to prevent duplicates
+                processedTxHashes.add(txHash);
+                
+                const block = await event.getBlock();
+                const timestamp = new Date(block.timestamp * 1000);
+                
+                // Determine if it's a buy or sell based on amounts
+                // If amount0 is negative, token0 is being sold (and token1 bought)
+                // If amount0 is positive, token0 is being bought (and token1 sold)
+                const isBuy = amount0.gt(0);
+                const tokenAmount = isBuy ? amount0.abs() : amount1.abs();
+                const ethAmount = isBuy ? amount1.abs() : amount0.abs();
+                
+                // Calculate price
+                const tokenAmountFormatted = parseFloat(formatEther(tokenAmount));
+                const ethAmountFormatted = parseFloat(formatEther(ethAmount));
+                const price = ethAmountFormatted / tokenAmountFormatted;
+                
+                const newTrade = {
+                    id: Date.now() + Math.random(), // Unique ID
+                    type: isBuy ? "buy" : "sell",
+                    token: selectedToken?.symbol || "TOKEN",
+                    amount: tokenAmountFormatted,
+                    price: price,
+                    total: ethAmountFormatted,
+                    time: timestamp,
+                    txHash: `${txHash.slice(0, 6)}...${txHash.slice(-4)}`,
+                    // For swap events, sender is the router/pool, recipient is the user
+                    sender: recipient, // The actual user who initiated the trade
+                    recipient: sender, // The pool/router contract
+                    fullTxHash: txHash
+                };
+                
+                // Add to trade history (most recent first)
+                setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]); // Keep last 100 trades
+            } catch (error) {
+                console.error("Error processing swap event:", error);
+            }
+        };
+        
+        // Get initial price from slot0
+        const getInitialPrice = async () => {
+            try {
+                const slot0 = await poolContract.slot0();
+                updatePriceFromSqrtPriceX96(slot0.sqrtPriceX96);
+            } catch (error) {
+                console.error("Error fetching initial price:", error);
+            }
+        };
+        
+        getInitialPrice();
+        
+        // Record the timestamp when we start listening
+        const startListeningTime = Date.now();
+        console.log("Starting to listen for Swap events at:", new Date(startListeningTime));
+        
+        // Modified handleSwap to check timestamp
+        const handleSwapWithTimeCheck = async (...args) => {
+            try {
+                const event = args[args.length - 1];
+                const block = await event.getBlock();
+                const eventTimestamp = block.timestamp * 1000;
+                
+                // Only process events that happened after we started listening
+                if (eventTimestamp < startListeningTime) {
+                    console.log("Ignoring historical event from:", new Date(eventTimestamp));
+                    return;
+                }
+                
+                // Process the event
+                await handleSwap(...args);
+            } catch (error) {
+                console.error("Error in handleSwapWithTimeCheck:", error);
+            }
+        };
+        
+        // Attach event listener
+        poolContract.on("Swap", handleSwapWithTimeCheck);
+        
+        // Cleanup
+        return () => {
+            console.log("Removing pool event listener");
+            poolContract.off("Swap", handleSwapWithTimeCheck);
+        };
+    }, [poolInfo.poolAddress, selectedToken?.id, selectedToken?.symbol]);
 
     // Fetch token1 symbol and spot price when token is selected
     useEffect(() => {
@@ -1156,7 +1384,7 @@ const Launchpad: React.FC = () => {
     // Fetch quotes using wagmi hooks
     const quoterAddress = config.protocolAddresses?.uniswapQuoterV2;
     
-    const { data: quoteData } = useContractRead({
+    const { data: quoteData, isLoading: isQuoteLoading } = useContractRead({
         address: quoterAddress,
         abi: QuoterAbi,
         functionName: "quoteExactInput",
@@ -1171,8 +1399,15 @@ const Launchpad: React.FC = () => {
         if (!tradeAmount || !selectedToken || parseFloat(tradeAmount) === 0) {
             setQuote("");
             setPriceImpact("0");
+            setShowQuoteLoading(false);
             return;
         }
+        
+        // Show loading spinner when input changes
+        setShowQuoteLoading(true);
+        const timer = setTimeout(() => {
+            setShowQuoteLoading(false);
+        }, 1000); // Show spinner for 1 second
         
         if (quoteData && quoteData[0]) {
             // Use actual quote from contract
@@ -1205,6 +1440,8 @@ const Launchpad: React.FC = () => {
                 setPriceImpact("0.2");
             }
         }
+        
+        return () => clearTimeout(timer); // Cleanup timer
     }, [tradeAmount, selectedToken, isBuying, quoteData]);
     
     // Contract write hooks for trading
@@ -1215,6 +1452,30 @@ const Launchpad: React.FC = () => {
         abi: ExchangeHelperAbi,
         functionName: "buyTokens",
         onSuccess(data) {
+            // Add transaction to history
+            const tokenAmount = parseFloat(quoteData ? formatEther(quoteData[0] || "0") : "0");
+            const ethAmount = parseFloat(tradeAmount);
+            const price = ethAmount / tokenAmount;
+            
+            const newTrade = {
+                id: Date.now() + Math.random(),
+                type: "buy",
+                token: selectedToken?.symbol || "TOKEN",
+                amount: tokenAmount,
+                price: price,
+                total: ethAmount,
+                time: new Date(),
+                txHash: `${data.hash.slice(0, 6)}...${data.hash.slice(-4)}`,
+                sender: address,
+                recipient: selectedToken?.token0,
+                fullTxHash: data.hash
+            };
+            // Check if already processed
+            if (!processedTxHashes.has(data.hash)) {
+                processedTxHashes.add(data.hash);
+                setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
+            }
+            
             setTimeout(() => {
                 const fetchBalances = async () => {
                     if (!selectedToken) return;
@@ -1266,6 +1527,30 @@ const Launchpad: React.FC = () => {
         abi: ExchangeHelperAbi,
         functionName: "buyTokensWETH",
         onSuccess(data) {
+            // Add transaction to history
+            const tokenAmount = parseFloat(quoteData ? formatEther(quoteData[0] || "0") : "0");
+            const ethAmount = parseFloat(tradeAmount);
+            const price = ethAmount / tokenAmount;
+            
+            const newTrade = {
+                id: Date.now() + Math.random(),
+                type: "buy",
+                token: selectedToken?.symbol || "TOKEN",
+                amount: tokenAmount,
+                price: price,
+                total: ethAmount,
+                time: new Date(),
+                txHash: `${data.hash.slice(0, 6)}...${data.hash.slice(-4)}`,
+                sender: address,
+                recipient: selectedToken?.token0,
+                fullTxHash: data.hash
+            };
+            // Check if already processed
+            if (!processedTxHashes.has(data.hash)) {
+                processedTxHashes.add(data.hash);
+                setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
+            }
+            
             setTimeout(() => {
                 const fetchBalances = async () => {
                     if (!selectedToken) return;
@@ -1320,6 +1605,30 @@ const Launchpad: React.FC = () => {
         abi: ExchangeHelperAbi,
         functionName: useWeth ? "sellTokens" : "sellTokensETH",
         onSuccess(data) {
+            // Add transaction to history
+            const ethAmount = parseFloat(quoteData ? formatEther(quoteData[0] || "0") : "0");
+            const tokenAmount = parseFloat(tradeAmount);
+            const price = ethAmount / tokenAmount;
+            
+            const newTrade = {
+                id: Date.now() + Math.random(),
+                type: "sell",
+                token: selectedToken?.symbol || "TOKEN",
+                amount: tokenAmount,
+                price: price,
+                total: ethAmount,
+                time: new Date(),
+                txHash: `${data.hash.slice(0, 6)}...${data.hash.slice(-4)}`,
+                sender: address,
+                recipient: selectedToken?.token0,
+                fullTxHash: data.hash
+            };
+            // Check if already processed
+            if (!processedTxHashes.has(data.hash)) {
+                processedTxHashes.add(data.hash);
+                setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
+            }
+            
             setTimeout(() => {
                 const fetchBalances = async () => {
                     if (!selectedToken) return;
@@ -2014,7 +2323,14 @@ const Launchpad: React.FC = () => {
                                     <Tabs.Content value="my">
                                         {address ? (
                                                 <VStack gap={2} align="stretch">
-                                                    {tradeHistory.filter((_, index) => index % 2 === 0).map((trade) => (
+                                                    {tradeHistory.filter(trade => 
+                                                        trade.sender?.toLowerCase() === address.toLowerCase() || 
+                                                        trade.recipient?.toLowerCase() === address.toLowerCase()
+                                                    ).length > 0 ? (
+                                                        tradeHistory.filter(trade => 
+                                                            trade.sender?.toLowerCase() === address.toLowerCase() || 
+                                                            trade.recipient?.toLowerCase() === address.toLowerCase()
+                                                        ).map((trade) => (
                                                         <Flex
                                                             key={trade.id}
                                                             p={2}
@@ -2061,7 +2377,12 @@ const Launchpad: React.FC = () => {
                                                                     fontSize="xs"
                                                                     cursor="pointer"
                                                                     _hover={{ textDecoration: "underline" }}
-                                                                    onClick={() => window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank")}
+                                                                    onClick={() => {
+                                                                        const explorerUrl = config.chain === "monad" 
+                                                                            ? `https://monadexplorer.com/tx/${trade.fullTxHash || trade.txHash}`
+                                                                            : `https://bscscan.com/tx/${trade.fullTxHash || trade.txHash}`;
+                                                                        window.open(explorerUrl, "_blank");
+                                                                    }}
                                                                     minW="100px"
                                                                     textAlign="right"
                                                                 >
@@ -2075,7 +2396,12 @@ const Launchpad: React.FC = () => {
                                                                 </Text>
                                                             </Box>
                                                         </Flex>
-                                                    ))}
+                                                    ))
+                                                    ) : (
+                                                        <Text color="#666" textAlign="center" py={8}>
+                                                            No transactions found
+                                                        </Text>
+                                                    )}
                                                 </VStack>
                                             ) : (
                                                 <Text color="#666" textAlign="center" py={8}>
@@ -2239,11 +2565,15 @@ const Launchpad: React.FC = () => {
                                 size="lg"
                                 _placeholder={{ color: "#666" }}
                             />
-                            {quote && (
-                                <Text color="#666" fontSize="xs" mt={1}>
-                                    You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
-                                </Text>
-                            )}
+                            <Box h="20px" mt={1} display="flex" alignItems="center">
+                                {showQuoteLoading ? (
+                                    <Spinner size="xs" color="#4ade80" />
+                                ) : quote ? (
+                                    <Text color="#666" fontSize="xs">
+                                        You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                    </Text>
+                                ) : null}
+                            </Box>
                         </Box>
                         
                         <Box mb={4}>
@@ -2285,13 +2615,20 @@ const Launchpad: React.FC = () => {
                             fontSize="lg"
                             fontWeight="bold"
                             onClick={isBuying ? handleBuy : handleSell}
-                            isDisabled={!selectedToken || !tradeAmount || isLoading}
-                            isLoading={isLoading}
+                            isDisabled={!selectedToken || !tradeAmount || isLoading || isLoadingExecuteTrade}
+                            isLoading={isLoading || isLoadingExecuteTrade}
+                            loadingText="Processing..."
                             _hover={{
                                 bg: isBuying ? "#22c55e" : "#dc2626"
                             }}
+                            opacity={isLoading || isLoadingExecuteTrade ? 0.7 : 1}
+                            cursor={isLoading || isLoadingExecuteTrade ? "not-allowed" : "pointer"}
                         >
-                            {isBuying ? "Buy" : "Sell"} {selectedToken?.symbol || ""}
+                            {(isLoading || isLoadingExecuteTrade) ? (
+                                <Spinner size="sm" color={isBuying ? "black" : "white"} />
+                            ) : (
+                                `${isBuying ? "Buy" : "Sell"} ${selectedToken?.symbol || ""}`
+                            )}
                         </Button>
                     </Box>
                     </VStack>
@@ -2352,11 +2689,15 @@ const Launchpad: React.FC = () => {
                                         size="lg"
                                         _placeholder={{ color: "#666" }}
                                     />
-                                    {quote && (
-                                        <Text color="#666" fontSize="xs" mt={1}>
-                                            You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
-                                        </Text>
-                                    )}
+                                    <Box h="20px" mt={1} display="flex" alignItems="center">
+                                        {showQuoteLoading ? (
+                                            <Spinner size="xs" color="#4ade80" />
+                                        ) : quote ? (
+                                            <Text color="#666" fontSize="xs">
+                                                You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                            </Text>
+                                        ) : null}
+                                    </Box>
                                 </Box>
                                 
                                 <Box mb={4}>
@@ -2591,7 +2932,14 @@ const Launchpad: React.FC = () => {
                                     <Tabs.Content value="my">
                                         {address ? (
                                                 <VStack gap={2} align="stretch">
-                                                    {tradeHistory.filter((_, index) => index % 2 === 0).map((trade) => (
+                                                    {tradeHistory.filter(trade => 
+                                                        trade.sender?.toLowerCase() === address.toLowerCase() || 
+                                                        trade.recipient?.toLowerCase() === address.toLowerCase()
+                                                    ).length > 0 ? (
+                                                        tradeHistory.filter(trade => 
+                                                            trade.sender?.toLowerCase() === address.toLowerCase() || 
+                                                            trade.recipient?.toLowerCase() === address.toLowerCase()
+                                                        ).map((trade) => (
                                                         <Box
                                                             key={trade.id}
                                                             p={3}
@@ -2654,7 +3002,12 @@ const Launchpad: React.FC = () => {
                                                                 </HStack>
                                                             </Flex>
                                                         </Box>
-                                                    ))}
+                                                    ))
+                                                    ) : (
+                                                        <Text color="#666" textAlign="center" py={8}>
+                                                            No transactions found
+                                                        </Text>
+                                                    )}
                                                 </VStack>
                                             ) : (
                                                 <Text color="#666" textAlign="center" py={8}>

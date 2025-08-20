@@ -444,7 +444,7 @@ const Markets: React.FC = () => {
   
 
   return (
-    <Container maxW="container.xl" py={12} ml={isConnected ? "2%" : "8%"}>
+    <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
       <Toaster />
       {/* Prompt user to connect their wallet if not connected */}
       {!isConnected ? (
@@ -454,139 +454,140 @@ const Markets: React.FC = () => {
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
-            height="70vh"
+            height="100vh"
             color="white"
-            bg="#222831"
-            p={8}
-            borderRadius="xl"
-            boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
-            m={4}
-            border="1px solid #4ade80"
-            mt="100px"
-            ml={isMobile ? 5 : "7%"}
-            w="70%"
-            h="30%"
+            bg="#0a0a0a"
+            px={4}
             >
             <Box
-                mb={6}
-                p={4}
-                borderRadius="full"
-                bg="rgba(74, 222, 128, 0.2)"
-                
+                bg="#1a1a1a"
+                border="1px solid #2a2a2a"
+                borderRadius="xl"
+                p={8}
+                maxW="400px"
+                textAlign="center"
             >
-                <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
+                <Box
+                    mb={6}
+                    p={4}
+                    borderRadius="full"
+                    bg="rgba(74, 222, 128, 0.1)"
+                    display="inline-block"
+                >
+                    <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
+                </Box>
+                <Heading as="h2" mb={4} fontSize="xl" color="white">Wallet Not Connected</Heading>
+                <Text fontSize="sm" mb={6} color="#666">
+                    Please connect your wallet to access the Markets page.
+                </Text>
             </Box>
-            <Heading as="h2" mb={4} fontSize="md" textAlign="center">Wallet Not Connected</Heading>
-            <Text fontSize="sm" textAlign="center" mb={6} color="gray.400">
-                Please connect your wallet to access the Markets page.
-            </Text>
-
-            </Box>
-            <Box h="50vh"><br /></Box>            
+        </Box>            
         </>
       ) : (
         <Box
           color="white"
-          textAlign="left"
-          mt={isMobile ? "18%" : "100px"}
-          ml={isMobile ? -3 : "5%"}
-          alignContent={"center"}
-          alignItems={"center"}
+          pt={isMobile ? "80px" : "100px"}
+          pb={8}
+          px={isMobile ? 4 : 8}
+          maxW="1600px"
+          mx="auto"
         >
-          <Box width={isMobile ? "90%" : "100%"} maxW="1100px" mx="auto" >
-            <Box px={4} mb={4}>
-              <HStack spacing={4}>
+            <Box mb={8}>
+              {/* <Heading as="h1" mb={4} fontSize={isMobile ? "2xl" : "3xl"} color="white">
+                Markets
+              </Heading> */}
+              <HStack spacing={2}>
                 <Button
                   onClick={() => handleSetView("all")}
                   variant={view === "all" ? "solid" : "outline"}
-                  background={view === "all" ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
-                  border="2px solid #4ade80"
-                  color={view === "all" ? "white" : "#4ade80"}
-                  boxShadow={view === "all" ? "0 4px 15px rgba(74, 222, 128, 0.4)" : "0 2px 8px rgba(74, 222, 128, 0.1)"}
-                  transition="all 0.3s ease"
+                  bg={view === "all" ? "#4ade80" : "transparent"}
+                  color={view === "all" ? "black" : "white"}
+                  border="1px solid"
+                  borderColor={view === "all" ? "#4ade80" : "#2a2a2a"}
+                  size="sm"
+                  fontWeight="500"
                   _hover={{
-                    background: view === "all" ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
-                    borderColor: "#65f343",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 20px rgba(74, 222, 128, 0.3)"
-                  }}
-                  _active={{
-                    transform: "translateY(0px)",
-                    boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
+                    bg: view === "all" ? "#22c55e" : "#1a1a1a"
                   }}
                 >
-                  <Text fontSize="sm" color={view == "all" ? "black" : "white"}>All Markets</Text>
+                  All Markets
                 </Button>
                 <Button
                   onClick={() => handleSetView("my")}
                   variant={view === "my" ? "solid" : "outline"}
-                  background={view === "my" ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
-                  border="2px solid #4ade80"
-                  color={view === "my" ? "white" : "#4ade80"}
-                  boxShadow={view === "my" ? "0 4px 15px rgba(74, 222, 128, 0.4)" : "0 2px 8px rgba(74, 222, 128, 0.1)"}
-                  transition="all 0.3s ease"
+                  bg={view === "my" ? "#4ade80" : "transparent"}
+                  color={view === "my" ? "black" : "white"}
+                  border="1px solid"
+                  borderColor={view === "my" ? "#4ade80" : "#2a2a2a"}
+                  size="sm"
+                  fontWeight="500"
                   _hover={{
-                    background: view === "my" ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
-                    borderColor: "#65f343",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 20px rgba(74, 222, 128, 0.3)"
-                  }}
-                  _active={{
-                    transform: "translateY(0px)",
-                    boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
+                    bg: view === "my" ? "#22c55e" : "#1a1a1a"
                   }}
                 >
-                  <Text fontSize="sm" color={view == "my" ? "black" : "white"}>My Markets</Text>
+                  My Markets
                 </Button>
               </HStack>
             </Box>
 
             {/* Vaults List */}
             <Box
-              border="1px solid gray"
-              p={8}
-              borderRadius={20}
-              backgroundColor="#222831"
+              bg="#1a1a1a"
+              border="1px solid #2a2a2a"
+              borderRadius="xl"
               overflow="hidden"
-              key={`vaults-container-${isAllVaultsLoading ? 'loading' : 'loaded'}`} // Force re-render on loading state change
             >
               {isAllVaultsLoading ? (
-                <Box textAlign="center" w="100%" p={10}>
-                  <Spinner size="md" color="#4ade80" thickness="3px" />
-                  <Text mt={3} color="#4ade80">Loading markets...</Text>
+                <Box textAlign="center" py={10}>
+                  <Spinner size="lg" color="#4ade80" thickness="3px" />
+                  <Text mt={4} color="#666">Loading markets...</Text>
                 </Box>
               ) : isAllVaultsError || error ? (
-                <Text color="red">Error fetching vaults</Text>
+                <Box textAlign="center" py={10}>
+                  <Text color="#ef4444">Error fetching vaults</Text>
+                </Box>
               ) : (view === "all" ? vaultDescriptions.length === 0 : userVaults.length === 0) ? (
-                <Text>No vaults found.<br /><br /><br /><br /><br /><br /><br /><br /></Text>
+                <Box textAlign="center" py={10}>
+                  <Text color="#666">No vaults found</Text>
+                </Box>
               ) : (
-                <VStack align="start" spacing={6} width="100%">
-                  <Box width="95%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4}>
+                <VStack align="start" spacing={0} width="100%">
+                  <Box 
+                    width="100%" 
+                    display="grid" 
+                    gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} 
+                    gap={2}
+                    bg="#2a2a2a"
+                    px={6}
+                    py={3}
+                    borderBottom="1px solid #3a3a3a"
+                    width="100%"
+                  >
                     <Box>
-                      <Text fontWeight="bold" color="#4ade80">&nbsp;Name</Text>
+                      <Text fontSize="xs" color="#888" fontWeight="600" textTransform="uppercase">Name</Text>
                     </Box>
                     <Box>
-                      <Text fontWeight="bold" color="#4ade80">Symbol</Text>
+                      <Text fontSize="xs" color="#888" fontWeight="600" textTransform="uppercase">Symbol</Text>
                     </Box>
                     {!isMobile && (
                       <>
                       <Box>
-                        <Text fontWeight="bold" color="#4ade80">Reserve Asset</Text>
+                        <Text fontSize="xs" color="#888" fontWeight="600" textTransform="uppercase">Reserve</Text>
                       </Box>
                       <Box>
-                        <Text fontWeight="bold" color="#4ade80">Protocol</Text>
+                        <Text fontSize="xs" color="#888" fontWeight="600" textTransform="uppercase">Protocol</Text>
                       </Box>
                       <Box>
-                        <Text fontWeight="bold" color="#4ade80">Presale</Text>
+                        <Text fontSize="xs" color="#888" fontWeight="600" textTransform="uppercase">Presale</Text>
                       </Box>
                       <Box>
-                        <Text fontWeight="bold" color="#4ade80">Action</Text>
+                        <Text fontSize="xs" color="#888" fontWeight="600" textTransform="uppercase">Action</Text>
                       </Box>
                       </>
                     )}
                   </Box>
                   {vaultsDataArray?.map((vault, index) => {
-                    // console.log(vault)
+                    console.log("Vault info:", vault.tokenSymbol, vault.vault, "Protocol:", config.vault2ProtocolMap[vault.vault])
 
                     let hasPresale;
 
@@ -600,92 +601,101 @@ const Markets: React.FC = () => {
 
                       <Box
                         key={index}
-                        p={4}
-                        border="1px solid"
-                        borderColor={isMobile? vault.presaleContract != zeroAddress ? "#4ade80" : "gray" : "gray"}
-                        borderRadius="md"
-                        w="98%"
+                        display="grid"
+                        gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"}
+                        gap={2}
+                        alignItems="center"
+                        px={6}
+                        py={4}
                         cursor="pointer"
                         onClick={() => handleVaultClick(vault)}
-                        _hover={{ backgroundColor: "#393E46" }}
+                        bg="transparent"
+                        borderBottom="1px solid #2a2a2a"
+                        width="100%"
+                        _hover={{ 
+                          bg: "#1a1a1a",
+                          borderColor: "#3a3a3a"
+                        }}
+                        transition="all 0.2s"
                     >
-                      <VStack width="98%" spacing={4}>
-                        <Box width="98%" display="grid" gridTemplateColumns={isMobile ? "repeat(2, 1fr)" : "repeat(6, 1fr)"} gap={4} alignItems="center">
                           {/* Token Name */}
-                          <Box ml={isMobile ? 0 : "-10px"}>
-                            <Text>{vault.tokenName}</Text>
+                          <Box>
+                            <Text color="white" fontSize="sm" noOfLines={1}>{vault.tokenName}</Text>
                           </Box>
 
                           {/* Token Symbol */}
-                          <Box ml={isMobile ? 0 : "-15px"}>
-                            <HStack>
-                              <Box><Text mr={2} >{vault.tokenSymbol}</Text></Box>
-                              <Box>
-                               <Image
-                                w={vault.tokenSymbol == "NOMA" ? "25px" : "20px"}
+                          <HStack spacing={2}>
+                            <Box>
+                              <Image
+                                w="20px"
+                                h="20px"
                                 src={vault.tokenSymbol == "NOMA" ? nomaLogo : placeholderLogo}
                                 alt="token logo"
                               />
+                            </Box>
+                            <Box>
+                              <Text color="white" fontSize="sm" fontWeight="500">{vault.tokenSymbol}</Text>
+                            </Box>
+                          </HStack>
+
+                          {/* Reserve */}
+                          <Box display={isMobile ? "none" : "block"}>
+                            <HStack spacing={2}>
+                              <Box>
+                                <Image
+                                  w="20px"
+                                  h="20px"
+                                  src={getReserveAssetLogo(getReserveAssetLabel(vault.token1))}
+                                  alt="reserve asset logo"
+                                />
+                              </Box>
+                              <Box>
+                                <Text color="white" fontSize="sm">{getReserveAssetLabel(vault.token1)}</Text>
                               </Box>
                             </HStack>
                           </Box>
 
-                          {/* Desktop columns */}
-                          {!isMobile ? (
-                            <>
-                              <Box>
-                                <HStack alignItems="center">
-                                <Box>
-                                  <Text mt={10} mr={2}>{getReserveAssetLabel(vault.token1)}</Text>
+                          {/* Protocol */}
+                          <Box display={isMobile ? "none" : "flex"} justifyContent="flex-start">
+                            <Image
+                              w="60px"
+                              h="auto"
+                              src={config.vault2ProtocolMap[vault.vault] == "uniswap" ? uniswapLogo : pancakeLogo}
+                              alt="protocol logo"
+                              opacity={0.8}
+                            />
+                          </Box>
+
+                          {/* Presale Status */}
+                          <Box display={isMobile ? "none" : "flex"} justifyContent="flex-start" alignItems="center">
+                            {hasPresale ? (
+                              <Link href={`/presale?a=${vault.presaleContract}`} target="_blank">
+                                <Box
+                                  px={3}
+                                  py={1}
+                                  borderRadius="full"
+                                  bg={vault.finalized ? "rgba(74, 222, 128, 0.1)" : vault.expired ? "rgba(239, 68, 68, 0.1)" : "rgba(251, 191, 36, 0.1)"}
+                                  border="1px solid"
+                                  borderColor={vault.finalized ? "#4ade80" : vault.expired ? "#ef4444" : "#fbbf24"}
+                                >
+                                  <Text 
+                                    color={vault.finalized ? "#4ade80" : vault.expired ? "#ef4444" : "#fbbf24"} 
+                                    fontSize="xs" 
+                                    fontWeight="600"
+                                  >
+                                    {vault.finalized ? "Finalized" : vault.expired ? "Expired" : "In Progress"}
+                                  </Text>
                                 </Box>
-                                <Box>
-                                  <Image
-                                    w="25px"
-                                    src={getReserveAssetLogo(getReserveAssetLabel(vault.token1))}
-                                    alt="reserve asset logo"
-                                  />
-                                </Box>
-                                </HStack>
-                              </Box>
+                              </Link>
+                            ) : (
+                              <Text color="#666" fontSize="sm">—</Text>
+                            )}
+                          </Box>
 
-                              <Box>
-                                <Image
-                                  w="65px"
-                                  src={config.vault2ProtocolMap[vault.vault] == "uniswap" ? uniswapLogo : pancakeLogo}
-                                  alt="protocol logo"
-                                />
-                              </Box>
-
-                              {/* Presale Status */}
-                              <Box textAlign="center" ml={-20}>
-                                {hasPresale ? (
-                                  <Link href={`/presale?a=${vault.presaleContract}`} target="_blank">
-                                    {vault.finalized ? (
-                                      <Text color="#4ade80" fontSize="sm" ml={"20px"}><b>Finalized</b></Text>
-                                    ) : vault.expired ? (
-                                      <Text color="red" fontSize="sm"><b>Expired</b></Text>
-                                    ) : (
-                                      <VStack>
-                                        <Box><Text color="#1ad000" fontSize="sm"><b>In progress</b></Text></Box>
-                                        <Box><Text color="white" fontSize="xs"><b>Click to view</b></Text></Box>
-                                      </VStack>
-                                    )}
-                                  </Link>
-                                ) : (
-                                  <Text color="gray" fontSize="sm"><b>No</b></Text>
-                                )}
-                              </Box>
-
-                              {/* Vault Modal */}
-                              <Box textAlign="center">
-                                <VaultModal vaultInfo={vault} isMobile={isMobile} address={address}/>
-                              </Box>
-                            </>
-                          ) : null}
-                        </Box>
-
-                        {/* No mobile action buttons */}
-                      </VStack>
+                          {/* Vault Modal */}
+                          <Box display={isMobile ? "none" : "flex"} justifyContent="flex-start">
+                            <VaultModal vaultInfo={vault} isMobile={isMobile} address={address}/>
+                          </Box>
                     </Box>
                     )
                   })}
@@ -693,14 +703,6 @@ const Markets: React.FC = () => {
                 </VStack>
               )}
             </Box>
-
-          </Box>
-            <p
-              style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft: isMobile ? "25px" : "12%"}}
-              onClick={() => window.history.back()}
-            >
-              Go Back
-            </p>  
         </Box>
       )}
     </Container>
