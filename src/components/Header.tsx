@@ -38,60 +38,96 @@ const Header: React.FC = () => {
 
   return (
     
-    <header id="header">
-      <nav className="navbar navbar-expand navbar-fixed-top" >
-        <div className="container header">
-        <Link href="https://noma.money" >
-          <Box w="60px">
+    <Box 
+      as="header" 
+      id="header" 
+      position="fixed" 
+      top={0} 
+      left={0} 
+      right={0} 
+      bg="#0a0a0a" 
+      borderBottom="1px solid #1a1a1a"
+      zIndex={1000}
+      px={4}
+      py={3}
+    >
+      <Box 
+        maxW="100%" 
+        mx="auto" 
+        display="flex" 
+        alignItems="center" 
+        justifyContent="space-between"
+      >
+        {/* Logo */}
+        <Link href="https://noma.money">
           <Image
-            mt={isMobile ? 2 : 3}
             src={Logo}
             alt="Noma Protocol"
-            style={{ width: "40px", height: "40px" }}
-            ml={isMobile ? 1 : "-2px"}
+            w="40px"
+            h="40px"
           />
+        </Link>
+        
+        {/* Navigation Links - Desktop */}
+        {!isMobile && (
+          <Box display="flex" gap={6} flex={1} justifyContent="center">
+            <Link href="/" _hover={{ color: "#4ade80" }} color="white" fontWeight="500">
+              Exchange
+            </Link>
+            <Link href="/markets" _hover={{ color: "#4ade80" }} color="white" fontWeight="500">
+              Markets
+            </Link>
+            <Link href="/liquidity" _hover={{ color: "#4ade80" }} color="white" fontWeight="500">
+              Liquidity
+            </Link>
+            <Link href="/launchpad" _hover={{ color: "#4ade80" }} color="white" fontWeight="500">
+              Launchpad
+            </Link>
           </Box>
-          </Link>
-            <Box>
-              <ul className="navbar-nav action">
-              <li className="nav-item ml-2">
-                <Button  onClick={() => open()} variant="outline" h="40px" w="220px" mt={1} mr={-5}>
-                  <p style={{color:"#4ade80", fontSize:(isMobile ? "12px" : "16px"), marginLeft: "5px"}}>
-                  <i className="fa-solid fa-wallet mr-md-2 green-bg" ></i>&nbsp;&nbsp;
-                  {isConnected
-                    ? `${address?.slice(0, 6)}...${address?.slice(-6)}`
-                    : !ctx.isSpanishCountry
-                    ? "Connect wallet"
-                    : "Conectar billetera"}
-                  </p>
-                </Button>
-                {!isMobile && (
-                  <>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</>
-                  )}
-              </li>
-            </ul>
+        )}
+        
+        {/* Wallet Connect Button */}
+        <Box display="flex" alignItems="center" gap={3}>
+          <Button 
+            onClick={() => open()} 
+            bg="#4ade80" 
+            color="black" 
+            h="40px" 
+            px={6}
+            fontWeight="600"
+            _hover={{ bg: "#22c55e" }}
+          >
+            <i className="fa-solid fa-wallet" style={{ marginRight: "8px" }}></i>
+            {isConnected
+              ? `${address?.slice(0, 6)}...${address?.slice(-6)}`
+              : !ctx.isSpanishCountry
+              ? "Connect wallet"
+              : "Conectar billetera"}
+          </Button>
+          
+          {/* Mobile Menu Toggle */}
+          {isMobile && (
+            <Box
+              as="button"
+              color="white"
+              fontSize="24px"
+              data-bs-toggle="modal"
+              data-bs-target="#menu"
+              cursor="pointer"
+            >
+              <i className="fa-solid fa-bars"></i>
             </Box>
-          <ul className="navbar-nav toggle">
-            <li className="nav-item">
-              <a
-                className="nav-link"
-                data-bs-toggle="modal"
-                data-bs-target="#menu"
-              >
-                <i className="fa-solid fa-bars m-0"></i>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
+          )}
+        </Box>
+      </Box>
       {/* Mobile Modal */}
       <div id="menu" className="modal fade p-0">
         <div className="modal-dialog dialog-animated">
-          <div className="modal-content h-100">
+          <div className="modal-content h-100" style={{ backgroundColor: "#1a1a1a", color: "white" }}>
             <div
               className="modal-header"
               data-bs-dismiss="modal"
-              style={{ color: "#fff" }}
+              style={{ color: "#fff", borderBottom: "1px solid #2a2a2a" }}
             >
               Menu <i className="far fa-times-circle icon-close"></i>
             </div>
@@ -99,42 +135,64 @@ const Header: React.FC = () => {
               <div className="row w-100">
                 <div className="items p-0 col-12 text-center">
                   <ul className="navbar-nav items mx-auto">
-
-                    <li
-                      className="nav-item"
-                      data-bs-dismiss="modal"
-                      style={{ fontSize: "20px" }}
-                    >
-                      {/* <Link className="nav-link" to="/">
-                        NOMA
-                      </Link> */}
-                    </li>
                     <li
                       className="nav-item"
                       data-bs-dismiss="modal"
                       style={{ fontSize: "20px", marginTop:"20px"}}
                     >
-                      <a className="btn ml-lg-auto btn-bordered-white" href="/" >
+                      <a 
+                        className="btn" 
+                        href="/" 
+                        style={{ 
+                          backgroundColor: "transparent", 
+                          color: "white", 
+                          border: "1px solid #4ade80",
+                          width: "200px"
+                        }}
+                      >
                         Exchange
                       </a>
-                    </li>                     
-                    {/* <li
-                      className="nav-item"
-                      data-bs-dismiss="modal"
-                      style={{ fontSize: "20px", marginTop:"20px"}}
-                    >
-                      <a className="btn ml-lg-auto btn-bordered-white" href="/launchpad" >
-                        Launchpad
-                      </a>
-                    </li>                 */}
+                    </li>
                     <li className="nav-item" style={{ fontSize: "20px", marginTop:"20px"}}>
-                      <a className="btn ml-lg-auto btn-bordered-white" href="/markets">
+                      <a 
+                        className="btn" 
+                        href="/markets"
+                        style={{ 
+                          backgroundColor: "transparent", 
+                          color: "white", 
+                          border: "1px solid #4ade80",
+                          width: "200px"
+                        }}
+                      >
                         Markets
                       </a>
                     </li>
                     <li className="nav-item" style={{ fontSize: "20px", marginTop:"20px"}}>
-                      <a className="btn ml-lg-auto btn-bordered-white" href="/liquidity">
+                      <a 
+                        className="btn" 
+                        href="/liquidity"
+                        style={{ 
+                          backgroundColor: "transparent", 
+                          color: "white", 
+                          border: "1px solid #4ade80",
+                          width: "200px"
+                        }}
+                      >
                         Liquidity
+                      </a>
+                    </li>
+                    <li className="nav-item" style={{ fontSize: "20px", marginTop:"20px"}}>
+                      <a 
+                        className="btn" 
+                        href="/launchpad"
+                        style={{ 
+                          backgroundColor: "transparent", 
+                          color: "white", 
+                          border: "1px solid #4ade80",
+                          width: "200px"
+                        }}
+                      >
+                        Launchpad
                       </a>
                     </li>
                   </ul>
@@ -144,7 +202,7 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
-    </header>
+    </Box>
   );
 };
 

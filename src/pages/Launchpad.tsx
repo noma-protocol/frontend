@@ -13,7 +13,12 @@ import {
   Textarea,
   Input,
   Spinner,
-  createListCollection
+  createListCollection,
+  Table,
+  IconButton,
+  Badge,
+  Tabs,
+  Center
 } from "@chakra-ui/react";
 import {
     SelectContent,
@@ -25,7 +30,7 @@ import {
   } from "../components/ui/select";
 import { Checkbox } from "../components/ui/checkbox"
   
-import { useAccount, useBalance, useContractWrite } from "wagmi";
+import { useAccount, useBalance, useContractWrite, useContractRead } from "wagmi";
 import { isMobile } from "react-device-detect";
 import { Slider } from "../components/ui/slider"
 import {
@@ -45,7 +50,8 @@ import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import { unCommify, commify, generateBytes32String, getContractAddress } from "../utils";
 import Logo from "../assets/images/noma_logo_transparent.png";
 import { ethers } from "ethers"; // Import ethers.js
-const { formatEther, parseEther } = ethers.utils;
+import { formatEther, parseEther } from "viem";
+const { utils, providers } = ethers;
 
 import { ProgressLabel, ProgressBar, ProgressRoot, ProgressValueText } from "../components/ui/progress"
 import PresaleDetails from "../components/PresaleDetails";
@@ -58,6 +64,8 @@ import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
 import addressesBsc from "../assets/deployment.json";
+import { FaArrowTrendUp, FaArrowTrendDown } from "react-icons/fa6";
+import { LuSearch } from "react-icons/lu";
 
 const addresses = config.chain == "local"
   ? addressesLocal
@@ -67,85 +75,378 @@ const { environment, presaleContractAddress } = config;
 
 const FactoryArtifact = await import(`../assets/OikosFactory.json`);
 const FactoryAbi = FactoryArtifact.abi;
-const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory"); 
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+
+const zeroAddress = "0x0000000000000000000000000000000000000000";
+
+// Uniswap V3 Factory ABI for fetching pool addresses
+const uniswapV3FactoryABI = [
+  "function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool)",
+];
+
+const feeTier = 3000;
+
+import ReactApexChart from 'react-apexcharts'; 
+
+// Contract ABIs
+const ERC20Abi = [
+    "function totalSupply() view returns (uint)",
+    "function balanceOf(address) view returns (uint)",
+    "function decimals() view returns (uint)",
+    "function symbol() view returns (string)",
+    "function name() view returns (string)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+    "function allowance(address owner, address spender) view returns (uint256)"
+];
+
+const IWETHAbi = [
+    "function deposit() payable external",
+    "function withdraw(uint256) external",
+    "function balanceOf(address) view returns (uint)"
+];
+
+// Provider setup
+const localProvider = new providers.JsonRpcProvider(
+    config.chain == "local" ? "http://localhost:8545" : config.RPC_URL
+);
 
 const Launchpad: React.FC = () => {
     const { address, isConnected } = useAccount();
-    const [deployStep, setDeployStep] = useState(0);
-    const [tokenName, setTokenName] = useState("");
-    const [tokenSymbol, setTokenSymbol] = useState("");
-    const [tokenDecimals, setTokenDecimals] = useState("18");
-    const [tokenSupply, setTokenSupply] = useState("100");
-
-    const [price, setPrice] = useState("0");
-    const [floorPrice, setFloorPrice] = useState("0");
-    const [presalePrice, setPresalePrice] = useState("0");
-
-    const [token1, setToken1] = useState(config.protocolAddresses.WMON || "0x");
-    const [feeTier, setFeeTier] = useState(10);
+    const [selectedToken, setSelectedToken] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [tradeAmount, setTradeAmount] = useState("");
+    const [isBuying, setIsBuying] = useState(true);
+    const [tradeHistoryTab, setTradeHistoryTab] = useState("all");
+    const [isTokenListCollapsed, setIsTokenListCollapsed] = useState(false);
+    
+    // Exchange-related states
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [presale, setPresale] = useState("0");
-    const [softCap, setSoftCap] = useState("0");
-    const [duration, setDuration] = useState(Number(86400*30).toString());
+    const [ethBalance, setEthBalance] = useState("0");
+    const [tokenBalance, setTokenBalance] = useState("0");
+    const [wethBalance, setWethBalance] = useState("0");
+    const [useWeth, setUseWeth] = useState(false);
+    const [spotPrice, setSpotPrice] = useState(0);
+    const [slippage, setSlippage] = useState("1");
+    const [quote, setQuote] = useState("");
+    const [priceImpact, setPriceImpact] = useState("0");
+    
+    // Token data from blockchain
+    const [tokens, setTokens] = useState([]);
+    const [isTokensLoading, setIsTokensLoading] = useState(true);
+    const [vaultDescriptions, setVaultDescriptions] = useState([]);
+    
+    // Trade history data
+    const [tradeHistory] = useState([
+        { id: 1, type: "buy", token: "CLOWN", amount: 50000, price: 0.0000186, total: 0.93, time: new Date(Date.now() - 60000), txHash: "0x1234...5678" },
+        { id: 2, type: "sell", token: "DOGE", amount: 100, price: 0.08523, total: 8.523, time: new Date(Date.now() - 180000), txHash: "0x2345...6789" },
+        { id: 3, type: "buy", token: "PEPE", amount: 1000000, price: 0.0000012, total: 1.2, time: new Date(Date.now() - 300000), txHash: "0x3456...7890" },
+        { id: 4, type: "buy", token: "CLOWN", amount: 25000, price: 0.0000182, total: 0.455, time: new Date(Date.now() - 600000), txHash: "0x4567...8901" },
+        { id: 5, type: "sell", token: "SHIB", amount: 10000, price: 0.0000089, total: 0.089, time: new Date(Date.now() - 900000), txHash: "0x5678...9012" },
+    ]);
+    
+    // Chart data
+    const [chartOptions] = useState({
+        chart: {
+            type: 'candlestick',
+            background: 'transparent',
+            toolbar: {
+                show: true,
+                tools: {
+                    download: false,
+                    selection: false,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: false,
+                    reset: true
+                },
+                autoSelected: 'zoom'
+            },
+            zoom: {
+                enabled: true,
+                type: 'x',
+                autoScaleYaxis: true
+            },
+            animations: {
+                enabled: true,
+                speed: 800,
+                animateGradually: {
+                    enabled: true,
+                    delay: 150
+                }
+            }
+        },
+        grid: {
+            borderColor: '#1a1a1a',
+            strokeDashArray: 4,
+            xaxis: {
+                lines: {
+                    show: true
+                }
+            },
+            yaxis: {
+                lines: {
+                    show: true
+                }
+            },
+            padding: {
+                top: 10,
+                right: 20,
+                bottom: 10,
+                left: 10
+            }
+        },
+        xaxis: {
+            type: 'datetime',
+            labels: {
+                style: {
+                    colors: '#666',
+                    fontSize: '11px',
+                    fontFamily: 'inherit'
+                },
+                datetimeFormatter: {
+                    hour: 'HH:mm'
+                }
+            },
+            axisBorder: {
+                show: true,
+                color: '#1a1a1a'
+            },
+            axisTicks: {
+                show: false
+            },
+            tooltip: {
+                enabled: false
+            }
+        },
+        yaxis: {
+            opposite: true,
+            labels: {
+                style: {
+                    colors: '#666',
+                    fontSize: '11px',
+                    fontFamily: 'inherit'
+                },
+                formatter: (value) => {
+                    if (value < 0.00001) return value.toExponential(2);
+                    if (value < 0.01) return value.toFixed(6);
+                    return value.toFixed(2);
+                }
+            },
+            axisBorder: {
+                show: false
+            },
+            axisTicks: {
+                show: false
+            }
+        },
+        plotOptions: {
+            candlestick: {
+                colors: {
+                    upward: '#4ade80',
+                    downward: '#ef4444'
+                },
+                wick: {
+                    useFillColor: true
+                }
+            }
+        },
+        tooltip: {
+            enabled: true,
+            theme: 'dark',
+            style: {
+                fontSize: '12px',
+                fontFamily: 'inherit'
+            },
+            x: {
+                format: 'dd MMM HH:mm'
+            },
+            custom: function({ seriesIndex, dataPointIndex, w }) {
+                const o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
+                const h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
+                const l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
+                const c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
+                const formatValue = (val) => {
+                    if (val < 0.00001) return val.toExponential(4);
+                    if (val < 0.01) return val.toFixed(8);
+                    return val.toFixed(2);
+                };
+                return '<div class="apexcharts-tooltip-candlestick" style="padding: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px;">' +
+                    '<div style="color: #888; font-size: 11px; margin-bottom: 4px;">OHLC</div>' +
+                    '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">Open:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(o) + '</span></div>' +
+                    '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">High:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(h) + '</span></div>' +
+                    '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">Low:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(l) + '</span></div>' +
+                    '<div style="display: flex; justify-content: space-between;"><span style="color: #666;">Close:</span> <span style="color: ' + (c >= o ? '#4ade80' : '#ef4444') + '; margin-left: 16px; font-weight: 600;">' + formatValue(c) + '</span></div>' +
+                    '</div>';
+            }
+        }
+    });
+    
+    const [chartSeries] = useState([{
+        name: 'Price',
+        data: [
+            { x: new Date(Date.now() - 3600000 * 24), y: [0.0000180, 0.0000190, 0.0000175, 0.0000186] },
+            { x: new Date(Date.now() - 3600000 * 23), y: [0.0000186, 0.0000188, 0.0000183, 0.0000185] },
+            { x: new Date(Date.now() - 3600000 * 22), y: [0.0000185, 0.0000189, 0.0000184, 0.0000188] },
+            { x: new Date(Date.now() - 3600000 * 21), y: [0.0000188, 0.0000191, 0.0000187, 0.0000189] },
+            { x: new Date(Date.now() - 3600000 * 20), y: [0.0000189, 0.0000192, 0.0000188, 0.0000191] },
+            { x: new Date(Date.now() - 3600000 * 19), y: [0.0000191, 0.0000193, 0.0000190, 0.0000192] },
+            { x: new Date(Date.now() - 3600000 * 18), y: [0.0000192, 0.0000192, 0.0000188, 0.0000189] },
+            { x: new Date(Date.now() - 3600000 * 17), y: [0.0000189, 0.0000190, 0.0000187, 0.0000188] },
+            { x: new Date(Date.now() - 3600000 * 16), y: [0.0000188, 0.0000189, 0.0000182, 0.0000184] },
+            { x: new Date(Date.now() - 3600000 * 15), y: [0.0000184, 0.0000186, 0.0000183, 0.0000185] },
+            { x: new Date(Date.now() - 3600000 * 14), y: [0.0000185, 0.0000187, 0.0000184, 0.0000186] },
+            { x: new Date(Date.now() - 3600000 * 13), y: [0.0000186, 0.0000188, 0.0000185, 0.0000187] },
+            { x: new Date(Date.now() - 3600000 * 12), y: [0.0000187, 0.0000191, 0.0000186, 0.0000190] },
+            { x: new Date(Date.now() - 3600000 * 11), y: [0.0000190, 0.0000192, 0.0000189, 0.0000191] },
+            { x: new Date(Date.now() - 3600000 * 10), y: [0.0000191, 0.0000193, 0.0000190, 0.0000192] },
+            { x: new Date(Date.now() - 3600000 * 9), y: [0.0000192, 0.0000194, 0.0000191, 0.0000193] },
+            { x: new Date(Date.now() - 3600000 * 8), y: [0.0000193, 0.0000194, 0.0000188, 0.0000189] },
+            { x: new Date(Date.now() - 3600000 * 7), y: [0.0000189, 0.0000190, 0.0000187, 0.0000188] },
+            { x: new Date(Date.now() - 3600000 * 6), y: [0.0000188, 0.0000189, 0.0000186, 0.0000187] },
+            { x: new Date(Date.now() - 3600000 * 5), y: [0.0000187, 0.0000188, 0.0000185, 0.0000186] },
+            { x: new Date(Date.now() - 3600000 * 4), y: [0.0000186, 0.0000187, 0.0000185, 0.0000186] },
+            { x: new Date(Date.now() - 3600000 * 3), y: [0.0000186, 0.0000188, 0.0000185, 0.0000187] },
+            { x: new Date(Date.now() - 3600000 * 2), y: [0.0000187, 0.0000189, 0.0000186, 0.0000188] },
+            { x: new Date(Date.now() - 3600000 * 1), y: [0.0000188, 0.0000189, 0.0000185, 0.0000186] },
+            { x: new Date(), y: [0.0000186, 0.0000189, 0.0000184, 0.0000186] }
+        ]
+    }]);
 
-    const [isFirstSel, setIsFirstSel] = useState(true);
-    const [isSecondSel, setIsSecondSel] = useState(false);
-    const [isThirdSel, setIsThirdSel] = useState(false);
-    const [isFourthSel, setIsFourthSel] = useState(false);
-
-    const { 
-        isLoading: deploying, 
-        write: deployVault 
-    } = useContractWrite({
+    const filteredTokens = tokens.filter(token => 
+        token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        token.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    // Fetch pool address from Uniswap V3 Factory
+    const fetchPoolAddress = async (token0, token1) => {
+        const uniswapV3FactoryContract = new ethers.Contract(
+            config.protocolAddresses.uniswapV3Factory,
+            uniswapV3FactoryABI,
+            localProvider
+        );
+        
+        const poolAddress = await uniswapV3FactoryContract.getPool(token0, token1, feeTier);
+        return poolAddress;
+    };
+    
+    const WETH_ADDRESS = config.chain === "local" ? 
+        "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701" : 
+        "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+    
+    // Fetch all deployers from factory contract
+    const {
+        data: deployersData,
+        isError: isDeployersError,
+    } = useContractRead({
         address: nomaFactoryAddress,
         abi: FactoryAbi,
-        functionName: "deployVault",
-        args: [
-            {
-                softCap: parseEther(`${softCap}`),
-                deadline: duration,
-            },
-            {
-                name: tokenName,
-                symbol: tokenSymbol,
-                decimals: tokenDecimals.toString(),
-                initialSupply: parseEther(`${Number(tokenSupply)}`),
-                maxTotalSupply: parseEther(`${Number(tokenSupply)}`),
-                IDOPrice: parseEther(`${Number(price)}`),
-                floorPrice: parseEther(`${Number(floorPrice)}`),
-                token1: token1,
-                feeTier: "3000",
-                presale: presale.toString()
-            },
-        ],
-        value: parseEther(`${1}`), // 0.1 MON for deployment
-        gasLimit: 30000000, // Increase gas limit
-        onSuccess(data) {
-        console.log(`transaction successful: ${data.hash}`);
-
-        toaster.create({
-            title: "Success",
-            description: "Deployment successful",
-        })
-        setTimeout(() => {
-            window.location.href = "markets?v=my";
-        }, 1500); // 3000ms = 3 seconds
-        },
-        onError(error) {
-        const msg = error.message.indexOf("TokenAlreadyExists") > -1 ? "Token already exists" : 
-                    error.message.indexOf("Already contributed") > -1 ? "Already contributed" : 
-                    error.message.indexOf("0xf4354b39") > -1 ? "Invalid soft cap" :
-                    error.message.indexOf("NotAuthorityError") > -1 ? "Permissionless deployment is disabled. Reach out on Discord." :
-                    error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
-        toaster.create({
-            title: "Error",
-            description: msg,
-        })
-        console.log(error)
-        console.error("failed:", error);
+        functionName: "getDeployers",
+        enabled: isConnected,
+    });
+    
+    // Fetch vault data and convert to token list
+    useEffect(() => {
+        if (!deployersData || deployersData.length === 0) {
+            setIsTokensLoading(false);
+            return;
         }
-    }); 
+        
+        const fetchVaults = async () => {
+            try {
+                const nomaFactoryContract = new ethers.Contract(
+                    nomaFactoryAddress,
+                    FactoryAbi,
+                    localProvider
+                );
+                
+                const allVaultDescriptions = await Promise.all(
+                    deployersData.map(async (deployer) => {
+                        try {
+                            const vaultsData = await nomaFactoryContract.getVaults(deployer);
+                            
+                            if (!vaultsData || vaultsData.length === 0) {
+                                return [];
+                            }
+                            
+                            return Promise.all(
+                                vaultsData.map(async (vault) => {
+                                    try {
+                                        const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
+                                        
+                                        return {
+                                            tokenName: vaultDescriptionData[0],
+                                            tokenSymbol: vaultDescriptionData[1],
+                                            tokenDecimals: Number(vaultDescriptionData[2]),
+                                            token0: vaultDescriptionData[3],
+                                            token1: vaultDescriptionData[4],
+                                            deployer: vaultDescriptionData[5],
+                                            vault: vaultDescriptionData[6],
+                                            presaleContract: vaultDescriptionData[7],
+                                            poolAddress: await fetchPoolAddress(
+                                                vaultDescriptionData[3], 
+                                                vaultDescriptionData[4]
+                                            ),
+                                        };
+                                    } catch (error) {
+                                        console.error("Error fetching vault description:", error);
+                                        return null;
+                                    }
+                                })
+                            );
+                        } catch (error) {
+                            console.error(`Error fetching vaults for deployer ${deployer}:`, error);
+                            return [];
+                        }
+                    })
+                );
+                
+                const flattenedVaults = allVaultDescriptions.flat().filter(Boolean);
+                setVaultDescriptions(flattenedVaults);
+                
+                // Convert vault descriptions to token format for display
+                const tokenList = flattenedVaults.map((vault, index) => ({
+                    id: index + 1,
+                    name: vault.tokenName,
+                    symbol: vault.tokenSymbol,
+                    price: 0.0000186 + Math.random() * 0.001, // Mock price for now
+                    change24h: (Math.random() - 0.5) * 20, // Mock 24h change
+                    volume24h: Math.floor(Math.random() * 1000000),
+                    marketCap: Math.floor(Math.random() * 10000000),
+                    liquidity: Math.floor(Math.random() * 1000000),
+                    fdv: Math.floor(Math.random() * 10000000),
+                    holders: Math.floor(Math.random() * 10000),
+                    token0: vault.token0,
+                    token1: vault.token1,
+                    vault: vault.vault,
+                    poolAddress: vault.poolAddress
+                }));
+                
+                setTokens(tokenList);
+                setIsTokensLoading(false);
+                
+            } catch (error) {
+                console.error("Error fetching vaults:", error);
+                setTokens([]);
+                setIsTokensLoading(false);
+            }
+        };
+        
+        fetchVaults();
+    }, [deployersData]);
+    
+    const formatPrice = (price) => {
+        if (price < 0.00001) return price.toExponential(2);
+        if (price < 1) return price.toFixed(6);
+        return commify(price, 2);
+    };
+    
+    const formatNumber = (num) => {
+        if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+        if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+        return num.toFixed(2);
+    }; 
 
 
     const handleClickNext = () => {
@@ -410,35 +711,117 @@ const Launchpad: React.FC = () => {
         return Number(duration) / 86400;
     }
 
-    const handleClickDeploy = () => {  
-
-        console.log( [
-            {
-                softCap: parseEther(`${softCap}`),
-                deadline: duration,
-            },
-            {
-            name: tokenName,
-            symbol: tokenSymbol,
-            decimals: tokenDecimals.toString(),
-            totalSupply: parseEther(`${Number(tokenSupply)}`),
-            maxTotalSupply: parseEther(`${Number(tokenSupply)}`),
-            IDOPrice: parseEther(`${Number(price)}`),
-            floorPrice: parseEther(`${Number(floorPrice)}`),
-            token1: token1,
-            feeTier: "3000",
-            presale: presale.toString()
-            },
-        ])
-
-        deployVault()
+    // Fetch balances
+    useEffect(() => {
+        const fetchBalances = async () => {
+            if (!address || !selectedToken) return;
+            
+            try {
+                // Fetch ETH balance
+                const ethBal = await localProvider.getBalance(address);
+                setEthBalance(formatEther(ethBal));
                 
-    }
+                // Fetch WETH balance
+                const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
+                const wethBal = await wethContract.balanceOf(address);
+                setWethBalance(formatEther(wethBal));
+                
+                // Fetch selected token balance if available
+                if (selectedToken && selectedToken.token0) {
+                    const tokenContract = new ethers.Contract(selectedToken.token0, ERC20Abi, localProvider);
+                    const tokenBal = await tokenContract.balanceOf(address);
+                    setTokenBalance(formatEther(tokenBal));
+                }
+            } catch (error) {
+                console.error("Error fetching balances:", error);
+            }
+        };
+        
+        fetchBalances();
+        const interval = setInterval(fetchBalances, 5000); // Refresh every 5 seconds
+        
+        return () => clearInterval(interval);
+    }, [address, selectedToken]);
+    
+    // Calculate quote and price impact
+    useEffect(() => {
+        if (!tradeAmount || !selectedToken || parseFloat(tradeAmount) === 0) {
+            setQuote("");
+            setPriceImpact("0");
+            return;
+        }
+        
+        // Mock quote calculation (replace with real DEX quote)
+        const amount = parseFloat(tradeAmount);
+        if (isBuying) {
+            const estimatedTokens = amount / selectedToken.price;
+            setQuote(estimatedTokens.toFixed(2));
+            setPriceImpact((amount * 0.003).toFixed(2)); // Mock 0.3% impact
+        } else {
+            const estimatedETH = amount * selectedToken.price;
+            setQuote(estimatedETH.toFixed(6));
+            setPriceImpact((amount * 0.002).toFixed(2)); // Mock 0.2% impact
+        }
+    }, [tradeAmount, selectedToken, isBuying]);
+    
+    const handleBuy = async () => {
+        if (isLoading || !selectedToken || !tradeAmount) return;
+        
+        setIsLoading(true);
+        try {
+            // Mock buy logic - in real implementation, this would call the exchange contract
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate transaction
+            
+            toaster.create({
+                title: "Trade Executed",
+                description: `Bought ${quote} ${selectedToken.symbol} for ${tradeAmount} ${useWeth ? 'WETH' : 'ETH'}`,
+                status: "success"
+            });
+            
+            setTradeAmount("");
+            setQuote("");
+        } catch (error) {
+            toaster.create({
+                title: "Trade Failed",
+                description: error.message || "Transaction failed",
+                status: "error"
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const handleSell = async () => {
+        if (isLoading || !selectedToken || !tradeAmount) return;
+        
+        setIsLoading(true);
+        try {
+            // Mock sell logic - in real implementation, this would call the exchange contract
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate transaction
+            
+            toaster.create({
+                title: "Trade Executed",
+                description: `Sold ${tradeAmount} ${selectedToken.symbol} for ${quote} ${useWeth ? 'WETH' : 'ETH'}`,
+                status: "success"
+            });
+            
+            setTradeAmount("");
+            setQuote("");
+        } catch (error) {
+            toaster.create({
+                title: "Trade Failed",
+                description: error.message || "Transaction failed",
+                status: "error"
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
 
 
     return (
-        <Container maxW="container.xl" py={12}> 
+        <Container maxW="100%" p={0} bg="#0a0a0a"> 
             <Toaster />
             {!isConnected ? (
                 <Box
@@ -450,466 +833,978 @@ const Launchpad: React.FC = () => {
                 >
                     <Heading as="h2">Connect your wallet</Heading>
                 </Box>
-            ) : (            
-            <Box
-                w="95%"
-                color="white"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                textAlign="left"
-                position="relative"
-                mt={50}
-                mb={"30%"}
-            >
-            <SimpleGrid columns={1} w="100%" ml={isMobile?"2vh":"20vw"}>
-                {/* <Heading as={"h3"}>
-                    Launchpad
-                    <Text>Launch your Unruggable & Up only token 🚀</Text>
-                </Heading> */}
-                {deployStep == 0 ? (
-                <SimpleGrid columns={1} w="100%" mt={20}>
-                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="400px" backgroundColor="#222831">
-                        <Heading as={"h4"} color="white" mr={8}>
-                            <HStack>
-                                <Text fontSize={"21px"} color="#4ade80">Step 1 - </Text>Token Info
-                            </HStack>
-                        </Heading>
-                        <Box w={"100%"}>
-                            <HStack>
-                                <Box w={{ base: "180px", lg: "120px" }}>Name</Box>
-                                <Box>
-                                    <Input
-                                        border={isFirstSel == true ? "1px solid #00FF00" : "1px solid #000000"}
-                                        id="name"
-                                        placeholder="e.g. Noma Token"
-                                        h={"40px"}
-                                        w={{ base: "", lg: "200px" }}
-                                        onChange={handleSetTokenName}
-                                        onClick={() => setIsFirstSel(true)}
-                                        value={tokenName}
-                                    />
-                                </Box>
-                            </HStack>
-                        </Box>
-                        <Box w={"100%"}>
-                            <HStack>
-                                <Box w={{ base: "180px", lg: "120px" }}>Symbol</Box>
-                                <Box mt={2}>
-                                    <Input
-                                        id="symbol"
-                                        placeholder="e.g. NOMA"
-                                        h={"40px"}
-                                        w={{ base: "", lg: "200px" }}
-                                        onChange={handleSetTokenSymbol}
-                                        value={tokenSymbol}
-                                    />
-                                </Box>
-                            </HStack>
-                        </Box>
-
-                        <Box w={"100%"} mt={2}>
-                            <HStack>
-                                <Box w={{ base: "180px", lg: "115px" }}>Decimals</Box>
-                                <Box>
-                                    <NumberInputRoot
-                                        isMobile={isMobile}
-                                        defaultValue="18"
-                                        min={6}
-                                        max={18}
-                                        onChange={handleSetDecimals}
-                                        ml={isMobile ? 0 : 1.5}
-                                        marginRight={"5px"}
-                                        disabled={true}
-                                    >
-                                        <NumberInputLabel h={"40px"} w={{ base: "", lg: "auto" }} />
-                                        <NumberInputField h={"40px"} w={{ base: "", lg: "200px" }} />
-                                    </NumberInputRoot>
-                                </Box>
-                            </HStack>
-                        </Box>
-                        <Box w={"100%"} >
-                        <HStack>
-                            <Box w={{ base: "180px", lg: "100px" }}>
-                                <Text>Presale</Text>
-                            </Box>
-                            <Box>
-                            <SelectRoot
-                                ml={5}
-                                mb={2}
-                                collection={presaleChoices}
-                                size="sm"
-                                width={"200px"}
-                                onChange={handleSetPresale}
-                                defaultValue={"0"} // Set the default value to "0" (No)
-                                value={presale}
-                                border="2px solid white"
-                            >
-                                <SelectTrigger>
-                                    <SelectValueText placeholder="Choose option" />
-                                </SelectTrigger>
-                                <SelectContent style={{borderColor:"white"}}>
-                                    {presaleChoices.items.map((choice) => (
-                                        <SelectItem item={choice} key={choice.value}>
-                                            {choice.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </SelectRoot>
-                            </Box>
-                        </HStack>
-                        </Box>
-                        <Box color="red" mt={5}>
-                            <Text fontSize={"16px"}>{error}</Text>
-                        </Box>
-                    </Box>
-                    {deployStep > 0 ? (
-                        <Button onClick={handleClickBack} mt={5} colorScheme="green" w={isMobile ? "120px" : "10%"} ml={10} mr={2}>Back</Button>
-                    ) : <></>}
-                    <Button onClick={handleClickNext} mt={5} colorScheme="green" w={isMobile ? "120px" : "10%"} ml={10}>Next</Button>
-                </SimpleGrid>
-                ) : deployStep == 1 ? (
-                    <>
-                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="350px" backgroundColor="#222831"  mt={"80px"}>
-                        <Heading as={"h4"} color="white" mr={8}>
-                            <HStack>
-                                <Text fontSize={"21px"} color="#4ade80">Step 2 - </Text>Pool Info
-                            </HStack>
-                        </Heading>
-                        <Box w={"100%"}>
-                        <HStack>
-                                <Box w={{ base: "180px", lg: "120px" }}>Floor Price</Box>
-                                <Box>
-                                    <NumberInputRoot
-                                        id="floorPrice"
-                                        isMobile={isMobile}
-                                        defaultValue={0.001}
-                                        step={Number(0.001)}
-                                        min={0.001}
-                                        customStep={0.001}
-                                        marginRight={"5px"}
-                                        type="price"
-                                        setPrice={setPrice}
-                                        setFloorPrice={setFloorPrice}
-                                        setSupply={null}
-                                        targetValue={Number(0.001)}
-                                        value={floorPrice}
-                                        onChange={() => { 
-                                            handleSetPrice(event.target.value);
-                                        }}
-                                    >
-                                        <NumberInputLabel h={"40px"} w={{ base: "", lg: "auto" }} />
-                                        <NumberInputField h={"40px"} w={{ base: "", lg: "200px" }} />
-                                    </NumberInputRoot>
-                                </Box>
-                                <Box>
-                                <Image
-                                    w="25px"
-                                    src={monadLogo}
-                                    alt="reserve asset logo"
-                                    mt={-2}
-                                    ml={2}
-                                    />
-                                </Box>                                        
-                            </HStack>
-                            <HStack>
-                                <Box w={{ base: "180px", lg: "95px" }}>Supply</Box>
-                                <Box>
-                                    <NumberInputRoot
-                                        id="supply"
-                                        isMobile={isMobile}
-                                        marginRight={"5px"}
-                                        defaultValue="1000000"
-                                        min={100}
-                                        max={10e27}
-                                        ml={isMobile ? 0 : "25px"}
-                                        type="supply"
-                                        setTokenSupply={setTokenSupply}
-                                        targetValue={tokenSupply}
-                                        customStep={1}
-                                        onChange={handleSetSupply}
-                                        value={commify(tokenSupply, 0)}
-                                    >
-                                        <NumberInputLabel h={"40px"} w={{ base: "", lg: "auto" }} />
-                                        <NumberInputField h={"40px"} w={{ base: "", lg: "200px" }} />
-                                    </NumberInputRoot>
-                                </Box>
-                                <Box>
-                                <Image
-                                    w="25px"
-                                    src={placeholderLogo}
-                                    alt="asset logo"
-                                    ml={2}
-                                    mt={-2}
-                                    />
-                                </Box>                                     
-                            </HStack>
-                        </Box>
-                        <Box w={"100%"}>
-                            <HStack>
-                                <Box w={{ base: "120px", lg: "120px" }}>Asset</Box>
-                                <Box>
-                                <SelectRoot
-                                    collection={assets}
-                                    size="sm"
-                                    ml={isMobile? "-30px": 0}
-                                    width={isMobile?"185px":"200px"}
-                                    onChange={handleSelectAsset}
-                                    border="2px solid white"
-                                >
-                                    <SelectTrigger>
-                                    {assets.items.map((data, index) => {
-                                            if (index > 0) return;
-                                            return (
-                                                <SelectValueText placeholder={data.label}>
-                                                </SelectValueText>
-                                            );
-                                            })}  
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {assets.items.map((asset) => (
-                                            <SelectItem item={asset} key={asset.value}>
-                                                {asset.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </SelectRoot>
-                                </Box>
-                            </HStack>
-                        </Box>
-                    </Box>
-                    <Box>
-                        {deployStep > 0 ? (
-                            <Button onClick={handleClickBack} mt={5} colorScheme="green" w={isMobile ? "120px" : "10%"} mr={2} ml={10}>Back</Button>
-                        ) : <></>}
-                        <Button onClick={handleClickNext} mt={5} colorScheme="green" w={isMobile ? "120px" : "10%"}>Next</Button>
-                    </Box>
-                    </>
-                ) : (deployStep == 2 ? (
-                <>
-                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="350px"  backgroundColor="#222831" mt={"80px"}>
-                        <Heading as={"h4"} color="white" mr={8}>
-                            <HStack>
-                                <Text fontSize={"21px"} color="#4ade80">Step 3 - </Text>Presale Info
-                            </HStack>
-                        </Heading>
-                        <Box w={"100%"}>
-                        {presale == 1 && (
-                            <>
-                            <HStack>
-                            <Box w={{ base: "180px", lg: "140px" }}>Presale price</Box>
-                                <Box>
-                                    <Input 
-                                        id="presalePrice"
-                                        placeholder="e.g. 0.001"
-                                        h={"40px"}
-                                        w={{ base: "", lg: "200px" }}
-                                        // onChange={handleSetPrice}
-                                        value={price}
-                                        disabled={true}
-                                    />
-                                </Box>
-                                <Box>
-                                <Image
-                                    w="25px"
-                                    src={monadLogo}
-                                    alt="reserve asset logo"
-                                    ml={2}
-                                    />
-                                </Box> 
-                            </HStack>
-                            <HStack mt={2}>
-                                <Box w={{ base: "180px", lg: "115px" }}>Soft Cap</Box> 
-                                <Box>
-                                    <Input
-                                        id="softcap"
-                                        w={{ base: "", lg: "200px" }}
-                                        h="40px"
-                                        // isMobile={isMobile}
-                                        // marginRight={"5px"}
-                                        defaultValue={((tokenSupply * 10/100) * price) / 8}
-                                        min={((tokenSupply * 10/100) * price) / 8 } 
-                                        max={((tokenSupply * 10/100) * price) * 60/100}
-                                        ml={isMobile ? 0 : "25px"}
-                                        // setTokenSupply={(()=>{})}
-                                        // targetValue={softCap}
-                                        // customStep={1}
-                                        onChange={handleSetSoftCap}
-                                        value={commify(softCap, 0)}
-                                    />
-                                </Box>
-                                <Box>
-                                <Image
-                                    w="25px"
-                                    src={monadLogo}
-                                    alt="reserve asset logo"
-                                    ml={2}
-                                    />
-                                </Box> 
-                            </HStack>                                
-                            <HStack mt={2}>
-                                <Box w={{ base: "100x", lg: "140px" }}>Duration</Box>
-                                <Box>
-                                <SelectRoot
-                                    mt={1}
-                                    ml={isMobile?25:0}
-                                    collection={durationChoices}
-                                    size="sm"
-                                    width={isMobile?"180px":"200px"}
-                                    onChange={handleSetDuration}
-                                    value={duration}
-                                    border="2px solid white"
-                                    >
-                                    <SelectTrigger>
-                                        {durationChoices.items.map((data, index) => {
-                                            if (index > 0) return;
-                                            return (
-                                                <SelectValueText placeholder={data.label}>
-                                                </SelectValueText>
-                                            );
-                                            })}       
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {durationChoices.items.map((choice) => (
-                                            <SelectItem item={choice} key={choice.value}>
-                                                {choice.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                    </SelectRoot>
-                                </Box>
-                            </HStack>                  
-                            </>
-                        )}
-                        </Box>
-                        </Box>
-                        <Box>
-                        {deployStep > 0 ? (
-                            <Button onClick={handleClickBack} mt={5} colorScheme="green" w={isMobile ? "120px" : "10%"} mr={2} ml={10}>Back</Button>
-                        ) : <></>}
-                        <Button onClick={handleClickNext} mt={5} colorScheme="green" w={isMobile ? "120px" : "10%"}>Next</Button>
-                    </Box>                            
-                </>
-                ) : 
-                    <Box >
-                    <Box border="1px solid gray" p={8} borderRadius={20} w={isMobile ? "auto" : "80%"} h="450px" backgroundColor="#222831" mt={"80px"}>
-                        <Heading as={"h4"} color="white" mr={8}>
-                            <HStack>
-                                <Text fontSize={"21px"} color="#4ade80">Step {presale == 0 ? "3" : "4"} - </Text>Confirm {isMobile ? "" : "Deploy"}
-                            </HStack>
-                        </Heading>
-
-                        <Box w={"100%"}>
-                            <HStack>
-                                <Box w={{ base: "120px", lg: "140px" }}>Name</Box>
-                                <Box>
-                                    <Text>{tokenName}</Text>
-                                </Box>
-                            </HStack>
-                            <HStack>
-                                <Box w={{ base: "120px", lg: "140px" }}>Symbol</Box>
-                                <Box>
-                                    <Text>{tokenSymbol}</Text>
-                                </Box>
-                            </HStack>
-                            <HStack>
-                                <Box w={{ base: "120px", lg: "140px" }}>Logo</Box>
-                                <Box >
-                                    <Image h={4} src={placeholderLogo} />
-                                </Box>
-                            </HStack>
-                            <HStack>
-                                <Box w={{ base: "120px", lg: "140px" }}>Decimals</Box>
-                                <Box>
-                                    <Text>{tokenDecimals}</Text>
-                                </Box>
-                            </HStack>
-                            <HStack>
-                            <Box w={{ base: "120px", lg: "140px" }}>Floor Price</Box>
-                            <Box>
-                                <Text>{floorPrice}</Text>
-                            </Box>
-                            <Box>
-                                <Text>WMON</Text>
-                            </Box>
-                            </HStack>
-                            {presale == 1 ? (
-                            <>
-                            <HStack>
-                            <Box w={{ base: "120px", lg: "140px" }}>Presale Price</Box>
-                            <Box>
-                                <Text>{commify(price)}</Text>
-                            </Box>
-                            <Box>
-                                <Text>WMON</Text>
-                            </Box>
-                            </HStack> 
-                            <HStack>
-                            <Box w={{ base: "120px", lg: "140px" }}>Soft Cap</Box>
-                            <Box>
-                                <Text>{commify(softCap, 0)}</Text>
-                            </Box>
-                            <Box>
-                                <Text>WMON</Text>
-                            </Box>
-                            </HStack>
-                            <HStack>
-                            <Box w={{ base: "120px", lg: "140px" }}>Duration</Box>
-                            <Box>
-                                <Text>{getDaysFromDuration(duration)} days</Text>
-                            </Box>
-                            </HStack>
-                            </>                                                              
-                            ) : 
-                            <></>}
-                            <HStack>
-                                <Box w={{ base: "120px", lg: "140px" }}>Supply</Box>
-                                <Box>
-                                    <Text>{commify(tokenSupply, 0)}</Text>
-                                </Box>
-                                <Box>
-                                    <Text>{tokenName}</Text>
-                                </Box>
-                            </HStack>
-                            <HStack>
-                                <Box w={{ base: "120px", lg: "140px" }}>Asset</Box>
-                                <Box>
-                                {isMobile ? <>{`${getAssetLabelByValue(token1)} `}</> :
-                                    <Text>{`${getAssetLabelByValue(token1)} (${token1?.slice(0, 6)}...${token1?.slice(-6)})`}</Text>}
-                                </Box>
-                                <Box>
-                                <Image
-                                w="25px"
-                                src={monadLogo}
-                                alt="reserve asset logo"
+            ) : (
+            <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4} minH="calc(100vh - 80px)">
+                {/* Left side - Token List */}
+                <Box 
+                    flex={isMobile ? "1" : "0 0 350px"} 
+                    maxW={isMobile ? "100%" : "350px"} 
+                    w={isMobile ? "100%" : "350px"}
+                    display={isMobile && isTokenListCollapsed ? "none" : "block"}
+                >
+                    <Box bg="#1a1a1a" borderRadius="lg" pr={3} pl={0} py={3} overflowX="hidden">
+                        <Flex alignItems="center" mb={3} pl={3}>
+                            <Input
+                                placeholder="Search tokens..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                bg="#2a2a2a"
+                                border="none"
+                                _placeholder={{ color: "#666" }}
+                                h="36px"
+                                fontSize="sm"
+                            />
+                            <IconButton
                                 ml={2}
-                                />
-                                </Box>
-                            </HStack>
+                                variant="ghost"
+                                color="#666"
+                                size="sm"
+                            >
+                                <LuSearch />
+                            </IconButton>
+                        </Flex>
+                        
+                        <Box overflowY="auto" overflowX="hidden" maxH={isMobile ? "300px" : "calc(100vh - 180px)"} mx={isMobile ? -2 : 0}>
+                            {isTokensLoading ? (
+                                <Center py={10}>
+                                    <VStack>
+                                        <Spinner size="md" color="#4ade80" thickness="3px" />
+                                        <Text color="#4ade80" fontSize="sm">Loading tokens...</Text>
+                                    </VStack>
+                                </Center>
+                            ) : tokens.length === 0 ? (
+                                <Center py={10}>
+                                    <Text color="#666" fontSize="sm">No tokens found</Text>
+                                </Center>
+                            ) : (
+                            <Table.Root size="sm" variant="unstyled">
+                                <Table.Header>
+                                    <Table.Row>
+                                        <Table.ColumnHeader color="#888" fontSize="xs" py={2} pl={isMobile ? 2 : 0} pr={isMobile ? 1 : 3}>Token</Table.ColumnHeader>
+                                        <Table.ColumnHeader color="#888" fontSize="xs" py={2} px={isMobile ? 1 : 2} textAlign="right">Price</Table.ColumnHeader>
+                                        <Table.ColumnHeader color="#888" fontSize="xs" py={2} px={isMobile ? 1 : 2} textAlign="right">24h</Table.ColumnHeader>
+                                        {!isMobile && <Table.ColumnHeader color="#888" fontSize="xs" py={2} pr={3} pl={2} textAlign="right">MCap</Table.ColumnHeader>}
+                                    </Table.Row>
+                                </Table.Header>
+                                <Table.Body>
+                                    {filteredTokens.map((token) => (
+                                        <Table.Row
+                                            key={token.id}
+                                            cursor="pointer"
+                                            _hover={{ bg: "#2a2a2a" }}
+                                            onClick={() => {
+                                                setSelectedToken(token);
+                                                if (isMobile) {
+                                                    setIsTokenListCollapsed(true);
+                                                }
+                                            }}
+                                            bg={selectedToken?.id === token.id ? "#2a2a2a" : "transparent"}
+                                            transition="background 0.2s"
+                                        >
+                                            <Table.Cell py={isMobile ? 1 : 2} pl={isMobile ? 2 : 0} pr={isMobile ? 1 : 3}>
+                                                <Box display="flex" alignItems="center" h="full">
+                                                    <HStack gap={isMobile ? 1 : 2}>
+                                                        <Box w={isMobile ? "16px" : "20px"} h={isMobile ? "16px" : "20px"}>
+                                                            <Image
+                                                                src={placeholderLogo}
+                                                                alt={token.symbol}
+                                                                w={isMobile ? "16px" : "20px"}
+                                                                h={isMobile ? "16px" : "20px"}
+                                                            />
+                                                        </Box>
+                                                        <Box>
+                                                            <Text color="white" fontSize={isMobile ? "xs" : "sm"} fontWeight="500" whiteSpace="nowrap">
+                                                                {token.symbol}
+                                                            </Text>
+                                                        </Box>
+                                                    </HStack>
+                                                </Box>
+                                            </Table.Cell>
+                                            <Table.Cell py={isMobile ? 1 : 2} px={isMobile ? 1 : 2} textAlign="right" verticalAlign="middle">
+                                                <Text color="white" fontSize="xs" whiteSpace="nowrap">
+                                                    ${formatPrice(token.price)}
+                                                </Text>
+                                            </Table.Cell>
+                                            <Table.Cell py={isMobile ? 1 : 2} px={isMobile ? 1 : 2} textAlign="right" verticalAlign="middle">
+                                                <Text 
+                                                    color={token.change24h > 0 ? "#4ade80" : "#ef4444"} 
+                                                    fontSize="xs" 
+                                                    whiteSpace="nowrap"
+                                                >
+                                                    {token.change24h > 0 ? "+" : ""}{token.change24h}%
+                                                </Text>
+                                            </Table.Cell>
+                                            {!isMobile && (
+                                                <Table.Cell py={2} px={2} textAlign="right" verticalAlign="middle">
+                                                    <Text color="white" fontSize="xs" whiteSpace="nowrap">
+                                                        ${formatNumber(token.marketCap)}
+                                                    </Text>
+                                                </Table.Cell>
+                                            )}
+                                        </Table.Row>
+                                    ))}
+                                </Table.Body>
+                            </Table.Root>
+                            )}
                         </Box>
                     </Box>
-                    {deployStep == 3 ? (
-                        <HStack>
-                            <Button onClick={handleClickBack} mt={5} colorScheme="green" w={isMobile ? "120px" : "10%"} ml={10}>Back</Button>
-                            <Button
-                            disabled={deploying}
-                                onClick={() => {
-                                    try {
-                                        handleClickDeploy();
-                                    } catch (error) {
-                                        console.error("Failed to contribute:", error);
-                                    }
-                                }}
-                                isLoading={deploying}
-                                mt={5} colorScheme="green" w={isMobile ? "120px" : "10%"}>
-                                    {deploying ? <Spinner size="sm" /> : "Deploy"}
-                                </Button>
-                        </HStack>
-                    ) : <></>}
+                </Box>
+                
+                {/* Middle - Chart and Token Info */}
+                <Box flex={isMobile ? "1" : "2"} w={isMobile ? "100%" : "auto"}>
+                    {/* Show selected token info bar on mobile when list is collapsed */}
+                    {isMobile && isTokenListCollapsed && selectedToken && (
+                        <Box 
+                            bg="#1a1a1a" 
+                            p={3} 
+                            mb={4} 
+                            borderRadius="lg" 
+                            display="flex" 
+                            alignItems="center" 
+                            justifyContent="space-between"
+                            cursor="pointer"
+                            onClick={() => setIsTokenListCollapsed(false)}
+                        >
+                            <HStack>
+                                <Box>
+                                    <Image src={placeholderLogo} alt={selectedToken.symbol} w="24px" h="24px" />
+                                </Box>
+                                <Box>
+                                    <Text color="white" fontWeight="bold">{selectedToken.symbol}</Text>
+                                </Box>
+                                <Box>
+                                    <Text color="#888">${formatPrice(selectedToken.price)}</Text>
+                                </Box>
+                                <Box>
+                                    <Text color={selectedToken.change24h > 0 ? "#4ade80" : "#ef4444"} fontSize="sm">
+                                        {selectedToken.change24h > 0 ? "+" : ""}{selectedToken.change24h}%
+                                    </Text>
+                                </Box>
+                            </HStack>
+                            <Text color="#888" fontSize="sm">Tap to change</Text>
+                        </Box>
+                    )}
+                    {selectedToken ? (
+                        <VStack gap={4}>
+                            {/* Token Info Cards */}
+                            <SimpleGrid columns={isMobile ? 2 : 4} gap={isMobile ? 2 : 4} w="100%">
+                                <Box bg="#1a1a1a" p={4} borderRadius="lg">
+                                    <Text color="#888" fontSize="sm" mb={2}>Price</Text>
+                                    <HStack alignItems="baseline" gap={isMobile ? 2 : 3}>
+                                        <Box>
+                                            <Text color="white" fontSize={isMobile ? "md" : "xl"} fontWeight="bold">
+                                                ${formatPrice(selectedToken.price)}
+                                            </Text>
+                                        </Box>
+                                        <Box>
+                                            <HStack gap={1}>
+                                                <Box>
+                                                    {selectedToken.change24h > 0 ? (
+                                                        <FaArrowTrendUp color="#4ade80" size={isMobile ? "10" : "14"} />
+                                                    ) : (
+                                                        <FaArrowTrendDown color="#ef4444" size={isMobile ? "10" : "14"} />
+                                                    )}
+                                                </Box>
+                                                <Box>
+                                                    <Text color={selectedToken.change24h > 0 ? "#4ade80" : "#ef4444"} fontSize={isMobile ? "xs" : "sm"} fontWeight="600">
+                                                        {selectedToken.change24h > 0 ? "+" : ""}{selectedToken.change24h}%
+                                                    </Text>
+                                                </Box>
+                                            </HStack>
+                                        </Box>
+                                    </HStack>
+                                </Box>
+                                
+                                <Box bg="#1a1a1a" p={4} borderRadius="lg">
+                                    <Text color="#888" fontSize="sm" mb={2}>24h Volume</Text>
+                                    <Box>
+                                        <Text color="white" fontSize="xl" fontWeight="bold">
+                                            ${formatNumber(selectedToken.volume24h)}
+                                        </Text>
+                                    </Box>
+                                </Box>
+                                
+                                <Box bg="#1a1a1a" p={4} borderRadius="lg">
+                                    <Text color="#888" fontSize="sm" mb={2}>Market Cap</Text>
+                                    <Box>
+                                        <Text color="white" fontSize="xl" fontWeight="bold">
+                                            ${formatNumber(selectedToken.marketCap)}
+                                        </Text>
+                                    </Box>
+                                </Box>
+                                
+                                <Box bg="#1a1a1a" p={4} borderRadius="lg">
+                                    <Text color="#888" fontSize="sm" mb={2}>Liquidity</Text>
+                                    <Box>
+                                        <Text color="white" fontSize="xl" fontWeight="bold">
+                                            ${formatNumber(selectedToken.liquidity)}
+                                        </Text>
+                                    </Box>
+                                </Box>
+                            </SimpleGrid>
+                            
+                            {/* Chart */}
+                            <Box bg="#1a1a1a" p={isMobile ? 2 : 4} borderRadius="lg" w="100%" h={isMobile ? "300px" : "400px"}>
+                                <ReactApexChart
+                                    options={chartOptions}
+                                    series={chartSeries}
+                                    type="candlestick"
+                                    height="100%"
+                                />
+                            </Box>
+                            
+                            {/* Trade History with Tabs - Only show on desktop */}
+                            {!isMobile && (
+                            <Box bg="#1a1a1a" borderRadius="lg" p={isMobile ? 3 : 4} w="100%">
+                                <Tabs.Root value={tradeHistoryTab} onValueChange={(e) => setTradeHistoryTab(e.value)}>
+                                    <Tabs.List mb={4}>
+                                        <Tabs.Trigger 
+                                            value="all" 
+                                            flex={1}
+                                            _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                            color="#888"
+                                            fontWeight="600"
+                                        >
+                                            All Transactions
+                                        </Tabs.Trigger>
+                                        <Tabs.Trigger 
+                                            value="my" 
+                                            flex={1}
+                                            _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                            color="#888"
+                                            fontWeight="600"
+                                        >
+                                            My Transactions
+                                        </Tabs.Trigger>
+                                    </Tabs.List>
+                                    
+                                    <Tabs.Content value="all">
+                                        <VStack gap={2} align="stretch">
+                                                {tradeHistory.map((trade) => (
+                                                    <Flex
+                                                        key={trade.id}
+                                                        p={2}
+                                                        bg="#2a2a2a"
+                                                        borderRadius="md"
+                                                        cursor="pointer"
+                                                        _hover={{ bg: "#333" }}
+                                                        alignItems="center"
+                                                        gap={isMobile ? 2 : 4}
+                                                        flexWrap={isMobile ? "wrap" : "nowrap"}
+                                                    >
+                                                        <Box>
+                                                            <Badge
+                                                                colorPalette={trade.type === "buy" ? "green" : "red"}
+                                                                size="sm"
+                                                                minW="45px"
+                                                                textAlign="center"
+                                                            >
+                                                                {trade.type.toUpperCase()}
+                                                            </Badge>
+                                                        </Box>
+                                                        
+                                                        <HStack flex="1" gap={4}>
+                                                            <Box>
+                                                                <Text color="white" fontWeight="bold" minW="60px">
+                                                                    {trade.token}
+                                                                </Text>
+                                                            </Box>
+                                                            <Box>
+                                                                <Text color="#888" fontSize="sm">
+                                                                    {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
+                                                                </Text>
+                                                            </Box>
+                                                        </HStack>
+                                                        
+                                                        <Box>
+                                                            <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
+                                                                ${trade.total.toFixed(2)}
+                                                            </Text>
+                                                        </Box>
+                                                        
+                                                        <Box>
+                                                            <Text 
+                                                                color="#4ade80" 
+                                                                fontSize="xs"
+                                                                cursor="pointer"
+                                                                _hover={{ textDecoration: "underline" }}
+                                                                onClick={() => window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank")}
+                                                                minW="100px"
+                                                                textAlign="right"
+                                                            >
+                                                                {trade.txHash}
+                                                            </Text>
+                                                        </Box>
+                                                        
+                                                        <Box>
+                                                            <Text color="#888" fontSize="xs" minW="60px" textAlign="right">
+                                                                {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                            </Text>
+                                                        </Box>
+                                                    </Flex>
+                                                ))}
+                                            </VStack>
+                                    </Tabs.Content>
+                                    
+                                    <Tabs.Content value="my">
+                                        {address ? (
+                                                <VStack gap={2} align="stretch">
+                                                    {tradeHistory.filter((_, index) => index % 2 === 0).map((trade) => (
+                                                        <Flex
+                                                            key={trade.id}
+                                                            p={2}
+                                                            bg="#2a2a2a"
+                                                            borderRadius="md"
+                                                            cursor="pointer"
+                                                            _hover={{ bg: "#333" }}
+                                                            alignItems="center"
+                                                            gap={4}
+                                                        >
+                                                            <Box>
+                                                                <Badge
+                                                                    colorPalette={trade.type === "buy" ? "green" : "red"}
+                                                                    size="sm"
+                                                                    minW="45px"
+                                                                    textAlign="center"
+                                                                >
+                                                                    {trade.type.toUpperCase()}
+                                                                </Badge>
+                                                            </Box>
+                                                            
+                                                            <HStack flex="1" gap={4}>
+                                                                <Box>
+                                                                    <Text color="white" fontWeight="bold" minW="60px">
+                                                                        {trade.token}
+                                                                    </Text>
+                                                                </Box>
+                                                                <Box>
+                                                                    <Text color="#888" fontSize="sm">
+                                                                        {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
+                                                                    </Text>
+                                                                </Box>
+                                                            </HStack>
+                                                            
+                                                            <Box>
+                                                                <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
+                                                                    ${trade.total.toFixed(2)}
+                                                                </Text>
+                                                            </Box>
+                                                            
+                                                            <Box>
+                                                                <Text 
+                                                                    color="#4ade80" 
+                                                                    fontSize="xs"
+                                                                    cursor="pointer"
+                                                                    _hover={{ textDecoration: "underline" }}
+                                                                    onClick={() => window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank")}
+                                                                    minW="100px"
+                                                                    textAlign="right"
+                                                                >
+                                                                    {trade.txHash}
+                                                                </Text>
+                                                            </Box>
+                                                            
+                                                            <Box>
+                                                                <Text color="#888" fontSize="xs" minW="60px" textAlign="right">
+                                                                    {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                                </Text>
+                                                            </Box>
+                                                        </Flex>
+                                                    ))}
+                                                </VStack>
+                                            ) : (
+                                                <Text color="#666" textAlign="center" py={8}>
+                                                    Connect your wallet to view your transactions
+                                                </Text>
+                                            )}
+                                    </Tabs.Content>
+                                </Tabs.Root>
+                            </Box>
+                            )}
+                        </VStack>
+                    ) : (
+                        <Box
+                            bg="#1a1a1a"
+                            h="600px"
+                            borderRadius="lg"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                        >
+                            <Text color="#666">Select a token to view details</Text>
+                        </Box>
+                    )}
+                </Box>
+                
+                {/* Right side - Trading Panel and History */}
+                {!isMobile ? (
+                    <Box w="300px">
+                        <VStack gap={4}>
+                        {/* Wallet Balance Box */}
+                        <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
+                        <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
+                            Wallet Balance
+                        </Text>
+                        
+                        <VStack align="stretch" gap={3}>
+                            {/* MON Balance */}
+                            <Box>
+                                <Flex justifyContent="space-between" alignItems="center">
+                                    <HStack>
+                                        <Box w="20px" h="20px">
+                                            <Image
+                                                src={monadLogo}
+                                                alt="MON"
+                                                w="20px"
+                                                h="20px"
+                                            />
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">MON</Text>
+                                        </Box>
+                                    </HStack>
+                                    <Box>
+                                        <Text color="white" fontWeight="bold">
+                                            {address ? parseFloat(ethBalance).toFixed(4) : "0.00"}
+                                        </Text>
+                                    </Box>
+                                </Flex>
+                                <Text color="#666" fontSize="xs" textAlign="right">
+                                    ≈ ${address ? (parseFloat(ethBalance) * 50).toFixed(2) : "0.00"}
+                                </Text>
+                            </Box>
+                            
+                            {/* Selected Token Balance */}
+                            {selectedToken && (
+                                <Box>
+                                    <Flex justifyContent="space-between" alignItems="center">
+                                        <HStack>
+                                            <Box w="20px" h="20px">
+                                                <Image
+                                                    src={placeholderLogo}
+                                                    alt={selectedToken.symbol}
+                                                    w="20px"
+                                                    h="20px"
+                                                />
+                                            </Box>
+                                            <Box>
+                                                <Text color="#888" fontSize="sm">{selectedToken.symbol}</Text>
+                                            </Box>
+                                        </HStack>
+                                        <Box>
+                                            <Text color="white" fontWeight="bold">
+                                                {address ? parseFloat(tokenBalance).toFixed(2) : "0.00"}
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                    <Text color="#666" fontSize="xs" textAlign="right">
+                                        ≈ ${address && selectedToken ? (parseFloat(tokenBalance) * selectedToken.price).toFixed(2) : "0.00"}
+                                    </Text>
+                                </Box>
+                            )}
+                            
+                            {/* Total Portfolio Value */}
+                            <Box borderTop="1px solid #2a2a2a" pt={3} mt={2}>
+                                <Flex justifyContent="space-between" alignItems="center">
+                                    <Box>
+                                        <Text color="#888" fontSize="sm">Total Value</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="#4ade80" fontWeight="bold" fontSize="lg">
+                                            ${address ? (
+                                                parseFloat(ethBalance) * 50 + 
+                                                (selectedToken ? parseFloat(tokenBalance) * selectedToken.price : 0)
+                                            ).toFixed(2) : "0.00"}
+                                        </Text>
+                                    </Box>
+                                </Flex>
+                            </Box>
+                        </VStack>
                     </Box>
+                    
+                    {/* Trading Panel */}
+                    <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
+                        <Text color="white" fontSize="lg" fontWeight="bold" mb={4}>
+                            Trade {selectedToken?.symbol || "Token"}
+                        </Text>
+                        
+                        <Flex mb={4}>
+                            <Button
+                                flex={1}
+                                bg={isBuying ? "#4ade80" : "transparent"}
+                                color={isBuying ? "black" : "white"}
+                                onClick={() => setIsBuying(true)}
+                                borderRadius="md"
+                                border="1px solid #2a2a2a"
+                            >
+                                Buy
+                            </Button>
+                            <Button
+                                flex={1}
+                                ml={2}
+                                bg={!isBuying ? "#ef4444" : "transparent"}
+                                color={!isBuying ? "white" : "white"}
+                                onClick={() => setIsBuying(false)}
+                                borderRadius="md"
+                                border="1px solid #2a2a2a"
+                            >
+                                Sell
+                            </Button>
+                        </Flex>
+                        
+                        <Box mb={4}>
+                            <Flex justifyContent="space-between" alignItems="center" mb={2}>
+                                <Text color="#888" fontSize="sm">Amount</Text>
+                                <HStack gap={2}>
+                                    <Checkbox 
+                                        size="sm" 
+                                        checked={useWeth}
+                                        onCheckedChange={(e) => setUseWeth(e.checked)}
+                                    >
+                                        <Text fontSize="xs" color="#888">Use WETH</Text>
+                                    </Checkbox>
+                                </HStack>
+                            </Flex>
+                            <Input
+                                placeholder="0.00"
+                                value={tradeAmount}
+                                onChange={(e) => setTradeAmount(e.target.value)}
+                                bg="#2a2a2a"
+                                border="none"
+                                size="lg"
+                                _placeholder={{ color: "#666" }}
+                            />
+                            {quote && (
+                                <Text color="#666" fontSize="xs" mt={1}>
+                                    You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                </Text>
+                            )}
+                        </Box>
+                        
+                        <Box mb={4}>
+                            <Flex justifyContent="space-between" mb={2}>
+                                <Box>
+                                    <Text color="#888" fontSize="sm">Price Impact</Text>
+                                </Box>
+                                <Box>
+                                    <Text color={parseFloat(priceImpact) > 3 ? "#ef4444" : "#4ade80"} fontSize="sm">
+                                        {priceImpact}%
+                                    </Text>
+                                </Box>
+                            </Flex>
+                            <Flex justifyContent="space-between" mb={2}>
+                                <Box>
+                                    <Text color="#888" fontSize="sm">Min Received</Text>
+                                </Box>
+                                <Box>
+                                    <Text color="white" fontSize="sm">
+                                        {quote || "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                    </Text>
+                                </Box>
+                            </Flex>
+                            <Flex justifyContent="space-between">
+                                <Box>
+                                    <Text color="#888" fontSize="sm">Network Fee</Text>
+                                </Box>
+                                <Box>
+                                    <Text color="white" fontSize="sm">~$0.12</Text>
+                                </Box>
+                            </Flex>
+                        </Box>
+                        
+                        <Button
+                            w="100%"
+                            h="48px"
+                            bg={isBuying ? "#4ade80" : "#ef4444"}
+                            color={isBuying ? "black" : "white"}
+                            fontSize="lg"
+                            fontWeight="bold"
+                            onClick={isBuying ? handleBuy : handleSell}
+                            isDisabled={!selectedToken || !tradeAmount || isLoading}
+                            isLoading={isLoading}
+                            _hover={{
+                                bg: isBuying ? "#22c55e" : "#dc2626"
+                            }}
+                        >
+                            {isBuying ? "Buy" : "Sell"} {selectedToken?.symbol || ""}
+                        </Button>
+                    </Box>
+                    </VStack>
+                    </Box>
+                ) : (
+                    /* Mobile Layout - Reordered */
+                    <>
+                        {/* Trade Box First on Mobile */}
+                        <Box w="100%">
+                            <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
+                                <Text color="white" fontSize="lg" fontWeight="bold" mb={4}>
+                                    Trade {selectedToken?.symbol || "Token"}
+                                </Text>
+                                
+                                <Flex mb={4}>
+                                    <Button
+                                        flex={1}
+                                        bg={isBuying ? "#4ade80" : "transparent"}
+                                        color={isBuying ? "black" : "white"}
+                                        onClick={() => setIsBuying(true)}
+                                        borderRadius="md"
+                                        border="1px solid #2a2a2a"
+                                    >
+                                        Buy
+                                    </Button>
+                                    <Button
+                                        flex={1}
+                                        ml={2}
+                                        bg={!isBuying ? "#ef4444" : "transparent"}
+                                        color={!isBuying ? "white" : "white"}
+                                        onClick={() => setIsBuying(false)}
+                                        borderRadius="md"
+                                        border="1px solid #2a2a2a"
+                                    >
+                                        Sell
+                                    </Button>
+                                </Flex>
+                                
+                                <Box mb={4}>
+                                    <Flex justifyContent="space-between" alignItems="center" mb={2}>
+                                        <Text color="#888" fontSize="sm">Amount</Text>
+                                        <HStack gap={2}>
+                                            <Checkbox 
+                                                size="sm" 
+                                                checked={useWeth}
+                                                onCheckedChange={(e) => setUseWeth(e.checked)}
+                                            >
+                                                <Text fontSize="xs" color="#888">Use WETH</Text>
+                                            </Checkbox>
+                                        </HStack>
+                                    </Flex>
+                                    <Input
+                                        placeholder="0.00"
+                                        value={tradeAmount}
+                                        onChange={(e) => setTradeAmount(e.target.value)}
+                                        bg="#2a2a2a"
+                                        border="none"
+                                        size="lg"
+                                        _placeholder={{ color: "#666" }}
+                                    />
+                                    {quote && (
+                                        <Text color="#666" fontSize="xs" mt={1}>
+                                            You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                        </Text>
+                                    )}
+                                </Box>
+                                
+                                <Box mb={4}>
+                                    <Flex justifyContent="space-between" mb={2}>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">Price Impact</Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color={parseFloat(priceImpact) > 3 ? "#ef4444" : "#4ade80"} fontSize="sm">
+                                                {priceImpact}%
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                    <Flex justifyContent="space-between" mb={2}>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">Min Received</Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="white" fontSize="sm">
+                                                {quote || "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                    <Flex justifyContent="space-between">
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">Network Fee</Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="white" fontSize="sm">~$0.12</Text>
+                                        </Box>
+                                    </Flex>
+                                </Box>
+                                
+                                <Button
+                                    w="100%"
+                                    h="48px"
+                                    bg={isBuying ? "#4ade80" : "#ef4444"}
+                                    color={isBuying ? "black" : "white"}
+                                    fontSize="lg"
+                                    fontWeight="bold"
+                                    onClick={isBuying ? handleBuy : handleSell}
+                                    isDisabled={!selectedToken || !tradeAmount || isLoading}
+                                    isLoading={isLoading}
+                                    _hover={{
+                                        bg: isBuying ? "#22c55e" : "#dc2626"
+                                    }}
+                                >
+                                    {isBuying ? "Buy" : "Sell"} {selectedToken?.symbol || ""}
+                                </Button>
+                            </Box>
+                        </Box>
+                        
+                        {/* Wallet Balance Second on Mobile */}
+                        <Box w="100%">
+                            <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
+                                <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
+                                    Wallet Balance
+                                </Text>
+                                
+                                <VStack align="stretch" gap={3}>
+                                    {/* MON Balance */}
+                                    <Box>
+                                        <Flex justifyContent="space-between" alignItems="center">
+                                            <HStack>
+                                                <Box w="20px" h="20px">
+                                                    <Image
+                                                        src={monadLogo}
+                                                        alt="MON"
+                                                        w="20px"
+                                                        h="20px"
+                                                    />
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="sm">MON</Text>
+                                                </Box>
+                                            </HStack>
+                                            <Box>
+                                                <Text color="white" fontWeight="bold">
+                                                    {address ? parseFloat(ethBalance).toFixed(4) : "0.00"}
+                                                </Text>
+                                            </Box>
+                                        </Flex>
+                                        <Text color="#666" fontSize="xs" textAlign="right">
+                                            ≈ ${address ? (parseFloat(ethBalance) * 50).toFixed(2) : "0.00"}
+                                        </Text>
+                                    </Box>
+                                    
+                                    {/* Selected Token Balance */}
+                                    {selectedToken && (
+                                        <Box>
+                                            <Flex justifyContent="space-between" alignItems="center">
+                                                <HStack>
+                                                    <Box w="20px" h="20px">
+                                                        <Image
+                                                            src={placeholderLogo}
+                                                            alt={selectedToken.symbol}
+                                                            w="20px"
+                                                            h="20px"
+                                                        />
+                                                    </Box>
+                                                    <Box>
+                                                        <Text color="#888" fontSize="sm">{selectedToken.symbol}</Text>
+                                                    </Box>
+                                                </HStack>
+                                                <Box>
+                                                    <Text color="white" fontWeight="bold">
+                                                        {address ? parseFloat(tokenBalance).toFixed(2) : "0.00"}
+                                                    </Text>
+                                                </Box>
+                                            </Flex>
+                                            <Text color="#666" fontSize="xs" textAlign="right">
+                                                ≈ ${address && selectedToken ? (parseFloat(tokenBalance) * selectedToken.price).toFixed(2) : "0.00"}
+                                            </Text>
+                                        </Box>
+                                    )}
+                                    
+                                    {/* Total Portfolio Value */}
+                                    <Box borderTop="1px solid #2a2a2a" pt={3} mt={2}>
+                                        <Flex justifyContent="space-between" alignItems="center">
+                                            <Box>
+                                                <Text color="#888" fontSize="sm">Total Value</Text>
+                                            </Box>
+                                            <Box>
+                                                <Text color="#4ade80" fontWeight="bold" fontSize="lg">
+                                                    ${address ? (
+                                                        parseFloat(ethBalance) * 50 + 
+                                                        (selectedToken ? parseFloat(tokenBalance) * selectedToken.price : 0)
+                                                    ).toFixed(2) : "0.00"}
+                                                </Text>
+                                            </Box>
+                                        </Flex>
+                                    </Box>
+                                </VStack>
+                            </Box>
+                        </Box>
+                        
+                        {/* Trade History Last on Mobile */}
+                        {selectedToken && (
+                        <Box w="100%">
+                            <Box bg="#1a1a1a" borderRadius="lg" p={3} w="100%">
+                                <Tabs.Root value={tradeHistoryTab} onValueChange={(e) => setTradeHistoryTab(e.value)}>
+                                    <Tabs.List mb={4}>
+                                        <Tabs.Trigger 
+                                            value="all" 
+                                            flex={1}
+                                            _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                            color="#888"
+                                            fontWeight="600"
+                                        >
+                                            All Transactions
+                                        </Tabs.Trigger>
+                                        <Tabs.Trigger 
+                                            value="my" 
+                                            flex={1}
+                                            _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                            color="#888"
+                                            fontWeight="600"
+                                        >
+                                            My Transactions
+                                        </Tabs.Trigger>
+                                    </Tabs.List>
+                                    
+                                    <Tabs.Content value="all">
+                                        <VStack gap={2} align="stretch">
+                                                {tradeHistory.map((trade) => (
+                                                    <Box
+                                                        key={trade.id}
+                                                        p={3}
+                                                        bg="#2a2a2a"
+                                                        borderRadius="md"
+                                                        cursor="pointer"
+                                                        _hover={{ bg: "#333" }}
+                                                    >
+                                                        {/* First Row: Badge, Token, Amount */}
+                                                        <Flex justifyContent="space-between" alignItems="center" mb={2}>
+                                                            <HStack gap={2}>
+                                                                <Box>
+                                                                    <Badge
+                                                                        colorPalette={trade.type === "buy" ? "green" : "red"}
+                                                                        size="sm"
+                                                                    >
+                                                                        {trade.type.toUpperCase()}
+                                                                    </Badge>
+                                                                </Box>
+                                                                <Box>
+                                                                    <Text color="white" fontWeight="bold">
+                                                                        {trade.token}
+                                                                    </Text>
+                                                                </Box>
+                                                            </HStack>
+                                                            <Box>
+                                                                <Text color="white" fontWeight="bold">
+                                                                    ${trade.total.toFixed(2)}
+                                                                </Text>
+                                                            </Box>
+                                                        </Flex>
+                                                        
+                                                        {/* Second Row: Trade details and time */}
+                                                        <Flex justifyContent="space-between" alignItems="center">
+                                                            <Box>
+                                                                <Text color="#888" fontSize="xs">
+                                                                    {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
+                                                                </Text>
+                                                            </Box>
+                                                            <HStack gap={3}>
+                                                                <Box>
+                                                                    <Text 
+                                                                        color="#4ade80" 
+                                                                        fontSize="xs"
+                                                                        cursor="pointer"
+                                                                        _hover={{ textDecoration: "underline" }}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank");
+                                                                        }}
+                                                                    >
+                                                                        {trade.txHash}
+                                                                    </Text>
+                                                                </Box>
+                                                                <Box>
+                                                                    <Text color="#888" fontSize="xs">
+                                                                        {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                                    </Text>
+                                                                </Box>
+                                                            </HStack>
+                                                        </Flex>
+                                                    </Box>
+                                                ))}
+                                            </VStack>
+                                    </Tabs.Content>
+                                    
+                                    <Tabs.Content value="my">
+                                        {address ? (
+                                                <VStack gap={2} align="stretch">
+                                                    {tradeHistory.filter((_, index) => index % 2 === 0).map((trade) => (
+                                                        <Box
+                                                            key={trade.id}
+                                                            p={3}
+                                                            bg="#2a2a2a"
+                                                            borderRadius="md"
+                                                            cursor="pointer"
+                                                            _hover={{ bg: "#333" }}
+                                                        >
+                                                            {/* First Row: Badge, Token, Amount */}
+                                                            <Flex justifyContent="space-between" alignItems="center" mb={2}>
+                                                                <HStack gap={2}>
+                                                                    <Box>
+                                                                        <Badge
+                                                                            colorPalette={trade.type === "buy" ? "green" : "red"}
+                                                                            size="sm"
+                                                                        >
+                                                                            {trade.type.toUpperCase()}
+                                                                        </Badge>
+                                                                    </Box>
+                                                                    <Box>
+                                                                        <Text color="white" fontWeight="bold">
+                                                                            {trade.token}
+                                                                        </Text>
+                                                                    </Box>
+                                                                </HStack>
+                                                                <Box>
+                                                                    <Text color="white" fontWeight="bold">
+                                                                        ${trade.total.toFixed(2)}
+                                                                    </Text>
+                                                                </Box>
+                                                            </Flex>
+                                                            
+                                                            {/* Second Row: Trade details and time */}
+                                                            <Flex justifyContent="space-between" alignItems="center">
+                                                                <Box>
+                                                                    <Text color="#888" fontSize="xs">
+                                                                        {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
+                                                                    </Text>
+                                                                </Box>
+                                                                <HStack gap={3}>
+                                                                    <Box>
+                                                                        <Text 
+                                                                            color="#4ade80" 
+                                                                            fontSize="xs"
+                                                                            cursor="pointer"
+                                                                            _hover={{ textDecoration: "underline" }}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank");
+                                                                            }}
+                                                                        >
+                                                                            {trade.txHash}
+                                                                        </Text>
+                                                                    </Box>
+                                                                    <Box>
+                                                                        <Text color="#888" fontSize="xs">
+                                                                            {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                                        </Text>
+                                                                    </Box>
+                                                                </HStack>
+                                                            </Flex>
+                                                        </Box>
+                                                    ))}
+                                                </VStack>
+                                            ) : (
+                                                <Text color="#666" textAlign="center" py={8}>
+                                                    Connect your wallet to view your transactions
+                                                </Text>
+                                            )}
+                                    </Tabs.Content>
+                                </Tabs.Root>
+                            </Box>
+                        </Box>
+                        )}
+                    </>
                 )}
-            </SimpleGrid>
-            </Box>)}
+            </Flex>
+            )}
         </Container>
     );
 };
