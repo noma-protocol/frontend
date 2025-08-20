@@ -1131,90 +1131,28 @@ const Launchpad: React.FC = () => {
     
     // Calculate quote and price impact
     useEffect(() => {
-        if (!tradeAmount || !selectedToken || parseFloat(tradeAmount) === 0 || !poolInfo.poolAddress) {
+        if (!tradeAmount || !selectedToken || parseFloat(tradeAmount) === 0) {
             setQuote("");
             setPriceImpact("0");
             return;
         }
         
-        const calculateQuote = async () => {
-            try {
-                const quoterAddress = config.protocolAddresses.uniswapQuoterV2;
-                const quoterContract = new ethers.Contract(quoterAddress, QuoterAbi, localProvider);
-                
-                // Build swap path
-                const feeTier = 3000;
-                let swapPath;
-                
-                if (isBuying) {
-                    // Buying token with ETH/WETH
-                    swapPath = utils.solidityPack(
-                        ["address", "uint24", "address"],
-                        [selectedToken.token1, feeTier, selectedToken.token0]
-                    );
-                    
-                    try {
-                        // Get amount of tokens out for ETH in
-                        const result = await quoterContract.quoteExactInput(swapPath, parseEther(tradeAmount));
-                        const amountOut = formatEther(result[0]);
-                        setQuote(parseFloat(amountOut).toFixed(6));
-                        
-                        // Calculate price impact
-                        const expectedOut = parseFloat(tradeAmount) / selectedToken.price;
-                        const actualOut = parseFloat(amountOut);
-                        const impact = Math.abs((expectedOut - actualOut) / expectedOut * 100);
-                        setPriceImpact(impact.toFixed(2));
-                    } catch (error) {
-                        console.error("Error getting buy quote:", error);
-                        // Fallback to simple calculation
-                        const estimatedTokens = parseFloat(tradeAmount) / selectedToken.price;
-                        setQuote(estimatedTokens.toFixed(6));
-                        setPriceImpact("0.3");
-                    }
-                } else {
-                    // Selling token for ETH/WETH
-                    swapPath = utils.solidityPack(
-                        ["address", "uint24", "address"],
-                        [selectedToken.token0, feeTier, selectedToken.token1]
-                    );
-                    
-                    try {
-                        // Get amount of ETH out for tokens in
-                        const result = await quoterContract.quoteExactInput(swapPath, parseEther(tradeAmount));
-                        const amountOut = formatEther(result[0]);
-                        setQuote(parseFloat(amountOut).toFixed(6));
-                        
-                        // Calculate price impact
-                        const expectedOut = parseFloat(tradeAmount) * selectedToken.price;
-                        const actualOut = parseFloat(amountOut);
-                        const impact = Math.abs((expectedOut - actualOut) / expectedOut * 100);
-                        setPriceImpact(impact.toFixed(2));
-                    } catch (error) {
-                        console.error("Error getting sell quote:", error);
-                        // Fallback to simple calculation
-                        const estimatedETH = parseFloat(tradeAmount) * selectedToken.price;
-                        setQuote(estimatedETH.toFixed(6));
-                        setPriceImpact("0.2");
-                    }
-                }
-            } catch (error) {
-                console.error("Error calculating quote:", error);
-                // Fallback calculation
-                const amount = parseFloat(tradeAmount);
-                if (isBuying) {
-                    const estimatedTokens = amount / selectedToken.price;
-                    setQuote(estimatedTokens.toFixed(6));
-                    setPriceImpact("0.3");
-                } else {
-                    const estimatedETH = amount * selectedToken.price;
-                    setQuote(estimatedETH.toFixed(6));
-                    setPriceImpact("0.2");
-                }
-            }
-        };
+        // For now, use simple calculation until we properly configure the quoter
+        const amount = parseFloat(tradeAmount);
+        if (isBuying) {
+            const estimatedTokens = amount / selectedToken.price;
+            setQuote(estimatedTokens.toFixed(6));
+            setPriceImpact("0.3"); // Mock 0.3% impact
+        } else {
+            const estimatedETH = amount * selectedToken.price;
+            setQuote(estimatedETH.toFixed(6));
+            setPriceImpact("0.2"); // Mock 0.2% impact
+        }
         
-        calculateQuote();
-    }, [tradeAmount, selectedToken, isBuying, poolInfo.poolAddress]);
+        // TODO: Implement actual quote fetching from Quoter contract
+        // This requires proper configuration of the quoter address and ensuring
+        // the contract is deployed on the current network
+    }, [tradeAmount, selectedToken, isBuying]);
     
     // Contract write hooks for trading
     const {
