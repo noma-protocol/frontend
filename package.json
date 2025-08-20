@@ -23,7 +23,7 @@
     "@visx/shape": "^3.5.0",
     "@visx/tooltip": "^3.3.0",
     "@web3modal/wagmi": "^3.5.7",
-    "apexcharts": "^4.5.0",
+    "apexcharts": "^4.7.0",
     "axios": "^1.6.7",
     "chart.js": "^4.4.7",
     "ethers": "^5.7.2",

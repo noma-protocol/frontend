@@ -144,7 +144,18 @@ const Launchpad: React.FC = () => {
         { id: 5, type: "sell", token: "SHIB", amount: 10000, price: 0.0000089, total: 0.089, time: new Date(Date.now() - 900000), txHash: "0x5678...9012" },
     ]);
     
-    // Chart data
+    // Mock data for price chart
+    const mockPoolAddress = "0x1234567890123456789012345678901234567890";
+    const mockIMV = "1000000000000000000"; // 1 ETH in wei
+    const mockPriceUSD = "3500";
+    
+    const [percentChange, setPercentChange] = useState(0);
+    const [chartSeries, setChartSeries] = useState([]);
+    const [chartTimeframe, setChartTimeframe] = useState("24h");
+    const [chartGranularity, setChartGranularity] = useState("1h");
+    const [isChartLoading, setIsChartLoading] = useState(false);
+    
+    // Chart options with professional styling
     const [chartOptions] = useState({
         chart: {
             type: 'candlestick',
@@ -228,6 +239,7 @@ const Launchpad: React.FC = () => {
                     fontFamily: 'inherit'
                 },
                 formatter: (value) => {
+                    if (!value || isNaN(value)) return '0';
                     if (value < 0.00001) return value.toExponential(2);
                     if (value < 0.01) return value.toFixed(6);
                     return value.toFixed(2);
@@ -262,56 +274,224 @@ const Launchpad: React.FC = () => {
                 format: 'dd MMM HH:mm'
             },
             custom: function({ seriesIndex, dataPointIndex, w }) {
-                const o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
-                const h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
-                const l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
-                const c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
-                const formatValue = (val) => {
-                    if (val < 0.00001) return val.toExponential(4);
-                    if (val < 0.01) return val.toFixed(8);
-                    return val.toFixed(2);
-                };
-                return '<div class="apexcharts-tooltip-candlestick" style="padding: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px;">' +
-                    '<div style="color: #888; font-size: 11px; margin-bottom: 4px;">OHLC</div>' +
-                    '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">Open:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(o) + '</span></div>' +
-                    '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">High:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(h) + '</span></div>' +
-                    '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">Low:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(l) + '</span></div>' +
-                    '<div style="display: flex; justify-content: space-between;"><span style="color: #666;">Close:</span> <span style="color: ' + (c >= o ? '#4ade80' : '#ef4444') + '; margin-left: 16px; font-weight: 600;">' + formatValue(c) + '</span></div>' +
+                try {
+                    const o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
+                    const h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
+                    const l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
+                    const c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
+                    
+                    if (!o || !h || !l || !c) return '';
+                    
+                    const formatValue = (val) => {
+                        if (!val || isNaN(val)) return '0';
+                        if (val < 0.00001) return val.toExponential(4);
+                        if (val < 0.01) return val.toFixed(8);
+                        return val.toFixed(2);
+                    };
+                    
+                    return '<div class="apexcharts-tooltip-candlestick" style="padding: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px;">' +
+                        '<div style="color: #888; font-size: 11px; margin-bottom: 4px;">OHLC</div>' +
+                        '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">Open:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(o) + '</span></div>' +
+                        '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">High:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(h) + '</span></div>' +
+                        '<div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #666;">Low:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(l) + '</span></div>' +
+                        '<div style="display: flex; justify-content: space-between;"><span style="color: #666;">Close:</span> <span style="color: #fff; margin-left: 16px;">' + formatValue(c) + '</span></div>' +
                     '</div>';
+                } catch (e) {
+                    return '';
+                }
             }
         }
     });
+
+    // Generate mock OHLC data for chart
+    const generateMockOHLCData = (timeframe) => {
+        const data = [];
+        const now = Date.now();
+        let points = 24;
+        let interval = 3600000; // 1 hour
+        
+        switch (timeframe) {
+            case "15m":
+                points = 15;
+                interval = 60000; // 1 minute
+                break;
+            case "1h":
+                points = 12;
+                interval = 300000; // 5 minutes
+                break;
+            case "24h":
+                points = 24;
+                interval = 3600000; // 1 hour
+                break;
+            case "1w":
+                points = 28;
+                interval = 21600000; // 6 hours
+                break;
+            case "1M":
+                points = 30;
+                interval = 86400000; // 24 hours
+                break;
+        }
+        
+        let basePrice = selectedToken && selectedToken.price > 0 ? selectedToken.price : 0.0000186;
+        
+        // Ensure basePrice is a valid number
+        if (isNaN(basePrice) || !isFinite(basePrice)) {
+            basePrice = 0.0000186;
+        }
+        
+        for (let i = points; i >= 0; i--) {
+            const variation = (Math.random() - 0.5) * basePrice * 0.1;
+            const open = Math.max(0.0000001, basePrice + variation);
+            const close = Math.max(0.0000001, basePrice + (Math.random() - 0.5) * basePrice * 0.1);
+            const high = Math.max(open, close) * (1 + Math.random() * 0.05);
+            const low = Math.min(open, close) * (1 - Math.random() * 0.05);
+            
+            // Validate all values are finite numbers
+            if (isFinite(open) && isFinite(high) && isFinite(low) && isFinite(close)) {
+                data.push({
+                    x: new Date(now - (i * interval)),
+                    y: [
+                        parseFloat(open.toFixed(8)),
+                        parseFloat(high.toFixed(8)),
+                        parseFloat(low.toFixed(8)),
+                        parseFloat(close.toFixed(8))
+                    ]
+                });
+            }
+            
+            basePrice = close;
+        }
+        
+        return data;
+    };
     
-    const [chartSeries] = useState([{
-        name: 'Price',
-        data: [
-            { x: new Date(Date.now() - 3600000 * 24), y: [0.0000180, 0.0000190, 0.0000175, 0.0000186] },
-            { x: new Date(Date.now() - 3600000 * 23), y: [0.0000186, 0.0000188, 0.0000183, 0.0000185] },
-            { x: new Date(Date.now() - 3600000 * 22), y: [0.0000185, 0.0000189, 0.0000184, 0.0000188] },
-            { x: new Date(Date.now() - 3600000 * 21), y: [0.0000188, 0.0000191, 0.0000187, 0.0000189] },
-            { x: new Date(Date.now() - 3600000 * 20), y: [0.0000189, 0.0000192, 0.0000188, 0.0000191] },
-            { x: new Date(Date.now() - 3600000 * 19), y: [0.0000191, 0.0000193, 0.0000190, 0.0000192] },
-            { x: new Date(Date.now() - 3600000 * 18), y: [0.0000192, 0.0000192, 0.0000188, 0.0000189] },
-            { x: new Date(Date.now() - 3600000 * 17), y: [0.0000189, 0.0000190, 0.0000187, 0.0000188] },
-            { x: new Date(Date.now() - 3600000 * 16), y: [0.0000188, 0.0000189, 0.0000182, 0.0000184] },
-            { x: new Date(Date.now() - 3600000 * 15), y: [0.0000184, 0.0000186, 0.0000183, 0.0000185] },
-            { x: new Date(Date.now() - 3600000 * 14), y: [0.0000185, 0.0000187, 0.0000184, 0.0000186] },
-            { x: new Date(Date.now() - 3600000 * 13), y: [0.0000186, 0.0000188, 0.0000185, 0.0000187] },
-            { x: new Date(Date.now() - 3600000 * 12), y: [0.0000187, 0.0000191, 0.0000186, 0.0000190] },
-            { x: new Date(Date.now() - 3600000 * 11), y: [0.0000190, 0.0000192, 0.0000189, 0.0000191] },
-            { x: new Date(Date.now() - 3600000 * 10), y: [0.0000191, 0.0000193, 0.0000190, 0.0000192] },
-            { x: new Date(Date.now() - 3600000 * 9), y: [0.0000192, 0.0000194, 0.0000191, 0.0000193] },
-            { x: new Date(Date.now() - 3600000 * 8), y: [0.0000193, 0.0000194, 0.0000188, 0.0000189] },
-            { x: new Date(Date.now() - 3600000 * 7), y: [0.0000189, 0.0000190, 0.0000187, 0.0000188] },
-            { x: new Date(Date.now() - 3600000 * 6), y: [0.0000188, 0.0000189, 0.0000186, 0.0000187] },
-            { x: new Date(Date.now() - 3600000 * 5), y: [0.0000187, 0.0000188, 0.0000185, 0.0000186] },
-            { x: new Date(Date.now() - 3600000 * 4), y: [0.0000186, 0.0000187, 0.0000185, 0.0000186] },
-            { x: new Date(Date.now() - 3600000 * 3), y: [0.0000186, 0.0000188, 0.0000185, 0.0000187] },
-            { x: new Date(Date.now() - 3600000 * 2), y: [0.0000187, 0.0000189, 0.0000186, 0.0000188] },
-            { x: new Date(Date.now() - 3600000 * 1), y: [0.0000188, 0.0000189, 0.0000185, 0.0000186] },
-            { x: new Date(), y: [0.0000186, 0.0000189, 0.0000184, 0.0000186] }
-        ]
-    }]);
+    const API_BASE_URL = "https://pricefeed.noma.money";
+    
+    // Helper function to get time parameters for API
+    const getTimeParams = (timeframe, granularity) => {
+        const now = Date.now();
+        let fromTimestamp;
+        
+        switch (timeframe) {
+            case "15m":
+                fromTimestamp = now - (15 * 60 * 1000);
+                break;
+            case "1h":
+                fromTimestamp = now - (60 * 60 * 1000);
+                break;
+            case "24h":
+                fromTimestamp = now - (24 * 60 * 60 * 1000);
+                break;
+            case "1w":
+                fromTimestamp = now - (7 * 24 * 60 * 60 * 1000);
+                break;
+            case "1M":
+                fromTimestamp = now - (30 * 24 * 60 * 60 * 1000);
+                break;
+            default:
+                fromTimestamp = now - (24 * 60 * 60 * 1000);
+        }
+        
+        return {
+            from_timestamp: fromTimestamp,
+            to_timestamp: now,
+            interval: granularity
+        };
+    };
+    
+    // Fetch OHLC data from API
+    const fetchOHLCData = async (timeframe, granularity) => {
+        try {
+            const { from_timestamp, to_timestamp, interval } = getTimeParams(timeframe, granularity);
+            
+            const url = new URL(`${API_BASE_URL}/api/price/ohlc`);
+            url.searchParams.append('from_timestamp', from_timestamp.toString());
+            url.searchParams.append('to_timestamp', to_timestamp.toString());
+            url.searchParams.append('interval', interval);
+            
+            const response = await fetch(url.toString());
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            
+            const responseJson = await response.json();
+            
+            if (responseJson && responseJson.ohlc && Array.isArray(responseJson.ohlc)) {
+                const ohlcData = responseJson.ohlc
+                    .map((candle) => {
+                        const open = parseFloat(candle.open);
+                        const high = parseFloat(candle.high);
+                        const low = parseFloat(candle.low);
+                        const close = parseFloat(candle.close);
+                        
+                        if (isFinite(open) && isFinite(high) && isFinite(low) && isFinite(close)) {
+                            return {
+                                x: new Date(candle.timestamp),
+                                y: [open, high, low, close]
+                            };
+                        }
+                        return null;
+                    })
+                    .filter(Boolean);
+                
+                return ohlcData.length > 0 ? ohlcData : generateMockOHLCData(timeframe);
+            } else {
+                return generateMockOHLCData(timeframe);
+            }
+        } catch (error) {
+            console.error("Error fetching OHLC data:", error);
+            return generateMockOHLCData(timeframe);
+        }
+    };
+    
+    // Update chart data when selected token or timeframe changes
+    useEffect(() => {
+        if (!selectedToken) {
+            setChartSeries([]);
+            return;
+        }
+        
+        setIsChartLoading(true);
+        
+        // Fetch data from API
+        const loadChartData = async () => {
+            const ohlcData = await fetchOHLCData(chartTimeframe, chartGranularity);
+            
+            // Validate data before setting
+            if (ohlcData && ohlcData.length > 0) {
+                setChartSeries([{
+                    name: `${selectedToken.symbol}/ETH`,
+                    data: ohlcData
+                }]);
+                
+                // Calculate percentage change
+                const firstPrice = ohlcData[0].y[0];
+                const lastPrice = ohlcData[ohlcData.length - 1].y[3];
+                if (isFinite(firstPrice) && isFinite(lastPrice) && firstPrice > 0) {
+                    const change = ((lastPrice - firstPrice) / firstPrice) * 100;
+                    setPercentChange(isFinite(change) ? change : 0);
+                } else {
+                    setPercentChange(0);
+                }
+            } else {
+                setChartSeries([{
+                    name: `${selectedToken.symbol}/ETH`,
+                    data: []
+                }]);
+                setPercentChange(0);
+            }
+            
+            setIsChartLoading(false);
+        };
+        
+        loadChartData();
+        
+        // Refresh data every 30 seconds
+        const interval = setInterval(loadChartData, 30000);
+        
+        return () => clearInterval(interval);
+    }, [selectedToken, chartTimeframe, chartGranularity]);
 
     const filteredTokens = tokens.filter(token => 
         token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -342,18 +522,34 @@ const Launchpad: React.FC = () => {
         address: nomaFactoryAddress,
         abi: FactoryAbi,
         functionName: "getDeployers",
-        enabled: isConnected,
+        enabled: true, // Always fetch tokens, not just when connected
     });
     
     // Fetch vault data and convert to token list
     useEffect(() => {
-        if (!deployersData || deployersData.length === 0) {
-            setIsTokensLoading(false);
-            return;
-        }
-        
         const fetchVaults = async () => {
+            // Keep loading state for minimum time for better UX
+            const minLoadingTime = 1500;
+            const startTime = Date.now();
+            
             try {
+                // If no deployer data yet, wait for it
+                if (!deployersData) {
+                    return;
+                }
+                
+                // If no deployers found, show empty state after minimum loading time
+                if (deployersData.length === 0) {
+                    const elapsedTime = Date.now() - startTime;
+                    const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+                    
+                    setTimeout(() => {
+                        setTokens([]);
+                        setIsTokensLoading(false);
+                    }, remainingTime);
+                    return;
+                }
+                
                 const nomaFactoryContract = new ethers.Contract(
                     nomaFactoryAddress,
                     FactoryAbi,
@@ -422,13 +618,31 @@ const Launchpad: React.FC = () => {
                     poolAddress: vault.poolAddress
                 }));
                 
-                setTokens(tokenList);
-                setIsTokensLoading(false);
+                // Ensure minimum loading time for better UX
+                const elapsedTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+                
+                setTimeout(() => {
+                    setTokens(tokenList);
+                    setIsTokensLoading(false);
+                    
+                    // Select first token if none selected
+                    if (!selectedToken && tokenList.length > 0) {
+                        setSelectedToken(tokenList[0]);
+                    }
+                }, remainingTime);
                 
             } catch (error) {
                 console.error("Error fetching vaults:", error);
-                setTokens([]);
-                setIsTokensLoading(false);
+                
+                // Show error state after minimum loading time
+                const elapsedTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+                
+                setTimeout(() => {
+                    setTokens([]);
+                    setIsTokensLoading(false);
+                }, remainingTime);
             }
         };
         
@@ -866,12 +1080,78 @@ const Launchpad: React.FC = () => {
                         
                         <Box overflowY="auto" overflowX="hidden" maxH={isMobile ? "300px" : "calc(100vh - 180px)"} mx={isMobile ? -2 : 0}>
                             {isTokensLoading ? (
-                                <Center py={10}>
-                                    <VStack>
-                                        <Spinner size="md" color="#4ade80" thickness="3px" />
-                                        <Text color="#4ade80" fontSize="sm">Loading tokens...</Text>
-                                    </VStack>
-                                </Center>
+                                <VStack spacing={0} w="100%">
+                                    {/* Show skeleton rows while loading */}
+                                    {[...Array(8)].map((_, index) => (
+                                        <Box 
+                                            key={index} 
+                                            w="100%" 
+                                            p={isMobile ? 2 : 3} 
+                                            borderBottom="1px solid" 
+                                            borderColor="#2a2a2a"
+                                        >
+                                            <HStack justifyContent="space-between">
+                                                <HStack spacing={isMobile ? 2 : 3}>
+                                                    {/* Token logo skeleton */}
+                                                    <Box 
+                                                        w={isMobile ? "16px" : "20px"} 
+                                                        h={isMobile ? "16px" : "20px"} 
+                                                        bg="#2a2a2a" 
+                                                        borderRadius="full"
+                                                        animation="pulse 2s infinite"
+                                                    />
+                                                    {/* Token symbol skeleton */}
+                                                    <Box 
+                                                        w="50px" 
+                                                        h="16px" 
+                                                        bg="#2a2a2a" 
+                                                        borderRadius="sm"
+                                                        animation="pulse 2s infinite"
+                                                        animationDelay={`${index * 0.1}s`}
+                                                    />
+                                                </HStack>
+                                                <HStack spacing={isMobile ? 2 : 4}>
+                                                    {/* Price skeleton */}
+                                                    <Box 
+                                                        w="60px" 
+                                                        h="16px" 
+                                                        bg="#2a2a2a" 
+                                                        borderRadius="sm"
+                                                        animation="pulse 2s infinite"
+                                                        animationDelay={`${index * 0.1 + 0.2}s`}
+                                                    />
+                                                    {/* 24h change skeleton */}
+                                                    <Box 
+                                                        w="45px" 
+                                                        h="16px" 
+                                                        bg="#2a2a2a" 
+                                                        borderRadius="sm"
+                                                        animation="pulse 2s infinite"
+                                                        animationDelay={`${index * 0.1 + 0.3}s`}
+                                                    />
+                                                    {/* Market cap skeleton (desktop only) */}
+                                                    {!isMobile && (
+                                                        <Box 
+                                                            w="70px" 
+                                                            h="16px" 
+                                                            bg="#2a2a2a" 
+                                                            borderRadius="sm"
+                                                            animation="pulse 2s infinite"
+                                                            animationDelay={`${index * 0.1 + 0.4}s`}
+                                                        />
+                                                    )}
+                                                </HStack>
+                                            </HStack>
+                                        </Box>
+                                    ))}
+                                    {/* Loading message */}
+                                    <Center pt={4} pb={2}>
+                                        <HStack>
+                                            <Spinner size="sm" color="#4ade80" thickness="2px" />
+                                            <Text color="#4ade80" fontSize="xs">Fetching tokens from blockchain...</Text>
+                                        </HStack>
+                                    </Center>
+                                </VStack>
                             ) : tokens.length === 0 ? (
                                 <Center py={10}>
                                     <Text color="#666" fontSize="sm">No tokens found</Text>
@@ -931,7 +1211,7 @@ const Launchpad: React.FC = () => {
                                                     fontSize="xs" 
                                                     whiteSpace="nowrap"
                                                 >
-                                                    {token.change24h > 0 ? "+" : ""}{token.change24h}%
+                                                    {token.change24h > 0 ? "+" : ""}{token.change24h.toFixed(2)}%
                                                 </Text>
                                             </Table.Cell>
                                             {!isMobile && (
@@ -976,8 +1256,8 @@ const Launchpad: React.FC = () => {
                                     <Text color="#888">${formatPrice(selectedToken.price)}</Text>
                                 </Box>
                                 <Box>
-                                    <Text color={selectedToken.change24h > 0 ? "#4ade80" : "#ef4444"} fontSize="sm">
-                                        {selectedToken.change24h > 0 ? "+" : ""}{selectedToken.change24h}%
+                                    <Text color={percentChange > 0 ? "#4ade80" : "#ef4444"} fontSize="sm">
+                                        {percentChange > 0 ? "+" : ""}{percentChange.toFixed(2)}%
                                     </Text>
                                 </Box>
                             </HStack>
@@ -999,15 +1279,15 @@ const Launchpad: React.FC = () => {
                                         <Box>
                                             <HStack gap={1}>
                                                 <Box>
-                                                    {selectedToken.change24h > 0 ? (
+                                                    {percentChange > 0 ? (
                                                         <FaArrowTrendUp color="#4ade80" size={isMobile ? "10" : "14"} />
                                                     ) : (
                                                         <FaArrowTrendDown color="#ef4444" size={isMobile ? "10" : "14"} />
                                                     )}
                                                 </Box>
                                                 <Box>
-                                                    <Text color={selectedToken.change24h > 0 ? "#4ade80" : "#ef4444"} fontSize={isMobile ? "xs" : "sm"} fontWeight="600">
-                                                        {selectedToken.change24h > 0 ? "+" : ""}{selectedToken.change24h}%
+                                                    <Text color={percentChange > 0 ? "#4ade80" : "#ef4444"} fontSize={isMobile ? "xs" : "sm"} fontWeight="600">
+                                                        {percentChange > 0 ? "+" : ""}{percentChange.toFixed(2)}%
                                                     </Text>
                                                 </Box>
                                             </HStack>
@@ -1044,13 +1324,105 @@ const Launchpad: React.FC = () => {
                             </SimpleGrid>
                             
                             {/* Chart */}
-                            <Box bg="#1a1a1a" p={isMobile ? 2 : 4} borderRadius="lg" w="100%" h={isMobile ? "300px" : "400px"}>
-                                <ReactApexChart
-                                    options={chartOptions}
-                                    series={chartSeries}
-                                    type="candlestick"
-                                    height="100%"
-                                />
+                            <Box bg="#1a1a1a" p={isMobile ? 2 : 4} borderRadius="lg" w="100%" h={isMobile ? "350px" : "450px"}>
+                                <HStack justifyContent="space-between" w="100%" mb={4}>
+                                    <Box>
+                                        <HStack spacing={4}>
+                                            <Box>
+                                                <Text color="white" fontSize="lg" fontWeight="bold">
+                                                    {selectedToken.symbol}/ETH
+                                                </Text>
+                                            </Box>
+                                            <Box>
+                                                <SelectRoot
+                                                    collection={createListCollection({
+                                                        items: chartTimeframe === "15m" 
+                                                            ? [{ label: "1m", value: "1m" }, { label: "5m", value: "5m" }, { label: "15m", value: "15m" }]
+                                                            : chartTimeframe === "1h"
+                                                            ? [{ label: "5m", value: "5m" }, { label: "15m", value: "15m" }, { label: "30m", value: "30m" }]
+                                                            : chartTimeframe === "24h" 
+                                                            ? [{ label: "30m", value: "30m" }, { label: "1h", value: "1h" }, { label: "6h", value: "6h" }, { label: "12h", value: "12h" }]
+                                                            : chartTimeframe === "1w"
+                                                            ? [{ label: "1h", value: "1h" }, { label: "6h", value: "6h" }, { label: "12h", value: "12h" }, { label: "24h", value: "24h" }]
+                                                            : [{ label: "6h", value: "6h" }, { label: "12h", value: "12h" }, { label: "24h", value: "24h" }]
+                                                    })}
+                                                    size="xs"
+                                                    value={[chartGranularity]}
+                                                    onValueChange={(details) => setChartGranularity(details.value[0])}
+                                                >
+                                                    <SelectTrigger minW="80px">
+                                                        <SelectValueText placeholder={chartGranularity} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {(chartTimeframe === "15m" 
+                                                            ? [{ label: "1m", value: "1m" }, { label: "5m", value: "5m" }, { label: "15m", value: "15m" }]
+                                                            : chartTimeframe === "1h"
+                                                            ? [{ label: "5m", value: "5m" }, { label: "15m", value: "15m" }, { label: "30m", value: "30m" }]
+                                                            : chartTimeframe === "24h" 
+                                                            ? [{ label: "30m", value: "30m" }, { label: "1h", value: "1h" }, { label: "6h", value: "6h" }, { label: "12h", value: "12h" }]
+                                                            : chartTimeframe === "1w"
+                                                            ? [{ label: "1h", value: "1h" }, { label: "6h", value: "6h" }, { label: "12h", value: "12h" }, { label: "24h", value: "24h" }]
+                                                            : [{ label: "6h", value: "6h" }, { label: "12h", value: "12h" }, { label: "24h", value: "24h" }]
+                                                        ).map((item) => (
+                                                            <SelectItem key={item.value} item={item}>
+                                                                {item.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </SelectRoot>
+                                            </Box>
+                                        </HStack>
+                                    </Box>
+                                    <Box>
+                                        <HStack gap={1}>
+                                            {['15m', '1h', '24h', '1w', '1M'].map(tf => (
+                                                <Box key={tf}>
+                                                    <Button
+                                                        size="xs"
+                                                        variant={chartTimeframe === tf ? "solid" : "ghost"}
+                                                        bg={chartTimeframe === tf ? "#4ade80" : "transparent"}
+                                                        color={chartTimeframe === tf ? "black" : "#888"}
+                                                        _hover={{ bg: chartTimeframe === tf ? "#4ade80" : "#2a2a2a" }}
+                                                        onClick={() => {
+                                                            setChartTimeframe(tf);
+                                                            // Set default granularity based on timeframe
+                                                            if (tf === '15m') setChartGranularity('5m');
+                                                            else if (tf === '1h') setChartGranularity('15m');
+                                                            else if (tf === '24h') setChartGranularity('1h');
+                                                            else if (tf === '1w') setChartGranularity('6h');
+                                                            else if (tf === '1M') setChartGranularity('24h');
+                                                        }}
+                                                        fontSize="xs"
+                                                        px={2}
+                                                    >
+                                                        {tf}
+                                                    </Button>
+                                                </Box>
+                                            ))}
+                                        </HStack>
+                                    </Box>
+                                </HStack>
+                                {isChartLoading ? (
+                                    <Center h="calc(100% - 60px)">
+                                        <VStack>
+                                            <Spinner size="md" color="#4ade80" thickness="3px" />
+                                            <Text color="#4ade80" fontSize="sm">Loading chart data...</Text>
+                                        </VStack>
+                                    </Center>
+                                ) : chartSeries.length > 0 && chartSeries[0].data.length > 0 ? (
+                                    <Box h="calc(100% - 60px)" minH="300px">
+                                        <ReactApexChart
+                                            options={chartOptions}
+                                            series={chartSeries}
+                                            type="candlestick"
+                                            height="100%"
+                                        />
+                                    </Box>
+                                ) : (
+                                    <Center h="calc(100% - 60px)">
+                                        <Text color="#666" fontSize="sm">No price data available</Text>
+                                    </Center>
+                                )}
                             </Box>
                             
                             {/* Trade History with Tabs - Only show on desktop */}
