@@ -121,3 +121,16 @@ input::placeholder {
 td tr {
   width: fit-content !important;
 }
+
+/* Pulse animation for loading skeletons */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
