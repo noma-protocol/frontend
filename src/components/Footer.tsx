@@ -1,38 +1,22 @@
-import { Link } from "react-router-dom";
-import { SimpleGrid, Box, HStack, Center, VStack, Text} from '@chakra-ui/react';
-import {
-  Button,
-  NavItem,
-  Nav,
-  Container,
-  Row,
-  Col,
-  UncontrolledTooltip,
-} from "reactstrap";
-
+import React from "react";
+import { Box, HStack, VStack, Text, Link, Button, Image, Container, SimpleGrid } from '@chakra-ui/react';
 import { ethers } from "ethers";
-import Logo from "../assets/images/oikos-type.svg";
+import Logo from "../assets/images/logo.svg";
 import { isMobile } from "react-device-detect";
 import metamaskLogo from "../assets/images/metamask.svg";
 
-const Footer: React.FC = (
-  page = "home" // Default value for page prop, can be overridden when used
-) => { 
-
+const Footer: React.FC = () => { 
     const isFilteredPage = window.location.href.includes("liquidity") || window.location.href.includes("markets");
 
     const addTokenToMetaMask = async () => {
-
-      const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488"; // Replace with your token's contract address
+      const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488";
 
       try {
-        // Create a provider using MetaMask's injected web3 provider
         if (typeof window.ethereum !== 'undefined') {
           await window.ethereum.request({ method: 'eth_requestAccounts' });
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
 
-          // Get the contract interface and ABI (replace with your token's ABI)
           const tokenABI = [
             "function name() public view returns (string memory)",
             "function symbol() public view returns (string memory)",
@@ -42,21 +26,17 @@ const Footer: React.FC = (
             "function transfer(address recipient, uint256 amount) public returns (bool)",
           ];
           
-          // Create a contract instance
           const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
 
-          // Get the token details
           const name = await tokenContract.name();
           const symbol = await tokenContract.symbol();
           const decimals = await tokenContract.decimals();
 
-          // Prepare the token information for MetaMask
           const formattedSymbol = symbol || "OKS";
-          const formattedDecimals = decimals || 18; // Default to 18 if not specified
+          const formattedDecimals = decimals || 18;
 
           const hexValue = ethers.utils.parseUnits('1', formattedDecimals);
 
-          // Add the token to MetaMask
           await window.ethereum.request({
             method: 'wallet_watchAsset',
             params: {
@@ -77,164 +57,131 @@ const Footer: React.FC = (
       }
     };
     
+  if (isMobile || isFilteredPage) {
+    return null;
+  }
+
   return (
-    <>
-  { !isMobile && !isFilteredPage ? (    
-    <footer className="footer" 
-    style={{ 
-        position:  "relative",
-        bottom:    0,
-        left:      0,
-        width:     "100%",
-        borderTop: "1px solid #4ade80",
-        background: "#000",     // or whatever bg you want
-        zIndex:    2400
-      }}>
-      <Container>
-        <Row style={{marginTop: "-20px", marginLeft: "-15%"}}>
-          <Col md="3" style={{paddingTop: isMobile?25:0}}>
+    <Box 
+      as="footer"
+      position="relative"
+      bottom={0}
+      left={0}
+      right={0}
+      bg="#0a0a0a"
+      borderTop="1px solid #1a1a1a"
+      py={8}
+    >
+      <Container maxW="container.xl" px={{ base: 4, md: 16 }}>
+        <SimpleGrid columns={{ base: 1, md: 4 }} spacing={8}>
+          {/* Logo Column */}
+          <VStack align="flex-start" spacing={4}>
+            <Image src={Logo} alt="Noma Protocol" w="40px" h="40px" />
+            <Text color="#666" fontSize="sm">
+              © 2024 Noma Protocol
+            </Text>
+          </VStack>
 
-            <VStack>
-              {/* <img
-                src={Logo}
-                style={{
-                  maxWidth: "10vh",
-                  marginLeft: isMobile ? "36%" : 20,
-                  marginTop: isMobile? 30 : 50
-                }}
-              /> */}
-               <Box mt={2}>
+          {/* Resources Column */}
+          <VStack align="flex-start" spacing={3}>
+            <Text color="white" fontWeight="600" mb={2}>Resources</Text>
+            <Link 
+              href="https://docs.noma.money" 
+              isExternal
+              color="#888"
+              _hover={{ color: "#4ade80" }}
+              fontSize="sm"
+              fontWeight="500"
+            >
+              Documentation
+            </Link>
+            <Link 
+              href="https://nomaprotocol.medium.com/" 
+              isExternal
+              color="#888"
+              _hover={{ color: "#4ade80" }}
+              fontSize="sm"
+              fontWeight="500"
+            >
+              Blog
+            </Link>
+            <Link 
+              href="/Terms"
+              color="#888"
+              _hover={{ color: "#4ade80" }}
+              fontSize="sm"
+              fontWeight="500"
+            >
+              Terms of Use
+            </Link>
+          </VStack>
 
-               </Box>
-            </VStack>
-          </Col>
-          <Col md="3" xs="6" >
-            <Nav style={{margin:'5vh'}}>
-              <VStack>
-                <Box>
-                <NavItem>
-                <a href="https://docs.noma.money" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px"}}>
-                  <><p style={{color:"#4ade80"}}>Docs</p></>
-                </a>
-              </NavItem>
-                </Box>
-                <Box>
-                <NavItem>
-                <a href="https://nomaprotocol.medium.com/" target="_blank" rel="noopener noreferrer" style={{fontSize:isMobile?"12px": "14px", color:"#f3f7c6"}}>
-                   <><p style={{color:"#4ade80"}}>Blog</p></>
-                </a>
-              </NavItem>
-                </Box>
-              </VStack>
-            </Nav>
-          </Col>
-          <Col md="3" xs="6">
-            <Nav style={{margin:'5vh'}}>
-              <NavItem>
-                <Link to="/Terms" style={{fontSize:isMobile?"12px": "14px", color:"#4ade80"}}>
-                 <><p style={{color:"#4ade80"}}>Terms of Use</p></>
-                 </Link>
-              </NavItem>
-              {/* <NavItem>
-                <Link to="/Privacy">Privacy Policy</Link>
-              </NavItem> */}
-            </Nav>
-          </Col>
-          <Col md="3" style={{marginTop:'50px', paddingLeft:"100px", marginLeft:isMobile? "5%": 0}}>
-            <h3 className="title" color="white">Follow us:</h3>
-              <a
+          {/* Community Column */}
+          <VStack align="flex-start" spacing={3}>
+            <Text color="white" fontWeight="600" mb={2}>Community</Text>
+            <HStack spacing={4}>
+              <Link
                 href="https://twitter.com/nomaprotocol"
-                id="tooltip39661217"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ width: "5px" }}
-                className="btn-icon btn-neutral btn-round btn-simple ml-1"
+                isExternal
+                color="#888"
+                _hover={{ color: "#4ade80" }}
+                fontSize="20px"
               >
-                <i className="fab fa-twitter" />&nbsp;&nbsp;
-              </a>
-              <UncontrolledTooltip delay={0} target="tooltip39661217">
-                Follow us
-              </UncontrolledTooltip>
-
-              <a
+                <i className="fab fa-twitter" />
+              </Link>
+              <Link
                 href="https://github.com/noma-protocol"
-                id="tooltip206037619"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ width: "5px" }}
-                className="btn-icon btn-neutral btn-round btn-simple ml-1"
+                isExternal
+                color="#888"
+                _hover={{ color: "#4ade80" }}
+                fontSize="20px"
               >
-                <i className="fab fa-github" />&nbsp;&nbsp;
-              </a>
-              <UncontrolledTooltip delay={0} target="tooltip206037619">
-                Like us
-              </UncontrolledTooltip>
-
-              <a
+                <i className="fab fa-github" />
+              </Link>
+              <Link
                 href="https://discord.gg/nomaprotocol"
-                id="tooltip750293512"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ width: "5px" }}
-                className="btn-icon btn-neutral btn-round btn-simple ml-1"
+                isExternal
+                color="#888"
+                _hover={{ color: "#4ade80" }}
+                fontSize="20px"
               >
-                <i className="fab fa-discord" />&nbsp;&nbsp;
-              </a>
-              <UncontrolledTooltip delay={0} target="tooltip750293512">
-                Follow us
-              </UncontrolledTooltip>
-
-              <a
+                <i className="fab fa-discord" />
+              </Link>
+              <Link
                 href="https://t.me/nomaprotocol"
-                id="tooltip750293512"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ width: "5px" }}
-                className="btn-icon btn-neutral btn-round btn-simple ml-1"
+                isExternal
+                color="#888"
+                _hover={{ color: "#4ade80" }}
+                fontSize="20px"
               >
-                <i className="fab fa-telegram" />&nbsp;&nbsp;
-              </a>
-              <UncontrolledTooltip delay={0} target="tooltip750293512">
-                Follow us
-              </UncontrolledTooltip>
-                <button
-                      onClick={addTokenToMetaMask}
-                      style={{
-                        borderRadius: "0px",
-                        height: "35px",
-                        padding: "0px 10px",
-                        width: "200px",
-                        backgroundColor: "transparent",
-                        border: "1px solid gray",
-                        marginTop: "20px",
-                        fontSize: "12px",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease-in-out",
-                        marginLeft: "-55px",
-                        marginBottom: "40px"
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = "rgba(74, 222, 128, 0.2)";
-                        e.currentTarget.style.borderColor = "#4ade80";
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                        e.currentTarget.style.borderColor = "#4ade80";
-                        e.currentTarget.style.transform = "translateY(0)";
-                      }}
-                      >
-                      <div style={{ marginLeft: "10%", display: "flex", alignItems: "center" }}>
-                          <img src={metamaskLogo} style={{ width: "15px", marginRight: "5px" }} />
-                          <span style={{ fontSize: "11px", color: "white" }}>Add NOMA to Metamask</span>
-                      </div>
-                </button>    
-          </Col>
-        </Row>
-        {isMobile ? <><br /><br /></> : <></>}
+                <i className="fab fa-telegram" />
+              </Link>
+            </HStack>
+          </VStack>
+
+          {/* Add Token Column */}
+          <VStack align="flex-start" spacing={3}>
+            <Text color="white" fontWeight="600" mb={2}>Get Started</Text>
+            <Button
+              onClick={addTokenToMetaMask}
+              size="sm"
+              variant="outline"
+              borderColor="#4ade80"
+              color="white"
+              _hover={{ 
+                bg: "rgba(74, 222, 128, 0.1)",
+                borderColor: "#4ade80",
+                transform: "translateY(-2px)"
+              }}
+              transition="all 0.2s"
+              leftIcon={<Image src={metamaskLogo} w="16px" h="16px" />}
+            >
+              Add NOMA to MetaMask
+            </Button>
+          </VStack>
+        </SimpleGrid>
       </Container>
-    </footer>) : <></>}
-    </>
+    </Box>
   );
 };
 
