@@ -7,13 +7,11 @@ import useScreenOrientation from '../hooks/useScreenOrientation';
 import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import { Toaster, toaster } from "../components/ui/toaster";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
-import BalanceCard from '../components/BalanceCard';
 import ethLogo from '../assets/images/weth.svg';
 import bnbLogo from '../assets/images/bnb.png';
 import monadLogo from '../assets/images/monad.png';
 import LoanAddCollateral from '../components/LoanAddCollateral';
 import LoanRepay from '../components/LoanRepay';
-import walletIcon from '../assets/images/walletIcon.svg';
 import placeholderLogo from '../assets/images/question.svg';
 import placeholderLogoDark from '../assets/images/question_white.svg';
 
@@ -103,13 +101,10 @@ const Borrow = () => {
     const [isRolling, setIsRolling] = useState(false);
 
     const [isTokenInfoLoading, setIsTokenInfoLoading] = useState(true);
-    const [isWrapping, setIsWrapping] = useState(false);
-    const [isUnwrapping, setIsUnwrapping] = useState(false);
 
     const [token0Info, setToken0Info] = useState({});
     const [token1Info, setToken1Info] = useState({});
     const [ethBalance, setEthBalance] = useState("0");
-    const [wrapAmount, setWrapAmount] = useState("0");
     const [token0, setToken0] = useState("");
     const [token1, setToken1] = useState("");
     const [duration, setDuration] = useState(`${86400 * 30}`);
@@ -120,30 +115,7 @@ const Borrow = () => {
     const [repayAmount, setRepayAmount] = useState("0");
     const [isComputing, setIsComputing] = useState(false);
     const [ltv, setLtv] = useState(0);
-    const [selectedDestination, setSelectedDestination] = useState("Exchange");
-
     let loanData ;
-
-    const _navigationSelectData = {
-        items: [
-        {
-            label: "Exchange",
-            value: "/",
-        },            
-        {
-            label: "Markets",
-            value: "/markets",
-        },
-        {
-            label: "Liquidity",
-            value: "/liquidity",
-        },
-        {
-            label: "Stake",
-            value: `/stake?v=${vaultAddress}`,
-        },
-        ],
-    };
 
     // if (token1Info?.tokenSymbol == "WMON") {
     //     setToken1Info({
@@ -185,56 +157,6 @@ const Borrow = () => {
     return () => clearInterval(interval);
     }, [address]);
 
-    const {
-        write : deposit,
-      } = useContractWrite({
-          address: token1,
-          abi: IWETHAbi,
-          functionName: "deposit",
-          value: parseEther(`${wrapAmount}`),
-          onSuccess(data) {
-              setIsWrapping(false);
-              setIsLoading(false);
-            },
-            onError(error) {
-                setIsWrapping(false);
-                setIsLoading(false);
-                const msg = Number(error.message.toString().indexOf("exceeds")) > -1 ? "Not enough balance" :
-                            error.message.indexOf("PresaleEnded") > -1 ? "The presale has ended" :
-                            error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
-                toaster.create({
-                    title: "Error",
-                    description: msg,
-                });
-                setWrapAmount(0);
-            }
-    });
-    
-    const {
-        write: withdraw,
-    } = useContractWrite({
-        address: token1,
-        abi: IWETHAbi,
-        functionName: "withdraw",
-        args: [parseEther(`${wrapAmount}`)],
-        onSuccess(data) {
-            setIsUnwrapping(false);
-            setIsLoading(false);
-        },
-        onError(error) {
-            console.error(`transaction failed: ${error.message}`);
-            setIsUnwrapping(false);
-            setIsLoading(false);
-            const msg = Number(error.message.toString().indexOf("burn amount exceeds balance")) > -1 ? "Not enough balance" :
-                        error.message.indexOf("PresaleEnded") > -1 ? "The presale has ended" :
-                        error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
-            toaster.create({
-                title: "Error",
-                description: msg,
-            });
-            setWrapAmount(0);
-        }
-    });
 
     const {
         data: activeLoan,
@@ -685,11 +607,6 @@ const Borrow = () => {
         // setIsAdding(true);
     };
 
-    const handleSelectDestination = (event) => {
-        console.log(`Selected destination: ${event.target.value}`);
-         
-        window.location = event.target.value;
-    }
 
     const handleUseMax = () => {
         if (token0Info?.balance) {
@@ -705,938 +622,492 @@ const Borrow = () => {
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) ;
     
     return (
-        <Container maxW="container.xl=" py={12} pl={"0%"} ml={isConnected ? "13%" : "10%"}>
+        <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
             <Toaster />
 
             {!isConnected ? (
-            <>
                 <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  height="70vh"
-                  color="white"
-                  bg="#222831"
-                  p={8}
-                  borderRadius="xl"
-                  bosmhadow="0 4px 12px rgba(0, 0, 0, 0.5)"
-                  m={4}
-                  border="1px solid #4ade80"
-                  mt="100px"
-                  ml={isMobile ? 5 : "7%"}
-                  w="70%"
-                  h="30%"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    height="100vh"
+                    color="white"
                 >
-                  <Box
-                    mb={6}
-                    p={4}
-                    borderRadius="full"
-                    bg="rgba(74, 222, 128, 0.2)"
-                    
-                  >
-                    <Image src={walletIcon} alt="Wallet Icon" bosmize="50px" />
-                  </Box>
-                  <Heading as="h2" mb={4} fontSize="md" textAlign="center">Wallet Not Connected</Heading>
-                  <Text fontSize={isMobile ? "xs" : "sm"} textAlign="center" mb={6} color="gray.400">
-                    Please connect your wallet to access the Borrow page.
-                  </Text>
-
+                    <Heading as="h2">Connect your wallet</Heading>
                 </Box>
-                <Box h="50vh"><br /></Box>            
-            </>
             ) : isMobile && isLandscape ? (
                 <RotateDeviceMessage />
             ) : (
 
                 <Box
-                    w="100%"
                     color="white"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    textAlign="left"
-                    position="relative"
-                    mt={"50px"}
-                    mb={"15%"}
-                    ml={isMobile ? -3 : "-2vw"}
-                    // ml={isMobile ? "20px" : 0}
-                    // border="1px solid red"
+                    pt={isMobile ? "80px" : "100px"}
+                    pb={8}
+                    px={isMobile ? 4 : 8}
+                    maxW="1600px"
+                    mx="auto"
                 >
                 {isAddress(vaultAddress) ? (
-                    isMobile ? (
-                        <Flex direction="column">
-                        <Box  ml="-5">
-                            <HStack mt={10} >
-                            <Box w="80px">
-                                <Text> Go to:</Text>
-                            </Box>
-                            <Box>
-                            <SelectRoot
-                                mt={0}
-                                ml={5}
-                                mb={2}
-                                collection={createListCollection(_navigationSelectData )}
-                                size="sm"
-                                width={isMobile ? "125px" : "150px"}
-                                onChange={handleSelectDestination}
-                                value={selectedDestination} // Bind the selected value to the state
-                                
-                            >
-                                <SelectTrigger>
-                                {_navigationSelectData.items.map((data, index) => {
-                                if (index > 0) return;
-                                    return (
-                                    <SelectValueText placeholder={data.label}>
-                                    </SelectValueText>
-                                    );
-                                })}                  
-                                </SelectTrigger>
-                                <SelectContent>
-                                {_navigationSelectData.items
-                                .slice()          // make a shallow copy
-                                .reverse()        // reverse the copy 
-                                .map((data) => {
-                                    return (
-                                    <SelectItem item={data} key={data.value}>
-                                        {data.label}
-                                    </SelectItem>
-                                    );
-                                })}
-                                </SelectContent>
-                            </SelectRoot>
-                            </Box>
-                        </HStack>  
-                        </Box>                            
-                        <Box mt={2} ml={2}>
-                        <BalanceCard 
-                            ethBalance={ethBalance}
-                            token0Balance={token0Info?.balance} 
-                            token0Symbol={token0Info?.tokenSymbol} 
-                            token1Symbol={token1Info.tokenSymbol} 
-                            token1Balance={token1Info?.balance}
-                            deposit={deposit}
-                            withdraw={withdraw}
-                            setIsLoading={setIsLoading}
-                            isLoading={isLoading}
-                            isTokenInfoLoading={isTokenInfoLoading}
-                            isWrapping={isWrapping}
-                            setIsWrapping={setIsWrapping}
-                            isUnwrapping={isUnwrapping}
-                            setIsUnwrapping={setIsUnwrapping}
-                            setWrapAmount={setWrapAmount}
-                            wrapAmount={wrapAmount}
-                            vaultAddress={vaultAddress} 
-                            page="borrow"
-                            />
-                        </Box>
-                        <Box p={2} mt={5} w={isMobile ? "90%" : "98%"} ml={-5} ml={-5} border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} >
-                            <Text fontSize={"12px"}  color="#4ade80" ml={2}>Active Loan</Text>        
-                           <SimpleGrid columns={4} mt={-5} backgroundColor={"#222831"} w={isMobile ? "94%" : "352px"} ml={2} mr={2}>
-                                <Box fontSize={isMobile ? "xs" : "sm"} w='95px' px={2} color="white" backgroundColor={"#4ade80"}> Collateral </Box>
-                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#4ade80"}> Borrowed </Box>
-                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#4ade80"}> 
-                                <HStack>
-                                 <Box><Text fontSize={isMobile ? "xs" : "sm"}>LTV</Text></Box>
-                                 <Box>
-                                    <Tooltip content="Loan to Value Ratio" placement="top">
-                                        <Image src={placeholderLogo} w={15} />
-                                    </Tooltip>
-                                 </Box>
-                                </HStack>
-                                </Box>
-                                <Box fontSize={isMobile ? "xs" : "sm"} px={2} color="white" backgroundColor={"#4ade80"}>
-                                Expires
-                                </Box>
-                                {loanData?.borrowAmount > 0 ? ( 
-                                    <>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="gray.800"  borderRadius="5px 0 0 5px" h="25px" borderRight="none">
-                                        <HStack>
-                                            <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
-                                            {displayedCollateral}
-                                            </Box>
-                                            <Box  fontSize="xx-small" ml={-1} color="white">
-                                            {isTokenInfoLoading ? <Spinner size="sm" /> : token0Info.tokenSymbol}
-                                            </Box>
-                                        </HStack>
-                                    </Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="gray.800"  borderRadius="0"  h="25px" borderLeft="none" borderRight="none">
-                                        <HStack>
-                                            <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
-                                            {commify(formatEther(`${loanData.borrowAmount}`), 4)}
-                                            </Box>
-                                            <Box  fontSize="xx-small" ml={-1} color="white">
-                                            {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info.tokenSymbol}
-                                            </Box>
-                                        </HStack>
-                                    </Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white"  borderRadius="0"  h="25px" borderLeft="none" borderRight="none" fontSize={isMobile ? "xs" : "sm"}> {commifyDecimals(ltv, 2)}</Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0 5px 5px 0" h="25px" borderLeft="none" fontSize={isMobile ? "xs" : "sm"}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
-                                    <VStack w="100%">
-                                        <Box ml={-8} mt={4}><Text fontSize={isMobile ? "xs" : "sm"} color="#4ade80">Actions</Text></Box>
-                                    <Box >                              
-                                    <HStack alignItems="center" justifyContent="space-between" w="100%" pb={2} ml={isMobile ? "35%" : 0} mt={-2}>
-                                    <Box>
-                                        <LoanAddCollateral
-                                            size="sm"
-                                            token0Symbol={token0Info.tokenSymbol}
-                                            handleSetCollateral={setCollateral}
-                                            handleSetExtraCollateral={handleSetExtraCollateral}
-                                            extraCollateral={extraCollateral}
-                                            isMobile={isMobile}
-                                            ltv={ltv}
-                                            handleClickAdd={handleClickAdd}
-                                            isAdding={isAdding}
-                                            setIsAdding={setIsAdding}
-                                            isLoading={isLoading}
-                                            setIsLoading={setIsLoading}
-                                            isTokenInfoLoading={isTokenInfoLoading}
-                                            token0Balance={token0Info?.balance}
-                                        />
-                                    </Box>
-                                    <Box>
-                                        <LoanRepay
-                                            size="sm"
-                                            fullCollateral={loanData?.collateralAmount}
-                                            loanAmount={loanData?.borrowAmount}
-                                            token0Symbol={token0Info.tokenSymbol}
-                                            repayAmount={repayAmount}
-                                            setRepayAmount={setRepayAmount}
-                                            handleClickRepayAmount={handleClickRepayAmount}
-                                            isRepaying={isRepaying}
-                                            setIsRepaying={setIsRepaying}
-                                            isMobile={isMobile}
-                                            imv={IMV}
-                                            ltv={ltv}
-                                            isLoading={isTokenInfoLoading}
-                                        />
-                                    </Box>
-                                    <Box>
-                                        <DrawerRoot >
-                                        <DrawerTrigger asChild>
-                                        <Button
-                                            ml={2}
-                                            variant={"outline"}
-                                            h={6}
-                                            // onClick={() => setIsLoading(true)}
-                                            disabled={isRolling || isTokenInfoLoading || ltv <= 1}
-                                            w={"80px"}
-                                            border="1px solid #f3f7c6"
-                                            borderRadius={5}
-                                            _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
-                                        >
-                                        {isRolling ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Roll</Text>}
-                                        </Button>
-                                        </DrawerTrigger>
-                                        <DrawerBackdrop />
-                                        <DrawerContent>
-                                            <Box mt="80%" ml={5}>
-                                            <DrawerHeader>
-                                                <DrawerTitle>
-                                                    <Text as="h3" color="#4ade80">Roll Loan</Text>
-                                                </DrawerTitle>
-                                                <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
-                                                    <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
-                                                </DrawerCloseTrigger>
-                                            </DrawerHeader>
-                                            <DrawerBody>
-                                                {/* <Input
-                                                    placeholder="Amount to roll"
-                                                    // onChange={(e) => setWrapAmount(e.target.value)}
-                                                    w="80%"
-                                                /> */}
-                                            <Box border="1px solid #4ade80" borderRadius="md" p={3} w="90%" >                              
-
-                                                <HStack>
-                                                    <Box w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">New Duration:</Text></Box>
-                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{duration / 86400} days</Text></Box>
-                                                </HStack>
-                                                <HStack>
-                                                    <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} c color="#f3f7c6">Expires On:</Text></Box>
-                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
-                                                </HStack>
-                                                <HStack>
-                                                    <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">Amount:</Text></Box>
-                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
-                                                </HStack>
-                                                <HStack>
-                                                    <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">Loan Fees:</Text></Box>
-                                                    <Box>
-                                                        <Text color="white" fontSize={isMobile ? "xs" : "sm"}>
-                                                        {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}&nbsp;
-                                                        {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info.tokenSymbol}
-                                                        </Text></Box>
-                                                </HStack>
-                                            </Box>  
-                                            <Box mt={10}>
-                                            <DrawerActionTrigger asChild>
-                                                    <Button variant="outline"  w="120px" onClick={() => setIsRolling(false)}>
-                                                        Cancel
-                                                    </Button>
-                                                
-                                                </DrawerActionTrigger>
-                                                <Button colorScheme="blue" onClick={handleClickRoll} w="120px" ml={2}>
-                                                    {isRolling ? <Spinner size="sm" /> : "Confirm"}
-                                                </Button>                                
-                                            </Box>                                
-                                            </DrawerBody>
-                                            </Box>
-                                            {/* <DrawerFooter>
-                                            </DrawerFooter> */}
-                                        </DrawerContent>
-                                        </DrawerRoot>
-                                    </Box>
-                                    </HStack>
-                                    </Box>
-                                    </VStack>
-                                    </>) : <Box mt={2} mb={2} w="120px"><Text fontSize={isMobile ? "xs" : "sm"} ml={2}>No active loan</Text></Box>
-                                    }                                
-                            </SimpleGrid>
-                        </Box>
-                            <Box 
-                                p={2} 
-                                ml={-5}  
-                                mt={5}  
-                                w={"90%"}   
-                                border="1px solid ivory" 
-                                borderRadius={10} 
-                                backgroundColor={"#222831"} 
-                            >
-                                <Text fontSize={"12px"} fontWeight={"bold"} color="#4ade80" ml={2}>New Loan</Text>    
-                                <SimpleGrid columns={2} w={"94%"}  mt={-5} fontSize={isMobile ? "xs" : "sm"} p={1} backgroundColor={"#222831"} ml={2} mr={2}>
-                                    <Box backgroundColor={"#4ade80"} >
-                                        <Text fontSize={isMobile ? "xs" : "sm"}>&nbsp;<b>Amount</b></Text>
-                                    </Box>
-                                    <Box  backgroundColor={"#4ade80"}>
-                                        <Text fontSize={isMobile ? "xs" : "sm"} ml="40px">&nbsp;&nbsp;&nbsp;<b>Duration</b></Text>
-                                    </Box>
-                                    <Box w="auto" mt={2}>
-                                        <HStack>
-                                            <Box w="auto">
-                                            <NumberInputRoot
-                                                isMobile={isMobile}
-                                                min={0}
-                                                max={999999999}
-                                                step={0.1}
-                                                onChange={handleSetAmountToBorrow}
-                                                marginRight={"5px"}
-                                                value={borrowAmount === '0' ? '' : borrowAmount}
-                                                setTokenSupply={(() => {})}
-                                                setPrice={setBorrowAmount}
-                                                setFloorPrice={(() => {})}
-                                                height={"25px"}
-                                                mt={1}
-                                            >
-                                                <NumberInputLabel h={"30px"} w={{ base: "", lg: "auto" }} />
-                                                <NumberInputField h={"30px"} w={{ base: "", lg: "200px" }} />
-                                            </NumberInputRoot>
-                                            </Box>
-                                            <Box mt={2}>
-                                                <Image src={monadLogo} w="25px"></Image>
-                                            </Box>
-                                        </HStack>
-                                        <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
-                                        <Text
-                                            ml={2}
-                                            fontSize={isMobile ? "xs" : "sm"}
-                                            cursor="pointer"
-                                            textDecoration="underline"
-                                            onClick={handleUseMax}
-                                        >
-                                            Use max
-                                        </Text>
-                                        </VStack>
-                                            <br />
-                                            <Box>
-                                                <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">Borrowing</Text>
-                                            </Box>
-                                            <Box>
-                                                <HStack >
-                                                    <Box w="75px" textAlign={"left"}><Text fontSize={isMobile?"sm":"15px"}>{formatNumberPrecise(borrowAmount, 2)} </Text></Box>
-                                                    <Box>{token1Info.tokenSymbol}</Box>
-                                                    <Box  w="120px" fontSize={"11px"} mt={"2px"}> <Text fontSize={"xx-small"} color="#f3f7c6">({duration / 86400} days)</Text></Box>
-                                                </HStack>
-                                            </Box>
-                                            <Box mt={5}>
-                                                <Text  fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>Collateral required</Text>
-                                            </Box>
-                                            <Box>
-                                                {isComputing ? (
-                                                    <Spinner size="sm" />
-                                                ) : (
-                                                    <Text fontSize={"sm"}>{formatNumberPrecise(collateral || 4)} {token0Info.tokenSymbol}</Text>
-                                                )}
-                                            </Box>
-                                            <Box mt={5} fontSize={isMobile ? "xs" : "sm"}>
-                                            <HStack>
-                                                <Box> <Text fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    </Box>
-                                                <Box><Image src={placeholderLogoDark} w={15}></Image></Box>
-                                            </HStack>
-                                            </Box>
-                                            <Box>
-                                                <HStack>
-                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(`${loanFees || 0}`, 8)}</Text> </Box>
-                                                    <Box><Text fontSize={isMobile ? "xs" : "sm"}> {token1Info.tokenSymbol}</Text>  </Box>
-                                                </HStack>
-                                            </Box>
-                                            <Box mt={5}> 
-                                                    <HStack>
-                                                        <Box><Text fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>IMV</Text> </Box>
-                                                        <Box><Image src={placeholderLogoDark} w={15}></Image></Box>
-                                                    </HStack>
-                                                <HStack>
-                                                    <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Text></Box>
-                                                    <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
-                                                </HStack>
-                                            </Box>  
-                                    </Box>
-                                    <Box>
-                                    <SelectRoot
-                                        mt={3}
-                                        ml={12}
-                                        collection={durationChoices}
-                                        size="sm"
-                                        width={"100px"}
-                                        onChange={handleSetDuration}
-                                        value={duration}
-                                        backgroundColor={"#18181b"}
-                                        color={"white"}
-                                        >
-                                        <SelectTrigger
-                                            _hover={{ backgroundColor: "#18181d" }}
-                                        >
-                                            {durationChoices.items.map((data, index) => {
-                                                if (index > 0) return;
-                                                return (
-                                                    <SelectValueText placeholder={data.label}>
-                                                    </SelectValueText>
-                                                );
-                                                })}
-                                        </SelectTrigger>
-                                        <SelectContent
-                                            backgroundColor={"#18181b"}
-                                            color={"white"}
-                                        >
-                                            {durationChoices.items.map((choice) => (
-                                                <SelectItem
-                                                    item={choice}
-                                                    key={choice.value}
-                                                    _hover={{ backgroundColor: "#18181d" }}
-                                                >
-                                                    {choice.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </SelectRoot>
-                                     <Button 
-                                        mt={6} 
-                                        w={"100px"}
-                                        h={"25px"}
-                                        border="2px solid #4ade80"
-                                        variant="outline" 
-                                        ml={12} 
-                                        onClick={() => handleBorrow()}  
-                                        disabled={
-                                            isTokenInfoLoading || 
-                                            loanData?.borrowAmount > 0 || 
-                                            borrowAmount == 0 || 
-                                            parseFloat(formatEther(`${token0Info.balance}`)) < parseFloat(`${collateral}`)
-                                        }
-                                        background={isBorrowing ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
-                                        boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
-                                        transition="all 0.3s ease"
-                                        _hover={{
-                                          background: isBorrowing ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
-                                          borderColor: "#65f343",
-                                          transform: "translateY(-1px)",
-                                          boxShadow: "0 4px 12px rgba(74, 222, 128, 0.25)"
-                                        }}
-                                        _active={{
-                                          transform: "translateY(0px)",
-                                          boxShadow: "0 2px 6px rgba(74, 222, 128, 0.2)"
-                                        }}
-                                        >
-                                            {isBorrowing ? <Spinner size="sm" color="#4ade80"/> :  <Text fontSize={isMobile ? "xs" : "sm"} color="#4ade80">Borrow</Text>}
-                                        </Button>
-                                    </Box>
-                                    <Box>
-
-                                    </Box>
-                                </SimpleGrid>
-                            </Box>   
-                            <p
-                                style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
-                                onClick={() => window.history.back()}
-                            >
-                            Go Back
-                            </p>                          
-                        </Flex>
-                                                 
-                    ) : (
-                    <Box  w="99%">
-                    <Box mt={10} ml={"2%"}>
-                        <HStack>
-                            <Box w="80px" >
-                                <Text> Go to:</Text>
-                            </Box>
-                            <Box>
-                            <SelectRoot
-                                mt={isMobile ? "-60px" : 0}
-                                ml={5}
-                                mb={2}
-                                collection={createListCollection(_navigationSelectData )}
-                                size="sm"
-                                width={isMobile ? "185px" : "150px"}
-                                onChange={handleSelectDestination}
-                                value={selectedDestination} // Bind the selected value to the state
-                                
-                            >
-                                <SelectTrigger>
-                                {_navigationSelectData.items.map((data, index) => {
-                                if (index > 0) return;
-                                    return (
-                                    <SelectValueText placeholder={data.label}>
-                                    </SelectValueText>
-                                    );
-                                })}                  
-                                </SelectTrigger>
-                                <SelectContent>
-                                {_navigationSelectData.items
-                                .slice()          // make a shallow copy
-                                .reverse()        // reverse the copy 
-                                .map((data) => {
-                                    return (
-                                    <SelectItem item={data} key={data.value}>
-                                        {data.label}
-                                    </SelectItem>
-                                    );
-                                })}
-                                </SelectContent>
-                            </SelectRoot>
-                            </Box>
-                        </HStack>
-                    
-                    </Box>
-                    <Grid
-                        h="600px"
-                        templateRows="repeat(2, 1fr)"
-                        templateColumns="repeat(2, 1fr)"
-                        gap={1}
-                        mb={20}
-                        mt={5}
-                        px={2}
-                        py={4}
-                        // border="1px solid yellow"
-                    >
-                        <GridItem  mt={"-5"} w="90%" border={"1px solid white"} px={4} py={3} ml={5} borderRadius={10} backgroundColor={"#222831"}>
-                            <Text fontSize={isMobile?"12px":"15px"} color="#4ade80">Active Loan</Text>
-                            <SimpleGrid columns={5} mt={-5} fontSize={isMobile ? "xs" : "sm"}>
-                                <Box px={2} color="black" backgroundColor={"#4ade80"}> Collateral </Box>
-                                <Box px={2} color="black" backgroundColor={"#4ade80"}> Borrowed </Box>
-                                <Box px={2} color="black" backgroundColor={"#4ade80"}> 
-                                <HStack>
-                                 <Box><Text fontSize={isMobile ? "xs" : "sm"}>LTV</Text></Box>
-                                 <Box>
-                                    <Tooltip content="Loan to Value Ratio: LTV is the ratio of the loan amount to the value of the collateral" placement="top">
-                                        <Image src={placeholderLogo} w={15} />
-                                    </Tooltip>                                    
-                                 </Box>
-                                </HStack>
-                                </Box>
-                                <Box px={2} color="black" backgroundColor={"#4ade80"}>
-                                Expires
-                                </Box>
-                                <Box px={2} color="black" backgroundColor={"#4ade80"}> &nbsp;&nbsp;&nbsp;Actions </Box>
-                                
-                                {loanData?.borrowAmount > 0 ? ( 
-                                    <>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="5px 0 0 5px" h="25px" borderRight="none">
-                                        <HStack>
-                                            <Box  fontSize={isMobile ? "xs" : "sm"}>
-                                            {displayedCollateral}
-                                            </Box>
-                                            <Box  fontSize="xx-small" color="white">
-                                            {token0Info.tokenSymbol}
-                                            </Box>
-                                        </HStack>
-                                    </Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0" h="25px" borderLeft="none" borderRight="none">
-                                        <HStack>
-                                            <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
-                                            {commify(formatEther(`${loanData.borrowAmount}`), 4)}
-                                            </Box>
-                                            <Box  fontSize="xx-small">
-                                            {token1Info.tokenSymbol}
-                                            </Box>
-                                        </HStack>
-                                    </Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0" h="25px" borderLeft="none" borderRight="none" fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(ltv, 2)}</Box>
-                                    <Box px={2} mt={1} bgColor={"#18181b"} color="white" borderRadius="0 5px 5px 0" h="25px" borderLeft="none" fontSize={"sm"}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
-                                    <Box px={2}  mt={1} ml={-10} > 
-                                    <VStack ml={10}> 
-                                    <LoanAddCollateral
-                                        size="lg"
-                                        token0Symbol={token0Info.tokenSymbol}
-                                        handleSetCollateral={setCollateral}
-                                        handleSetExtraCollateral={handleSetExtraCollateral}
-                                        extraCollateral={extraCollateral}
-                                        isMobile={isMobile}
-                                        ltv={ltv}
-                                        handleClickAdd={handleClickAdd}
-                                        isAdding={isAdding}
-                                        setIsAdding={setIsAdding}
-                                        isLoading={isLoading}
-                                        setIsLoading={setIsLoading}
-                                        isTokenInfoLoading={isTokenInfoLoading}
-                                        token0Balance={token0Info?.balance}
-                                    />
-                                    <LoanRepay
-                                        size="lg"
-                                        fullCollateral={loanData?.collateralAmount}
-                                        loanAmount={loanData?.borrowAmount}
-                                        token0Symbol={token0Info.tokenSymbol}
-                                        repayAmount={repayAmount}
-                                        setRepayAmount={setRepayAmount}
-                                        handleClickRepayAmount={handleClickRepayAmount}
-                                        isRepaying={isRepaying}
-                                        setIsRepaying={setIsRepaying}
-                                        isMobile={isMobile}
-                                        imv={IMV}
-                                        ltv={ltv}
-                                        isLoading={isTokenInfoLoading}
-                                    />
-                                    <DrawerRoot >
-                                    <DrawerTrigger asChild>
-                                    <Button 
-                                        variant={"outline"}
-                                        h={8}
-                                        mt={-3}
-                                        // onClick={() => setIsLoading(true)}
-                                        disabled={isRolling  || isTokenInfoLoading || ltv <= 1}
-                                        w={"90px"}
-                                        border="1px solid #f3f7c6"
-                                        borderRadius={5}
-                                        _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
-                                    >
-                                    {isRolling ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Roll</Text>}
-                                    </Button>
-                                    </DrawerTrigger>
-                                    <DrawerBackdrop />
-                                    <DrawerContent>
-                                        <Box mt="80%" ml={5}>
-                                        <DrawerHeader>
-                                            <DrawerTitle>
-                                                <Text as="h3" color="#4ade80">Roll Loan</Text>
-                                            </DrawerTitle>
-                                            <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
-                                                <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
-                                            </DrawerCloseTrigger>
-                                        </DrawerHeader>
-                                        <DrawerBody>
-                                            {/* <Input
-                                                placeholder="Amount to roll"
-                                                // onChange={(e) => setWrapAmount(e.target.value)}
-                                                w="80%"
-                                            /> */}
-                                        <Box border="1px solid #4ade80" borderRadius="md" p={3} w="90%" >                              
-
-                                            <HStack>
-                                                <Box w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">New Duration:</Text></Box>
-                                                <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{duration / 86400} days</Text></Box>
-                                            </HStack>
-                                            <HStack>
-                                                <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} c color="#f3f7c6">Expires On:</Text></Box>
-                                                <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}</Text></Box>
-                                            </HStack>
-                                            <HStack>
-                                                <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">Amount:</Text></Box>
-                                                <Box><Text fontSize={isMobile ? "xs" : "sm"} color="white">{commifyDecimals(rollLoanAmount, 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
-                                            </HStack>
-                                            <HStack>
-                                                <Box  w="120px"><Text fontSize={isMobile ? "xs" : "sm"} color="#f3f7c6">Loan Fees:</Text></Box>
-                                                <Box>
-                                                    <Text color="white" fontSize={isMobile ? "xs" : "sm"}>
-                                                    {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}&nbsp;
-                                                    {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info.tokenSymbol}
-                                                    </Text></Box>
-                                            </HStack>
-                                        </Box>  
-                                        <Box mt={10}>
-                                        <DrawerActionTrigger asChild>
-                                                <Button variant="outline"  w="120px" onClick={() => setIsRolling(false)}>
-                                                    Cancel
-                                                </Button>
-                                               
-                                            </DrawerActionTrigger>
-                                            <Button colorScheme="blue" onClick={handleClickRoll} w="120px" ml={2}>
-                                                {isRolling ? <Spinner size="sm" /> : "Confirm"}
-                                            </Button>                                
-                                        </Box>                                
-                                        </DrawerBody>
-                                        </Box>
-                                        {/* <DrawerFooter>
-                                        </DrawerFooter> */}
-                                    </DrawerContent>
-                                    </DrawerRoot>
-
-                                    </VStack>
-                                    </Box>
-
-                                    </>
-                                ) : (
-                                    <>
-                                    <Box p={2}>
-                                    No Data
-                                    </Box>
-                                    <Box>
-
-                                    </Box>
-                                    <Box>
-                                    </Box>
-                                    </>
-                                )}
-                            </SimpleGrid>
-                        </GridItem>
-                        <GridItem ml={"-5vh"} >
-                        <Box mt={-5}>
-                            <BalanceCard 
-                                ethBalance={ethBalance}
-                                token0Balance={token0Info?.balance} 
-                                token0Symbol={token0Info?.tokenSymbol} 
-                                token1Symbol={token1Info.tokenSymbol} 
-                                token1Balance={token1Info?.balance}
-                                deposit={deposit}
-                                withdraw={withdraw}
-                                setIsLoading={setIsLoading}
-                                isLoading={isLoading}
-                                isTokenInfoLoading={isTokenInfoLoading}
-                                isWrapping={isWrapping}
-                                setIsWrapping={setIsWrapping}
-                                isUnwrapping={isUnwrapping}
-                                setIsUnwrapping={setIsUnwrapping}
-                                setWrapAmount={setWrapAmount}
-                                wrapAmount={wrapAmount}
-                                vaultAddress={vaultAddress}
-                                page="borrow" 
-                            />
-                        </Box>
-                        </GridItem>
-                        <GridItem mt={5} w="90%" border={"1px solid white"} py={3} px={4} pb={8} ml={5} borderRadius={10} backgroundColor={"#222831"}>
-                        <Text fontSize={isMobile?"12px":"15px"} fontWeight={"bold"} color="#4ade80">New Loan</Text>
-                        <SimpleGrid columns={3} w="100%" mt={-5}>
-                            <Box w="500px"backgroundColor={"#4ade80"}  mb={2}>
-                                <Text fontSize={isMobile ? "xs" : "sm"} color="black">&nbsp;Amount</Text>
-                            </Box>
-                            <Box  >
-                                <Text fontSize={isMobile ? "xs" : "sm"} ml="40px"  color="black">&nbsp;&nbsp;&nbsp;Duration</Text>
-                            </Box>
-                            <Box backgroundColor={"#4ade80"} mb={2}>
-                                <Text ml={5} fontSize={isMobile ? "xs" : "sm"}  color="black">Actions</Text>
-                            </Box>
-                            <Box w="auto">
-                                <HStack>
-                                    <Box w="auto">
-                                        <NumberInputRoot
-                                            isMobile={isMobile}
-                                            min={0}
-                                            max={999999999}
-                                            step={0.1}
-                                            onChange={handleSetAmountToBorrow}
-                                            marginRight={"5px"}
-                                            value={borrowAmount === '0' ? '' : borrowAmount}
-                                            setTokenSupply={(() => {})}
-                                            setPrice={setBorrowAmount}
-                                            setFloorPrice={(() => {})}
-                                            height={"38px"}
-                                            mt={1}
-                                            borderRadius={5}
-                                            // backgroundColor={"#F5F5DC"}
-                                            // color="gray.800"
-                                        >
-                                        <NumberInputLabel  h={"38px"} w={{ base: "", lg: "auto" }} />
-                                        <NumberInputField  h={"38px"} w={{ base: "", lg: "200px" }} />
-                                        </NumberInputRoot>
-                                        <VStack textAlign="left" alignItems="left" spacing={1} mt={2}>
-                                        <Text
-                                            ml={2}
-                                            fontSize={isMobile ? "xs" : "sm"}
-                                            cursor="pointer"
-                                            textDecoration="underline"
-                                            onClick={handleUseMax}
-                                        >
-                                            Use max
-                                        </Text>
-                                        </VStack>
-                                    </Box>
-                                    <Box>
-                                        <Image src={monadLogo}></Image>
-                                    </Box>
-                                </HStack>
-                            </Box>
-                            <Box>
-                            <SelectRoot
-                                mt={1}
-                                ml={isMobile?25:62}
-                                color={"white"}
-                                collection={durationChoices}
-                                size="sm"
-                                width={isMobile?"180px":"120px"}
-                                onChange={handleSetDuration}
-                                value={duration}
-                                backgroundColor="#18181b"
-                                
-                                >
-                                <SelectTrigger
-                                    _hover={{ backgroundColor: "#18181bFF" }}
-                                >
-                                    {durationChoices.items.map((data, index) => {
-                                        if (index > 0) return;
-                                        return (
-                                            <SelectValueText placeholder={data.label}>
-                                            </SelectValueText>
-                                        );
-                                        })}
-                                </SelectTrigger>
-                                <SelectContent
-                                 backgroundColor="#18181b"
-                                 color={"white"}
-                                 >
-                                    {durationChoices.items.map((choice) => (
-                                        <SelectItem
-                                            item={choice}
-                                            key={choice.value}
-                                            _hover={{ backgroundColor: "#18181bFF" }}
-                                        >
-                                            {choice.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </SelectRoot>
-                            </Box>
-                            <Box>
-                            <Button 
-                                mt={2} 
-                                w="150px"
-                                h={"30px"}  
-                                borderColor={"#4ade80"} 
-                                variant="outline" 
-                                ml={5} 
-                                onClick={() => handleBorrow()}  
-                                disabled={
-                                    isTokenInfoLoading || 
-                                    loanData?.borrowAmount > 0 || 
-                                    borrowAmount == 0 || 
-                                    parseFloat(formatEther(`${token0Info.balance}`)) < parseFloat(`${collateral}`)
-                                } 
-                                borderRadius={5}
-                            >
-                               {isBorrowing ? <Spinner size="sm" color="#4ade80"/> :  <Text color="#4ade80">Borrow</Text>}
-                            </Button>
-                            </Box>
-                        </SimpleGrid>
-                        <Box ml={-2}>
-                        <SimpleGrid 
-                        columns={3}
-                        w="98%"
-                        mt={2}
-                        fontSize={isMobile ? "xs" : "sm"}
-                        p={1}
-                        backgroundColor="#222831"
-                        ml={2}
-                        mr={2}
+                    <Flex direction={isMobile ? "column" : "row"} gap={4} minH="calc(100vh - 120px)">
+                        {/* Left side - Loan Information */}
+                        <Box 
+                            flex={isMobile ? "1" : "0 0 350px"} 
+                            maxW={isMobile ? "100%" : "350px"} 
+                            w={isMobile ? "100%" : "350px"}
                         >
-                        <GridItem >
-                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">Borrowing</Text>
-                        </GridItem>
-                        <Box>
-                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">Collateral</Text>
-                        </Box>
-                        <Box>
-                            <HStack>
-                            <Box> 
-                                <Text fontWeight={"bold"} color="#4ade80" fontSize={isMobile ? "xs" : "sm"}>Loan Fees</Text>    
-                            </Box>
-                            <Box>
-                                <Tooltip content="Loan fees are 0.027% per diem charged upfront" placement="top">
-                                    <Image src={placeholderLogoDark} w={15} />
-                                </Tooltip>
-                            </Box>
-                            </HStack>   
-                        </Box>
-                        <Box>
-                            <Text fontSize={isMobile ? "xs" : "sm"}>
-                            <HStack >
-                                <Box textAlign={"left"}>
-                                    <Text fontSize={isMobile ? "xs" : "sm"}>{formatNumberPrecise(borrowAmount, 2)} </Text>
-                                </Box>
-                                <Box> 
-                                    <Text fontSize={isMobile ? "xs" : "sm"}>{token1Info.tokenSymbol}</Text>
-                                </Box>
-                            </HStack>                                
-                            </Text>
-                        </Box>
-                        <Box>
-                            <Text fontSize={isMobile ? "xs" : "sm"}>
-                                {isComputing ? (
-                                    <Spinner size="sm" />
-                                ) : (
-                                    <HStack>
+                            <Box bg="#1a1a1a" borderRadius="lg" p={4} mb={4}>
+                                <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Vault Information</Text>
+                                <VStack align="stretch" gap={2}>
+                                    <HStack justify="space-between">
                                         <Box>
-                                            <Text fontSize={isMobile ? "xs" : "sm"}>{formatNumberPrecise(collateral || 0)}</Text> 
+                                            <Text color="#888" fontSize="sm">Token Pair</Text>
                                         </Box>
                                         <Box>
-                                            <Text fontSize={isMobile ? "xs" : "sm"}> {token0Info.tokenSymbol}</Text>  
+                                            <Text color="white" fontSize="sm" fontWeight="500">
+                                                {isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}
+                                            </Text>
                                         </Box>
                                     </HStack>
-                                )}                              
-                            </Text>
-                        </Box>
-                        <Box>
-                            <HStack>
-                                <Box><Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(`${loanFees || 0}`, 8)}</Text> </Box>
-                                <Box><Text fontSize={isMobile ? "xs" : "sm"}> {token1Info.tokenSymbol}</Text>  </Box>
-                            </HStack>                             
-                        </Box>
-                        </SimpleGrid>
-                        <SimpleGrid columns={2} w="65%" mt={2} fontSize={isMobile ? "xs" : "sm"} p={1} backgroundColor="#222831" ml={2} mr={2}>
-                        <GridItem>
-                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">IMV</Text>
-                        </GridItem>
-                        <GridItem>
-                            <Text fontSize={isMobile ? "xs" : "sm"} fontWeight={"bold"} color="#4ade80">Duration</Text>
-                        </GridItem>
-                        <GridItem>
-                            <HStack>
-                                <Box> <Text fontSize={isMobile ? "xs" : "sm"}>{commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}</Text></Box>
-                                <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}</Box>
-                            </HStack>
-                        </GridItem>
-                        <GridItem>
-                            <Box fontSize={isMobile ? "xx-small" : "xs"} mt={"2px"}> 
-                                <Text fontSize={"sm"}>{duration / 86400} days</Text>
+                                    <HStack justify="space-between">
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">IMV</Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="white" fontSize="sm" fontWeight="500">
+                                                {commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}
+                                            </Text>
+                                        </Box>
+                                    </HStack>
+                                    <HStack justify="space-between">
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">Loan Fee Rate</Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="white" fontSize="sm" fontWeight="500">0.027% per day</Text>
+                                        </Box>
+                                    </HStack>
+                                </VStack>
                             </Box>
-                        </GridItem>
-                        </SimpleGrid>                            
+                            
+                            {/* Active Loan Box */}
                         </Box>
-                        </GridItem>
-
-                        <p
-                                style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
-                                onClick={() => window.history.back()}
-                            >
-                            Go Back
-                        </p>     
-                    </Grid>
-                    </Box>
-                    )
+                        
+                        {/* Middle - Main Content */}
+                        <Box flex={isMobile ? "1" : "2"} w={isMobile ? "100%" : "auto"}>
+                            {/* New Loan Form */}
+                            <Box bg="#1a1a1a" borderRadius="lg" p={6}>
+                                <Text fontSize="xl" fontWeight="bold" color="white" mb={4}>
+                                    New Loan
+                                </Text>
+                                
+                                {loanData?.borrowAmount > 0 ? (
+                                    <Box py={8} textAlign="center">
+                                        <Text color="#666" fontSize="lg" mb={2}>You already have an active loan</Text>
+                                        <Text color="#888" fontSize="sm">Manage your existing loan below or repay it to create a new one.</Text>
+                                    </Box>
+                                ) : (
+                                    <VStack gap={4} align="stretch">
+                                        <SimpleGrid columns={2} gap={4}>
+                                            <Box>
+                                                <Text fontSize="sm" color="#888" mb={2}>Borrow Amount</Text>
+                                                <HStack>
+                                                    <Input
+                                                        placeholder="0.00"
+                                                        value={borrowAmount === '0' ? '' : borrowAmount}
+                                                        onChange={handleSetAmountToBorrow}
+                                                        bg="#2a2a2a"
+                                                        border="none"
+                                                        h="40px"
+                                                        _placeholder={{ color: "#666" }}
+                                                    />
+                                                    <Box w="40px">
+                                                        <Image src={monadLogo} w="25px" h="25px" />
+                                                    </Box>
+                                                </HStack>
+                                                <Text
+                                                    fontSize="xs"
+                                                    color="#4ade80"
+                                                    cursor="pointer"
+                                                    mt={2}
+                                                    onClick={handleUseMax}
+                                                    _hover={{ textDecoration: "underline" }}
+                                                >
+                                                    Use max
+                                                </Text>
+                                            </Box>
+                                            <Box>
+                                                <Text fontSize="sm" color="#888" mb={2}>Duration</Text>
+                                                <Box 
+                                                    border="1px solid #3a3a3a"
+                                                    borderRadius="md"
+                                                    transition="all 0.2s"
+                                                    _hover={{ borderColor: "#4a4a4a" }}
+                                                >
+                                                    <SelectRoot
+                                                        collection={durationChoices}
+                                                        size="sm"
+                                                        width="100%"
+                                                        onChange={handleSetDuration}
+                                                        value={duration}
+                                                    >
+                                                        <SelectTrigger
+                                                            bg="#2a2a2a"
+                                                            border="none"
+                                                            h="36px"
+                                                            color="white"
+                                                            borderRadius="md"
+                                                            _hover={{ bg: "#3a3a3a" }}
+                                                            _focus={{ outline: "none" }}
+                                                            css={{
+                                                                "&:focus": { outline: "none" },
+                                                                "&:focus-visible": { outline: "none" }
+                                                            }}
+                                                        >
+                                                            <SelectValueText 
+                                                                placeholder="Select duration" 
+                                                                color="white"
+                                                            />
+                                                        </SelectTrigger>
+                                                        <SelectContent
+                                                        bg="#1a1a1a"
+                                                        border="1px solid #2a2a2a"
+                                                        borderRadius="md"
+                                                        boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
+                                                        zIndex={1000}
+                                                        _open={{
+                                                            animation: "fadeIn 0.2s ease-out"
+                                                        }}
+                                                    >
+                                                        {durationChoices.items.map((choice) => (
+                                                            <SelectItem
+                                                                item={choice}
+                                                                key={choice.value}
+                                                                py={3}
+                                                                px={4}
+                                                                color="white"
+                                                                bg="transparent"
+                                                                cursor="pointer"
+                                                                transition="all 0.2s"
+                                                                _hover={{ 
+                                                                    bg: "#2a2a2a",
+                                                                    color: "#4ade80"
+                                                                }}
+                                                                _selected={{
+                                                                    bg: "#2a2a2a",
+                                                                    color: "#4ade80",
+                                                                    fontWeight: "600"
+                                                                }}
+                                                                _focus={{
+                                                                    bg: "#2a2a2a",
+                                                                    outline: "none"
+                                                                }}
+                                                            >
+                                                                {choice.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </SelectRoot>
+                                            </Box>
+                                            </Box>
+                                        </SimpleGrid>
+                                        
+                                        <Box bg="#2a2a2a" p={4} borderRadius="md">
+                                            <SimpleGrid columns={2} gap={4}>
+                                                <Box>
+                                                    <Text fontSize="xs" color="#888" mb={1}>Collateral Required</Text>
+                                                    {isComputing ? (
+                                                        <Spinner size="sm" color="#4ade80" />
+                                                    ) : (
+                                                        <HStack>
+                                                            <Box>
+                                                                <Text fontSize="lg" color="white" fontWeight="bold">
+                                                                    {formatNumberPrecise(collateral || 0, 4)}
+                                                                </Text>
+                                                            </Box>
+                                                            <Box>
+                                                                <Text fontSize="sm" color="#888">{token0Info.tokenSymbol}</Text>
+                                                            </Box>
+                                                        </HStack>
+                                                    )}
+                                                </Box>
+                                                <Box>
+                                                    <Text fontSize="xs" color="#888" mb={1}>Loan Fees</Text>
+                                                    <HStack>
+                                                        <Box>
+                                                            <Text fontSize="lg" color="white" fontWeight="bold">
+                                                                {commifyDecimals(`${loanFees || 0}`, 4)}
+                                                            </Text>
+                                                        </Box>
+                                                        <Box>
+                                                            <Text fontSize="sm" color="#888">{token1Info.tokenSymbol}</Text>
+                                                        </Box>
+                                                    </HStack>
+                                                </Box>
+                                            </SimpleGrid>
+                                        </Box>
+                                        
+                                        <Button
+                                            w="100%"
+                                            size="lg"
+                                            variant="solid"
+                                            onClick={() => handleBorrow()}
+                                            disabled={
+                                                isTokenInfoLoading ||
+                                                loanData?.borrowAmount > 0 ||
+                                                borrowAmount == 0 ||
+                                                parseFloat(formatEther(`${token0Info.balance}`)) < parseFloat(`${collateral}`)
+                                            }
+                                            bg="#4ade80"
+                                            color="black"
+                                            _hover={{
+                                                bg: "#22c55e",
+                                                transform: "translateY(-1px)",
+                                                boxShadow: "0 4px 12px rgba(74, 222, 128, 0.25)"
+                                            }}
+                                            _active={{
+                                                transform: "translateY(0px)"
+                                            }}
+                                            _disabled={{
+                                                bg: "#2a2a2a",
+                                                color: "#666",
+                                                cursor: "not-allowed"
+                                            }}
+                                        >
+                                            {isBorrowing ? <Spinner size="sm" /> : "Borrow"}
+                                        </Button>
+                                    </VStack>
+                                )}
+                            </Box>
+                            
+                            {/* Active Loan Box - Below New Loan */}
+                            {loanData?.borrowAmount > 0 && (
+                                <Box bg="#1a1a1a" borderRadius="lg" p={6} mt={4}>
+                                    <Text fontSize="xl" fontWeight="bold" color="white" mb={4}>
+                                        Active Loan Details
+                                    </Text>
+                                    
+                                    <SimpleGrid columns={2} gap={4} mb={4}>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" mb={2}>Collateral Amount</Text>
+                                            <HStack>
+                                                <Box>
+                                                    <Text color="white" fontSize="2xl" fontWeight="bold">
+                                                        {displayedCollateral}
+                                                    </Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="lg">{token0Info.tokenSymbol}</Text>
+                                                </Box>
+                                            </HStack>
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" mb={2}>Borrowed Amount</Text>
+                                            <HStack>
+                                                <Box>
+                                                    <Text color="white" fontSize="2xl" fontWeight="bold">
+                                                        {commify(formatEther(`${loanData.borrowAmount}`), 4)}
+                                                    </Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="lg">{token1Info.tokenSymbol}</Text>
+                                                </Box>
+                                            </HStack>
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" mb={2}>Current LTV</Text>
+                                            <Text color={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"} fontSize="2xl" fontWeight="bold">
+                                                {commifyDecimals(ltv, 2)}%
+                                            </Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" mb={2}>Expires In</Text>
+                                            <Text color="white" fontSize="2xl" fontWeight="bold">
+                                                {getDaysLeft(`${loanData?.expires}`)} days
+                                            </Text>
+                                        </Box>
+                                    </SimpleGrid>
+                                    
+                                    <Box borderTop="1px solid #2a2a2a" pt={4}>
+                                        <Text color="#888" fontSize="sm" mb={3}>Quick Actions</Text>
+                                        <HStack gap={2}>
+                                            <Box>
+                                                <LoanAddCollateral
+                                                size="sm"
+                                                token0Symbol={token0Info.tokenSymbol}
+                                                handleSetCollateral={setCollateral}
+                                                handleSetExtraCollateral={handleSetExtraCollateral}
+                                                extraCollateral={extraCollateral}
+                                                isMobile={isMobile}
+                                                ltv={ltv}
+                                                handleClickAdd={handleClickAdd}
+                                                isAdding={isAdding}
+                                                setIsAdding={setIsAdding}
+                                                isLoading={isLoading}
+                                                setIsLoading={setIsLoading}
+                                                isTokenInfoLoading={isTokenInfoLoading}
+                                                token0Balance={token0Info?.balance}
+                                                />
+                                            </Box>
+                                            <Box>
+                                                <LoanRepay
+                                                size="sm"
+                                                fullCollateral={loanData?.collateralAmount}
+                                                loanAmount={loanData?.borrowAmount}
+                                                token0Symbol={token0Info.tokenSymbol}
+                                                repayAmount={repayAmount}
+                                                setRepayAmount={setRepayAmount}
+                                                handleClickRepayAmount={handleClickRepayAmount}
+                                                isRepaying={isRepaying}
+                                                setIsRepaying={setIsRepaying}
+                                                isMobile={isMobile}
+                                                imv={IMV}
+                                                ltv={ltv}
+                                                isLoading={isTokenInfoLoading}
+                                                />
+                                            </Box>
+                                            <Box>
+                                                <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={isRolling || isTokenInfoLoading || ltv <= 1}
+                                                border="1px solid #4ade80"
+                                                color="#4ade80"
+                                                _hover={{ bg: "rgba(74, 222, 128, 0.1)" }}
+                                                onClick={() => setIsRolling(true)}
+                                            >
+                                                {isRolling ? <Spinner size="sm" /> : "Roll"}
+                                                </Button>
+                                            </Box>
+                                        </HStack>
+                                    </Box>
+                                </Box>
+                            )}
+                        </Box>
+                        
+                        {/* Right side - Wallet Box */}
+                        {!isMobile && (
+                            <Box w="300px">
+                                <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
+                                    <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
+                                        Wallet
+                                    </Text>
+                                    
+                                    <VStack align="stretch" gap={3}>
+                                        {/* MON Balance */}
+                                        <Box>
+                                            <Flex justifyContent="space-between" alignItems="center">
+                                                <HStack>
+                                                    <Box w="20px" h="20px">
+                                                        <Image
+                                                            src={monadLogo}
+                                                            alt="MON"
+                                                            w="20px"
+                                                            h="20px"
+                                                        />
+                                                    </Box>
+                                                    <Box>
+                                                        <Text color="#888" fontSize="sm">MON</Text>
+                                                    </Box>
+                                                </HStack>
+                                                <Box>
+                                                    <Text color="white" fontWeight="bold">
+                                                        {address ? parseFloat(formatEther(ethBalance)).toFixed(4) : "0.00"}
+                                                    </Text>
+                                                </Box>
+                                            </Flex>
+                                            <Text color="#666" fontSize="xs" textAlign="right">
+                                                ≈ ${address ? (parseFloat(formatEther(ethBalance)) * 50).toFixed(2) : "0.00"}
+                                            </Text>
+                                        </Box>
+                                        
+                                        {/* Token0 Balance */}
+                                        {token0Info?.tokenSymbol && (
+                                            <Box>
+                                                <Flex justifyContent="space-between" alignItems="center">
+                                                    <HStack>
+                                                        <Box w="20px" h="20px">
+                                                            <Image
+                                                                src={placeholderLogoDark}
+                                                                alt={token0Info.tokenSymbol}
+                                                                w="20px"
+                                                                h="20px"
+                                                            />
+                                                        </Box>
+                                                        <Box>
+                                                            <Text color="#888" fontSize="sm">{token0Info.tokenSymbol}</Text>
+                                                        </Box>
+                                                    </HStack>
+                                                    <Box>
+                                                        <Text color="white" fontWeight="bold">
+                                                            {token0Info?.balance ? parseFloat(formatEther(token0Info.balance)).toFixed(4) : "0.00"}
+                                                        </Text>
+                                                    </Box>
+                                                </Flex>
+                                                <Text color="#666" fontSize="xs" textAlign="right">
+                                                    ≈ $0.00
+                                                </Text>
+                                            </Box>
+                                        )}
+                                        
+                                        {/* Token1 Balance */}
+                                        {token1Info?.tokenSymbol && (
+                                            <Box>
+                                                <Flex justifyContent="space-between" alignItems="center">
+                                                    <HStack>
+                                                        <Box w="20px" h="20px">
+                                                            <Image
+                                                                src={token1Info.tokenSymbol === "WMON" ? monadLogo : placeholderLogoDark}
+                                                                alt={token1Info.tokenSymbol}
+                                                                w="20px"
+                                                                h="20px"
+                                                            />
+                                                        </Box>
+                                                        <Box>
+                                                            <Text color="#888" fontSize="sm">{token1Info.tokenSymbol}</Text>
+                                                        </Box>
+                                                    </HStack>
+                                                    <Box>
+                                                        <Text color="white" fontWeight="bold">
+                                                            {token1Info?.balance ? parseFloat(formatEther(token1Info.balance)).toFixed(4) : "0.00"}
+                                                        </Text>
+                                                    </Box>
+                                                </Flex>
+                                                <Text color="#666" fontSize="xs" textAlign="right">
+                                                    ≈ ${token1Info?.tokenSymbol === "WMON" ? (parseFloat(formatEther(token1Info.balance || "0")) * 50).toFixed(2) : "0.00"}
+                                                </Text>
+                                            </Box>
+                                        )}
+                                        
+                                        {/* Total Portfolio Value */}
+                                        <Box borderTop="1px solid #2a2a2a" pt={3} mt={2}>
+                                            <Flex justifyContent="space-between" alignItems="center">
+                                                <Box>
+                                                    <Text color="#888" fontSize="sm">Total Value</Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#4ade80" fontWeight="bold" fontSize="lg">
+                                                        ${address ? (
+                                                            parseFloat(formatEther(ethBalance)) * 50 + 
+                                                            (token1Info?.tokenSymbol === "WMON" ? parseFloat(formatEther(token1Info.balance || "0")) * 50 : 0)
+                                                        ).toFixed(2) : "0.00"}
+                                                    </Text>
+                                                </Box>
+                                            </Flex>
+                                        </Box>
+                                    </VStack>
+                                </Box>
+                            </Box>
+                        )}
+                    </Flex>
                 ) : (
-                    <>Empty</>
+                    <Box py={8} textAlign="center">
+                        <Text color="#666">Invalid vault address</Text>
+                    </Box>
                 )}
-                </Box>  
+                </Box>
             )}
-
         </Container>
-    )
-}
+    );
+};
 
 export default Borrow;
