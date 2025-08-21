@@ -139,7 +139,7 @@ const Borrow = () => {
 
   useEffect(() => {
     if (vaultAddress == "0x0000000000000000000000000000000000000000" || vaultAddress == "") {
-      window.location.href = "https://oikos.cash"
+      window.location.href = "https://noma.money"
     }
 
   }, [vaultAddress]);
@@ -637,25 +637,15 @@ const Borrow = () => {
                 </Box>
             ) : isMobile && isLandscape ? (
                 <RotateDeviceMessage />
-            ) : (
-
-                <Box
-                    color="white"
-                    pt={isMobile ? "80px" : "100px"}
-                    pb={8}
-                    px={isMobile ? 4 : 8}
-                    maxW="1600px"
-                    mx="auto"
-                >
-                {isAddress(vaultAddress) ? (
-                    <Flex direction={isMobile ? "column" : "row"} gap={4} minH="calc(100vh - 120px)">
+            ) : isAddress(vaultAddress) ? (
+                <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4} minH="calc(100vh - 80px)">
                         {/* Left side - Loan Information */}
                         <Box 
                             flex={isMobile ? "1" : "0 0 350px"} 
                             maxW={isMobile ? "100%" : "350px"} 
                             w={isMobile ? "100%" : "350px"}
                         >
-                            <Box bg="#1a1a1a" borderRadius="lg" p={4} mb={4}>
+                            <Box bg="#1a1a1a" borderRadius="lg" p={4}>
                                 <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Vault Information</Text>
                                 <VStack align="stretch" gap={2}>
                                     <HStack justify="space-between">
@@ -1099,11 +1089,9 @@ const Borrow = () => {
                             </Box>
                         )}
                     </Flex>
-                ) : (
-                    <Box py={8} textAlign="center">
-                        <Text color="#666">Invalid vault address</Text>
-                    </Box>
-                )}
+            ) : (
+                <Box py={8} textAlign="center">
+                    <Text color="#666">Invalid vault address</Text>
                 </Box>
             )}
         </Container>
