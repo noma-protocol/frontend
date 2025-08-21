@@ -2080,8 +2080,8 @@ const Launchpad: React.FC = () => {
                     w={isMobile ? "100%" : "350px"}
                     display={isMobile && isTokenListCollapsed ? "none" : "block"}
                 >
-                    <Box bg="#1a1a1a" borderRadius="lg" pr={3} pl={0} py={3} overflowX="hidden">
-                        <Flex alignItems="center" mb={3} pl={3}>
+                    <Box bg="#1a1a1a" borderRadius="lg" pr={3} pl={3} py={3} overflowX="hidden">
+                        <Flex alignItems="center" mb={3}>
                             <Input
                                 placeholder="Search tokens..."
                                 value={searchTerm}
@@ -2171,8 +2171,8 @@ const Launchpad: React.FC = () => {
                                     {/* Loading message */}
                                     <Center pt={4} pb={2}>
                                         <HStack>
-                                            <Spinner size="sm" color="#4ade80" thickness="2px" />
-                                            <Text color="#4ade80" fontSize="xs">Fetching tokens from blockchain...</Text>
+                                            <Box><Spinner size="sm" color="#4ade80" thickness="2px" /></Box>
+                                            <Box><Text color="#4ade80" fontSize="xs">Fetching tokens from blockchain...</Text></Box>
                                         </HStack>
                                     </Center>
                                 </VStack>
@@ -2181,7 +2181,7 @@ const Launchpad: React.FC = () => {
                                     <Text color="#666" fontSize="sm">No tokens found</Text>
                                 </Center>
                             ) : (
-                            <Table.Root size="sm" variant="unstyled">
+                            <Table.Root size="sm" variant="unstyled" borderSpacing="0">
                                 <Table.Header>
                                     <Table.Row>
                                         <Table.ColumnHeader color="#888" fontSize="xs" py={2} pl={isMobile ? 2 : 0} pr={isMobile ? 1 : 3}>Token</Table.ColumnHeader>
@@ -2195,7 +2195,6 @@ const Launchpad: React.FC = () => {
                                         <Table.Row
                                             key={token.id}
                                             cursor="pointer"
-                                            _hover={{ bg: "#2a2a2a" }}
                                             onClick={() => {
                                                 console.log("Selected token:", token);
                                                 setSelectedToken(token);
@@ -2203,10 +2202,17 @@ const Launchpad: React.FC = () => {
                                                     setIsTokenListCollapsed(true);
                                                 }
                                             }}
-                                            bg={selectedToken?.id === token.id ? "#2a2a2a" : "transparent"}
-                                            transition="background 0.2s"
+                                            transition="all 0.2s"
                                         >
-                                            <Table.Cell py={isMobile ? 1 : 2} pl={isMobile ? 2 : 0} pr={isMobile ? 1 : 3}>
+                                            <Table.Cell 
+                                                py={isMobile ? 1 : 2} 
+                                                pl={selectedToken?.id === token.id ? "8px" : (isMobile ? 2 : 0)} 
+                                                pr={isMobile ? 1 : 3} 
+                                                bg={selectedToken?.id === token.id ? "#2a2a2a" : "transparent"}
+                                                _hover={{ bg: selectedToken?.id === token.id ? "#2a2a2a" : "#252525" }}
+                                                transition="all 0.2s"
+                                                borderLeft={selectedToken?.id === token.id ? "3px solid #4ade80" : "3px solid transparent"}
+                                            >
                                                 <Box display="flex" alignItems="center" h="full">
                                                     <HStack gap={isMobile ? 1 : 2}>
                                                         <Box w={isMobile ? "16px" : "20px"} h={isMobile ? "16px" : "20px"}>
@@ -2225,12 +2231,28 @@ const Launchpad: React.FC = () => {
                                                     </HStack>
                                                 </Box>
                                             </Table.Cell>
-                                            <Table.Cell py={isMobile ? 1 : 2} px={isMobile ? 1 : 2} textAlign="right" verticalAlign="middle">
+                                            <Table.Cell 
+                                                py={isMobile ? 1 : 2} 
+                                                px={isMobile ? 1 : 2} 
+                                                textAlign="right" 
+                                                verticalAlign="middle" 
+                                                bg={selectedToken?.id === token.id ? "#2a2a2a" : "transparent"}
+                                                _hover={{ bg: selectedToken?.id === token.id ? "#2a2a2a" : "#252525" }}
+                                                transition="all 0.2s"
+                                            >
                                                 <Text color="white" fontSize="xs" whiteSpace="nowrap">
                                                     ${formatPrice(token.price)}
                                                 </Text>
                                             </Table.Cell>
-                                            <Table.Cell py={isMobile ? 1 : 2} px={isMobile ? 1 : 2} textAlign="right" verticalAlign="middle">
+                                            <Table.Cell 
+                                                py={isMobile ? 1 : 2} 
+                                                px={isMobile ? 1 : 2} 
+                                                textAlign="right" 
+                                                verticalAlign="middle" 
+                                                bg={selectedToken?.id === token.id ? "#2a2a2a" : "transparent"}
+                                                _hover={{ bg: selectedToken?.id === token.id ? "#2a2a2a" : "#252525" }}
+                                                transition="all 0.2s"
+                                            >
                                                 <Text 
                                                     color={token.change24h > 0 ? "#4ade80" : "#ef4444"} 
                                                     fontSize="xs" 
@@ -2240,7 +2262,15 @@ const Launchpad: React.FC = () => {
                                                 </Text>
                                             </Table.Cell>
                                             {!isMobile && (
-                                                <Table.Cell py={2} px={2} textAlign="right" verticalAlign="middle">
+                                                <Table.Cell 
+                                                    py={2} 
+                                                    px={2} 
+                                                    textAlign="right" 
+                                                    verticalAlign="middle" 
+                                                    bg={selectedToken?.id === token.id ? "#2a2a2a" : "transparent"}
+                                                    _hover={{ bg: selectedToken?.id === token.id ? "#2a2a2a" : "#252525" }}
+                                                    transition="all 0.2s"
+                                                >
                                                     <Text color="white" fontSize="xs" whiteSpace="nowrap">
                                                         ${formatNumber(token.marketCap)}
                                                     </Text>
@@ -2678,7 +2708,7 @@ const Launchpad: React.FC = () => {
                         {/* Wallet Balance Box */}
                         <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
                         <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
-                            Wallet Balance
+                            Wallet
                         </Text>
                         
                         <VStack align="stretch" gap={3}>
