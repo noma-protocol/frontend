@@ -38,6 +38,7 @@ const Header: React.FC = () => {
     items: [
       { label: "Exchange", value: "/" },
       { label: "Borrow", value: `/borrow?v=${vaultAddress}` },
+      { label: "Stake", value: `/stake?v=${vaultAddress}` },
       { label: "Markets", value: "/markets" },
     ],
   });
@@ -128,7 +129,9 @@ const Header: React.FC = () => {
             collection={navigationItems}
             size="sm"
             width="140px"
-            value={[location.pathname === '/borrow' ? `/borrow?v=${vaultAddress}` : location.pathname]}
+            value={[location.pathname === '/borrow' ? `/borrow?v=${vaultAddress}` : 
+                    location.pathname === '/stake' ? `/stake?v=${vaultAddress}` : 
+                    location.pathname]}
             onValueChange={handleNavigationChange}
           >
             <SelectTrigger

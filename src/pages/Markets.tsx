@@ -569,7 +569,7 @@ const Markets: React.FC = () => {
                     {!isMobile && (
                       <>
                       <Box>
-                        <Text fontSize="xs" color="#888" fontWeight="600" textTransform="uppercase">Reserve</Text>
+                        <Text fontSize="xs" color="#888" fontWeight="600" textTransform="uppercase">Reserve Asset</Text>
                       </Box>
                       <Box>
                         <Text fontSize="xs" color="#888" fontWeight="600" textTransform="uppercase">Protocol</Text>
