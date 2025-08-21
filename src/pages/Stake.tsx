@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Image, Flex, Container, Heading, HStack, Box, Grid, GridItem, Button, Spinner, Text, createListCollection, SimpleGrid, NumberInput, VStack } from "@chakra-ui/react";
+import { Input, Image, Flex, Container, Heading, HStack, Box, Button, Spinner, Text, SimpleGrid, VStack } from "@chakra-ui/react";
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
@@ -7,10 +7,10 @@ import useScreenOrientation from '../hooks/useScreenOrientation';
 import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import { Toaster, toaster } from "../components/ui/toaster";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
-import BalanceCard from '../components/BalanceCard';
 
 import ethLogo from '../assets/images/weth.svg';
 import nomaLogo from '../assets/images/noma.png';
+import monadLogo from '../assets/images/monad.png';
 
 import walletIcon from '../assets/images/walletIcon.svg';
 import placeholderLogo from '../assets/images/question.svg';
@@ -105,28 +105,6 @@ const Stake = () => {
     const [token1, setToken1] = useState("");
 
     const [vaultDescription, setVaultDescription] = useState({});
-    const [selectedDestination, setSelectedDestination] = useState("Exchange");
-
-    const _navigationSelectData = {
-        items: [
-        {
-            label: "Exchange",
-            value: "/",
-        },            
-        {
-            label: "Markets",
-            value: "/markets",
-        },
-        {
-            label: "Liquidity",
-            value: "/liquidity",
-        },
-        {
-            label: "Borrow",
-            value: `/borrow?v=${vaultAddress}`,
-        },
-        ],
-    };
 
     // Reference to track if component is mounted
     const isMounted = React.useRef(true);
@@ -496,11 +474,6 @@ const Stake = () => {
         approveSnoma();
     }
 
-    const handleSelectDestination = (event) => {
-        console.log(`Selected destination: ${event.target.value}`);
-         
-        window.location = event.target.value;
-    }
 
     // console.log(`sNoma Balance: ${sNomaBalance} stakedBalance: ${stakedBalance}`);
     const rewards = formatEther(`${sNomaBalance || 0}`) - formatEther(`${stakedBalance || 0}`);
@@ -512,666 +485,340 @@ const Stake = () => {
     };
 
     return (
-        <Container maxW="container.xl" py={12} pl={"0%"} ml={isConnected ? "13%" : "10%"}>
+        <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
             <Toaster />
-
             {!isConnected ? (
-                <>
                 <Box
                     display="flex"
-                    flexDirection="column"
                     alignItems="center"
                     justifyContent="center"
-                    height="70vh"
+                    height="100vh"
                     color="white"
-                    bg="#222831"
-                    p={8}
-                    borderRadius="xl"
-                    boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
-                    m={4}
-                    border="1px solid #4ade80"
-                    mt="100px"
-                    ml={isMobile ? 5 : "7%"}
-                    w="70%"
-                    h="30%"
-                    >
-                    <Box
-                        mb={6}
-                        p={4}
-                        borderRadius="full"
-                        bg="rgba(74, 222, 128, 0.2)"
-                        
-                    >
-                        <Image src={walletIcon} alt="Wallet Icon" boxSize="50px" />
-                    </Box>
-                    <Heading as="h2" mb={4} fontSize="md" textAlign="center">Wallet Not Connected</Heading>
-                    <Text fontSize={isMobile ? "xs" : "sm"} textAlign="center" mb={6} color="gray.400">
-                        Please connect your wallet to access the Borrow page.
-                    </Text>
-
-                    </Box>
-                    <Box h="50vh"><br /></Box>            
-                </>
+                >
+                    <Heading as="h2">Connect your wallet</Heading>
+                </Box>
             ) : isMobile && isLandscape ? (
                 <RotateDeviceMessage />
-            ) : (
-
-                <Box
-                    w="100%"
-                    color="white"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    textAlign="left"
-                    position="relative"
-                    mt={"50px"}
-                    ml={isMobile ? -3 : "-2vw"}
-                    mb={"15%"}
-                >
-                 {isAddress(vaultAddress) ? (
-                    isMobile ? (
-                        <Flex direction="column">
-                        <Box  ml="-5">
-                            <HStack mt={10} >
-                            <Box w="80px">
-                                <Text> Go to:</Text>
-                            </Box>
-                            <Box>
-                            <SelectRoot
-                                mt={0}
-                                ml={5}
-                                mb={2}
-                                collection={createListCollection(_navigationSelectData )}
-                                size="sm"
-                                width={isMobile ? "125px" : "150px"}
-                                onChange={handleSelectDestination}
-                                value={selectedDestination} // Bind the selected value to the state
-                                
-                            >
-                                <SelectTrigger>
-                                {_navigationSelectData.items.map((data, index) => {
-                                if (index > 0) return;
-                                    return (
-                                    <SelectValueText placeholder={data.label}>
-                                    </SelectValueText>
-                                    );
-                                })}                  
-                                </SelectTrigger>
-                                <SelectContent>
-                                {_navigationSelectData.items
-                                .slice()          // make a shallow copy
-                                .reverse()        // reverse the copy 
-                                .map((data) => {
-                                    return (
-                                    <SelectItem item={data} key={data.value}>
-                                        {data.label}
-                                    </SelectItem>
-                                    );
-                                })}
-                                </SelectContent>
-                            </SelectRoot>
-                            </Box>
-                        </HStack>  
+            ) : isAddress(vaultAddress) ? (
+                <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4} minH="calc(100vh - 80px)">
+                    {/* Left side - Staking Information */}
+                    <Box 
+                        flex={isMobile ? "1" : "0 0 350px"} 
+                        maxW={isMobile ? "100%" : "350px"} 
+                        w={isMobile ? "100%" : "350px"}
+                    >
+                        <Box bg="#1a1a1a" borderRadius="lg" p={4}>
+                            <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Staking Information</Text>
+                            <VStack align="stretch" gap={2}>
+                                <HStack justify="space-between">
+                                    <Box>
+                                        <Text color="#888" fontSize="sm">Token</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="white" fontSize="sm" fontWeight="500">
+                                            {isTokenInfoLoading ? <Spinner size="sm" /> : token0Info?.tokenSymbol}
+                                        </Text>
+                                    </Box>
+                                </HStack>
+                                <HStack justify="space-between">
+                                    <Box>
+                                        <Text color="#888" fontSize="sm">Total Staked</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="white" fontSize="sm" fontWeight="500">
+                                            {commifyDecimals(formatEther(`${totalStaked || 0}`), 2)}
+                                        </Text>
+                                    </Box>
+                                </HStack>
+                                <HStack justify="space-between">
+                                    <Box>
+                                        <Text color="#888" fontSize="sm">APR (30 days)</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="white" fontSize="sm" fontWeight="500">{APR_30_DAYS.toFixed(2)}%</Text>
+                                    </Box>
+                                </HStack>
+                            </VStack>
                         </Box>
-                        <Box mt={2} ml={-2}>
-                            <BalanceCard 
-                                ethBalance={ethBalance}
-                                token0Balance={token0Info?.balance} 
-                                token0Symbol={token0Info?.tokenSymbol} 
-                                token1Symbol={token1Info.tokenSymbol} 
-                                token1Balance={token1Info?.balance}
-                                setIsLoading={setIsLoading}
-                                isLoading={isLoading}
-                                isTokenInfoLoading={isTokenInfoLoading}
-                                isWrapping={isWrapping}
-                                setIsWrapping={setIsWrapping}
-                                isUnwrapping={isUnwrapping}
-                                setIsUnwrapping={setIsUnwrapping}
-                                setWrapAmount={setWrapAmount}
-                                wrapAmount={wrapAmount}
-                                vaultAddress={vaultAddress} 
-                                page="stake"
-                            />
-                        </Box>
-                        <Box px={1} py={2} mt={5} w={"95%"}  border="1px solid ivory" borderRadius={10} backgroundColor={"#222831"} ml={"-30px"} fontSize="xs">
-                        <Text fontSize={"xs"} fontWeight={"bold"} color="#4ade80" ml={2}>Active Position</Text>
-                            <SimpleGrid 
-                                mt={-5} 
-                                fontSize={"11px"} 
-                                w={isMobile ? "96%" : "352px"} 
-                                ml={2} 
-                                mr={2}
-                                pr={2}
-                                gridTemplateColumns="65px 75px 70px 1fr" // wider Actions column
-                            >               
-                            <Box  h="20px" px={2} color="white" backgroundColor={"#4ade80"}> Staked </Box>
-                            <Box  h="20px" px={2} color="white" backgroundColor={"#4ade80"}> {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : `s${token0Info.tokenSymbol}`} </Box>
-                            <Box  h="20px" px={2} color="white" backgroundColor={"#4ade80"}> Rewards </Box>
-                            {/* <Box h="20px" px={2} color="white" backgroundColor={"#4ade80"}></Box> */}
-                            <Box  h="20px" px={2} color="white" backgroundColor={"#4ade80"} > &nbsp;&nbsp;&nbsp;Actions </Box> 
-                            {stakedBalance > 0 ? ( 
-                                <>
-                                <Box px={2} w="65px"> 
-                                    <HStack mt={2} >
-                                        <Box  fontSize="xs">
-                                        <Text fontSize="xs">{formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 2)}</Text>
-                                        </Box>
-                                        <Box ml={-1} fontSize="xx-small">
-                                        {isTokenInfoLoading ? <Spinner size="xs" /> :  <Text fontSize="xx-small">{token0Info.tokenSymbol}</Text>}
-                                        </Box>
-                                    </HStack>
-                                </Box>
-                                <HStack w="75px">
-                                <Box px={2}  >
-                                    <Text fontSize="xs">{formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 2)}</Text>
-                                </Box>
-                                <Box  fontSize="xx-small" ml={-3}>
-                                    {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xx-small" >s{token0Info.tokenSymbol}</Text>}
-                                </Box> 
-                                </HStack>                               
-                                <Box px={2}  w="70px">     
-                                    <HStack>
-                                        <Box mt={2} fontSize="xs">
-                                        {commify(rewards, 2)}
-                                        </Box>
-                                        <Box  fontSize="xx-small" ml={-1} mt={2}>
-                                            {isTokenInfoLoading ? <Spinner size="xs" mt={1}/> : <Text fontSize="xx-small" ml={-2}>&nbsp;{token0Info.tokenSymbol}</Text>}
-                                        </Box> 
-                                    </HStack>
-                                </Box>
-                                {/* <Box px={2} mt={2}>
-                                </Box> */}
-                                <Box px={1} mt={2} ml={-10}> 
-                                <Button 
-                                    h={"25px"}
-                                    border="2px solid #4ade80"
-                                    variant="outline" 
-                                    ml={"60px"} 
-                                    onClick={() => handleUnstake()}  
-                                    disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
-                                    w={"50%"}
-                                    background="transparent"
-                                    boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
-                                    transition="all 0.3s ease"
-                                    _hover={{
-                                      background: "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
-                                      borderColor: "#65f343",
-                                      transform: "translateY(-1px)",
-                                      boxShadow: "0 4px 12px rgba(74, 222, 128, 0.25)"
-                                    }}
-                                    _active={{
-                                      transform: "translateY(0px)",
-                                      boxShadow: "0 2px 6px rgba(74, 222, 128, 0.2)"
-                                    }}
-                                >
-                                    {isUnstaking ? <Spinner size="xs" color="#4ade80" /> : <Text fontSize={"xs"} color="#4ade80">Unstake</Text>}
-                                </Button>
-                                </Box>
-
-                                </>
-                            ) : (
-                                <>
-                                <Box p={2} w="120px">
-                                No Data
-                                </Box>
-                                <Box>
-                                <Box></Box>
-                                </Box>
-                                <Box>
-                                </Box>
-                                <Box></Box>
-                                </>
-                            )}                                
-
-                        </SimpleGrid>                         
-                        </Box>
-                            <Box 
-                                px={3} 
-                                py={2}
-                                ml={"-30px"}  
-                                mt={5}  
-                                w={"95%"}   
-                                border="1px solid ivory" 
-                                borderRadius={10} 
-                                backgroundColor={"#222831"} 
-                            >
-                            <Text fontSize={"xs"} fontWeight={"bold"} color="#4ade80">New Position</Text>
-                            <SimpleGrid columns={2}  w={isMobile ? "98%" : "352px"}  mt={-5} fontSize={"xs"}>
-                                <Box w="auto" backgroundColor={"#4ade80"}  mb={2}>
-                                    <Text fontSize="xs">&nbsp;<b>Amount</b></Text>
-                                </Box>
-                                <Box   w="auto"  backgroundColor={"#4ade80"} mb={2}>
-                                    <Text fontSize="xs" ml={10}>Actions</Text>
-                                </Box>
-                                <Box w="auto">
-                                    <HStack>
-                                        <Box w="auto" mt={-2}>
-                                        <NumberInputRoot
-                                            isMobile={isMobile}
-                                            min={0}
-                                            mt={1}
-                                            max={999999999}
-                                            step={0.1}
-                                            onChange={handleSetAmountToStake}
-                                            ml={isMobile ? 0 : 1.5}
-                                            marginRight={"5px"}
-                                            value={stakeAmount}
-                                            setTokenSupply={(() => {})}
-                                            setPrice={setStakeAmount}
-                                            setFloorPrice={(() => {})}
-                                            h="25px"
-                                        >
-                                            <NumberInputLabel h={"25px"} w={{ base: "", lg: "auto" }} />
-                                            <NumberInputField h={"25px"} w={{ base: "", lg: "200px" }} placeholder="Enter amount" />
-                                        </NumberInputRoot>
+                        
+                        {/* Active Position Box */}
+                        {stakedBalance > 0 && (
+                            <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
+                                <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Active Position</Text>
+                                <VStack align="stretch" gap={2}>
+                                    <HStack justify="space-between">
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">Staked</Text>
                                         </Box>
                                         <Box>
-                                            <Image ml={-2} src={nomaLogo} w="20px"></Image>
-                                        </Box>
-                                    </HStack>
-                                        <HStack mt={5}>
-                                        <Box>
-                                            <Text fontSize="xs">Staking:</Text>
-                                        </Box>
-                                        <Box>
-                                            <HStack>
-                                                <Box w="auto"><Text fontSize="xs">{stakeAmount ? formatNumberPrecise(stakeAmount, 4) : "0.0000"} </Text></Box>
-                                                <Box fontSize="xs">{isTokenInfoLoading ? <Spinner size="xs" /> : token0Info.tokenSymbol}</Box>
+                                            <HStack spacing={1}>
+                                                <Text color="white" fontSize="sm" fontWeight="500">
+                                                    {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
+                                                </Text>
+                                                <Text color="#888" fontSize="sm">
+                                                    {token0Info?.tokenSymbol}
+                                                </Text>
                                             </HStack>
-                                        </Box>                                    
-                                        </HStack>
-                                        <HStack w="400px">
-                                        <Box> <Text fontSize="xs"> To cooldown:</Text> </Box>
-                                        <Box w="30%">
-                                            {lastOperationTimestamp ? (
+                                        </Box>
+                                    </HStack>
+                                    <HStack justify="space-between">
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">sToken Balance</Text>
+                                        </Box>
+                                        <Box>
+                                            <HStack spacing={1}>
+                                                <Text color="white" fontSize="sm" fontWeight="500">
+                                                    {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 4)}
+                                                </Text>
+                                                <Text color="#888" fontSize="sm">
+                                                    s{token0Info?.tokenSymbol || "OKS"}
+                                                </Text>
+                                            </HStack>
+                                        </Box>
+                                    </HStack>
+                                    <HStack justify="space-between">
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">Rewards</Text>
+                                        </Box>
+                                        <Box>
+                                            <HStack spacing={1}>
+                                                <Text color="#4ade80" fontSize="sm" fontWeight="500">
+                                                    {commify(rewards, 4)}
+                                                </Text>
+                                                <Text color="#888" fontSize="sm">
+                                                    {token0Info?.tokenSymbol}
+                                                </Text>
+                                            </HStack>
+                                        </Box>
+                                    </HStack>
+                                    <HStack justify="space-between" pt={2}>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">Cooldown</Text>
+                                        </Box>
+                                        <Box>
+                                            {lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0 ? (
                                                 <CountdownTimer
                                                     startTsMs={Number(lastOperationTimestamp) * 1000}
                                                     intervalDays={3}
                                                 />
                                             ) : (
-                                                <Text fontSize="xs" color="gray">N/A</Text>
+                                                <Text fontSize="sm" color="#4ade80">Ready</Text>
                                             )}
                                         </Box>
-                                        <Box mt={-1}>
-                                            <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogoDark} w={15}></Image></Tooltip>
+                                    </HStack>
+                                </VStack>
+                            </Box>
+                        )}
+                    </Box>
+                    
+                    {/* Middle - Main Content */}
+                    <Box flex={isMobile ? "1" : "2"} w={isMobile ? "100%" : "auto"}>
+                        {/* New Stake Form */}
+                        <Box bg="#1a1a1a" borderRadius="lg" p={6}>
+                            <Text fontSize="xl" fontWeight="bold" color="white" mb={4}>
+                                Stake {token0Info?.tokenSymbol || "Token"}
+                            </Text>
+                            
+                            <VStack gap={4} align="stretch">
+                                <Box>
+                                    <Text fontSize="sm" color="#888" mb={2}>Amount to Stake</Text>
+                                    <HStack>
+                                        <Input
+                                            placeholder="0.00"
+                                            value={stakeAmount === '0' ? '' : stakeAmount}
+                                            onChange={handleSetAmountToStake}
+                                            bg="#2a2a2a"
+                                            border="none"
+                                            h="48px"
+                                            _placeholder={{ color: "#666" }}
+                                            _hover={{ bg: "#3a3a3a" }}
+                                            _focus={{ bg: "#3a3a3a", outline: "none" }}
+                                        />
+                                        <Box w="40px">
+                                            <Image src={nomaLogo} w="25px" h="25px" />
                                         </Box>
-                                        </HStack>
-                                        <HStack w="400px">
-                                        <Box w="120px"> <Text fontSize="xs"> Last operation:</Text> </Box>
+                                    </HStack>
+                                    <Text
+                                        fontSize="xs"
+                                        color="#4ade80"
+                                        cursor="pointer"
+                                        mt={2}
+                                        onClick={handleUseMax}
+                                        _hover={{ textDecoration: "underline" }}
+                                    >
+                                        Use max ({formatNumberPrecise(formatEther(token0Info?.balance || "0"), 4)} {token0Info?.tokenSymbol})
+                                    </Text>
+                                </Box>
+                                
+                                <SimpleGrid columns={2} gap={4} pt={2}>
+                                    <Box>
+                                        <Text color="#888" fontSize="sm">You'll receive</Text>
+                                        <Text color="white" fontSize="lg" fontWeight="500">
+                                            {stakeAmount ? formatNumberPrecise(stakeAmount, 4) : "0.00"} s{token0Info?.tokenSymbol || "OKS"}
+                                        </Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="#888" fontSize="sm">Current APR</Text>
+                                        <Text color="#4ade80" fontSize="lg" fontWeight="500">
+                                            {APR_30_DAYS.toFixed(2)}%
+                                        </Text>
+                                    </Box>
+                                </SimpleGrid>
+                                
+                                <Button
+                                    w="100%"
+                                    h="48px"
+                                    bg="#4ade80"
+                                    color="black"
+                                    fontWeight="600"
+                                    onClick={handleStake}
+                                    isLoading={isStaking}
+                                    isDisabled={!stakeAmount || Number(stakeAmount) <= 0 || (lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0)}
+                                    _hover={{ bg: "#22c55e" }}
+                                >
+                                    {lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0 ? 
+                                        "Cooldown Active" : "Stake"}
+                                </Button>
+                                
+                                {stakedBalance > 0 && (
+                                    <Button
+                                        w="100%"
+                                        h="48px"
+                                        variant="outline"
+                                        borderColor="#4ade80"
+                                        color="#4ade80"
+                                        fontWeight="600"
+                                        onClick={handleUnstake}
+                                        isLoading={isUnstaking}
+                                        isDisabled={stakedBalance <= 0 || (lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0)}
+                                        _hover={{ 
+                                            bg: "rgba(74, 222, 128, 0.1)",
+                                            borderColor: "#22c55e" 
+                                        }}
+                                    >
+                                        Unstake All
+                                    </Button>
+                                )}
+                            </VStack>
+                        </Box>
+                    </Box>
+                    
+                    {/* Right side - Wallet Box */}
+                    {!isMobile && (
+                        <Box w="300px">
+                            <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
+                                <Text fontSize="lg" fontWeight="bold" color="white" mb={4}>Wallet</Text>
+                                <VStack align="stretch" gap={3}>
+                                    {/* ETH Balance */}
+                                    <Box>
+                                        <Flex justifyContent="space-between" alignItems="center">
+                                            <HStack>
+                                                <Box w="20px" h="20px">
+                                                    <Image
+                                                        src={ethLogo}
+                                                        alt="ETH"
+                                                        w="20px"
+                                                        h="20px"
+                                                    />
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="sm">ETH</Text>
+                                                </Box>
+                                            </HStack>
+                                            <Box>
+                                                <Text color="white" fontWeight="bold">
+                                                    {parseFloat(formatEther(ethBalance)).toFixed(4)}
+                                                </Text>
+                                            </Box>
+                                        </Flex>
+                                        <Text color="#666" fontSize="xs" textAlign="right">
+                                            ≈ ${(parseFloat(formatEther(ethBalance)) * 50).toFixed(2)}
+                                        </Text>
+                                    </Box>
+                                    
+                                    {/* Token0 Balance */}
+                                    {token0Info?.tokenSymbol && (
                                         <Box>
-                                            <Text fontSize="xs" color="gray">
-                                                {lastOperationTimestamp ? new Date(Number(lastOperationTimestamp) * 1000).toLocaleString() : "N/A"}
+                                            <Flex justifyContent="space-between" alignItems="center">
+                                                <HStack>
+                                                    <Box w="20px" h="20px">
+                                                        <Image
+                                                            src={placeholderLogoDark}
+                                                            alt={token0Info.tokenSymbol}
+                                                            w="20px"
+                                                            h="20px"
+                                                        />
+                                                    </Box>
+                                                    <Box>
+                                                        <Text color="#888" fontSize="sm">{token0Info.tokenSymbol}</Text>
+                                                    </Box>
+                                                </HStack>
+                                                <Box>
+                                                    <Text color="white" fontWeight="bold">
+                                                        {token0Info?.balance ? parseFloat(formatEther(token0Info.balance)).toFixed(4) : "0.00"}
+                                                    </Text>
+                                                </Box>
+                                            </Flex>
+                                            <Text color="#666" fontSize="xs" textAlign="right">
+                                                ≈ $0.00
                                             </Text>
                                         </Box>
-                                        </HStack>                                        
-                                        {/* <Box mt={5}>
-                                            <Text fontWeight={"bold"} color="gray">Collateral required</Text>
-                                        </Box>
-                                        <Box>
-                                            <Text>{commify(collateral || 0)} {token0Info.tokenSymbol}</Text>
-                                        </Box>
-                                        <Box mt={5}>
-                                        <HStack>
-                                            <Box> <Text fontWeight={"bold"} color="gray">Loan Fees</Text>    </Box>
-                                            <Box><Image src={placeholderLogo} w={15}></Image></Box>
-                                        </HStack>
-                                        </Box>
-                                        <Box>
-                                            <Text>{commifyDecimals(formatEther(`${1 || 0}`), 6)} {token1Info.tokenSymbol}</Text>
-                                        </Box>
-                                        <Box mt={5}> 
-                                            <HStack>
-                                                <Box><Text fontWeight={"bold"} color="gray">IMV</Text> </Box>
-                                                <Box>{commifyDecimals(formatEther(`${1 || 0}`) || 0, 4)}</Box>
-                                                <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info?.tokenSymbol}/{token1Info?.tokenSymbol}</Box>
-                                            </HStack>
-                                        </Box>  */}
-                                </Box>
-                                <Box>
-                                {/* <SelectRoot
-                                    mt={1}
-                                    ml={isMobile?25:55}
-                                    collection={durationChoices}
-                                    size="sm"
-                                    width={isMobile?"180px":"110px"}
-                                    onChange={handleSetDuration}
-                                    value={duration}
-                                    >
-                                    <SelectTrigger>
-                                        {durationChoices.items.map((data, index) => {
-                                            if (index > 0) return;
-                                            return (
-                                                <SelectValueText placeholder={data.label}>
-                                                </SelectValueText>
-                                            );
-                                            })}       
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {durationChoices.items.map((choice) => (
-                                            <SelectItem item={choice} key={choice.value}>
-                                                {choice.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </SelectRoot> */}
-                                    <Button
-                                        mt={1}
-                                        h={"25px"}
-                                        border="2px solid #4ade80"
-                                        variant="outline"
-                                        ml={10}
-                                        onClick={() => handleStake()}
-                                        disabled={isLoading || !stakeAmount || stakeAmount === "" || Number(stakeAmount) <= 0}
-                                        w={"50%"}
-                                        background={isStaking ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "transparent"}
-                                        boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
-                                        transition="all 0.3s ease"
-                                        _hover={{
-                                          background: isStaking ? "linear-gradient(135deg, #4ade80 0%, #65f343 100%)" : "linear-gradient(135deg, #4ade8015 0%, #65f34320 100%)",
-                                          borderColor: "#65f343",
-                                          transform: "translateY(-1px)",
-                                          boxShadow: "0 4px 12px rgba(74, 222, 128, 0.25)"
-                                        }}
-                                        _active={{
-                                          transform: "translateY(0px)",
-                                          boxShadow: "0 2px 6px rgba(74, 222, 128, 0.2)"
-                                        }}
-                                    >
-                                        {isStaking ? <Spinner size="sm" color="#4ade80" /> : <Text fontSize={"xs"} color="#4ade80">Stake</Text>}
-                                    </Button>
-                                </Box>
-                            </SimpleGrid>                        
-                        </Box>  
-                        <p
-                                style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
-                                onClick={() => window.history.back()}
-                            >
-                            Go Back
-                        </p>                             
-                        </Flex>
-                    ) : ( 
-                    <Box w="99%">
-                    <Box mt={10} ml={"2%"}>
-                        <HStack>
-                            <Box w="80px" >
-                                <Text> Go to:</Text>
-                            </Box>
-                            <Box>
-                            <SelectRoot
-                                mt={isMobile ? "-60px" : 0}
-                                ml={5}
-                                mb={2}
-                                collection={createListCollection(_navigationSelectData )}
-                                size="sm"
-                                width={isMobile ? "185px" : "150px"}
-                                onChange={handleSelectDestination}
-                                value={selectedDestination} // Bind the selected value to the state
-                                
-                            >
-                                <SelectTrigger>
-                                {_navigationSelectData.items.map((data, index) => {
-                                if (index > 0) return;
-                                    return (
-                                    <SelectValueText placeholder={data.label}>
-                                    </SelectValueText>
-                                    );
-                                })}                  
-                                </SelectTrigger>
-                                <SelectContent>
-                                {_navigationSelectData.items
-                                .slice()          // make a shallow copy
-                                .reverse()        // reverse the copy 
-                                .map((data) => {
-                                    return (
-                                    <SelectItem item={data} key={data.value}>
-                                        {data.label}
-                                    </SelectItem>
-                                    );
-                                })}
-                                </SelectContent>
-                            </SelectRoot>
-                            </Box>
-                        </HStack>
-                    
-                    </Box>  
-                    <Grid
-                        h="600px"
-                        templateRows="repeat(2, 1fr)"
-                        templateColumns="repeat(2, 1fr)"
-                        gap={1}
-                        mb={20}
-                        mt={2}
-                        px={2}
-                        py={4}
-                        // border="1px solid red"
-
-                    >
-                    <GridItem w="90%" border={"1px solid white"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10}>
-                        <Text fontSize={"14px"} fontWeight={"bold"} color="#4ade80">Active Position</Text>
-                        <SimpleGrid columns={4} mt={-5} fontSize={"xs"} >
-                            <Box px={2} color="black" backgroundColor={"#4ade80"}> Staked </Box>
-                            <Box px={2} color="black" backgroundColor={"#4ade80"}> {isTokenInfoLoading ? <Spinner size="xs" /> : `s${token0Info.tokenSymbol}`} </Box>
-                            <Box px={2} color="black" backgroundColor={"#4ade80"}> Rewards </Box>
-                            {/* <Box px={2} color="white" backgroundColor={"#4ade80"}> APR</Box> */}
-                            <Box px={2} color="black" backgroundColor={"#4ade80"}> Actions </Box> 
-                            {stakedBalance > 0 ? ( 
-                                <>
-                                <Box px={2} mt={1} bgColor={"#18181b"}> 
-                                    <HStack>
-                                        <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
-                                        {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
-                                        </Box>
-                                        <Box  fontSize="xx-small">
-                                        {token0Info.tokenSymbol}
-                                        </Box>
-                                    </HStack>
-                                </Box>
-                                <Box px={2} mt={1} bgColor={"#18181b"} color="white">
-                                    {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 6)}
-                                </Box>
-                                <Box px={2} mt={1} bgColor={"#18181b"}>     
-                                    <HStack>
-                                        <Box  fontSize={isMobile ? "xs" : "sm"} color="white">
-                                        {commify(rewards, 4)}
-                                        </Box>
-                                        <Box  fontSize="xx-small">
-                                        {token0Info.tokenSymbol}
-                                        </Box>
-                                    </HStack>
-                                </Box>
-                                {/* <Box px={2} mt={1} bgColor={"#18181b"} color="white">
-                                    {"N/A"}
-                                </Box> */}
-                                <Box px={2}  mt={1} ml={-10}> 
-                                <Button 
-                                    h={"25px"}  
-                                    borderColor={"#4ade80"} 
-                                    variant="outline" 
-                                    ml={10} 
-                                    onClick={() => handleUnstake()}  
-                                disabled={isUnstaking || stakedBalance <= 0 || lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0} 
-                                    w={"100px"}
+                                    )}
                                     
-                                >
-                                    {isUnstaking ? <Spinner size="sm" color="#4ade80" /> : <Text fontSize={"13px"} color="#4ade80">Unstake</Text>}
-                                </Button>
-                                </Box>
-
-                                </>
-                            ) : (
-                                <>
-                                <Box p={2}>
-                                No Data
-                                </Box>
-                                <Box>
-                                <Box></Box>
-                                </Box>
-                                <Box>
-                                </Box>
-                                <Box></Box>
-                                </>
-                            )}                                
-
-                        </SimpleGrid>
-                    </GridItem>
-                    <GridItem  ml={"-5vh"}>
-                        <BalanceCard 
-                            ethBalance={ethBalance}
-                            token0Balance={token0Info?.balance} 
-                            token0Symbol={token0Info?.tokenSymbol} 
-                            token1Symbol={token1Info.tokenSymbol} 
-                            token1Balance={token1Info?.balance}
-                            // deposit={deposit}
-                            // withdraw={withdraw}
-                            setIsLoading={setIsLoading}
-                            isLoading={isLoading}
-                            isTokenInfoLoading={isTokenInfoLoading}
-                            isWrapping={isWrapping}
-                            setIsWrapping={setIsWrapping}
-                            isUnwrapping={isUnwrapping}
-                            setIsUnwrapping={setIsUnwrapping}
-                            setWrapAmount={setWrapAmount}
-                            wrapAmount={wrapAmount}
-                            vaultAddress={vaultAddress}
-                            page="stake" 
-                        />
-                    </GridItem>
-                    <GridItem mt={2} w="90%" border={"1px solid gray"} p={4} ml={5}  backgroundColor={"#222831"} borderRadius={10} mt={5}>
-                    <Text fontSize={"14px"} color="#4ade80"><b>New Position</b></Text>
-                    <SimpleGrid columns={2} w="100%" mt={-5} fontSize={"sm"}>
-                        <Box w="500px" backgroundColor={"#4ade80"}  mb={2}>
-                            <Text fontSize={isMobile ? "xs" : "sm"} color="black">&nbsp;Amount</Text>
-                        </Box> 
-                        <Box backgroundColor={"#4ade80"} mb={2}>
-                            <Text ml={5} fontSize={isMobile ? "xs" : "sm"} color="black">Actions</Text>
-                        </Box>
-                        <Box w="auto" mt={2}>
-                            <HStack>
-                                <Box w="auto" mt={-2}>
-                                <NumberInputRoot
-                                    isMobile={isMobile}
-                                    min={0}
-                                    max={999999999}
-                                    step={0.1}
-                                    onChange={handleSetAmountToStake}
-                                    ml={isMobile ? 0 : 1.5}
-                                    marginRight={"5px"}
-                                    value={stakeAmount}
-                                    setTokenSupply={(() => {})}
-                                    setPrice={setStakeAmount}
-                                    setFloorPrice={(() => {})}
-                                    h="25px"
-
-                                >
-                                    <NumberInputLabel h={"25px"} w={{ base: "", lg: "auto" }} />
-                                    <NumberInputField h={"25px"} w={{ base: "", lg: "200px" }} placeholder="Enter amount" />
-                                </NumberInputRoot>
-                                </Box>
-                                <Box mt={-2}>
-                                    <Image src={nomaLogo} w="20px"></Image>
-                                </Box>
-                            </HStack>
-                            <VStack textAlign="left" alignItems="left" gap={1} mt={2}>
-                            <Text
-                                ml={2}
-                                
-                                fontSize={isMobile ? "xs" : "sm"}
-                                cursor="pointer"
-                                textDecoration="underline"
-                                onClick={handleUseMax}
-                            >
-                                Use max
-                            </Text>
-                            </VStack>
-                            <SimpleGrid columns={2} mt={2} fontSize={"xs"} w="100%" mt={5}>
-                                <GridItem w="220px" >
-                            <VStack alignItems={"left"}>
-                                    <HStack ml={2}>
-                                <Box>
-                                    <Text color="#4ade80">Staking:</Text>
-                                </Box>
-                                <HStack>
-                                        <Box w="auto"><Text>{stakeAmount ? formatNumberPrecise(stakeAmount, 4) : "0.0000"} </Text></Box>
-                                        <Box>{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info.tokenSymbol}</Box>
-                                </HStack>
-
-                                </HStack>
-                            </VStack>
-                                </GridItem>
-                                <GridItem  ml={150}>
-                                   <HStack w="400px">
-                                    <Box> <Text color="#4ade80"> To cooldown:</Text> </Box>
-                                    <Box>
-                                        {lastOperationTimestamp && lastOperationTimestamp > 0 ? (
-                                            <CountdownTimer
-                                                startTsMs={Number(lastOperationTimestamp) * 1000}
-                                                intervalDays={3}
-                                            />
-                                        ) : (
-                                            <Text fontSize="xs" >N/A</Text>
-                                        )}
+                                    {/* Token1 Balance */}
+                                    {token1Info?.tokenSymbol && (
+                                        <Box>
+                                            <Flex justifyContent="space-between" alignItems="center">
+                                                <HStack>
+                                                    <Box w="20px" h="20px">
+                                                        <Image
+                                                            src={token1Info.tokenSymbol === "WMON" ? ethLogo : placeholderLogoDark}
+                                                            alt={token1Info.tokenSymbol}
+                                                            w="20px"
+                                                            h="20px"
+                                                        />
+                                                    </Box>
+                                                    <Box>
+                                                        <Text color="#888" fontSize="sm">{token1Info.tokenSymbol}</Text>
+                                                    </Box>
+                                                </HStack>
+                                                <Box>
+                                                    <Text color="white" fontWeight="bold">
+                                                        {token1Info?.balance ? parseFloat(formatEther(token1Info.balance)).toFixed(4) : "0.00"}
+                                                    </Text>
+                                                </Box>
+                                            </Flex>
+                                            <Text color="#666" fontSize="xs" textAlign="right">
+                                                ≈ ${token1Info?.tokenSymbol === "WMON" ? (parseFloat(formatEther(token1Info.balance || "0")) * 50).toFixed(2) : "0.00"}
+                                            </Text>
+                                        </Box>
+                                    )}
+                                    
+                                    {/* Total Portfolio Value */}
+                                    <Box borderTop="1px solid #2a2a2a" pt={3} mt={2}>
+                                        <Flex justifyContent="space-between" alignItems="center">
+                                            <Box>
+                                                <Text color="#888" fontSize="sm">Total Value</Text>
+                                            </Box>
+                                            <Box>
+                                                <Text color="#4ade80" fontWeight="bold" fontSize="lg">
+                                                    ${address ? (
+                                                        parseFloat(formatEther(ethBalance)) * 50 + 
+                                                        (token1Info?.tokenSymbol === "WMON" ? parseFloat(formatEther(token1Info.balance || "0")) * 50 : 0)
+                                                    ).toFixed(2) : "0.00"}
+                                                </Text>
+                                            </Box>
+                                        </Flex>
                                     </Box>
-                                    <Box>
-                                        <Tooltip content="This is the time users have to wait between operations."><Image src={placeholderLogoDark} w={15}></Image></Tooltip>
-                                    </Box>
-                                </HStack>
-                                </GridItem>
-                                </SimpleGrid>
+                                </VStack>
+                            </Box>
                         </Box>
-                        <Box>
-                        {/* <SelectRoot
-                            mt={1}
-                            ml={isMobile?25:55}
-                            collection={durationChoices}
-                            size="sm"
-                            width={isMobile?"180px":"110px"}
-                            onChange={handleSetDuration}
-                            value={duration}
-                            >
-                            <SelectTrigger>
-                                {durationChoices.items.map((data, index) => {
-                                    if (index > 0) return;
-                                    return (
-                                        <SelectValueText placeholder={data.label}>
-                                        </SelectValueText>
-                                    );
-                                    })}       
-                            </SelectTrigger>
-                            <SelectContent>
-                                {durationChoices.items.map((choice) => (
-                                    <SelectItem item={choice} key={choice.value}>
-                                        {choice.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </SelectRoot> */}
-                            <Button
-                                mt={1} 
-                                h={"25px"}
-                                borderColor={"#4ade80"}
-                                variant="outline" ml={5}
-                                onClick={() => handleStake()}
-                                disabled={isLoading || !stakeAmount || stakeAmount === "" || Number(stakeAmount) <= 0} w={"120px"}
-                            >
-                                {isStaking ? <Spinner size="sm" color="#4ade80" /> : <Text fontSize={"13px"} color="#4ade80">Stake</Text>}
-                            </Button>
-                        </Box>
-                    </SimpleGrid>
-
-                    </GridItem>
-                    <p
-                    style={{ fontSize: "13px", cursor: "pointer", textDecoration: "underline", marginLeft:"-15px" }}
-                    onClick={() => window.history.back()}
-                    >
-                    Go Back
-                    </p>   
-                    </Grid> 
-                    </Box>
-                     )
-                ) : (
-                    <>Empty</>
-                )} 
-                </Box>  
+                    )}
+                </Flex>
+            ) : (
+                <Box py={8} textAlign="center">
+                    <Text color="#666">Invalid vault address</Text>
+                </Box>
             )}
 
         </Container>

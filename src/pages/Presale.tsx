@@ -572,536 +572,374 @@ const Presale: React.FC = () => {
     // console.log(`hard cap is ${hardCap} soft cap is ${softCap} x ${hardCap / 200} y ${hardCap / 25}`)
 
   return (
-    <Container maxW="container.xl" p={2}>
-      <Box
-        // as="section"
-        // p={{ base: "4vh", md: "8vh" }}
-        // my={10}
-        w="100%"
-        color="white"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        textAlign="left"
-        position="relative"
-        mt={150}
-      >
-        {/* {!hasExpired || address == presaleInfo?.deployer ? ( */}
-          <>
-        <VStack spacing={8} w="full" px={4}>
-          <Box w="full" maxW="1000px" ml={isMobile?0:"2%"}>
-            {contractAddress != "0x0000000000000000000000000000000000000000" && contractAddress ? 
-          <VStack spacing={4} w="full" align="center">
-            {/* Content Box */}
-            <Box
-              w="full"
-              maxW="1000px"
-              p={4}
-              // borderRadius="lg"
-              // border="2px solid white"
-              // bg="#2d2f33"
-              boxShadow="lg"
-            >
-          {/* Welcome and Stats Section */}
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2}>
-            <Box 
-              p={2} 
-            >
-              <HStack>
-                <Box >
-                  <Text fontSize="lg" color="white" >
-                    Welcome
-                  </Text>
-                </Box>
-                <Box>
-                <Text fontSize={isMobile ? "sm": "lg"} fontWeight="bold" color="#f3b500">
-                {address ? `${address.slice(0, 6)}...${address.slice(-6)}` : "Not connected"}
-              </Text>
-                </Box>
-              </HStack>
-               {presaleInfo?.deployer == address /*&& hasExpired*/ && !finalized ? (
-                    <Box 
-                      border="1px solid #4ade80" 
-                      p={4} 
-                      mt={5}               
-                      w={"auto"} 
-                      h="150px"
-                      bgColor={"#222831"} borderRadius={10}
-                      >
-                      <Text color="#4ade80"><b>Admin Controls</b></Text>
-                        <HStack>
-                        <Button 
-                          disabled={finalized}
-                          onClick={handleClickFinalize}
-                          variant={"outline"}
-                          border="1px solid white"
-                          borderRadius={10}
-                          fontSize="sm"
-                          w="100px">
-                          {isLoading ? <Spinner size="sm" /> : "Finalize"}
-                        </Button>                           
-                        </HStack>
-                    </Box>): <></>}
-            </Box>
-            <Box
-              textAlign={{ base: "left", md: "right" }}
-              h={"100%"}
-              // border="1px solid white"
-              display="flex"
-              flexDirection="column"
-              gap={5}
-              pr={10}
-              pl={5}
-              ml={"5%"}
-            >
-            <Flex flexWrap="wrap" justifyContent="space-between" gap={4} mt={isMobile? 5:0} >
-              <Box >
-                <StatRoot>
-                  <StatLabel fontSize="sm" lineHeight="5px">
-                    Contributed
-                  </StatLabel>
-                  <StatValueText
-                    value={totalRaised}
-                    fontSize="md"
-                    lineHeight="5px"
-                    color="#f3b500"
-                  />
-                </StatRoot>
-              </Box>
-
-              <Box>
-                <StatRoot>
-                  <StatLabel fontSize="sm" lineHeight="5px">
-                    # Contributors
-                  </StatLabel>
-                  <StatValueText fontSize="md" lineHeight="1px" value={participantCount} color="#f3b500" />
-                </StatRoot>
-              </Box>
-
-              <Box>
-                <StatRoot>
-                  <StatLabel fontSize="sm" lineHeight="5px">
-                    Time Left
-                  </StatLabel>
-                  <StatValueText w={"130px"} fontSize="md" lineHeight="5px" color="#f3b500">
-                    {timeLeft}
-                  </StatValueText>
-                </StatRoot>
-              </Box>
-            <Box w={isMobile?"88%":"auto"} mt={5} >
-              <ProgressRoot value={timeLeft != "00:00:00:00" ? progress : progressSc} max={100}  maxW="sm" size="lg">
-                <HStack gap="5">
-                  <Box mt={5} >
-                    <ProgressLabel >Progress <br /> <br />
-
-                    </ProgressLabel>
-                  </Box>
-                  <ProgressBar flex="1" defaultValue={0} />
-                  <ProgressValueText >100%</ProgressValueText>
-                </HStack>
-              </ProgressRoot>
-
-              <Flex  w="400px" mt={3} direction="column">
-                <Box>
-                  <HStack>
-                  <Box w="80px"  ml={-2}>
-                  <Text fontSize="sm" color="#a1a1aa">Hard Cap</Text>
-                </Box>
-                  <Box  w="120px">
-                  <Text fontStyle="italic" color="#f3b500">
-                     &nbsp;<b>{Number(progress).toFixed(2)}</b>%
-                  </Text>
+    <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
+      <Toaster />
+      {!isConnected ? (
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          height="100vh"
+          color="white"
+        >
+          <Heading as="h2">Connect your wallet</Heading>
+        </Box>
+      ) : contractAddress && contractAddress !== "0x0000000000000000000000000000000000000000" ? ( 
+        <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4} minH="calc(100vh - 80px)">
+          {/* Left side - Presale Information */}
+          <Box 
+            flex={isMobile ? "1" : "0 0 350px"} 
+            maxW={isMobile ? "100%" : "350px"} 
+            w={isMobile ? "100%" : "350px"}
+          >
+            <Box bg="#1a1a1a" borderRadius="lg" p={4}>
+              <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Presale Information</Text>
+              <VStack align="stretch" gap={2}>
+                <HStack justify="space-between">
+                  <Box>
+                    <Text color="#888" fontSize="sm">Token</Text>
                   </Box>
                   <Box>
-                {isMobile ? <></> :
-                  <Text fontStyle="italic" color="gray" fontSize={"11px"}>
-                  &nbsp;<b>({commify(Number(hardCap), 2)} MON)</b>
-                </Text>}
+                    <Text color="white" fontSize="sm" fontWeight="500">
+                      {tokenSymbol || "Loading..."}
+                    </Text>
                   </Box>
-                  </HStack>
-                </Box>
-
-                <Box mt={2}>
-                <HStack >
-                  <Box  w="80px" >
-                    <Text fontSize="sm" color="#a1a1aa" ml={isMobile ? -2 : 0}>Soft Cap&nbsp;</Text>
+                </HStack>
+                <HStack justify="space-between">
+                  <Box>
+                    <Text color="#888" fontSize="sm">Price</Text>
                   </Box>
-                  <Box  w="120px" ml={isMobile ? 0 : -2}>
-                  <Text fontStyle="italic" color="#f3b500">
-                     <b>{Number(progressSc).toFixed(2)}</b>%
-                  </Text>
+                  <Box>
+                    <Text color="white" fontSize="sm" fontWeight="500">
+                      {initialPrice ? `${initialPrice} MON` : "Loading..."}
+                    </Text>
                   </Box>
-                  <Box ml={2}>
-                  {isMobile ? <></>:
-                    <Text fontStyle="italic" color="gray" fontSize={"11px"}>
-                    <b>({Number(softCap).toFixed(2)} MON)</b>
-                  </Text>}
+                </HStack>
+                <HStack justify="space-between">
+                  <Box>
+                    <Text color="#888" fontSize="sm">Hard Cap</Text>
                   </Box>
-                  </HStack>
-                </Box>
-              </Flex>
-
+                  <Box>
+                    <Text color="white" fontSize="sm" fontWeight="500">
+                      {hardCap ? `${commify(formatEther(hardCap), 2)} MON` : "Loading..."}
+                    </Text>
+                  </Box>
+                </HStack>
+                <HStack justify="space-between">
+                  <Box>
+                    <Text color="#888" fontSize="sm">Soft Cap</Text>
+                  </Box>
+                  <Box>
+                    <Text color="white" fontSize="sm" fontWeight="500">
+                      {softCap ? `${commify(formatEther(softCap), 2)} MON` : "Loading..."}
+                    </Text>
+                  </Box>
+                </HStack>
+                <HStack justify="space-between">
+                  <Box>
+                    <Text color="#888" fontSize="sm">Status</Text>
+                  </Box>
+                  <Box>
+                    <Text 
+                      color={finalized ? "#4ade80" : hasExpired ? "#ef4444" : "#fbbf24"} 
+                      fontSize="sm" 
+                      fontWeight="500"
+                    >
+                      {finalized ? "Finalized" : hasExpired ? "Expired" : "Active"}
+                    </Text>
+                  </Box>
+                </HStack>
+              </VStack>
             </Box>
-            </Flex>
-            </Box>
-          </SimpleGrid>
-
-
-            <Box mt={10} ></Box>
-              <SimpleGrid columns={{ base: 1, md: 2 }}  gap={4}>
-                  {contributions == 0 && !finalized ? (
-                      <Box bg="#222831" border="1px solid white" p={2}  borderRadius={10}>
-                      <StatRoot>
-                        <StatLabel fontSize="sm" lineHeight="5px" ml={2} color="#f3b500">
-                          Contribution Amount
-                        </StatLabel>
-                        <Text fontSize={13}  fontStyle={"italic"} m={2} mt={-2}>
-                          Choose a contribution amount {isMobile?<br />:<></>} (min <Badge fontSize="sm">{commifyDecimals(hardCap / 200, 2)}</Badge> max <Badge fontSize="sm">{commify(hardCap / 25, 2)}</Badge> MON)
-                        </Text>
-                      </StatRoot>
-                      <HStack spacing={4} align="center" justify="center" mt={2}>
-                      <VStack>
-                        <Box ml={isMobile ? -6 : 0}>
-                          <NumberInputRoot 
-                            mt={5}
-                            w={isMobile ? "140px": 60}
-                            h={"40px"} 
-                            resize={"none"} 
-                            size="sm" 
-                            variant="outline" 
-                            value={contributionAmount}
-                            marginRight={"5px"}
-                            defaultValue={0}
-                          >
-                            <NumberInputField
-                              h={'40px'}
-                              defaultValue={hardCap}
-                              onChange={(e) => {
-                                  return handleSetContributionAmount(e);
-                                }
-                              }
-                            />
-                          </NumberInputRoot>
-                        </Box>
-                        <Box>
-                        <Slider
-                          step={(hardCap/200)/100}
-                          defaultValue={[Number(hardCap)]}
-                          variant="outline"
-                          colorPalette={"yellow"}
-                          w={{ base: "120px", sm: "120px", md: "220px", lg: "220px" }} // Responsive widths
-                          marks={[
-                            { value: (hardCap/200), label: commifyDecimals(hardCap / 200, 2).toString() },
-                            { value: (hardCap/25), label: commify(hardCap / 25, 0).toString() },
-                          ]}
-                          min={Number(hardCap/200)}
-                          max={Number(hardCap/25)}
-                          mt="3%"
-                          ml={isMobile ? -2 :0}
-                          value={[contributionAmount > Number(hardCap/200) ? contributionAmount : Number(hardCap/200)]}
-                          onValueChange={(e) => {
-                            if (e.value < hardCap/200) {
-                              return setContributionAmount(hardCap/200);
-                            }
-                            return setContributionAmount(e.value);
-                        }}
-                        />
-                      <br />
-                        </Box>  
-                      </VStack>
-                      {allowance === 0 ? (
-                      <Box mt={-5}>
-                      <VStack h={"100px"} p={2} w={"100px"} ml={4} mt={2}>
-                        <HStack>
-                        <Box>
-                          <Button 
-                            backgroundColor={"gray.900"}
-                            variant={"outline"}
-                            colorScheme="blue"
-                            h={"40px"} 
-                            borderRadius={10}
-                            onClick={handleAddAmount}
-                          >+</Button>
-                        </Box>
-                        <Box>
-                          <Button 
-                            backgroundColor={"gray.900"}
-                            variant={"outline"}
-                            colorScheme="blue"
-                            h={"40px"} 
-                            borderRadius={10}
-                            onClick={handleSubtractAmount}
-                          >-</Button>
-                        </Box>
-                        </HStack>
-                        <Box>
-                        <Button
-                          ml={1}
-                          variant={"outline"}
-                          colorScheme="blue"
-                          w={"100px"}
-                          fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
-                          maxH={40}
-                          backgroundColor={"gray.900"}
-                          borderRadius={10}
-                          disabled={!isConnected || !contributionAmount || parseFloat(contributionAmount) === 0 || contributing || balance == 0}
-                          onClick={() => {
-                            // if (contributionAmount < 0.25 || contributionAmount > 5) {
-                            //   setErrorMessage("Contribution must be between 0.25 and 5 MON.");
-                            //   return;
-                            // }
-                            setErrorMessage(""); // Clear any previous error
-                            handleClickDeposit();
-                          }}
-                        >
-                        {contributing ? <Spinner size="sm" /> : "Deposit"}
-                      </Button>
-                      </Box>
-                      </VStack>
-                      <Toaster />
-                      </Box>
-
-                    ) : <></>}
-                    </HStack>
-                    </Box>): <></>}
-                  {contributions == 0 && !finalized ? (
-                    <>{isConnected ? <PresaleDetails {...presaleData} /> : 
-                    <>
-                      <Box bg="#222831" border="1px solid white" p={4}>
-                        <Text fontSize="sm" color="white">
-                          Connect your wallet to contribute
-                        </Text>
-                      </Box>
-                    </>}</>
-                ): <></>}
-              </SimpleGrid>
             
-            <Box 
-              mt={3} 
-              alignContent={"center"} 
-              backgroundColor="#222831" 
-              fontSize="sm" 
-              lineHeight="tall" 
-              p={4} 
-              w={"auto"} 
-              border="1px solid" 
-              borderRadius={10}
-
-            >
-              <Box w={isMobile?"100%":"55%"} p={1}>
-                {finalized ? (
-                  <Text as="h4">
-                    The presale has been finalized
-                  </Text>
-                ) : (
-                  <></>
-                )}
-                
-                {contributions > 0 ? (
-                  <StatRoot mb={10}>
-                  <StatLabel fontSize="sm" lineHeight="5px" color="#f3b500">
-                    Contribution Details
-                  </StatLabel>
-                  <Box bg="#222831"  p={4}>
-                  <HStack mt={"2px"} spacing={4}>
-                  <Box w="100px">
-                      <Text fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}>Contributed</Text>
+            {/* Progress Box */}
+            <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
+              <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Progress</Text>
+              <VStack align="stretch" gap={3}>
+                <Box>
+                  <HStack justify="space-between" mb={2}>
+                    <Text color="#888" fontSize="sm">Raised</Text>
+                    <Text color="#4ade80" fontSize="sm" fontWeight="500">
+                      {totalRaised ? `${commify(formatEther(totalRaised), 2)} MON` : "0 MON"}
+                    </Text>
+                  </HStack>
+                  <ProgressRoot value={timeLeft != "00:00:00:00" ? progress : progressSc} max={100}>
+                    <ProgressBar bg="#2a2a2a">
+                      <ProgressValueText color="white" fontSize="xs" />
+                    </ProgressBar>
+                  </ProgressRoot>
+                </Box>
+                <HStack justify="space-between">
+                  <Box>
+                    <Text color="#888" fontSize="sm">Contributors</Text>
                   </Box>
-                  <Box w={isMobile ? "69px" : "120px"}>
-                      <Text
-                          color="#f3b500"
-                          fontWeight="bold"
-                          fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
-                      >
-                          {commify(contributions, 2)}
-                      </Text>
+                  <Box>
+                    <Text color="white" fontSize="sm" fontWeight="500">
+                      {participantCount || 0}
+                    </Text>
                   </Box>
-                  <Box w="auto">
-                      <Image h={5} src={monadLogo} />
+                </HStack>
+                <HStack justify="space-between">
+                  <Box>
+                    <Text color="#888" fontSize="sm">Time Left</Text>
                   </Box>
-                  <Box w="auto">
-                      <Text fontWeight="bold" fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}>
-                          &nbsp;MON
-                      </Text>
+                  <Box>
+                    <Text color={hasExpired ? "#ef4444" : "#4ade80"} fontSize="sm" fontWeight="500">
+                      {hasExpired ? "Expired" : timeLeft}
+                    </Text>
                   </Box>
-              </HStack>
-
-              <HStack mt={3} spacing={4} >
-                  <Box w="100px">
-                      <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>
-                          {contributions === 0 ? "You get" : "Balance"}
-                      </Text>
-                  </Box>
-                  <Box w={isMobile ? "69px" : "120px"}>
-                      <Text
-                          color="#f3b500"
-                          fontWeight="bold"
-                          fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
-                      >
-                          {commify(tokensPurchased, 2)}
-                      </Text>
-                  </Box>
-                  <Box w="auto" ml={"1px"}>
-                      <Image h={4} src={placeholderLogo} />
-                  </Box>
-                  <Box w="auto">
-                      <Text fontWeight="bold" fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}>
-                          &nbsp;{tokenSymbol}
-                      </Text>
-                  </Box>
-              </HStack>
-                  {isMobile ? 
-                  <VStack alignItems={"left"} mt={2}>
-                    {Number(tokensPurchased) > 0 && (
-                      <>
-                        <Box>
-                          <Button
-                            mt={5} 
-                            w={"150px"}
-                            disabled={!finalized}
-                            onClick={() => {
-                              withdraw();
-                            }
-                          }>
-                            Withdraw
-                          </Button>  
-                        </Box>
-                        <Box>
-                          <AddToMetaMaskButton 
-                            contractAddress={contractAddress} 
-                          />
-                        </Box>
-                      </>
-                      )}
-                  </VStack>
-                   :
+                </HStack>
+              </VStack>
+            {/* Admin Controls */}
+            {presaleInfo?.deployer == address && !finalized && (
+              <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
+                <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Admin Controls</Text>
+                <Button 
+                  w="100%"
+                  h="40px"
+                  bg="#4ade80"
+                  color="black"
+                  fontWeight="600"
+                  onClick={handleClickFinalize}
+                  isLoading={isLoading}
+                  isDisabled={finalized || hasExpired}
+                  _hover={{ bg: "#22c55e" }}
+                >
+                  Finalize Presale
+                </Button>
+              </Box>
+            )}
+          </Box>
+          
+          {/* Middle - Main Content */}
+          <Box flex={isMobile ? "1" : "2"} w={isMobile ? "100%" : "auto"}>
+            {/* Contribution Form */}
+            <Box bg="#1a1a1a" borderRadius="lg" p={6}>
+              <Text fontSize="xl" fontWeight="bold" color="white" mb={4}>
+                Contribute to Presale
+              </Text>
+              
+              {!finalized && !hasExpired ? (
+                <VStack gap={4} align="stretch">
+                  <Box>
+                    <Text fontSize="sm" color="#888" mb={2}>Amount to Contribute</Text>
                     <HStack>
-                      {Number(tokensPurchased) > 0 && (
-                      <>
-                      <Box>
-                        <Button 
-                          mt={5}
-                          w="120px"
-                          disabled={!finalized}
-                          onClick={() => {
-                            handleWithdraw();
-                          }
-                        }>
-                        {isLoading ? <Spinner size="sm" /> : "Withdraw"}
-                      </Button>  
+                      <Button 
+                        onClick={handleSubtractAmount} 
+                        bg="#2a2a2a" 
+                        color="white"
+                        h="48px"
+                        w="48px"
+                        _hover={{ bg: "#3a3a3a" }}
+                      >
+                        -
+                      </Button>
+                      <NumberInputRoot
+                        value={contributionAmount}
+                        onChange={handleSetContributionAmount}
+                        min={0.001}
+                        max={5}
+                        step={0.001}
+                        w="100%"
+                      >
+                        <NumberInputField 
+                          placeholder="0.00"
+                          bg="#2a2a2a"
+                          border="none"
+                          h="48px"
+                          color="white"
+                          _placeholder={{ color: "#666" }}
+                          _hover={{ bg: "#3a3a3a" }}
+                          _focus={{ bg: "#3a3a3a", outline: "none" }}
+                        />
+                      </NumberInputRoot>
+                      <Button 
+                        onClick={handleAddAmount} 
+                        bg="#2a2a2a" 
+                        color="white"
+                        h="48px"
+                        w="48px"
+                        _hover={{ bg: "#3a3a3a" }}
+                      >
+                        +
+                      </Button>
+                      <Box w="80px" textAlign="center">
+                        <HStack>
+                          <Image src={monadLogo} w="20px" h="20px" />
+                          <Text color="white" fontWeight="500">MON</Text>
+                        </HStack>
+                      </Box>
+                    </HStack>
+                    <Slider 
+                      value={[parseFloat(contributionAmount) || 0]}
+                      onValueChange={(e) => setContributionAmount(e.value[0].toFixed(4))}
+                      min={0}
+                      max={5}
+                      step={0.001}
+                      mt={4}
+                    />
+                  </Box>
+                  
+                  <SimpleGrid columns={2} gap={4} pt={2}>
+                    <Box>
+                      <Text color="#888" fontSize="sm">You'll receive</Text>
+                      <Text color="white" fontSize="lg" fontWeight="500">
+                        {tokensPurchased} {tokenSymbol}
+                      </Text>
                     </Box>
                     <Box>
+                      <Text color="#888" fontSize="sm">Price per token</Text>
+                      <Text color="white" fontSize="lg" fontWeight="500">
+                        {initialPrice} MON
+                      </Text>
+                    </Box>
+                  </SimpleGrid>
+                  
+                  <Button
+                    w="100%"
+                    h="48px"
+                    bg="#4ade80"
+                    color="black"
+                    fontWeight="600"
+                    onClick={handleClickDeposit}
+                    isLoading={isLoading}
+                    isDisabled={!contributionAmount || parseFloat(contributionAmount) <= 0}
+                    _hover={{ bg: "#22c55e" }}
+                  >
+                    Contribute
+                  </Button>
+                </VStack>
+              ) : (
+                <Box py={8} textAlign="center">
+                  <Text color="#666" fontSize="lg">
+                    {finalized ? "This presale has been finalized" : "This presale has expired"}
+                  </Text>
+                </Box>
+              )}
+            </Box>
+            
+            {/* Your Contribution Box */}
+            {contributions > 0 && (
+              <Box bg="#1a1a1a" borderRadius="lg" p={6} mt={4}>
+                <Text fontSize="xl" fontWeight="bold" color="white" mb={4}>
+                  Your Contribution
+                </Text>
+                <VStack align="stretch" gap={3}>
+                  <HStack justify="space-between">
+                    <Text color="#888" fontSize="sm">Contributed</Text>
+                    <HStack>
+                      <Text color="white" fontSize="sm" fontWeight="500">
+                        {commify(contributions, 2)}
+                      </Text>
+                      <Image src={monadLogo} w="16px" h="16px" />
+                      <Text color="#888" fontSize="sm">MON</Text>
+                    </HStack>
+                  </HStack>
+                  <HStack justify="space-between">
+                    <Text color="#888" fontSize="sm">Tokens to receive</Text>
+                    <HStack>
+                      <Text color="#4ade80" fontSize="sm" fontWeight="500">
+                        {commify(tokensPurchased, 2)}
+                      </Text>
+                      <Text color="#888" fontSize="sm">{tokenSymbol}</Text>
+                    </HStack>
+                  </HStack>
+                  {finalized && (
+                    <Box pt={2}>
+                      <Button
+                        w="100%"
+                        h="40px"
+                        bg="#4ade80"
+                        color="black"
+                        fontWeight="600"
+                        onClick={handleWithdraw}
+                        isLoading={isLoading}
+                        _hover={{ bg: "#22c55e" }}
+                      >
+                        Withdraw Tokens
+                      </Button>
                       <AddToMetaMaskButton 
-                        contractAddress={contractAddress} 
+                        contractAddress={contractAddress}
+                        tokenSymbol={tokenSymbol}
+                        tokenDecimals={18}
                       />
                     </Box>
-                    </>)}
-                  </HStack>}
-                  </Box>
-                  </StatRoot>
-                ) : <></>}
-                {!finalized ? (
-                  <StatRoot>
-                  <StatLabel fontSize="sm" lineHeight="5px" color="#f3b500">
-                    Referral Program
-                  </StatLabel>
-                <Text fontSize={isMobile ? "11px" : "14px"} fontStyle={"italic"} mt={-2}>
-                  For each user referred you get 3% of their contribution
-                </Text>
-                </StatRoot>): <></>}
+                  )}
+                </VStack>
               </Box>
-              <Box>
-                {!finalized ? (
-                  <>
-                    <HStack columns={2} p={1} mt={2}>
-                    <Box w="80px">
-                      <Text>Referred</Text>
-                    </Box>
-                    <Box color="#f3b500" >
-                      {Number(referralCount)}
-                    </Box><b>users</b>
+            )}
+            
+            {/* Referral Program Box */}
+            {!finalized && (
+              <Box bg="#1a1a1a" borderRadius="lg" p={6} mt={4}>
+                <Text fontSize="xl" fontWeight="bold" color="white" mb={2}>
+                  Referral Program
+                </Text>
+                <Text fontSize="sm" color="#888" mb={4}>
+                  Earn 3% of contributions from users you refer
+                </Text>
+                <VStack align="stretch" gap={3}>
+                  <HStack justify="space-between">
+                    <Text color="#888" fontSize="sm">Users referred</Text>
+                    <Text color="white" fontSize="sm" fontWeight="500">
+                      {referralCount || 0}
+                    </Text>
                   </HStack>
-                  <HStack columns={2} p={1} mt={2}>
-                      <Box w="80px">
-                      <Text>Earned</Text>
-                    </Box>
-                    <Box color="#f3b500" >
-                      {Number(commify(formatEther(totalReferred) * 0.03)).toFixed(4)}
-                    </Box><b>MON</b>
-                  </HStack>              
-                  <Box w={isMobile?"100%":"75%"} mt={4} ml={1} >
-                    {isConnected ? (
-                      <Flex align="left" gap={1} direction={isMobile? "column" : "row"} alignItems="left" justifyContent="space-between">
-                      <Box w="180px">
-                        <Text fontSize={"sm"} >Share referral URL</Text>
-                      </Box>
-                      <Box>
-                      <Text 
-                        borderRadius={"10px"}
-                        p={1} 
-                        mt={-4}
-                        h={isMobile ? "40px" : "40px"}
-                        backgroundColor="ivory" 
-                        fontStyle="bold" 
-                        color="black" 
-                        fontSize={isMobile ? "9px" : "10px"}
-                        w={isMobile ? "300px" : "395px"}
-                        ml={isMobile ? '2px' : -75}
+                  <HStack justify="space-between">
+                    <Text color="#888" fontSize="sm">Earned</Text>
+                    <HStack>
+                      <Text color="#4ade80" fontSize="sm" fontWeight="500">
+                        {(formatEther(totalReferred) * 0.03).toFixed(4)}
+                      </Text>
+                      <Text color="#888" fontSize="sm">MON</Text>
+                    </HStack>
+                  </HStack>
+                  <Box pt={2}>
+                    <Text color="#888" fontSize="sm" mb={2}>Your referral link</Text>
+                    <HStack>
+                      <Box 
+                        flex="1" 
+                        bg="#2a2a2a" 
+                        p={2} 
+                        borderRadius="md"
+                        fontSize="xs"
+                        color="white"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        whiteSpace="nowrap"
                       >
                         {presaleUrl}
-                      </Text>
                       </Box>
-                      <Box>
-                        <Button
-                          p={2}
-                          px={2}
-                          ml={isMobile ? "5px" : -55}
-                          h={8}
-                          mt={isMobile?3:1}
-                          w={"120px"}
-                          borderRadius={10}
-                          onClick={handleCopy}
-                          colorScheme="white"
-                          variant="ghost"
-                          bg="transparent"
-                          border="2px solid"
-                          color="white"
-                          fontSize={isMobile ? "xs" : "sm"}
-                          _hover={{ bg: "rgba(0, 0, 255, 0.1)" }}
-                          _active={{ bg: "rgba(0, 0, 255, 0.2)" }}
+                      <Button
+                        size="sm"
+                        bg="#2a2a2a"
+                        color="white"
+                        onClick={handleCopy}
+                        _hover={{ bg: "#3a3a3a" }}
                       >
                         {hasCopied ? "Copied!" : "Copy"}
                       </Button>
-                      </Box>
-                    </Flex>): <>Please login with your wallet</>}
-                  </Box>        
-                  </>
-                ):<></>}
+                    </HStack>
+                  </Box>
+                </VStack>
               </Box>
-            </Box> 
-
-            </Box>
-        <br />  <br />  <br />
-          </VStack>
-          : <>
-            <Box textAlign={"center"} h={"50vh"}>
-              <Text as="h2" color="white" mt={"25%"}>
-                No address provided
-              </Text>
-            </Box>
-          </>}
+            )}
           </Box>
-        </VStack>          
-          </>
-          {/*} ) : 
-           <>
-          <Text as="h2">Expired!</Text>
-           </>*/}
-      </Box>
-    <Toaster />
+          
+          {/* Right side - Presale Details */}
+          {!isMobile && (
+            <Box w="300px">
+              <PresaleDetails {...presaleData} />
+            </Box>
+          )}
+        </Flex>
+      ) : (
+        <Box py={8} textAlign="center">
+          <Text color="#666">Invalid or missing presale address</Text>
+        </Box>
+      )}
     </Container>
   );
 };
 
 export default Presale;
- 

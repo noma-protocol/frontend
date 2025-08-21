@@ -545,8 +545,9 @@ const Borrow = () => {
     }
 
     const handleSetDuration = (e) => {
-        console.log("Duration: ", e.target.value);
-        setDuration(e.target.value);
+        const newDuration = e.value[0];
+        console.log("Duration: ", newDuration);
+        setDuration(newDuration);
     }
 
     const handleClickRoll = () => {
@@ -737,8 +738,9 @@ const Borrow = () => {
                                                         collection={durationChoices}
                                                         size="sm"
                                                         width="100%"
-                                                        onChange={handleSetDuration}
-                                                        value={duration}
+                                                        onValueChange={handleSetDuration}
+                                                        value={[duration]}
+                                                        defaultValue={[`${86400 * 30}`]}
                                                     >
                                                         <SelectTrigger
                                                             bg="#2a2a2a"
