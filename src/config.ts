@@ -3,7 +3,7 @@ const chain = import.meta.env.VITE_CHAIN;
 const RPC_URL = import.meta.env.VITE_RPC_URL;
 const feeTiers = [3000, 10000];
 
-const nomaVault = "0x3a4703EbF3d03467a2bF2B22828b945500c9c902";
+const nomaVault = "0x0b3507D715DCd7ee876626013b8BC7Fa1B069232";
 const presaleContractAddress = "0x99b32151E3C0c8432c4c6C9b6F3213123e443F06";
 
 const vault2ProtocolMap = {

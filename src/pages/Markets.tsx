@@ -442,7 +442,6 @@ const Markets: React.FC = () => {
 
   const vaultsDataArray = view === "all" ? vaultDescriptions : userVaults;
   
-
   return (
     <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
       <Toaster />
@@ -588,6 +587,7 @@ const Markets: React.FC = () => {
                   </Box>
                   {vaultsDataArray?.map((vault, index) => {
                     console.log("Vault info:", vault.tokenSymbol, vault.vault, "Protocol:", config.vault2ProtocolMap[vault.vault])
+                    console.log({ vault })
 
                     let hasPresale;
 
