@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { Box, Text, Button } from '@chakra-ui/react';
+import { Box, Text, Button, createListCollection } from '@chakra-ui/react';
 import { LanguageContext, LanguageContextType } from "../core/LanguageProvider";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount } from "wagmi";
@@ -7,12 +7,47 @@ import Logo from "../assets/images/logo.svg";
 import { isMobile } from 'react-device-detect';
 import { Link, Image } from '@chakra-ui/react';
 import { useMenu } from "../hooks/MenuContext";
+import {
+    SelectContent,
+    SelectItem,
+    SelectLabel,
+    SelectRoot,
+    SelectTrigger,
+    SelectValueText,
+} from "./ui/select";
+import { useNavigate, useLocation } from 'react-router-dom';
+import config from '../config';
 
 const Header: React.FC = () => {
   const ctx = useContext<LanguageContextType>(LanguageContext);
   const { open } = useWeb3Modal();
   const { address, isConnected } = useAccount();
   const { setIsMenuOpen } = useMenu(); // Access setIsMenuOpen from context
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get vault address from URL params if on borrow page
+  const searchParams = new URLSearchParams(location.search);
+  const currentVaultAddress = searchParams.get('v') || '';
+  
+  // Use the nomaVault as default if no vault address is in the URL
+  const nomaVault = "0x0b3507D715DCd7ee876626013b8BC7Fa1B069232";
+  const vaultAddress = currentVaultAddress || nomaVault;
+  
+  const navigationItems = createListCollection({
+    items: [
+      { label: "Exchange", value: "/" },
+      { label: "Borrow", value: `/borrow?v=${vaultAddress}` },
+      { label: "Markets", value: "/markets" },
+    ],
+  });
+
+  const handleNavigationChange = (e: any) => {
+    const value = e.value[0];
+    if (value) {
+      navigate(value);
+    }
+  };
 
 
   useEffect(() => {
@@ -86,8 +121,65 @@ const Header: React.FC = () => {
           </Box>
         )} */}
         
-        {/* Wallet Connect Button */}
+        {/* Navigation and Wallet */}
         <Box display="flex" alignItems="center" gap={3}>
+          {/* Navigation Dropdown */}
+          <SelectRoot
+            collection={navigationItems}
+            size="sm"
+            width="140px"
+            value={[location.pathname === '/borrow' ? `/borrow?v=${vaultAddress}` : location.pathname]}
+            onValueChange={handleNavigationChange}
+          >
+            <SelectTrigger
+              bg="#1a1a1a"
+              border="1px solid #2a2a2a"
+              h="38px"
+              color="white"
+              _hover={{ 
+                bg: "#2a2a2a",
+                borderColor: "#3a3a3a" 
+              }}
+              _focus={{
+                borderColor: "#2a2a2a",
+                outline: "none"
+              }}
+            >
+              <SelectValueText placeholder="Navigate" />
+            </SelectTrigger>
+            <SelectContent
+              bg="#1a1a1a"
+              border="1px solid #2a2a2a"
+              borderRadius="md"
+              boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
+            >
+              {navigationItems.items.map((item) => (
+                <SelectItem
+                  key={item.value}
+                  item={item}
+                  py={3}
+                  px={4}
+                  color="white"
+                  bg="transparent"
+                  cursor="pointer"
+                  transition="all 0.2s"
+                  _hover={{ 
+                    bg: "#2a2a2a",
+                    color: "#4ade80"
+                  }}
+                  _selected={{
+                    bg: "#2a2a2a",
+                    color: "#4ade80",
+                    fontWeight: "600"
+                  }}
+                >
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </SelectRoot>
+
+          {/* Wallet Connect Button */}
           <Button 
             onClick={() => open()} 
             bg="#4ade80" 

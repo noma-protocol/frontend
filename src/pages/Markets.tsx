@@ -485,16 +485,14 @@ const Markets: React.FC = () => {
       ) : (
         <Box
           color="white"
-          pt={isMobile ? "80px" : "100px"}
+          pt="20px"
           pb={8}
           px={isMobile ? 4 : 8}
           maxW="1600px"
           mx="auto"
         >
             <Box mb={8}>
-              {/* <Heading as="h1" mb={4} fontSize={isMobile ? "2xl" : "3xl"} color="white">
-                Markets
-              </Heading> */}
+              {/* View Toggle Buttons */}
               <HStack spacing={2}>
                 <Button
                   onClick={() => handleSetView("all")}
