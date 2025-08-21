@@ -690,6 +690,8 @@ const Presale: React.FC = () => {
                   </Box>
                 </HStack>
               </VStack>
+            </Box>
+            
             {/* Admin Controls */}
             {presaleInfo?.deployer == address && !finalized && (
               <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
