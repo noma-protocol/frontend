@@ -81,7 +81,7 @@ const Header: React.FC = () => {
     address: nomaFactoryAddress,
     abi: OikosFactoryAbi,
     functionName: "getDeployers",
-    enabled: isConnected && location.pathname === '/liquidity',
+    enabled: location.pathname === '/liquidity',
   });
 
 
