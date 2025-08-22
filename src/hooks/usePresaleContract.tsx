@@ -87,16 +87,25 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
             ]);
 
 
-            console.log(presaleInfo);
+            console.log("presaleInfo array:", presaleInfo?.map(v => v?.toString()));
+            
+            console.log("usePresaleContract raw values:", {
+                contributions: contributions?.toString(),
+                totalReferred: totalReferred?.toString(),
+                referralCount: referralCount?.toString(),
+                presaleInfo0: presaleInfo[0]?.toString(),
+                presaleInfo1: presaleInfo[1]?.toString(),
+                presaleInfo2: presaleInfo[2]?.toString()
+            });
 
             setPresaleData({
                 totalRaised: formatEther(totalRaised),
-                participantCount: participantCount,
+                participantCount: participantCount?.toString() || "0",
                 finalized,
                 softCapReached,
-                contributions: contributions,
-                totalReferred: totalReferred,
-                referralCount: referralCount,
+                contributions: contributions ? formatEther(contributions) : "0",
+                totalReferred: totalReferred ? formatEther(totalReferred) : "0", 
+                referralCount: referralCount?.toString() || "0",
                 softCap: formatEther(presaleInfo[0]),
                 hardCap:  formatEther(presaleInfo[1]),
                 initialPrice: formatEther(presaleInfo[2]),
