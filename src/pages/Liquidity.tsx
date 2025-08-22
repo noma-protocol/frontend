@@ -193,7 +193,7 @@ const Liquidity: React.FC = () => {
     address: nomaFactoryAddress,
     abi: OikosFactoryAbi,
     functionName: "getDeployers",
-    enabled: isConnected && selectedVault !== '',
+    enabled: selectedVault !== '',
   });
 
   useEffect(() => {
@@ -389,18 +389,7 @@ const Liquidity: React.FC = () => {
     <Container maxW="100%" p={0} bg="#0a0a0a" minH="100vh">
       <Toaster />
 
-      {!isConnected ? (
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          height="100vh"
-          color="white"
-          bg="#0a0a0a"
-        >
-          <Heading as="h2" color="white">Connect your wallet</Heading>
-        </Box>
-      ) : isMobile && isLandscape ? (
+      {isMobile && isLandscape ? (
         <RotateDeviceMessage />
       ) : (
         <Box w="100%" bg="#0a0a0a" p={isMobile ? 4 : 8}>
