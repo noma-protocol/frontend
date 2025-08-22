@@ -2080,7 +2080,11 @@ const Launchpad: React.FC = () => {
                     flex={isMobile ? "1" : "0 0 350px"} 
                     maxW={isMobile ? "100%" : "350px"} 
                     w={isMobile ? "100%" : "350px"}
-                    display={isMobile && isTokenListCollapsed ? "none" : "block"}
+                    display={isMobile && isTokenListCollapsed ? "none" : "flex"}
+                    flexDirection="column"
+                    gap={4}
+                    overflowY="auto"
+                    maxH="calc(100vh - 120px)"
                 >
                     <Box bg="#1a1a1a" borderRadius="lg" pr={3} pl={3} py={3} overflowX="hidden">
                         <Flex alignItems="center" mb={3}>
@@ -2104,7 +2108,7 @@ const Launchpad: React.FC = () => {
                             </IconButton>
                         </Flex>
                         
-                        <Box overflowY="auto" overflowX="hidden" maxH={isMobile ? "300px" : "calc(100vh - 180px)"} mx={isMobile ? -2 : 0}>
+                        <Box overflowY="auto" overflowX="hidden" h="300px" mx={isMobile ? -2 : 0}>
                             {isTokensLoading ? (
                                 <VStack spacing={0} w="100%">
                                     {/* Show skeleton rows while loading */}
@@ -2287,7 +2291,7 @@ const Launchpad: React.FC = () => {
                     </Box>
                     
                     {/* Troll Box */}
-                    <Box mt={4}>
+                    <Box flexShrink={0}>
                         <TrollBox />
                     </Box>
                 </Box>

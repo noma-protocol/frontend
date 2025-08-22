@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Container,
   VStack,
@@ -38,7 +38,7 @@ import PresaleDetails from "../components/PresaleDetails";
 import usePresaleContract from '../hooks/usePresaleContract';
 
 import metamaskLogo from "../assets/images/metamask.svg";
-import placeholderLogo from "../assets/images/question.svg";
+import placeholderLogo from "../assets/images/question_white.svg"; 
 import monadLogo from "../assets/images/monad.png";
 
 import config from '../config'; 
@@ -54,7 +54,7 @@ const addresses = config.chain === "local"
   ? addressesLocal
   : addressesBsc;
 
-const tokenAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
+// const tokenAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Proxy");
 
 const { environment, presaleContractAddress } = config;
 
@@ -205,12 +205,12 @@ const Presale: React.FC = () => {
     const {
       data: tokenBalancePresale
     } = useContractRead({
-      address: tokenAddress,
+      address: contractAddress,
       abi: ERC20Abi,
       functionName: "balanceOf",
       args: [contractAddress],
       watch: true,
-      enabled: !!tokenAddress && !!contractAddress,
+      enabled: /*!!tokenAddress &&*/ !!contractAddress,
       onError(error) {
         console.error("Error in tokenBalancePresale read:", error);
       }
@@ -218,7 +218,7 @@ const Presale: React.FC = () => {
 
     console.log("Contract reads:", {
       tokenBalancePresale: tokenBalancePresale?.toString(),
-      tokenAddress
+      contractAddress
     });
     
     // Removed duplicate presaleInfo read - using usePresaleContract instead
@@ -619,6 +619,53 @@ const Presale: React.FC = () => {
     }
   }, [contributionAmount, tokenBalance, initialPrice]);
 
+  // Check if user has already withdrawn from localStorage
+  const hasWithdrawnFromStorage = useMemo(() => {
+    if (!address || !contractAddress) return false;
+    const key = `withdrawn_${contractAddress}_${address}`;
+    return localStorage.getItem(key) === 'true';
+  }, [address, contractAddress]);
+
+  // Calculate tokens to claim based on contributions
+  const tokensToWithdraw = useMemo(() => {
+    if (!contributions || parseFloat(contributions) <= 0) return "0";
+    if (!initialPrice || parseFloat(initialPrice) <= 0) return "0";
+    
+    const tokens = parseFloat(contributions) / parseFloat(initialPrice);
+    return tokens.toFixed(4);
+  }, [contributions, initialPrice]);
+
+  // Calculate if user has already withdrawn
+  const hasWithdrawn = useMemo(() => {
+    console.log("Calculating hasWithdrawn:", {
+      contributions,
+      initialPrice,
+      tokenBalance: tokenBalance?.toString(),
+      tokenBalanceFormatted: tokenBalance ? formatEther(tokenBalance) : "0",
+      tokensToWithdraw
+    });
+    
+    // If no contributions, consider as withdrawn
+    if (!contributions || parseFloat(contributions) <= 0) return true;
+    
+    // If presale not finalized, can't withdraw yet
+    if (!finalized) return false;
+    
+    // Check if user already has the tokens they're supposed to receive
+    const currentBalance = tokenBalance ? parseFloat(formatEther(tokenBalance)) : 0;
+    const expectedTokens = parseFloat(tokensToWithdraw);
+    
+    console.log("Withdraw check:", {
+      currentBalance,
+      expectedTokens,
+      hasTokens: currentBalance >= expectedTokens * 0.9
+    });
+    
+    // If user has most of their expected tokens, they haven't withdrawn yet
+    // If balance is 0 and they should have tokens, they've already withdrawn
+    return expectedTokens > 0 && currentBalance < expectedTokens * 0.1;
+  }, [contributions, initialPrice, tokenBalance, tokensToWithdraw, finalized]);
+
   const handleClickFinalize = async () => {
     setIsLoading(true);
     try {
@@ -635,6 +682,11 @@ const Presale: React.FC = () => {
     setIsLoading(true);
     try {
       await withdraw();
+      // Mark as withdrawn in localStorage
+      if (address && contractAddress) {
+        const key = `withdrawn_${contractAddress}_${address}`;
+        localStorage.setItem(key, 'true');
+      }
     } catch (error) {
       setIsLoading(false);
       console.error("Failed to withdraw:", error);
@@ -839,6 +891,61 @@ const Presale: React.FC = () => {
           
           {/* Middle - Main Content */}
           <Box flex={isMobile ? "1" : "2"} w={isMobile ? "100%" : "auto"}>
+            {/* Token Information Box */}
+            <Box bg="#1a1a1a" borderRadius="lg" p={8} mb={4}>
+              <HStack spacing={12} align="center">
+                {/* Token Logo - Left Side */}
+                <Box minW="150px">
+                  <Box
+                    w="120px"
+                    h="120px"
+                    bg="#0a0a0a"
+                    borderRadius="full"
+                    border="2px solid #2a2a2a"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    position="relative"
+                    overflow="hidden"
+                    p={6}
+                  >
+                    <Box
+                      position="absolute"
+                      inset={0}
+                      bgGradient="linear(to-br, #4ade8040, transparent)"
+                    />
+                    <Image
+                      src={placeholderLogo}
+                      alt={tokenSymbol}
+                      w="60px"
+                      h="60px"
+                    />
+                  </Box>
+                </Box>
+                
+                {/* Token Info - Right Side */}
+                <Box flex="1">
+                  <VStack align="flex-start" spacing={4}>
+                    {/* Token Name and Symbol */}
+                    <Box>
+                      <Text color="white" fontSize="3xl" fontWeight="bold" mb={1}>
+                        {tokenName || "Loading..."}
+                      </Text>
+                      <Text color="#888" fontSize="xl">
+                        ${tokenSymbol || "..."}
+                      </Text>
+                    </Box>
+                    
+                    {/* Token Description */}
+                    <Text color="#888" fontSize="md" lineHeight="1.6">
+                      Join the presale for {tokenName || "this token"} and be part of an innovative DeFi ecosystem 
+                      with automated liquidity protection and price floor mechanisms.
+                    </Text>
+                  </VStack>
+                </Box>
+              </HStack>
+            </Box>
+
             {/* Contribution Form */}
             <Box bg="#1a1a1a" borderRadius="lg" p={6}>
               <Text fontSize="xl" fontWeight="bold" color="white" mb={4}>
@@ -850,7 +957,7 @@ const Presale: React.FC = () => {
                   <Box>
                     <Text fontSize="sm" color="#888" mb={2}>Amount to Contribute</Text>
                     <HStack>
-                      <Box><Button 
+                      {/* <Box><Button 
                         onClick={handleSubtractAmount} 
                         bg="#2a2a2a" 
                         color="white"
@@ -859,14 +966,14 @@ const Presale: React.FC = () => {
                         _hover={{ bg: "#3a3a3a" }}
                       >
                         -
-                      </Button></Box>
+                      </Button></Box> */}
                       <Box flex="1"><NumberInputRoot
                         value={contributionAmount}
                         onChange={handleSetContributionAmount}
                         min={0.001}
                         max={5}
                         step={0.001}
-                        w="100%"
+                        w="95%"
                       >
                         <NumberInputField 
                           placeholder="0.00"
@@ -879,7 +986,7 @@ const Presale: React.FC = () => {
                           _focus={{ bg: "#3a3a3a", outline: "none" }}
                         />
                       </NumberInputRoot></Box>
-                      <Box><Button 
+                      {/* <Box><Button 
                         onClick={handleAddAmount} 
                         bg="#2a2a2a" 
                         color="white"
@@ -888,10 +995,10 @@ const Presale: React.FC = () => {
                         _hover={{ bg: "#3a3a3a" }}
                       >
                         +
-                      </Button></Box>
-                      <Box w="80px" textAlign="center">
+                      </Button></Box> */}
+                      <Box w="80px" textAlign="center" ml={-10}>
                         <HStack>
-                          <Box><Image src={monadLogo} w="20px" h="20px" /></Box>
+                          <Box><Image src={monadLogo} w="25px" h="25px" /></Box>
                           <Box><Text color="white" fontWeight="500">MON</Text></Box>
                         </HStack>
                       </Box>
@@ -965,7 +1072,7 @@ const Presale: React.FC = () => {
                     <Box><Text color="#888" fontSize="sm">Tokens to receive</Text></Box>
                     <HStack>
                       <Box><Text color="#4ade80" fontSize="sm" fontWeight="500">
-                        {commify(tokensPurchased, 2)}
+                        {commify(tokensToWithdraw, 2)}
                       </Text></Box>
                       <Box><Text color="#888" fontSize="sm">{tokenSymbol}</Text></Box>
                     </HStack>
@@ -980,7 +1087,18 @@ const Presale: React.FC = () => {
                         fontWeight="600"
                         onClick={handleWithdraw}
                         isLoading={isLoading}
+                        isDisabled={
+                          !finalized || 
+                          !contributions || 
+                          parseFloat(contributions) <= 0 ||
+                          hasWithdrawnFromStorage
+                        }
                         _hover={{ bg: "#22c55e" }}
+                        _disabled={{
+                          bg: "#2a2a2a",
+                          color: "#666",
+                          cursor: "not-allowed"
+                        }}
                       >
                         Withdraw Tokens
                       </Button>
@@ -1183,14 +1301,14 @@ const Presale: React.FC = () => {
                 </Box>
                 
                 {/* Presale Details Box */}
-                {(() => {
+                {/* {(() => {
                   try {
                     return <PresaleDetails {...presaleData} />;
                   } catch (error) {
                     console.error("Error rendering PresaleDetails:", error);
                     return <Box>Error loading presale details</Box>;
                   }
-                })()}
+                })()} */}
               </VStack>
             </Box>
           )}
