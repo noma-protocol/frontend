@@ -42,7 +42,6 @@ import placeholderLogo from "../assets/images/question.svg";
 import monadLogo from "../assets/images/monad.png";
 
 import config from '../config'; 
-import bnbLogo from "../assets/images/bnb.png";
 
 import addressesLocal   from "../assets/deployment.json";
 import addressesBsc   from "../assets/deployment.json";
@@ -66,7 +65,7 @@ const ERC20Artifact = await import(`../assets/ERC20.json`);
 const ERC20Abi = ERC20Artifact.abi;
 
 const Presale: React.FC = () => {
-  const { address, isConnected } = useAccount();
+   const { address, isConnected } = useAccount();
   // Parse the referral code from the URL
   const [searchParams] = useSearchParams();
   const urlReferralCode = searchParams.get("r") || ""; // Fallback to empty string
@@ -86,7 +85,7 @@ const Presale: React.FC = () => {
 
   const [allowance, setAllowance] = useState(0);
   const [contributionAmount, setContributionAmount] = useState("");
-  const [tokensPurchased, setTokensPurchased] = useState(0);
+  const [tokensPurchased, setTokensPurchased] = useState("0");
   const [targetDate, setTargetDate] = useState(""); // 24 hours from now
 
   const [referralCode, setReferralCode] = useState('');
@@ -211,19 +210,18 @@ const Presale: React.FC = () => {
       functionName: "balanceOf",
       args: [contractAddress],
       watch: true,
+      enabled: !!tokenAddress && !!contractAddress,
+      onError(error) {
+        console.error("Error in tokenBalancePresale read:", error);
+      }
     });
 
-    // console.log(`Token balance in presale contract is ${tokenBalancePresale}`);
+    console.log("Contract reads:", {
+      tokenBalancePresale: tokenBalancePresale?.toString(),
+      tokenAddress
+    });
     
-    const {
-      data: presaleInfo
-    } = useContractRead({
-      address: contractAddress,
-      abi: PresaleAbi,
-      functionName: "getPresaleParams",
-    });
-
-    // console.log(presaleInfo);
+    // Removed duplicate presaleInfo read - using usePresaleContract instead
 
   const {
     data: tokenBalance, refetch: refetchTokenBalance
@@ -233,6 +231,9 @@ const Presale: React.FC = () => {
     functionName: "balanceOf",
     args: [address],
     watch: true,
+    onError(error) {
+      console.error("Error in tokenBalance read:", error);
+    }
   });
 
   const {
@@ -250,6 +251,24 @@ const Presale: React.FC = () => {
     address: contractAddress,
     abi: ERC20Abi,
     functionName: "symbol",
+    args: [],
+  });
+
+  const {
+    data: minContribution
+  } = useContractRead({
+    address: contractAddress,
+    abi: PresaleAbi,
+    functionName: "MIN_CONTRIBUTION",
+    args: [],
+  });
+
+  const {
+    data: maxContribution
+  } = useContractRead({
+    address: contractAddress,
+    abi: PresaleAbi,
+    functionName: "MAX_CONTRIBUTION",
     args: [],
   });
 
@@ -287,7 +306,9 @@ const Presale: React.FC = () => {
     urlReferralCode
   );
 
-   contributions = Number(formatEther(contributions)).toFixed(4);
+   console.log("Raw contributions:", contributions);
+   // contributions is already a string from usePresaleContract, no need to format
+   console.log("Formatted contributions:", contributions);
     // console.log(`Contributions is ${contributions}`);
 
   //  console.log({ 
@@ -301,24 +322,66 @@ const Presale: React.FC = () => {
   //   progress 
   // });
 
-  const balance =  useBalance({
+  const { data: monBalance, refetch: refetchBalance } = useBalance({
     address: address,
   });
   
-  const { refetch: refetchBalance } = useBalance({
-    address: address,
+  // Log balance data safely
+  if (monBalance) {
+    console.log("Balance data:", {
+      value: monBalance.value?.toString(),
+      formatted: monBalance.formatted,
+      symbol: monBalance.symbol,
+      decimals: monBalance.decimals
+    });
+  }
+
+  // Debug logging
+  console.log("Presale Debug:", {
+    initialPrice,
+    contributionAmount,
+    tokensPurchased,
+    contributions,
+    monBalance: monBalance?.value?.toString(),
+    totalReferred,
+    tokenBalance: tokenBalance?.toString(),
+    hardCap,
+    softCap,
+    totalRaised,
+    minContribution: minContribution?.toString(),
+    maxContribution: maxContribution?.toString()
   });
 
   const presaleData = {
     isMobile,
-    balance,
-    initialPrice,
-    contributions,
-    contributionAmount,
-    tokensPurchased,
+    balance: { data: monBalance },
+    initialPrice: initialPrice || "0",
+    contributions: contributions || "0",
+    contributionAmount: contributionAmount || "0",
+    tokensPurchased: tokensPurchased || "0",
     Logo,
-    tokenSymbol
-};
+    tokenSymbol: tokenSymbol || "TOKEN"
+  };
+  
+  // Log presaleData to check for problematic values
+  console.log("presaleData object:", JSON.stringify(presaleData, (key, value) => {
+    // Handle BigNumber objects
+    if (typeof value === 'object' && value !== null && value._isBigNumber) {
+      return value.toString();
+    }
+    // Handle BigInt values
+    if (typeof value === 'bigint') {
+      return value.toString();
+    }
+    // Handle objects with BigInt values
+    if (value && typeof value === 'object' && value.value && typeof value.value === 'bigint') {
+      return {
+        ...value,
+        value: value.value.toString()
+      };
+    }
+    return value;
+  }, 2));
 
   const {
     isLoading: contributing,
@@ -327,8 +390,8 @@ const Presale: React.FC = () => {
     address: contractAddress,
     abi: PresaleAbi,
     functionName: "deposit",
-    args: [generateBytes32String("0")],
-    value: contributionAmount && parseFloat(contributionAmount) > 0 ? parseEther(contributionAmount.toString()) : undefined,
+    args: [urlReferralCode ? generateBytes32String(urlReferralCode) : generateBytes32String("0")],
+    value: contributionAmount && parseFloat(contributionAmount) > 0 ? parseEther(parseFloat(contributionAmount).toFixed(6)) : undefined,
     onSuccess(data) {
       console.log(`transaction successful: ${data.hash} referral code: ${urlReferralCode}`);
       refetchBalance();
@@ -419,8 +482,12 @@ const Presale: React.FC = () => {
   });
 
   useEffect(() => {
-    const progress = (totalRaised / hardCap) * 100;
-    const progressSc = (totalRaised / softCap) * 100;
+    const totalRaisedNum = parseFloat(totalRaised) || 0;
+    const hardCapNum = parseFloat(hardCap) || 1; // Avoid division by zero
+    const softCapNum = parseFloat(softCap) || 1;
+    
+    const progress = (totalRaisedNum / hardCapNum) * 100;
+    const progressSc = (totalRaisedNum / softCapNum) * 100;
 
     setProgress(progress);
     setProgressSc(progressSc);
@@ -513,18 +580,43 @@ const Presale: React.FC = () => {
 
 
   useEffect(() => {
-    let tokensPurchased = tokenBalance || 0;
-    if (tokensPurchased === 0 && contributionAmount !== "") {
+    try {
+      if (tokenBalance && tokenBalance !== "0") {
+        // If we have an actual token balance, convert it from BigNumber
+        const tokenBalanceNum = Number(formatEther(tokenBalance));
+        setTokensPurchased(tokenBalanceNum.toFixed(4));
+      } else if (contributionAmount !== "" && initialPrice) {
         const contributionValue = parseFloat(contributionAmount);
-        if (!isNaN(contributionValue) && contributionValue > 0 && initialPrice) {
-          const cc = contributionValue / initialPrice;
+        const initialPriceNum = parseFloat(initialPrice);
+        
+        if (!isNaN(contributionValue) && contributionValue > 0 && !isNaN(initialPriceNum) && initialPriceNum > 0) {
+          const cc = contributionValue / initialPriceNum;
           if (cc > 0) {
-            tokensPurchased = parseEther((cc).toString());
-            console.log(`Tokens purchased is ${tokensPurchased}`);
+            // Ensure we're not passing a very long decimal
+            // Ensure we don't have excessive decimal places
+            // Round to 4 decimal places to avoid precision issues
+            const ccRounded = Math.round(cc * 10000) / 10000;
+            console.log("Token calculation:", {
+              contributionValue,
+              initialPriceNum,
+              cc,
+              ccRounded
+            });
+            setTokensPurchased(ccRounded.toString());
+            console.log(`Tokens purchased is ${ccRounded}`);
+          } else {
+            setTokensPurchased("0.0000");
           }
+        } else {
+          setTokensPurchased("0.0000");
         }
+      } else {
+        setTokensPurchased("0.0000");
       }
-    setTokensPurchased(Number(formatEther(tokensPurchased)).toFixed(4));
+    } catch (error) {
+      console.error("Error calculating tokens purchased:", error);
+      setTokensPurchased("0.0000");
+    }
   }, [contributionAmount, tokenBalance, initialPrice]);
 
   const handleClickFinalize = async () => {
@@ -566,7 +658,19 @@ const Presale: React.FC = () => {
     }
 
   const handleClickDeposit = async () => {
-      deposit()
+      console.log("Contribute button clicked", {
+        deposit: !!deposit,
+        contributionAmount,
+        contractAddress,
+        urlReferralCode,
+        contributing
+      });
+      
+      if (deposit) {
+        deposit()
+      } else {
+        console.error("Deposit function not available")
+      }
     }
 
     // console.log(`hard cap is ${hardCap} soft cap is ${softCap} x ${hardCap / 200} y ${hardCap / 25}`)
@@ -621,7 +725,7 @@ const Presale: React.FC = () => {
                   </Box>
                   <Box>
                     <Text color="white" fontSize="sm" fontWeight="500">
-                      {hardCap ? `${commify(formatEther(hardCap), 2)} MON` : "Loading..."}
+                      {hardCap ? `${commify(hardCap, 2)} MON` : "Loading..."}
                     </Text>
                   </Box>
                 </HStack>
@@ -631,7 +735,7 @@ const Presale: React.FC = () => {
                   </Box>
                   <Box>
                     <Text color="white" fontSize="sm" fontWeight="500">
-                      {softCap ? `${commify(formatEther(softCap), 2)} MON` : "Loading..."}
+                      {softCap ? `${commify(softCap, 2)} MON` : "Loading..."}
                     </Text>
                   </Box>
                 </HStack>
@@ -641,11 +745,31 @@ const Presale: React.FC = () => {
                   </Box>
                   <Box>
                     <Text 
-                      color={finalized ? "#4ade80" : hasExpired ? "#ef4444" : "#fbbf24"} 
+                      color={finalized ? "#4ade80" : hasExpired ? "#ef4444" : "#888"} 
                       fontSize="sm" 
                       fontWeight="500"
                     >
-                      {finalized ? "Finalized" : hasExpired ? "Expired" : "Active"}
+                      {finalized ? "Finalized" : hasExpired ? "Ended" : "Active"}
+                    </Text>
+                  </Box>
+                </HStack>
+                <HStack justify="space-between">
+                  <Box>
+                    <Text color="#888" fontSize="sm">Min Contribution</Text>
+                  </Box>
+                  <Box>
+                    <Text color="white" fontSize="sm" fontWeight="500">
+                      {minContribution ? `${formatEther(minContribution)} MON` : "Loading..."}
+                    </Text>
+                  </Box>
+                </HStack>
+                <HStack justify="space-between">
+                  <Box>
+                    <Text color="#888" fontSize="sm">Max Contribution</Text>
+                  </Box>
+                  <Box>
+                    <Text color="white" fontSize="sm" fontWeight="500">
+                      {maxContribution ? `${formatEther(maxContribution)} MON` : "Loading..."}
                     </Text>
                   </Box>
                 </HStack>
@@ -658,10 +782,10 @@ const Presale: React.FC = () => {
               <VStack align="stretch" gap={3}>
                 <Box>
                   <HStack justify="space-between" mb={2}>
-                    <Text color="#888" fontSize="sm">Raised</Text>
-                    <Text color="#4ade80" fontSize="sm" fontWeight="500">
-                      {totalRaised ? `${commify(formatEther(totalRaised), 2)} MON` : "0 MON"}
-                    </Text>
+                    <Box><Text color="#888" fontSize="sm">Raised</Text></Box>
+                    <Box><Text color="#4ade80" fontSize="sm" fontWeight="500">
+                      {totalRaised ? `${commify(totalRaised, 2)} MON` : "0 MON"}
+                    </Text></Box>
                   </HStack>
                   <ProgressRoot value={timeLeft != "00:00:00:00" ? progress : progressSc} max={100}>
                     <ProgressBar bg="#2a2a2a">
@@ -685,7 +809,7 @@ const Presale: React.FC = () => {
                   </Box>
                   <Box>
                     <Text color={hasExpired ? "#ef4444" : "#4ade80"} fontSize="sm" fontWeight="500">
-                      {hasExpired ? "Expired" : timeLeft}
+                      {hasExpired ? "Ended" : timeLeft}
                     </Text>
                   </Box>
                 </HStack>
@@ -693,7 +817,7 @@ const Presale: React.FC = () => {
             </Box>
             
             {/* Admin Controls */}
-            {presaleInfo?.deployer == address && !finalized && (
+            {deployer == address && !finalized && (
               <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
                 <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Admin Controls</Text>
                 <Button 
@@ -726,7 +850,7 @@ const Presale: React.FC = () => {
                   <Box>
                     <Text fontSize="sm" color="#888" mb={2}>Amount to Contribute</Text>
                     <HStack>
-                      <Button 
+                      <Box><Button 
                         onClick={handleSubtractAmount} 
                         bg="#2a2a2a" 
                         color="white"
@@ -735,8 +859,8 @@ const Presale: React.FC = () => {
                         _hover={{ bg: "#3a3a3a" }}
                       >
                         -
-                      </Button>
-                      <NumberInputRoot
+                      </Button></Box>
+                      <Box flex="1"><NumberInputRoot
                         value={contributionAmount}
                         onChange={handleSetContributionAmount}
                         min={0.001}
@@ -754,8 +878,8 @@ const Presale: React.FC = () => {
                           _hover={{ bg: "#3a3a3a" }}
                           _focus={{ bg: "#3a3a3a", outline: "none" }}
                         />
-                      </NumberInputRoot>
-                      <Button 
+                      </NumberInputRoot></Box>
+                      <Box><Button 
                         onClick={handleAddAmount} 
                         bg="#2a2a2a" 
                         color="white"
@@ -764,11 +888,11 @@ const Presale: React.FC = () => {
                         _hover={{ bg: "#3a3a3a" }}
                       >
                         +
-                      </Button>
+                      </Button></Box>
                       <Box w="80px" textAlign="center">
                         <HStack>
-                          <Image src={monadLogo} w="20px" h="20px" />
-                          <Text color="white" fontWeight="500">MON</Text>
+                          <Box><Image src={monadLogo} w="20px" h="20px" /></Box>
+                          <Box><Text color="white" fontWeight="500">MON</Text></Box>
                         </HStack>
                       </Box>
                     </HStack>
@@ -804,8 +928,8 @@ const Presale: React.FC = () => {
                     color="black"
                     fontWeight="600"
                     onClick={handleClickDeposit}
-                    isLoading={isLoading}
-                    isDisabled={!contributionAmount || parseFloat(contributionAmount) <= 0}
+                    isLoading={contributing}
+                    isDisabled={!contributionAmount || parseFloat(contributionAmount) <= 0 || contributing}
                     _hover={{ bg: "#22c55e" }}
                   >
                     Contribute
@@ -814,7 +938,7 @@ const Presale: React.FC = () => {
               ) : (
                 <Box py={8} textAlign="center">
                   <Text color="#666" fontSize="lg">
-                    {finalized ? "This presale has been finalized" : "This presale has expired"}
+                    {finalized ? "This presale has been finalized" : "This presale has ended"}
                   </Text>
                 </Box>
               )}
@@ -828,22 +952,22 @@ const Presale: React.FC = () => {
                 </Text>
                 <VStack align="stretch" gap={3}>
                   <HStack justify="space-between">
-                    <Text color="#888" fontSize="sm">Contributed</Text>
+                    <Box><Text color="#888" fontSize="sm">Contributed</Text></Box>
                     <HStack>
-                      <Text color="white" fontSize="sm" fontWeight="500">
+                      <Box><Text color="white" fontSize="sm" fontWeight="500">
                         {commify(contributions, 2)}
-                      </Text>
-                      <Image src={monadLogo} w="16px" h="16px" />
-                      <Text color="#888" fontSize="sm">MON</Text>
+                      </Text></Box>
+                      <Box><Image src={monadLogo} w="16px" h="16px" /></Box>
+                      <Box><Text color="#888" fontSize="sm">MON</Text></Box>
                     </HStack>
                   </HStack>
                   <HStack justify="space-between">
-                    <Text color="#888" fontSize="sm">Tokens to receive</Text>
+                    <Box><Text color="#888" fontSize="sm">Tokens to receive</Text></Box>
                     <HStack>
-                      <Text color="#4ade80" fontSize="sm" fontWeight="500">
+                      <Box><Text color="#4ade80" fontSize="sm" fontWeight="500">
                         {commify(tokensPurchased, 2)}
-                      </Text>
-                      <Text color="#888" fontSize="sm">{tokenSymbol}</Text>
+                      </Text></Box>
+                      <Box><Text color="#888" fontSize="sm">{tokenSymbol}</Text></Box>
                     </HStack>
                   </HStack>
                   {finalized && (
@@ -882,18 +1006,18 @@ const Presale: React.FC = () => {
                 </Text>
                 <VStack align="stretch" gap={3}>
                   <HStack justify="space-between">
-                    <Text color="#888" fontSize="sm">Users referred</Text>
-                    <Text color="white" fontSize="sm" fontWeight="500">
+                    <Box><Text color="#888" fontSize="sm">Users referred</Text></Box>
+                    <Box><Text color="white" fontSize="sm" fontWeight="500">
                       {referralCount || 0}
-                    </Text>
+                    </Text></Box>
                   </HStack>
                   <HStack justify="space-between">
-                    <Text color="#888" fontSize="sm">Earned</Text>
+                    <Box><Text color="#888" fontSize="sm">Earned</Text></Box>
                     <HStack>
-                      <Text color="#4ade80" fontSize="sm" fontWeight="500">
-                        {(formatEther(totalReferred) * 0.03).toFixed(4)}
-                      </Text>
-                      <Text color="#888" fontSize="sm">MON</Text>
+                      <Box><Text color="#4ade80" fontSize="sm" fontWeight="500">
+                        {(parseFloat(totalReferred) * 0.03).toFixed(4)}
+                      </Text></Box>
+                      <Box><Text color="#888" fontSize="sm">MON</Text></Box>
                     </HStack>
                   </HStack>
                   <Box pt={2}>
@@ -912,7 +1036,7 @@ const Presale: React.FC = () => {
                       >
                         {presaleUrl}
                       </Box>
-                      <Button
+                      <Box><Button
                         size="sm"
                         bg="#2a2a2a"
                         color="white"
@@ -920,18 +1044,154 @@ const Presale: React.FC = () => {
                         _hover={{ bg: "#3a3a3a" }}
                       >
                         {hasCopied ? "Copied!" : "Copy"}
-                      </Button>
+                      </Button></Box>
                     </HStack>
                   </Box>
                 </VStack>
               </Box>
             )}
+            
+            {/* Wallet Balance Box on Mobile */}
+            {isMobile && (
+              <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%" mt={4}>
+                <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
+                  Wallet
+                </Text>
+                
+                <VStack align="stretch" gap={3}>
+                  {/* MON Balance */}
+                  <Box>
+                    <Flex justifyContent="space-between" alignItems="center">
+                      <HStack>
+                        <Box w="20px" h="20px">
+                          <Image
+                            src={monadLogo}
+                            alt="MON"
+                            w="20px"
+                            h="20px"
+                          />
+                        </Box>
+                        <Box>
+                          <Text color="#888" fontSize="sm">MON</Text>
+                        </Box>
+                      </HStack>
+                      <Box>
+                        <Text color="white" fontWeight="bold">
+                          {monBalance ? parseFloat(formatEther(monBalance.value)).toFixed(4) : "0.0000"}
+                        </Text>
+                      </Box>
+                    </Flex>
+                    <Text color="#666" fontSize="xs" textAlign="right">
+                      ≈ ${monBalance ? (parseFloat(formatEther(monBalance.value)) * 50).toFixed(2) : "0.00"}
+                    </Text>
+                  </Box>
+                  
+                  {/* Token Balance if user has tokens */}
+                  {tokenBalance && parseFloat(formatEther(tokenBalance)) > 0 && (
+                    <Box>
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <HStack>
+                          <Box w="20px" h="20px">
+                            <Image
+                              src={placeholderLogo}
+                              alt={tokenSymbol}
+                              w="20px"
+                              h="20px"
+                            />
+                          </Box>
+                          <Box>
+                            <Text color="#888" fontSize="sm">{tokenSymbol}</Text>
+                          </Box>
+                        </HStack>
+                        <Box>
+                          <Text color="white" fontWeight="bold">
+                            {parseFloat(formatEther(tokenBalance)).toFixed(4)}
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </Box>
+                  )}
+                </VStack>
+              </Box>
+            )}
           </Box>
           
-          {/* Right side - Presale Details */}
+          {/* Right side - Wallet Box and Presale Details */}
           {!isMobile && (
             <Box w="300px">
-              <PresaleDetails {...presaleData} />
+              <VStack gap={4}>
+                {/* Wallet Balance Box */}
+                <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
+                  <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
+                    Wallet
+                  </Text>
+                  
+                  <VStack align="stretch" gap={3}>
+                    {/* MON Balance */}
+                    <Box>
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <HStack>
+                          <Box w="20px" h="20px">
+                            <Image
+                              src={monadLogo}
+                              alt="MON"
+                              w="20px"
+                              h="20px"
+                            />
+                          </Box>
+                          <Box>
+                            <Text color="#888" fontSize="sm">MON</Text>
+                          </Box>
+                        </HStack>
+                        <Box>
+                          <Text color="white" fontWeight="bold">
+                            {monBalance ? parseFloat(formatEther(monBalance.value)).toFixed(4) : "0.0000"}
+                          </Text>
+                        </Box>
+                      </Flex>
+                      <Text color="#666" fontSize="xs" textAlign="right">
+                        ≈ ${monBalance ? (parseFloat(formatEther(monBalance.value)) * 50).toFixed(2) : "0.00"}
+                      </Text>
+                    </Box>
+                    
+                    {/* Token Balance if user has tokens */}
+                    {tokenBalance && parseFloat(formatEther(tokenBalance)) > 0 && (
+                      <Box>
+                        <Flex justifyContent="space-between" alignItems="center">
+                          <HStack>
+                            <Box w="20px" h="20px">
+                              <Image
+                                src={placeholderLogo}
+                                alt={tokenSymbol}
+                                w="20px"
+                                h="20px"
+                              />
+                            </Box>
+                            <Box>
+                              <Text color="#888" fontSize="sm">{tokenSymbol}</Text>
+                            </Box>
+                          </HStack>
+                          <Box>
+                            <Text color="white" fontWeight="bold">
+                              {parseFloat(formatEther(tokenBalance)).toFixed(4)}
+                            </Text>
+                          </Box>
+                        </Flex>
+                      </Box>
+                    )}
+                  </VStack>
+                </Box>
+                
+                {/* Presale Details Box */}
+                {(() => {
+                  try {
+                    return <PresaleDetails {...presaleData} />;
+                  } catch (error) {
+                    console.error("Error rendering PresaleDetails:", error);
+                    return <Box>Error loading presale details</Box>;
+                  }
+                })()}
+              </VStack>
             </Box>
           )}
         </Flex>

@@ -2,47 +2,15 @@ import React from 'react';
 import { Box, HStack, Text, Image } from '@chakra-ui/react';
 import { commify, commifyDecimals, formatNumberPrecise } from '../utils';
 import placeholderLogo from "../assets/images/question.svg";
-import bnbLogo from "../assets/images/bnb.png";
+import monadLogo from "../assets/images/monad.png";
 
 const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenSymbol, contributionAmount, tokensPurchased, Logo }) => {
     return (
-        <Box backgroundColor="#222831" p={8}  borderRadius={10} px={8} border="1px solid white">
-            <HStack spacing={4}>
-                <Box w={isMobile ? "100px" : "150px"}>
-                    <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>Balance</Text>
-                </Box>
-                <Box w={isMobile ? "100px" : "150px"} 
-                // ml={isMobile ? 0 : -2} 
-                // border="1px solid white"
-                >
-                    <Text
-                        color="#f3b500"
-                        fontWeight="bold"
-                        fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
-                    >
-                        {Number(balance.data?.formatted).toFixed(4) > 1000 ? ">" : ""}
-                        {commify(Number(balance.data?.formatted).toFixed(3) > 1000 ? 1000 : Number(balance.data?.formatted).toFixed(4))}
-                    </Text>
-                </Box>
-                <Box 
-                // border="1px solid white" 
-                w={isMobile ? "50px" : "30px"} 
-                // ml={isMobile ? 5 : -5}
-                >
-                    <Image h={5}  src={bnbLogo}  />
-                </Box>
-                <Box w="40px" 
-                // border="1px solid white"
-                >
-                    <Text 
-                    fontWeight="bold" 
-                    // ml={isMobile ? -4 : -6}
-                    fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
-                     >
-                        {isMobile ? "" : <>&nbsp;</>}MON
-                    </Text>
-                </Box>
-            </HStack>
+        <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
+            <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
+                Details
+            </Text>
+
 
             <HStack mt={3} spacing={4} >
                 <Box 
@@ -56,7 +24,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 >
                     <Text
                         // ml={isMobile ? -2 : 0}
-                        color="#f3b500"
+                        color="#888"
                         fontWeight="bold"
                         fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
                     >
@@ -68,7 +36,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                   // border="1px solid white"
                 // ml={isMobile ? -7 : -5}
                 >
-                    <Image h={5} src={bnbLogo} />
+                    <Image h={5} src={monadLogo} />
                 </Box>
                 <Box 
                   w="40px" 
@@ -95,7 +63,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 >
                     <Text
                         //  ml={-2}
-                        color="#f3b500"
+                        color="#888"
                         fontWeight="bold"
                         fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
                     >
@@ -109,7 +77,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 >
                     <Image 
                     // ml={isMobile ? -3 : 0} 
-                    h={5} src={bnbLogo}  
+                    h={5} src={monadLogo}  
                     />
                 </Box>
                 <Box  
@@ -141,7 +109,7 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 >
                     <Text
                         // ml={isMobile ? "3px" : -1}
-                        color="#f3b500"
+                        color="#888"
                         fontWeight="bold"
                         fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
                     >

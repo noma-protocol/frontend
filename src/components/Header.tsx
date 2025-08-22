@@ -17,6 +17,7 @@ import {
 } from "./ui/select";
 import { useNavigate, useLocation } from 'react-router-dom';
 import config from '../config';
+import { useToken } from '../contexts/TokenContext';
 
 const Header: React.FC = () => {
   const ctx = useContext<LanguageContextType>(LanguageContext);
@@ -25,14 +26,15 @@ const Header: React.FC = () => {
   const { setIsMenuOpen } = useMenu(); // Access setIsMenuOpen from context
   const navigate = useNavigate();
   const location = useLocation();
+  const { selectedToken } = useToken();
 
   // Get vault address from URL params if on borrow page
   const searchParams = new URLSearchParams(location.search);
   const currentVaultAddress = searchParams.get('v') || '';
   
-  // Use the nomaVault as default if no vault address is in the URL
+  // Use the selected token's vault, then URL param, then default NOMA vault
   const nomaVault = "0x0b3507D715DCd7ee876626013b8BC7Fa1B069232";
-  const vaultAddress = currentVaultAddress || nomaVault;
+  const vaultAddress = selectedToken?.vault || currentVaultAddress || nomaVault;
   
   const navigationItems = createListCollection({
     items: [
