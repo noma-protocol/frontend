@@ -48,6 +48,7 @@ import { Toaster, toaster } from "../components/ui/toaster"
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
 import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress } from "../utils";
+import { useToken } from "../contexts/TokenContext";
 
 import Logo from "../assets/images/noma_logo_transparent.png";
 
@@ -99,6 +100,7 @@ import { set } from "react-ga";
 import placeholderLogo from "../assets/images/question_white.svg";
 import wethLogo from "../assets/images/weth.svg";
 import monadLogo from "../assets/images/monad.png";
+import TrollBox from "../components/TrollBox";
 import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
@@ -149,7 +151,7 @@ const localProvider = new providers.JsonRpcProvider(
 
 const Launchpad: React.FC = () => {
     const { address, isConnected } = useAccount();
-    const [selectedToken, setSelectedToken] = useState(null);
+    const { selectedToken, setSelectedToken } = useToken();
     const [searchTerm, setSearchTerm] = useState("");
     const [tradeAmount, setTradeAmount] = useState("");
     const [isBuying, setIsBuying] = useState(true);
@@ -597,7 +599,7 @@ const Launchpad: React.FC = () => {
         
         // Fetch data from API
         const loadChartData = async () => {
-            console.log("Loading chart data for token:", selectedToken.symbol, "timeframe:", chartTimeframe);
+            // console.log("Loading chart data for token:", selectedToken.symbol, "timeframe:", chartTimeframe);
             setIsChartLoading(true);
             
             try {
@@ -605,7 +607,7 @@ const Launchpad: React.FC = () => {
                 
                 // Validate data before setting
                 if (ohlcData && ohlcData.length > 0) {
-                    console.log("Chart data loaded:", ohlcData.length, "candles");
+                    // console.log("Chart data loaded:", ohlcData.length, "candles");
                     setChartSeries([{
                         name: `${selectedToken.symbol}/${token1Symbol}`,
                         data: ohlcData
@@ -663,10 +665,10 @@ const Launchpad: React.FC = () => {
                 };
                 
                 const change = calculatePercentChange(ohlcData, chartTimeframe);
-                console.log("Calculated percentage change:", change, "for timeframe:", chartTimeframe);
+                // console.log("Calculated percentage change:", change, "for timeframe:", chartTimeframe);
                 setPercentChange(change);
             } else {
-                console.log("No chart data available");
+                // console.log("No chart data available");
                 setChartSeries([{
                     name: `${selectedToken.symbol}/${token1Symbol}`,
                     data: []
@@ -837,7 +839,7 @@ const Launchpad: React.FC = () => {
         
         // Record the timestamp when we start listening
         const startListeningTime = Date.now();
-        console.log("Starting to listen for Swap events at:", new Date(startListeningTime));
+        // console.log("Starting to listen for Swap events at:", new Date(startListeningTime));
         
         // Modified handleSwap to check timestamp
         const handleSwapWithTimeCheck = async (...args) => {
@@ -1490,42 +1492,42 @@ const Launchpad: React.FC = () => {
                 
                 // Fetch WETH balance
                 try {
-                    console.log("Fetching WMON balance from address:", WETH_ADDRESS, "for wallet:", address);
+                    // console.log("Fetching WMON balance from address:", WETH_ADDRESS, "for wallet:", address);
                     const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
                     const wethBal = await wethContract.balanceOf(address);
-                    console.log("Raw WMON balance:", wethBal?.toString());
+                    // console.log("Raw WMON balance:", wethBal?.toString());
                     if (wethBal && wethBal._isBigNumber) {
                         const formattedWethBalance = formatEther(wethBal);
-                        console.log("Formatted WMON balance:", formattedWethBalance);
+                        // console.log("Formatted WMON balance:", formattedWethBalance);
                         setWethBalance(formattedWethBalance);
                     } else {
-                        console.log("Invalid WMON balance format, setting to 0");
+                        // console.log("Invalid WMON balance format, setting to 0");
                         setWethBalance("0");
                     }
                 } catch (wethError) {
-                    console.error("Error fetching WETH balance:", wethError);
+                    // console.error("Error fetching WETH balance:", wethError);
                     setWethBalance("0");
                 }
                 
                 // Fetch selected token balance if available
                 if (selectedToken && selectedToken.token0) {
                     try {
-                        console.log("Fetching balance for token:", selectedToken.symbol, "at address:", selectedToken.token0);
+                        // console.log("Fetching balance for token:", selectedToken.symbol, "at address:", selectedToken.token0);
                         const tokenContract = new ethers.Contract(selectedToken.token0, ERC20Abi, localProvider);
                         const tokenBal = await tokenContract.balanceOf(address);
-                        console.log("Raw token balance:", tokenBal.toString());
+                        // console.log("Raw token balance:", tokenBal.toString());
                         
                         // Ensure we have a valid BigNumber before formatting
                         if (tokenBal && tokenBal._isBigNumber) {
                             const formattedBalance = formatEther(tokenBal);
-                            console.log("Formatted token balance:", formattedBalance);
+                            // console.log("Formatted token balance:", formattedBalance);
                             setTokenBalance(formattedBalance);
                         } else {
-                            console.log("Invalid balance format, setting to 0");
+                            // console.log("Invalid balance format, setting to 0");
                             setTokenBalance("0");
                         }
                     } catch (tokenError) {
-                        console.error("Error fetching token balance:", tokenError);
+                        // console.error("Error fetching token balance:", tokenError);
                         setTokenBalance("0");
                     }
                 } else {
@@ -2282,6 +2284,11 @@ const Launchpad: React.FC = () => {
                             </Table.Root>
                             )}
                         </Box>
+                    </Box>
+                    
+                    {/* Troll Box */}
+                    <Box mt={4}>
+                        <TrollBox />
                     </Box>
                 </Box>
                 
