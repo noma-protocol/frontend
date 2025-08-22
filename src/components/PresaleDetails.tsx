@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, HStack, Text, Image } from '@chakra-ui/react';
 import { commify, commifyDecimals, formatNumberPrecise } from '../utils';
-import placeholderLogo from "../assets/images/question.svg";
+import placeholderLogo from "../assets/images/question_white.svg";
 import monadLogo from "../assets/images/monad.png";
 
 const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenSymbol, contributionAmount, tokensPurchased, Logo }) => {
@@ -10,46 +10,6 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
             <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
                 Details
             </Text>
-
-
-            <HStack mt={3} spacing={4} >
-                <Box 
-                  w={isMobile ? "100px" : "150px"} 
-                  // border="1px solid white"
-                >
-                    <Text fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}>Token price</Text>
-                </Box>
-                <Box  w={isMobile ? "100px" : "150px"}
-                  // border="1px solid white"
-                >
-                    <Text
-                        // ml={isMobile ? -2 : 0}
-                        color="#888"
-                        fontWeight="bold"
-                        fontSize={{ base: "12px", sm: "12px", md: "14px", lg: "14px" }}
-                    >
-                        {commifyDecimals(initialPrice, 6)}
-                    </Text>
-                </Box>
-                <Box  
-                  w={isMobile ? "50px" : "30px"} 
-                  // border="1px solid white"
-                // ml={isMobile ? -7 : -5}
-                >
-                    <Image h={5} src={monadLogo} />
-                </Box>
-                <Box 
-                  w="40px" 
-                  // border="1px solid white"
-                >
-                    <Text 
-                        fontWeight="bold" 
-                        fontSize={{ base: "11px", sm: "11px", md: "14px", lg: "14px" }}
-                    >
-                        {isMobile ? "" : <>&nbsp;</>}MON
-                    </Text>
-                </Box>
-            </HStack>
 
             <HStack mt={3} spacing={4}>
                 <Box 
@@ -121,10 +81,10 @@ const PresaleDetails = ({ isMobile, balance, initialPrice, contributions, tokenS
                 w={isMobile ? "50px" : "30px"} 
                 // border="1px solid white"
                 >
-                    <Image ml={isMobile ? 3 : 0} h={4} src={placeholderLogo} />
+                    {/* <Image ml={isMobile ? 3 : 0} h={4} src={placeholderLogo} /> */}
                 </Box>
-                <Box w={ "50px"} >
-                    <Text ml={isMobile ? 0 : -1}  fontWeight="bold" fontSize={isMobile ? "8px" : "10px"}>
+                <Box w={ "100px"} >
+                    <Text ml={isMobile ? 0 : -1}  fontWeight="bold" fontSize={isMobile ? "8px" : "14px"}>
                     &nbsp;{tokenSymbol}
                     </Text>
                 </Box>

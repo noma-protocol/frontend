@@ -1,8 +1,8 @@
-import React, { useContext, useEffect } from "react";
-import { Box, Text, Button, createListCollection } from '@chakra-ui/react';
+import React, { useContext, useEffect, useState } from "react";
+import { Box, Text, Button, createListCollection, Spinner, HStack } from '@chakra-ui/react';
 import { LanguageContext, LanguageContextType } from "../core/LanguageProvider";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-import { useAccount } from "wagmi";
+import { useAccount, useContractRead } from "wagmi";
 import Logo from "../assets/images/logo.svg";
 import { isMobile } from 'react-device-detect';
 import { Link, Image } from '@chakra-ui/react';
@@ -18,6 +18,20 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import config from '../config';
 import { useToken } from '../contexts/TokenContext';
+import { ethers } from "ethers";
+import { getContractAddress } from "../utils";
+import addressesLocal from "../assets/deployment.json";
+import addressesBsc from "../assets/deployment.json";
+
+// Get contract addresses
+const addresses = config.chain == "local" ? addressesLocal : addressesBsc;
+import OikosFactoryArtifact from "../assets/OikosFactory.json";
+const OikosFactoryAbi = OikosFactoryArtifact.abi;
+const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
+const { JsonRpcProvider } = ethers.providers;
+const localProvider = new JsonRpcProvider(
+  config.chain == "local" ? "http://localhost:8545" : config.RPC_URL
+);
 
 const Header: React.FC = () => {
   const ctx = useContext<LanguageContextType>(LanguageContext);
@@ -27,6 +41,12 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedToken } = useToken();
+
+  // Vault selection state
+  const [vaultDescriptions, setVaultDescriptions] = useState([]);
+  const [selectedVault, setSelectedVault] = useState("");
+  const [vaultsSelectData, setVaultsSelectData] = useState(createListCollection({ items: [] }));
+  const [isVaultsLoading, setIsVaultsLoading] = useState(false);
 
   // Get vault address from URL params if on borrow page
   const searchParams = new URLSearchParams(location.search);
@@ -39,6 +59,7 @@ const Header: React.FC = () => {
   const navigationItems = createListCollection({
     items: [
       { label: "Exchange", value: "/" },
+      { label: "Liquidity", value: `/liquidity` },
       { label: "Borrow", value: `/borrow?v=${vaultAddress}` },
       { label: "Stake", value: `/stake?v=${vaultAddress}` },
       { label: "Markets", value: "/markets" },
@@ -52,6 +73,115 @@ const Header: React.FC = () => {
     }
   };
 
+  // Fetch deployers for vault selection
+  const {
+    data: deployersData,
+    isError: isDeployersError,
+  } = useContractRead({
+    address: nomaFactoryAddress,
+    abi: OikosFactoryAbi,
+    functionName: "getDeployers",
+    enabled: isConnected && location.pathname === '/liquidity',
+  });
+
+
+  // Fetch vaults when on liquidity page
+  useEffect(() => {
+    if (location.pathname === '/liquidity' && deployersData && typeof deployersData !== "undefined") {
+      const nomaFactoryContract = new ethers.Contract(
+        nomaFactoryAddress,
+        OikosFactoryAbi,
+        localProvider
+      );
+
+      const fetchVaults = async () => {
+        setIsVaultsLoading(true);
+        try {
+          const allVaultDescriptions = [];
+
+          for (const deployer of deployersData) {
+            const vaultsData = await nomaFactoryContract.getVaults(deployer);
+
+            for (const vault of vaultsData) {
+              const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
+
+              const plainVaultDescription = {
+                tokenName: vaultDescriptionData[0],
+                tokenSymbol: vaultDescriptionData[1],
+                vault: vaultDescriptionData[6],
+              };
+              
+              if (config.environment != "dev") {
+                if (plainVaultDescription.tokenSymbol != "OKS") {
+                  continue;
+                }
+              }
+
+              allVaultDescriptions.push(plainVaultDescription);
+            }
+          }
+
+          setVaultDescriptions(allVaultDescriptions);
+          setIsVaultsLoading(false);
+
+          // Set the first vault as default or get from URL
+          const urlVault = searchParams.get('vault');
+          if (urlVault) {
+            setSelectedVault(urlVault);
+          } else if (allVaultDescriptions.length > 0) {
+            // If no vault in URL, set first vault and navigate to it
+            const firstVault = allVaultDescriptions[0].vault;
+            setSelectedVault(firstVault);
+            navigate(`/liquidity?vault=${firstVault}`, { replace: true });
+          }
+          
+        } catch (error) {
+          console.error("Error fetching vaults:", error);
+          setIsVaultsLoading(false);
+        }
+      };
+
+      fetchVaults();
+    }
+  }, [deployersData, location.pathname]);
+
+  // Update vaults select data when vault descriptions change
+  useEffect(() => {
+    if (vaultDescriptions.length > 0) {
+      const _vaultsSelectData = {
+        items: vaultDescriptions
+          .filter((vault) => vault?.tokenName && vault?.vault)
+          .map((vault) => ({
+            label: vault.tokenName,
+            value: vault.vault,
+          })),
+      };
+  
+      if (_vaultsSelectData.items.length > 0) {
+        setVaultsSelectData(createListCollection(_vaultsSelectData));
+      }
+    }
+  }, [vaultDescriptions]);
+
+  // Sync selected vault with URL when on liquidity page
+  useEffect(() => {
+    if (location.pathname === '/liquidity') {
+      const urlVault = searchParams.get('vault');
+      if (urlVault && urlVault !== selectedVault) {
+        setSelectedVault(urlVault);
+      }
+    }
+  }, [location.search, location.pathname]);
+
+  // Handle vault selection change
+  const handleVaultChange = (details) => {
+    const value = details.value?.[0] || details.value;
+    if (value) {
+      setSelectedVault(value);
+      // Navigate to liquidity page with selected vault
+      navigate(`/liquidity?vault=${value}`);
+    }
+  };
 
   useEffect(() => {
     const menuModal = document.getElementById("menu");
@@ -126,6 +256,66 @@ const Header: React.FC = () => {
         
         {/* Navigation and Wallet */}
         <Box display="flex" alignItems="center" gap={3}>
+          {/* Vault Selector - Only on Liquidity page */}
+          {location.pathname === '/liquidity' && !isVaultsLoading && vaultsSelectData?.items?.length > 0 && (
+            <SelectRoot
+              key={`vault-select-${vaultsSelectData.items.length}`}
+              collection={vaultsSelectData}
+              size="sm"
+              width="160px"
+              value={selectedVault ? [selectedVault] : []}
+              onValueChange={handleVaultChange}
+            >
+              <SelectTrigger
+                bg="#1a1a1a"
+                border="1px solid #2a2a2a"
+                h="38px"
+                color="white"
+                _hover={{ 
+                  bg: "#2a2a2a",
+                  borderColor: "#3a3a3a" 
+                }}
+                _focus={{
+                  borderColor: "#2a2a2a",
+                  outline: "none"
+                }}
+              >
+                <SelectValueText placeholder="Select vault" />
+              </SelectTrigger>
+              <SelectContent
+                bg="#1a1a1a"
+                border="1px solid #2a2a2a"
+                borderRadius="md"
+              >
+                {vaultsSelectData.items.map((vaultData) => (
+                  <SelectItem 
+                    item={vaultData} 
+                    key={vaultData.value}
+                    _hover={{ 
+                      bg: "#2a2a2a",
+                      color: "white" 
+                    }}
+                    _selected={{
+                      bg: "#2a2a2a",
+                      color: "#4ade80"
+                    }}
+                    color="#888"
+                  >
+                    {vaultData.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
+          )}
+
+          {/* Loading spinner for vaults */}
+          {location.pathname === '/liquidity' && isVaultsLoading && (
+            <HStack>
+              <Spinner size="sm" color="#4ade80" />
+              <Text color="#888" fontSize="sm">Loading vaults...</Text>
+            </HStack>
+          )}
+
           {/* Navigation Dropdown */}
           <SelectRoot
             collection={navigationItems}

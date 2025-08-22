@@ -24,30 +24,26 @@ interface Message {
 const TrollBox: React.FC = () => {
   const { address, isConnected } = useAccount();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      address: '0x1234...5678',
-      text: 'Welcome to the troll box! 🚀',
-      timestamp: new Date(Date.now() - 5 * 60 * 1000),
-    },
-    {
-      id: '2',
-      address: '0xabcd...efgh',
-      text: 'NOMA to the moon! 🌙',
-      timestamp: new Date(Date.now() - 3 * 60 * 1000),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll if user is already near the bottom
+    if (messagesEndRef.current) {
+      const container = messagesEndRef.current.parentElement;
+      if (container) {
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+        if (isNearBottom && messages.length > 2) {
+          scrollToBottom();
+        }
+      }
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -55,6 +51,28 @@ const TrollBox: React.FC = () => {
       setUnreadCount(0);
     }
   }, [isExpanded]);
+
+  // Add initial messages after component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMessages([
+        {
+          id: '1',
+          address: '0x1234...5678',
+          text: 'Welcome to the troll box! 🚀',
+          timestamp: new Date(Date.now() - 5 * 60 * 1000),
+        },
+        {
+          id: '2',
+          address: '0xabcd...efgh',
+          text: 'NOMA to the moon! 🌙',
+          timestamp: new Date(Date.now() - 3 * 60 * 1000),
+        },
+      ]);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSendMessage = () => {
     if (!newMessage.trim() || !isConnected) return;
@@ -94,11 +112,6 @@ const TrollBox: React.FC = () => {
     }
   };
 
-  const formatAddress = (addr: string) => {
-    if (!addr) return 'Anonymous';
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  };
-
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
@@ -108,17 +121,26 @@ const TrollBox: React.FC = () => {
     <Box
       bg="#1a1a1a"
       borderRadius="lg"
-      p={4}
-      cursor="pointer"
-      onClick={() => setIsExpanded(true)}
       position="relative"
-      _hover={{ bg: '#2a2a2a' }}
       transition="all 0.2s"
+      h="300px"
+      maxH="300px"
+      display="flex"
+      flexDirection="column"
+      overflow="hidden"
     >
-      <HStack justify="space-between">
+      {/* Header */}
+      <HStack
+        justify="space-between"
+        p={3}
+        borderBottom="1px solid #2a2a2a"
+        cursor="pointer"
+        onClick={() => setIsExpanded(true)}
+        _hover={{ bg: '#2a2a2a' }}
+      >
         <HStack>
-          <FiMessageSquare size={20} color="#4ade80" />
-          <Text color="white" fontWeight="bold">Troll Box</Text>
+          <Box> <FiMessageSquare size={20} color="#4ade80" /></Box>
+          <Box><Text color="white" fontWeight="bold">Troll Box</Text></Box>
         </HStack>
         <HStack>
           {unreadCount > 0 && (
@@ -133,12 +155,95 @@ const TrollBox: React.FC = () => {
             variant="ghost"
             color="white"
             _hover={{ bg: '#3a3a3a' }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(true);
+            }}
           />
         </HStack>
       </HStack>
-      <Text color="#888" fontSize="sm" mt={2}>
-        Click to join the conversation
-      </Text>
+      
+      {/* Messages */}
+      <VStack
+        flex="1"
+        overflowY="auto"
+        overflowX="hidden"
+        p={3}
+        gap={2}
+        align="stretch"
+        position="relative"
+        css={{
+          '&::-webkit-scrollbar': {
+            width: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            bg: '#0a0a0a',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            bg: '#3a3a3a',
+            borderRadius: '2px',
+          },
+        }}
+      >
+        {messages.slice(-3).map((msg) => (
+          <Box key={msg.id} mb={1}>
+            <Box
+              bg="#2a2a2a"
+              p={2}
+              borderRadius="sm"
+              borderLeft="2px solid #4ade80"
+            >
+              <Text color="white" fontSize="xs" noOfLines={1}>
+                {msg.text}
+              </Text>
+            </Box>
+          </Box>
+        ))}
+        <div ref={messagesEndRef} />
+      </VStack>
+
+      {/* Input */}
+      <Box p={3} borderTop="1px solid #2a2a2a">
+        {isConnected ? (
+          <HStack>
+            <Input
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder="Type message..."
+              bg="#2a2a2a"
+              border="none"
+              color="white"
+              h="36px"
+              _placeholder={{ color: '#666' }}
+              _hover={{ bg: '#3a3a3a' }}
+              _focus={{ bg: '#3a3a3a', outline: 'none' }}
+            />
+            <Button
+              size="sm"
+              bg="#4ade80"
+              color="black"
+              fontWeight="600"
+              onClick={handleSendMessage}
+              isDisabled={!newMessage.trim()}
+              _hover={{ bg: "#22c55e" }}
+              _disabled={{ 
+                bg: "#2a2a2a", 
+                color: "#666",
+                cursor: "not-allowed" 
+              }}
+              leftIcon={<FiSend />}
+              px={4}
+            >
+              Send
+            </Button>
+          </HStack>
+        ) : (
+          <Text color="#888" textAlign="center" fontSize="xs">
+            Connect wallet to chat
+          </Text>
+        )}
+      </Box>
     </Box>
   );
 
@@ -160,10 +265,12 @@ const TrollBox: React.FC = () => {
           top="50%"
           left="50%"
           transform="translate(-50%, -50%)"
-          w="40vw"
-          h="40vh"
-          minW="400px"
-          minH="400px"
+          w="60vw"
+          h="70vh"
+          minW="600px"
+          minH="500px"
+          maxW="900px"
+          maxH="700px"
           bg="#1a1a1a"
           borderRadius="xl"
           overflow="hidden"
@@ -180,13 +287,17 @@ const TrollBox: React.FC = () => {
             bg="#0a0a0a"
           >
             <HStack>
-              <FiMessageSquare size={20} color="#4ade80" />
+              <Box> <FiMessageSquare size={20} color="#4ade80" /> </Box>
+              <Box>
               <Text color="white" fontWeight="bold" fontSize="lg">
                 Troll Box
               </Text>
+              </Box>
+              <Box>
               <Text color="#888" fontSize="sm">
                 ({messages.length} messages)
               </Text>
+              </Box>
             </HStack>
             <IconButton
               aria-label="Minimize"
@@ -221,14 +332,6 @@ const TrollBox: React.FC = () => {
           >
             {messages.map((msg) => (
               <Box key={msg.id}>
-                <HStack justify="space-between" mb={1}>
-                  <Text color="#4ade80" fontSize="sm" fontWeight="500">
-                    {formatAddress(msg.address)}
-                  </Text>
-                  <Text color="#666" fontSize="xs">
-                    {formatTime(msg.timestamp)}
-                  </Text>
-                </HStack>
                 <Box
                   bg="#2a2a2a"
                   p={3}
@@ -256,17 +359,28 @@ const TrollBox: React.FC = () => {
                   bg="#2a2a2a"
                   border="none"
                   color="white"
+                  h="44px"
                   _placeholder={{ color: '#666' }}
                   _hover={{ bg: '#3a3a3a' }}
                   _focus={{ bg: '#3a3a3a', outline: 'none' }}
                 />
-                <IconButton
-                  aria-label="Send"
-                  icon={<FiSend />}
-                  colorScheme="green"
+                <Button
+                  bg="#4ade80"
+                  color="black"
+                  fontWeight="600"
                   onClick={handleSendMessage}
                   isDisabled={!newMessage.trim()}
-                />
+                  _hover={{ bg: "#22c55e" }}
+                  _disabled={{ 
+                    bg: "#2a2a2a", 
+                    color: "#666",
+                    cursor: "not-allowed" 
+                  }}
+                  leftIcon={<FiSend />}
+                  px={6}
+                >
+                  Send
+                </Button>
               </HStack>
             ) : (
               <Text color="#888" textAlign="center" fontSize="sm">

@@ -19,9 +19,11 @@ import { useAccount, useContractRead } from "wagmi";
 import { Toaster } from "../components/ui/toaster";
 import { ethers } from "ethers";
 const { JsonRpcProvider } = ethers.providers;
+const { formatEther } = ethers.utils;
 import { isMobile } from "react-device-detect";
 import useScreenOrientation from '../hooks/useScreenOrientation';
 import RotateDeviceMessage from '../components/RotateDeviceMessage';
+import { commify, commifyDecimals } from "../utils";
 import {
     SelectContent,
     SelectItem,
@@ -38,8 +40,9 @@ import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
 import addressesBsc   from "../assets/deployment.json";
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 
-const ModelHelperArtifact = await import(`../assets/ModelHelper.json`);
+import ModelHelperArtifact from "../assets/ModelHelper.json";
 const ModelHelperAbi = ModelHelperArtifact.abi;
 
 const addresses = config.chain === "local"
@@ -53,8 +56,8 @@ const localProvider = new JsonRpcProvider(
   config.RPC_URL
 );
 
-// Dynamically import the NomaFactory artifact and extract its ABI
-const OikosFactoryArtifact = await import(`../assets/OikosFactory.json`);
+// Import the NomaFactory artifact and extract its ABI
+import OikosFactoryArtifact from "../assets/OikosFactory.json";
 const OikosFactoryAbi = OikosFactoryArtifact.abi;
 
 const uniswapV3FactoryABI = [
@@ -72,12 +75,10 @@ const feeTier = 3000;
 
 const Liquidity: React.FC = () => {
   const { address, isConnected } = useAccount();
+  const location = useLocation();
   const screenOrientation = useScreenOrientation();
   const isLandscape = screenOrientation.includes("landscape");
-  const [isAllVaultsLoading, setIsAllVaultsLoading] = useState(true);
   const [vaultDescriptions, setVaultDescriptions] = useState([]);
-  const [selectedVault, setSelectedVault] = useState(""); // State to store the selected vault address
-  const [vaultsSelectData, setVaultsSelectData] = useState(createListCollection({ items: [] }));
   const [errorDeployed, setErrorDeployed] = useState(false);
   const [vaultData, setVaultData] = useState({});
   const [liquidityRatio, setLiquidityRatio] = useState(0);
@@ -89,6 +90,11 @@ const Liquidity: React.FC = () => {
   const [feesToken1, setFeesToken1] = useState(0);
   const [priceUSD, setPriceUSD] = useState("0.00000000000");
   const [selectedDestination, setSelectedDestination] = useState("/liquidity");
+  const [token1Symbol, setToken1Symbol] = useState("MON");
+  
+  // Get selected vault from URL params
+  const searchParams = new URLSearchParams(location.search);
+  const selectedVault = searchParams.get('vault') || '';
 
   const _navigationSelectData = {
     items: [
@@ -178,7 +184,7 @@ const Liquidity: React.FC = () => {
   };
 
   /**
-   * Fetch all vaults for the "All Markets" view
+   * Fetch vault descriptions to display token info
    */
   const {
     data: deployersData,
@@ -187,105 +193,71 @@ const Liquidity: React.FC = () => {
     address: nomaFactoryAddress,
     abi: OikosFactoryAbi,
     functionName: "getDeployers",
-    enabled: isConnected,
+    enabled: isConnected && selectedVault !== '',
   });
 
   useEffect(() => {
-    if (typeof deployersData !== "undefined") {
+    if (typeof deployersData !== "undefined" && selectedVault) {
       const nomaFactoryContract = new ethers.Contract(
         nomaFactoryAddress,
         OikosFactoryAbi,
         localProvider
       );
 
-      setTimeout(() => {
-        const fetchVaults = async () => {
-          setIsAllVaultsLoading(true);
+      const fetchVaultDescriptions = async () => {
+        try {
+          const allVaultDescriptions = [];
 
-          try {
-            const allVaultDescriptions = [];
+          // Iterate over deployers
+          for (const deployer of deployersData) {
+            const vaultsData = await nomaFactoryContract.getVaults(deployer);
 
-            // Iterate over deployers
-            for (const deployer of deployersData) {
-              const vaultsData = await nomaFactoryContract.getVaults(deployer);
+            // Iterate over vaults for each deployer
+            for (const vault of vaultsData) {
+              const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
 
-              // Iterate over vaults for each deployer
-              for (const vault of vaultsData) {
-                const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
-
-                // Convert Proxy(_Result) to a plain object
-                const plainVaultDescription = {
-                  tokenName: vaultDescriptionData[0],
-                  tokenSymbol: vaultDescriptionData[1],
-                  tokenDecimals: Number(vaultDescriptionData[2]), // Convert BigInt to number
-                  token0: vaultDescriptionData[3],
-                  token1: vaultDescriptionData[4],
-                  deployer: vaultDescriptionData[5],
-                  vault: vaultDescriptionData[6],
-                  presaleContract: vaultDescriptionData[7],
-                };
-                
-                if (config.environment != "dev") {
-                  if (plainVaultDescription.tokenSymbol != "OKS") {
-                    // console.log("Skipping OKS vault:", vault.toString());
-                    continue;
-                  }
+              // Convert Proxy(_Result) to a plain object
+              const plainVaultDescription = {
+                tokenName: vaultDescriptionData[0],
+                tokenSymbol: vaultDescriptionData[1],
+                tokenDecimals: Number(vaultDescriptionData[2]), // Convert BigInt to number
+                token0: vaultDescriptionData[3],
+                token1: vaultDescriptionData[4],
+                deployer: vaultDescriptionData[5],
+                vault: vaultDescriptionData[6],
+                presaleContract: vaultDescriptionData[7],
+              };
+              
+              if (config.environment != "dev") {
+                if (plainVaultDescription.tokenSymbol != "OKS") {
+                  continue;
                 }
-
-                const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
-
-                // Create a new object with the additional poolAddress property
-                const augmentedVaultDescription = {
-                  ...plainVaultDescription, // Retains all original keys
-                  poolAddress, // Add poolAddress to the object
-                };
-
-                allVaultDescriptions.push(augmentedVaultDescription);
               }
-            }
 
-            // Update state with all vault descriptions
-            setVaultDescriptions(allVaultDescriptions);
-            setIsAllVaultsLoading(false);
+              const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
-            // Set the first vault as the default selected value
-            if (allVaultDescriptions.length > 0) {
-                setSelectedVault(allVaultDescriptions[0].vault);
+              // Create a new object with the additional poolAddress property
+              const augmentedVaultDescription = {
+                ...plainVaultDescription, // Retains all original keys
+                poolAddress, // Add poolAddress to the object
+              };
+
+              allVaultDescriptions.push(augmentedVaultDescription);
             }
-            
-          } catch (error) {
-            console.error("Error fetching vaults:", error);
           }
-        };
 
-        fetchVaults();
-      }, 3000);
-    }
-  }, [deployersData]);
-
-  useEffect(() => {
-    if (vaultDescriptions.length > 0) {
-      const _vaultsSelectData = {
-        items: vaultDescriptions
-          .filter((vault) => vault?.tokenName && vault?.vault) // Ensure valid values
-          .map((vault) => ({
-            label: vault.tokenName, // Label shown in dropdown
-            value: vault.vault, // Unique identifier for selection
-          })),
-      };
-  
-      if (_vaultsSelectData.items.length > 0) {
-        console.log("Vaults Select Data:", _vaultsSelectData);
-        setVaultsSelectData(createListCollection(_vaultsSelectData));
-  
-        // Set the first vault as the selected value if no vault is currently selected
-        if (!selectedVault) {
-          console.log("Setting selectedVault to:", _vaultsSelectData.items[0].value);
-          setSelectedVault(_vaultsSelectData.items[0].value);
+          // Update state with all vault descriptions
+          setVaultDescriptions(allVaultDescriptions);
+            
+        } catch (error) {
+          console.error("Error fetching vault descriptions:", error);
         }
-      }
+      };
+
+      fetchVaultDescriptions();
     }
-  }, [vaultDescriptions]); // Runs when vaultDescriptions updates
+  }, [deployersData, selectedVault]);
+
 
   useEffect(() => {
     const fetchVaultInfo = async () => {
@@ -403,21 +375,18 @@ const Liquidity: React.FC = () => {
   
   }, [selectedVault]); // Only run this effect when selectedVault changes
 
-  const handleSelectMarket = (event) => {
-    console.log("Selected Market:", event.target.value);
-    setSelectedVault(event.target.value);
-    setErrorDeployed(false); // Reset the error state when a new vault is selected
-  }
 
-  const handleSelectDestination = (event) => {
-      console.log(`Selected destination: ${event.target.value}`);
-        
-      window.location = event.target.value;
+  const handleSelectDestination = (details) => {
+      console.log(`Selected destination:`, details);
+      const value = details.value?.[0] || details.value || details.target?.value;
+      if (value) {
+        window.location = value;
+      }
   }
     
 
   return (
-    <Container maxW="container.xl" h="90vh">
+    <Container maxW="100%" p={0} bg="#0a0a0a" minH="100vh">
       <Toaster />
 
       {!isConnected ? (
@@ -425,159 +394,95 @@ const Liquidity: React.FC = () => {
           display="flex"
           alignItems="center"
           justifyContent="center"
-          height="100%"
+          height="100vh"
           color="white"
-          backgroundColor={"blackAlpha.800"}
+          bg="#0a0a0a"
         >
-          <Heading as="h2">Connect your wallet</Heading>
+          <Heading as="h2" color="white">Connect your wallet</Heading>
         </Box>
       ) : isMobile && isLandscape ? (
         <RotateDeviceMessage />
       ) : (
-        <Box
-          w="100%"
-          color="white"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          textAlign="left"
-          position="relative"
-          mt={"10px"}
-          backgroundColor={"blackAlpha.800"}
-        >
-          <SimpleGrid columns={1} w={isMobile ? "95%" : "100%"} ml={isMobile ? "0" : "15%"} mt={"8vh"}>
-              {/* Header Section */}
-              {/* <Heading as="h3">
-                Liquidity
-                <Text fontSize="md">
-                  All tokens launched with the Noma protocol in one place 🚀
-                </Text>
-              </Heading> */}
+        <Box w="100%" bg="#0a0a0a" p={isMobile ? 4 : 8}>
+          <Box maxW="1600px" mx="auto">
+            {/* Header with navigation */}
 
-              <Box w={isMobile ? "55%" : "25%"}>
-              {isAllVaultsLoading ? (
-                  <><HStack><Box mt={10} ml={5}><Text>Loading vaults...</Text></Box> <Box mt={10}><Spinner size="sm" /></Box></HStack></>
-              ) : vaultsSelectData?.items?.length > 0 ? (
-                <Box ml={isMobile ? 2 : "15%"}>
-                <VStack mt={10} >
-                  <Box w="100%">
-                    <SimpleGrid columns={2}>
-                        {isMobile ? (
-                          <></>
-                          ) : (
-                            <GridItem><Text fontSize="sm" mt={isMobile ? 0 : 10}>Go to:</Text></GridItem>
-                          )
-                        }
-                      <GridItem colSpan={isMobile ? 2 : 1}>
-                        <SelectRoot
-                          mt={isMobile ? 5 : 0}
-                          ml={isMobile ? 3 : 5}
-                          collection={createListCollection(_navigationSelectData )}
-                          size="sm"
-                          width={isMobile ? "165px" : "160px"}
-                          onChange={handleSelectDestination}
-                          value={selectedDestination} // Bind the selected value to the state
-                          h={"30px"}
-                        >
-                        <SelectTrigger>
-                          {_navigationSelectData.items.map((data, index) => {
-                          if (index > 0) return;
-                              return (
-                              <SelectValueText placeholder={data.label}>
-                              </SelectValueText>
-                              );
-                          })}                  
-                          </SelectTrigger>
-                          <SelectContent>
-                          {_navigationSelectData.items
-                            .slice()          // make a shallow copy
-                            .reverse()        // reverse the copy 
-                            .map((data) => {
-                              return (
-                              <SelectItem item={data} key={data.value}>
-                                  {data.label}
-                              </SelectItem>
-                              );
-                          })}
-                          </SelectContent>
-                      </SelectRoot>                       
-                      </GridItem>
-                    </SimpleGrid>
-                  </Box>
-                  <Box >
-                    <SimpleGrid columns={2}>
-                          {isMobile ? (
-                            <></>
-                            ) : (
-                              <GridItem  mt={isMobile ? 0 : "10px"}><Text fontSize="sm">Market:</Text></GridItem>
-                            )
-                          }
-                      <GridItem colSpan={isMobile ? 2 : 1}>
-                      <SelectRoot
-                        ml={isMobile ? "-20px" : 5}
-                        mb={isMobile ? 2 : 0}
-                        mt={isMobile ? 2  : 2}
-                        collection={vaultsSelectData}
-                        size="sm"
-                        width={isMobile ? "165px" : "160px"}
-                        onChange={handleSelectMarket}
-                        value={selectedVault} // Bind the selected value to the state
-                        h={"30px"}
-                    >
-                      <SelectTrigger>
-                      {vaultsSelectData.items
-                        .slice()          // make a shallow copy
-                        .reverse()        // reverse the copy 
-                        .map((vaultData, index) => {
-                        if (index > 0) return;
-                          return (
-                            <SelectValueText placeholder={vaultData.label}>
-                            </SelectValueText>
-                          );
-                        })}                  
-                        </SelectTrigger>
-                      <SelectContent>
-                        {vaultsSelectData.items
-                        .slice()          // make a shallow copy
-                        .reverse()        // reverse the copy 
-                        .map((vaultData) => {
-                          return (
-                            <SelectItem item={vaultData} key={vaultData.value}>
-                              {vaultData.label}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                        </SelectRoot>                        
-                      </GridItem>
-                    </SimpleGrid>
-                  </Box>
-                </VStack>
+
+            {/* Market Stats Cards */}
+            {selectedVault && !errorDeployed && (
+              <SimpleGrid columns={isMobile ? 2 : 4} gap={4} mb={8}>
+                <Box bg="#1a1a1a" p={4} borderRadius="lg">
+                  <Text color="#888" fontSize="sm" mb={2}>Spot Price</Text>
+                  <Text color="white" fontSize="xl" fontWeight="bold">
+                    ${commifyDecimals(spotPrice * priceUSD, 4)}
+                  </Text>
+                  <Text color="#4ade80" fontSize="xs">
+                    {commifyDecimals(spotPrice, 8)} MON
+                  </Text>
+                </Box>
+                
+                <Box bg="#1a1a1a" p={4} borderRadius="lg">
+                  <Text color="#888" fontSize="sm" mb={2}>Liquidity Ratio</Text>
+                  <Text color="white" fontSize="xl" fontWeight="bold">
+                    {commifyDecimals(formatEther(liquidityRatio), 2)}
+                  </Text>
+                  <Text color="#4ade80" fontSize="xs">
+                    Protocol Health
+                  </Text>
+                </Box>
+                
+                <Box bg="#1a1a1a" p={4} borderRadius="lg">
+                  <Text color="#888" fontSize="sm" mb={2}>Circulating Supply</Text>
+                  <Text color="white" fontSize="xl" fontWeight="bold">
+                    {commify(formatEther(circulatingSupply), 0)}
+                  </Text>
+                  <Text color="#4ade80" fontSize="xs">
+                    {vaultDescriptions.find((vault) => vault.vault === selectedVault)?.tokenSymbol || 'Tokens'}
+                  </Text>
+                </Box>
+                
+                <Box bg="#1a1a1a" p={4} borderRadius="lg">
+                  <Text color="#888" fontSize="sm" mb={2}>IMV Price</Text>
+                  <Text color="white" fontSize="xl" fontWeight="bold">
+                    ${commifyDecimals(formatEther(imv || 0) * priceUSD, 4)}
+                  </Text>
+                  <Text color="#4ade80" fontSize="xs">
+                    Floor Protection
+                  </Text>
+                </Box>
+              </SimpleGrid>
+            )}
+
+            {/* Main content area */}
+            {!errorDeployed ? (
+              selectedVault ? (
+                <Box bg="#1a1a1a" borderRadius="xl" p={isMobile ? 4 : 8} minH="600px">
+                  <LiquidityChart
+                    isConnected={isConnected}
+                    data={vaultData}
+                    spotPrice={spotPrice}
+                    priceUSD={priceUSD}
+                    imvPrice={imv}
+                    circulatingSupply={circulatingSupply}
+                    liquidityRatio={liquidityRatio}
+                    capacity={capacity}
+                    accumulatedFees={[feesToken0, feesToken1]}
+                    underlyingBalances={underlyingBalances}
+                    tokenName={vaultDescriptions.find((vault) => vault.vault === selectedVault)?.tokenName}
+                    tokenSymbol={vaultDescriptions.find((vault) => vault.vault === selectedVault)?.tokenSymbol}
+                  />
                 </Box>
               ) : (
-                <Text>No vaults available.</Text>
-              )}
+                <Box bg="#1a1a1a" borderRadius="xl" p={20} textAlign="center">
+                  <Text color="#888" fontSize="lg">Select a vault to view liquidity analytics</Text>
                 </Box>
-
-                {!errorDeployed ? (
-                    <LiquidityChart
-                      isConnected={isConnected}
-                      data={vaultData}
-                      spotPrice={spotPrice}
-                      priceUSD={priceUSD}
-                      imvPrice={imv}
-                      circulatingSupply={circulatingSupply}
-                      liquidityRatio={liquidityRatio}
-                      capacity={capacity}
-                      accumulatedFees={[feesToken0, feesToken1]}
-                      underlyingBalances={underlyingBalances}
-                      tokenName={vaultDescriptions.find((vault) => vault.vault === selectedVault)?.tokenName}
-                      tokenSymbol={vaultDescriptions.find((vault) => vault.vault === selectedVault)?.tokenSymbol}
-                />) : (
-                    <Text fontSize="xs" ml={5} w="auto">Failed to fetch vault info. Please try again later.</Text>
-                )}
-                
-          </SimpleGrid>
+              )
+            ) : (
+              <Box bg="#1a1a1a" borderRadius="xl" p={20} textAlign="center">
+                <Text color="#888" fontSize="lg">Failed to fetch vault info. Please try again later.</Text>
+              </Box>
+            )}
+          </Box>
         </Box>
       )}
     </Container>
