@@ -24,7 +24,7 @@ import monadLogo from "../assets/images/monad.png";
 import VaultModal from "../components/VaultModal";
 import { set } from "react-ga";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
-import placeholderLogo from "../assets/images/question.svg";
+import placeholderLogo from "../assets/images/question_white.svg";
 import nomaLogo from "../assets/images/noma.png";
 import oksLogo from "../assets/images/logo_dark.png";
 import addressesLocal   from "../assets/deployment.json";
@@ -686,7 +686,7 @@ const Markets: React.FC = () => {
                                 </Box>
                               </Link>
                             ) : (
-                              <Text color="#666" fontSize="sm">—</Text>
+                              <Text color="#666" fontSize="sm">N/A</Text>
                             )}
                           </Box>
 
