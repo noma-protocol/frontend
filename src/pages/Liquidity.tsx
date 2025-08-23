@@ -131,7 +131,7 @@ const Liquidity: React.FC = () => {
     const fetchPrice = async () => {
       try {
         const cached = localStorage.getItem('bnb_usd_price');
-        const cacheTime = localStorage.getItem('bnb_usd_price');
+        const cacheTime = localStorage.getItem('bnb_usd_price_time');
 
         // Check if cache exists and is fresh (less than 5 minutes old)
         if (cached && cacheTime && Date.now() - Number(cacheTime) < 5 * 60 * 1000) {
@@ -164,7 +164,9 @@ const Liquidity: React.FC = () => {
         localStorage.setItem('bnb_usd_price_time', Date.now().toString());
 
       } catch (err) {
-        console.log(err.message);
+        console.log('Error fetching BNB price:', err.message);
+        // Set a default price if fetch fails
+        setPriceUSD("600.00000000000"); // Default BNB price
       }
     };
 
@@ -305,23 +307,26 @@ const Liquidity: React.FC = () => {
         
         setCirculatingSupply(circulatingSupply);
         
-        // Convert spotPriceX96 from Q64.96 fixed-point format to a regular number
-        // sqrtPriceX96 represents sqrt(price) * 2^96
-        // To get the actual price: price = (sqrtPriceX96 / 2^96)^2
+        // Convert spot price from wei to ether
         if (spotPriceX96 && !spotPriceX96.isZero()) {
-          // Get decimal representation by dividing by 2^96
-          const Q96 = ethers.BigNumber.from(2).pow(96);
-          const sqrtPrice = spotPriceX96.mul(ethers.utils.parseEther("1")).div(Q96);
+          // The value is in wei, convert to ether
+          const spotPriceFormatted = parseFloat(ethers.utils.formatEther(spotPriceX96));
           
-          // Square it to get the actual price
-          const price = sqrtPrice.mul(sqrtPrice).div(ethers.utils.parseEther("1"));
+          console.log("Spot price:", {
+            spotPriceWei: spotPriceX96.toString(),
+            spotPriceEther: spotPriceFormatted
+          });
           
-          // Convert to float
-          const spotPriceFormatted = parseFloat(ethers.utils.formatEther(price));
-          console.log("Spot price converted from X96:", spotPriceFormatted, "sqrtPriceX96:", spotPriceX96.toString());
           setSpotPrice(spotPriceFormatted);
+          
+          // Debug log for display values
+          console.log("Price display debug:", {
+            spotPrice: spotPriceFormatted,
+            priceUSD: priceUSD,
+            displayValue: spotPriceFormatted * parseFloat(priceUSD)
+          });
         } else {
-          console.log("Spot price X96 is zero or invalid");
+          console.log("Spot price is zero or invalid");
           setSpotPrice(0);
         }
         
@@ -428,50 +433,6 @@ const Liquidity: React.FC = () => {
             {/* Header with navigation */}
 
 
-            {/* Market Stats Cards */}
-            {selectedVault && !errorDeployed && (
-              <SimpleGrid columns={isMobile ? 2 : 4} gap={4} mb={8}>
-                <Box bg="#1a1a1a" p={4} borderRadius="lg">
-                  <Text color="#888" fontSize="sm" mb={2}>Spot Price</Text>
-                  <Text color="white" fontSize="xl" fontWeight="bold">
-                    ${commifyDecimals(spotPrice * priceUSD, 4)}
-                  </Text>
-                  <Text color="#4ade80" fontSize="xs">
-                    {commifyDecimals(spotPrice, 8)} MON
-                  </Text>
-                </Box>
-                
-                <Box bg="#1a1a1a" p={4} borderRadius="lg">
-                  <Text color="#888" fontSize="sm" mb={2}>Liquidity Ratio</Text>
-                  <Text color="white" fontSize="xl" fontWeight="bold">
-                    {commifyDecimals(formatEther(liquidityRatio), 2)}
-                  </Text>
-                  <Text color="#4ade80" fontSize="xs">
-                    Protocol Health
-                  </Text>
-                </Box>
-                
-                <Box bg="#1a1a1a" p={4} borderRadius="lg">
-                  <Text color="#888" fontSize="sm" mb={2}>Circulating Supply</Text>
-                  <Text color="white" fontSize="xl" fontWeight="bold">
-                    {commify(formatEther(circulatingSupply), 0)}
-                  </Text>
-                  <Text color="#4ade80" fontSize="xs">
-                    {vaultDescriptions.find((vault) => vault.vault === selectedVault)?.tokenSymbol || 'Tokens'}
-                  </Text>
-                </Box>
-                
-                <Box bg="#1a1a1a" p={4} borderRadius="lg">
-                  <Text color="#888" fontSize="sm" mb={2}>IMV Price</Text>
-                  <Text color="white" fontSize="xl" fontWeight="bold">
-                    ${commifyDecimals(formatEther(imv || 0) * priceUSD, 4)}
-                  </Text>
-                  <Text color="#4ade80" fontSize="xs">
-                    Floor Protection
-                  </Text>
-                </Box>
-              </SimpleGrid>
-            )}
 
             {/* Main content area */}
             {!errorDeployed ? (

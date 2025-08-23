@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text } from '@chakra-ui/react';
 import { Group } from '@visx/group';
-import { Bar } from '@visx/shape';
+import { Bar, Line } from '@visx/shape';
 import { AxisBottom } from '@visx/axis';
 import { scaleLinear, scalePower } from '@visx/scale';
 import { Tooltip, useTooltip } from '@visx/tooltip';
@@ -10,7 +10,7 @@ import { commify } from '../utils.tsx';
 // Check if screen is mobile using window width
 const isMobile = typeof window !== 'undefined' && window.innerWidth <= 520;
 
-const PriceRangeVisualization = ({ data, width, height }) => {
+const PriceRangeVisualization = ({ data, width, height, spotPrice }) => {
   // Tooltip setup
   const {
     tooltipData,
@@ -25,8 +25,8 @@ const PriceRangeVisualization = ({ data, width, height }) => {
   const sidePadding = width * 0.05;
 
   const margin = {
-    top:    20,
-    bottom: 50,
+    top:    10,
+    bottom: 40,
     left:   sidePadding,
     right:  sidePadding,
   };
@@ -124,6 +124,30 @@ const PriceRangeVisualization = ({ data, width, height }) => {
               })}
             />
           {/* )} */}
+          
+          {/* Spot Price Line */}
+          {spotPrice && spotPrice > 0 && (
+            <>
+              <Line
+                from={{ x: priceScale(spotPrice), y: 0 }}
+                to={{ x: priceScale(spotPrice), y: yMax }}
+                stroke="#9333ea"
+                strokeWidth={2}
+                strokeDasharray="5,5"
+                pointerEvents="none"
+              />
+              <text
+                x={priceScale(spotPrice) + 5}
+                y={20}
+                fill="#9333ea"
+                fontSize="12"
+                fontWeight="bold"
+                pointerEvents="none"
+              >
+                Spot
+              </text>
+            </>
+          )}
         </Group>
       </svg>
       {tooltipOpen && (
