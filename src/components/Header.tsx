@@ -63,6 +63,7 @@ const Header: React.FC = () => {
       { label: "Borrow", value: `/borrow?v=${vaultAddress}` },
       { label: "Stake", value: `/stake?v=${vaultAddress}` },
       { label: "Markets", value: "/markets" },
+      { label: "Launchpad", value: "/launchpad" },
     ],
   });
 
