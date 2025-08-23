@@ -280,20 +280,51 @@ const Liquidity: React.FC = () => {
   
         let data = {};
   
-        const [
-          liquidityRatio,
-          circulatingSupply,
-          spotPrice,
-          anchorCapacity,
-          floorCapacity,
+        const vaultInfo = await VaultContract.getVaultInfo();
+        
+        // Destructure the VaultInfo struct
+        const liquidityRatio = vaultInfo.liquidityRatio;
+        const circulatingSupply = vaultInfo.circulatingSupply;
+        const spotPriceX96 = vaultInfo.spotPriceX96;
+        const anchorCapacity = vaultInfo.anchorCapacity;
+        const floorCapacity = vaultInfo.floorCapacity;
+        const token0Address = vaultInfo.token0;
+        const token1Address = vaultInfo.token1;
+        const newFloorPrice = vaultInfo.newFloor;
+  
+        console.log("Vault Info Response:", {
+          liquidityRatio: liquidityRatio.toString(),
+          circulatingSupply: circulatingSupply.toString(),
+          spotPriceX96: spotPriceX96.toString(),
+          anchorCapacity: anchorCapacity.toString(),
+          floorCapacity: floorCapacity.toString(),
           token0Address,
           token1Address,
-          newFloorPrice
-        ] = await VaultContract.getVaultInfo();
-  
+          newFloorPrice: newFloorPrice.toString()
+        });
         
         setCirculatingSupply(circulatingSupply);
-        setSpotPrice(spotPrice);
+        
+        // Convert spotPriceX96 from Q64.96 fixed-point format to a regular number
+        // sqrtPriceX96 represents sqrt(price) * 2^96
+        // To get the actual price: price = (sqrtPriceX96 / 2^96)^2
+        if (spotPriceX96 && !spotPriceX96.isZero()) {
+          // Get decimal representation by dividing by 2^96
+          const Q96 = ethers.BigNumber.from(2).pow(96);
+          const sqrtPrice = spotPriceX96.mul(ethers.utils.parseEther("1")).div(Q96);
+          
+          // Square it to get the actual price
+          const price = sqrtPrice.mul(sqrtPrice).div(ethers.utils.parseEther("1"));
+          
+          // Convert to float
+          const spotPriceFormatted = parseFloat(ethers.utils.formatEther(price));
+          console.log("Spot price converted from X96:", spotPriceFormatted, "sqrtPriceX96:", spotPriceX96.toString());
+          setSpotPrice(spotPriceFormatted);
+        } else {
+          console.log("Spot price X96 is zero or invalid");
+          setSpotPrice(0);
+        }
+        
         setCapacity({
           anchor: anchorCapacity,
           floor: floorCapacity
