@@ -6,7 +6,7 @@ import {Box} from "@chakra-ui/react";
 
 const { formatEther, formatUnits, parseEther } = ethers.utils;
 
-const MyChart = ({ positions, isMobile }) => {
+const MyChart = ({ positions, isMobile, spotPrice }) => {
    const [chartData, setChartData] = useState([]);
 
     useEffect(() => {
@@ -41,8 +41,8 @@ const MyChart = ({ positions, isMobile }) => {
     };
   
     return (
-        <Box ml={isMobile? "5px" : "2%"}>
-            <PriceRangeVisualization data={chartData} width={isMobile? 350 : "1400"} height={300}  />
+        <Box ml={isMobile? "5px" : "5%"} mt="10px">
+            <PriceRangeVisualization data={chartData} width={isMobile? 350 : 792} height={300} spotPrice={spotPrice} />
         </Box>
     );
 };
