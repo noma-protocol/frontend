@@ -136,8 +136,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       >
         <DialogHeader color="white" borderBottom="1px solid #2a2a2a" bg="#0a0a0a" p={4}>
           <HStack>
-            <FiUser size={20} />
-            <Text fontSize="lg" fontWeight="bold">User Profile</Text>
+            <Box> <FiUser size={20} /> </Box>
+            <Box> <Text fontSize="lg" fontWeight="bold">User Profile</Text> </Box>
           </HStack>
         </DialogHeader>
         <DialogCloseTrigger />
@@ -161,19 +161,21 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         {formatAddress(address)}
                       </Text>
                     </Box>
-                    <Badge
-                      bg="#2a2a2a"
-                      color={getReputationColor(profile.reputation)}
-                      fontSize="lg"
-                      px={3}
-                      py={1}
-                      borderRadius="md"
-                    >
-                      <HStack gap={1}>
-                        <FiStar />
-                        <Text>{profile.reputation}</Text>
-                      </HStack>
-                    </Badge>
+                    <Box>
+                      <Badge
+                        bg="#2a2a2a"
+                        color={getReputationColor(profile.reputation)}
+                        fontSize="lg"
+                        px={3}
+                        py={1}
+                        borderRadius="md"
+                      >
+                        <HStack gap={1}>
+                          <Box><FiStar /></Box>
+                          <Box><Text>{profile.reputation}</Text></Box>
+                        </HStack>
+                      </Badge>
+                    </Box>
                   </HStack>
                 </VStack>
               </Box>
@@ -188,8 +190,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <Grid templateColumns="repeat(2, 1fr)" gap={4}>
                   <Box bg="#2a2a2a" p={4} borderRadius="md">
                     <HStack gap={2} mb={1}>
-                      <FiCalendar color="#4ade80" />
-                      <Text color="#888" fontSize="sm">Account Age</Text>
+                      <Box><FiCalendar color="#4ade80" /></Box>
+                      <Box><Text color="#888" fontSize="sm">Account Age</Text></Box>
                     </HStack>
                     <Text color="white" fontSize="lg" fontWeight="bold">
                       {calculateAccountAge(profile.firstConnected)}
@@ -197,8 +199,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </Box>
                   <Box bg="#2a2a2a" p={4} borderRadius="md">
                     <HStack gap={2} mb={1}>
-                      <FiImage color="#4ade80" />
-                      <Text color="#888" fontSize="sm">NFTs Owned</Text>
+                      <Box><FiImage color="#4ade80" /></Box>
+                      <Box><Text color="#888" fontSize="sm">NFTs Owned</Text></Box>
                     </HStack>
                     <Text color="white" fontSize="lg" fontWeight="bold">
                       {profile.nfts.length}
