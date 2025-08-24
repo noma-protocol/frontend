@@ -182,17 +182,28 @@ const TrollBox: React.FC = () => {
             <HStack gap={1}>
               <Button
                 size="xs"
-                bg="#3a3a3a"
+                bg="linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%)"
                 color="white"
                 fontSize="sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsCollapsed(!isCollapsed);
                 }}
-                _hover={{ bg: '#4a4a4a' }}
+                _hover={{ 
+                  bg: 'linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                }}
+                _active={{
+                  transform: 'translateY(0)',
+                  boxShadow: '0 1px 4px rgba(0, 0, 0, 0.2)'
+                }}
                 px={2}
                 minW="24px"
                 h="24px"
+                borderRadius="md"
+                border="1px solid rgba(255, 255, 255, 0.1)"
+                transition="all 0.2s"
                 title={isCollapsed ? "Expand" : "Collapse"}
               >
                 {isCollapsed ? '+' : '−'}
@@ -200,32 +211,56 @@ const TrollBox: React.FC = () => {
               {connected ? (
                 <Button
                   size="xs"
-                  bg="#ff6b6b"
+                  bg="linear-gradient(135deg, #ff6b6b 0%, #e53e3e 100%)"
                   color="white"
                   fontSize="xs"
+                  fontWeight="600"
                   onClick={(e) => {
                     e.stopPropagation();
                     disconnect();
                   }}
-                  _hover={{ bg: "#e53e3e" }}
+                  _hover={{ 
+                    bg: "linear-gradient(135deg, #ff5252 0%, #d32f2f 100%)",
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 2px 8px rgba(255, 107, 107, 0.3)'
+                  }}
+                  _active={{
+                    transform: 'translateY(0)',
+                    boxShadow: '0 1px 4px rgba(255, 107, 107, 0.2)'
+                  }}
                   h="24px"
                   w="85px"
+                  borderRadius="md"
+                  transition="all 0.2s"
+                  boxShadow="0 1px 4px rgba(255, 107, 107, 0.2)"
                 >
                   Disconnect
                 </Button>
               ) : (
                 <Button
                   size="xs"
-                  bg="#4ade80"
+                  bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
                   color="black"
                   fontSize="xs"
+                  fontWeight="600"
                   onClick={(e) => {
                     e.stopPropagation();
                     reconnect();
                   }}
-                  _hover={{ bg: "#22c55e" }}
+                  _hover={{ 
+                    bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 2px 8px rgba(74, 222, 128, 0.3)'
+                  }}
+                  _active={{
+                    transform: 'translateY(0)',
+                    boxShadow: '0 1px 4px rgba(74, 222, 128, 0.2)'
+                  }}
                   h="24px"
                   w="85px"
+                  borderRadius="md"
+                  transition="all 0.2s"
+                  boxShadow="0 1px 4px rgba(74, 222, 128, 0.2)"
                 >
                   Connect
                 </Button>
@@ -233,17 +268,28 @@ const TrollBox: React.FC = () => {
               {!isCollapsed && (
                 <Button
                   size="xs"
-                  bg="#3a3a3a"
+                  bg="linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%)"
                   color="white"
                   fontSize="sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsExpanded(true);
                   }}
-                  _hover={{ bg: '#4a4a4a' }}
+                  _hover={{ 
+                    bg: 'linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                  }}
+                  _active={{
+                    transform: 'translateY(0)',
+                    boxShadow: '0 1px 4px rgba(0, 0, 0, 0.2)'
+                  }}
                   px={2}
                   minW="24px"
                   h="24px"
+                  borderRadius="md"
+                  border="1px solid rgba(255, 255, 255, 0.1)"
+                  transition="all 0.2s"
                   title="Expand"
                 >
                   ⤢
@@ -368,19 +414,32 @@ const TrollBox: React.FC = () => {
             <Box>
               <Button
                 size="sm"
-                bg="#4ade80"
+                bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
                 color="black"
                 fontWeight="600"
                 onClick={handleSendMessage}
                 isDisabled={!newMessage.trim()}
-                _hover={{ bg: "#22c55e" }}
+                _hover={{ 
+                  bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 2px 8px rgba(74, 222, 128, 0.3)'
+                }}
+                _active={{
+                  transform: 'translateY(0)',
+                  boxShadow: '0 1px 4px rgba(74, 222, 128, 0.2)'
+                }}
                 _disabled={{ 
                   bg: "#2a2a2a", 
                   color: "#666",
-                  cursor: "not-allowed" 
+                  cursor: "not-allowed",
+                  transform: 'none',
+                  boxShadow: 'none'
                 }}
                 leftIcon={<FiSend />}
                 px={4}
+                borderRadius="md"
+                transition="all 0.2s"
+                boxShadow="0 1px 4px rgba(74, 222, 128, 0.2)"
               >
                 Send
               </Button>
@@ -394,12 +453,23 @@ const TrollBox: React.FC = () => {
             {!connected && (
               <Button
                 size="sm"
-                bg="#4ade80"
+                bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
                 color="black"
                 fontWeight="600"
                 onClick={reconnect}
-                _hover={{ bg: "#22c55e" }}
+                _hover={{ 
+                  bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 2px 8px rgba(74, 222, 128, 0.3)'
+                }}
+                _active={{
+                  transform: 'translateY(0)',
+                  boxShadow: '0 1px 4px rgba(74, 222, 128, 0.2)'
+                }}
                 px={4}
+                borderRadius="md"
+                transition="all 0.2s"
+                boxShadow="0 1px 4px rgba(74, 222, 128, 0.2)"
               >
                 Connect to Chat
               </Button>
@@ -466,24 +536,48 @@ const TrollBox: React.FC = () => {
                 {connected ? (
                   <Button
                     size="sm"
-                    bg="#ff6b6b"
+                    bg="linear-gradient(135deg, #ff6b6b 0%, #e53e3e 100%)"
                     color="white"
                     fontSize="sm"
+                    fontWeight="600"
                     onClick={disconnect}
-                    _hover={{ bg: "#e53e3e" }}
+                    _hover={{ 
+                      bg: "linear-gradient(135deg, #ff5252 0%, #d32f2f 100%)",
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 2px 8px rgba(255, 107, 107, 0.3)'
+                    }}
+                    _active={{
+                      transform: 'translateY(0)',
+                      boxShadow: '0 1px 4px rgba(255, 107, 107, 0.2)'
+                    }}
                     w="120px"
+                    borderRadius="md"
+                    transition="all 0.2s"
+                    boxShadow="0 1px 4px rgba(255, 107, 107, 0.2)"
                   >
                     Disconnect
                   </Button>
                 ) : (
                   <Button
                     size="sm"
-                    bg="#4ade80"
+                    bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
                     color="black"
                     fontSize="sm"
+                    fontWeight="600"
                     onClick={reconnect}
-                    _hover={{ bg: "#22c55e" }}
+                    _hover={{ 
+                      bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 2px 8px rgba(74, 222, 128, 0.3)'
+                    }}
+                    _active={{
+                      transform: 'translateY(0)',
+                      boxShadow: '0 1px 4px rgba(74, 222, 128, 0.2)'
+                    }}
                     w="120px"
+                    borderRadius="md"
+                    transition="all 0.2s"
+                    boxShadow="0 1px 4px rgba(74, 222, 128, 0.2)"
                   >
                     Connect
                   </Button>
@@ -629,18 +723,31 @@ const TrollBox: React.FC = () => {
                       <Button
                         size="sm"
                         h="32px"
-                        bg="#4ade80"
+                        bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
                         color="black"
                         fontWeight="600"
                         onClick={handleChangeUsername}
                         isDisabled={!username.trim() || username === serverUsername || !isUsernameValid(username)}
-                        _hover={{ bg: '#22c55e' }}
+                        _hover={{ 
+                          bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 2px 8px rgba(74, 222, 128, 0.3)'
+                        }}
+                        _active={{
+                          transform: 'translateY(0)',
+                          boxShadow: '0 1px 4px rgba(74, 222, 128, 0.2)'
+                        }}
                         _disabled={{ 
                           bg: "#2a2a2a", 
                           color: "#666",
-                          cursor: "not-allowed" 
+                          cursor: "not-allowed",
+                          transform: 'none',
+                          boxShadow: 'none'
                         }}
                         px={4}
+                        borderRadius="md"
+                        transition="all 0.2s"
+                        boxShadow="0 1px 4px rgba(74, 222, 128, 0.2)"
                       >
                         Set
                       </Button>
@@ -677,19 +784,32 @@ const TrollBox: React.FC = () => {
                   </Box>
                   <Box>
                     <Button
-                      bg="#4ade80"
+                      bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
                       color="black"
                       fontWeight="600"
                       onClick={handleSendMessage}
                       isDisabled={!newMessage.trim()}
-                      _hover={{ bg: "#22c55e" }}
+                      _hover={{ 
+                        bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 2px 8px rgba(74, 222, 128, 0.3)'
+                      }}
+                      _active={{
+                        transform: 'translateY(0)',
+                        boxShadow: '0 1px 4px rgba(74, 222, 128, 0.2)'
+                      }}
                       _disabled={{ 
                         bg: "#2a2a2a", 
                         color: "#666",
-                        cursor: "not-allowed" 
+                        cursor: "not-allowed",
+                        transform: 'none',
+                        boxShadow: 'none'
                       }}
                       leftIcon={<FiSend />}
                       px={6}
+                      borderRadius="md"
+                      transition="all 0.2s"
+                      boxShadow="0 1px 4px rgba(74, 222, 128, 0.2)"
                     >
                       Send
                     </Button>
@@ -703,12 +823,23 @@ const TrollBox: React.FC = () => {
                 </Text>
                 {!connected && (
                   <Button
-                    bg="#4ade80"
+                    bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
                     color="black"
                     fontWeight="600"
                     onClick={reconnect}
-                    _hover={{ bg: "#22c55e" }}
+                    _hover={{ 
+                      bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 2px 8px rgba(74, 222, 128, 0.3)'
+                    }}
+                    _active={{
+                      transform: 'translateY(0)',
+                      boxShadow: '0 1px 4px rgba(74, 222, 128, 0.2)'
+                    }}
                     px={6}
+                    borderRadius="md"
+                    transition="all 0.2s"
+                    boxShadow="0 1px 4px rgba(74, 222, 128, 0.2)"
                   >
                     Connect to Chat
                   </Button>
