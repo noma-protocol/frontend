@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trollbox Test Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        #messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #444;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+        }
+        
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .message .username {
+            font-weight: bold;
+            color: #4ade80;
+        }
+        
+        .message .timestamp {
+            font-size: 0.8em;
+            color: #888;
+        }
+        
+        .message .content {
+            margin-top: 5px;
+        }
+        
+        .error {
+            color: #ff6b6b;
+            background-color: #3a1a1a;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        
+        .system {
+            color: #4ecdc4;
+            font-style: italic;
+        }
+        
+        #input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        input {
+            flex: 1;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 3px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #4ade80;
+            color: #000;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #22c55e;
+        }
+        
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        
+        #status {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .connected {
+            color: #4ade80;
+        }
+        
+        .disconnected {
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Trollbox Test Client</h1>
+    
+    <div id="messages"></div>
+    
+    <div id="input-area">
+        <input type="text" id="username" placeholder="Username (optional)" maxlength="20">
+        <input type="text" id="message" placeholder="Type your message..." maxlength="500">
+        <button id="send">Send</button>
+    </div>
+    
+    <div id="status">Status: <span class="disconnected">Disconnected</span></div>
+    
+    <script>
+        let ws = null;
+        let clientId = null;
+        
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('message');
+        const usernameInput = document.getElementById('username');
+        const sendButton = document.getElementById('send');
+        const statusSpan = document.querySelector('#status span');
+        
+        function connect() {
+            ws = new WebSocket('ws://localhost:9090');
+            
+            ws.onopen = () => {
+                console.log('Connected to server');
+                statusSpan.textContent = 'Connected';
+                statusSpan.className = 'connected';
+                sendButton.disabled = false;
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                switch (data.type) {
+                    case 'welcome':
+                        clientId = data.clientId;
+                        addSystemMessage(`Connected with ID: ${clientId}`);
+                        
+                        // Display recent messages
+                        data.messages.forEach(msg => {
+                            addMessage(msg);
+                        });
+                        break;
+                        
+                    case 'message':
+                        addMessage(data);
+                        break;
+                        
+                    case 'error':
+                        addErrorMessage(data.message);
+                        break;
+                        
+                    case 'pong':
+                        console.log('Received pong');
+                        break;
+                }
+            };
+            
+            ws.onclose = () => {
+                console.log('Disconnected from server');
+                statusSpan.textContent = 'Disconnected';
+                statusSpan.className = 'disconnected';
+                sendButton.disabled = true;
+                
+                // Attempt to reconnect after 3 seconds
+                setTimeout(connect, 3000);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                addErrorMessage('Connection error');
+            };
+        }
+        
+        function addMessage(msg) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            const time = new Date(msg.timestamp).toLocaleTimeString();
+            
+            messageDiv.innerHTML = `
+                <span class="username">${escapeHtml(msg.username)}</span>
+                <span class="timestamp">${time}</span>
+                <div class="content">${escapeHtml(msg.content)}</div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function addSystemMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message system';
+            messageDiv.textContent = `[System] ${text}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function addErrorMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message error';
+            messageDiv.textContent = `[Error] ${text}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function sendMessage() {
+            const content = messageInput.value.trim();
+            if (!content || !ws || ws.readyState !== WebSocket.OPEN) return;
+            
+            const username = usernameInput.value.trim() || 'Anonymous';
+            
+            ws.send(JSON.stringify({
+                type: 'message',
+                content: content,
+                username: username
+            }));
+            
+            messageInput.value = '';
+        }
+        
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Keep connection alive with periodic pings
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'ping' }));
+            }
+        }, 30000);
+        
+        // Connect on load
+        connect();
+    </script>
+</body>
+</html>
