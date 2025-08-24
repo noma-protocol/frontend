@@ -156,6 +156,68 @@ const Launchpad: React.FC = () => {
     const [tradeAmount, setTradeAmount] = useState("");
     const [isBuying, setIsBuying] = useState(true);
     const [tradeHistoryTab, setTradeHistoryTab] = useState("all");
+    
+    // Input validation function
+    const validateAndSetTradeAmount = (value) => {
+        // Remove any non-numeric characters except decimal point
+        const cleanedValue = value.replace(/[^0-9.]/g, '');
+        
+        // Ensure only one decimal point
+        const parts = cleanedValue.split('.');
+        if (parts.length > 2) {
+            return; // Invalid input, don't update
+        }
+        
+        // Limit decimal places to 18 (ETH precision)
+        if (parts.length === 2 && parts[1].length > 18) {
+            return; // Too many decimal places
+        }
+        
+        // Prevent leading zeros (except 0. or 0)
+        if (cleanedValue.length > 1 && cleanedValue[0] === '0' && cleanedValue[1] !== '.') {
+            return;
+        }
+        
+        // Validate it's a valid number
+        if (cleanedValue !== '' && cleanedValue !== '.' && isNaN(parseFloat(cleanedValue))) {
+            return;
+        }
+        
+        setTradeAmount(cleanedValue);
+    };
+    
+    // Helper to get validation state
+    const getTradeValidationState = () => {
+        if (!tradeAmount) return { isValid: true, message: "" };
+        
+        const amount = parseFloat(tradeAmount);
+        if (isNaN(amount) || amount <= 0) {
+            return { isValid: false, message: "Enter a valid amount" };
+        }
+        
+        if (isBuying) {
+            const availableBalance = useWeth 
+                ? parseFloat(formatEther(wethBalance || "0"))
+                : parseFloat(formatEther(balance?.value || "0"));
+            
+            if (amount > availableBalance) {
+                return { 
+                    isValid: false, 
+                    message: `Insufficient ${useWeth ? 'WETH' : 'ETH'} balance` 
+                };
+            }
+        } else {
+            const tokenBalanceNum = parseFloat(formatEther(tokenBalance || "0"));
+            if (amount > tokenBalanceNum) {
+                return { 
+                    isValid: false, 
+                    message: `Insufficient ${selectedToken?.symbol || 'token'} balance` 
+                };
+            }
+        }
+        
+        return { isValid: true, message: "" };
+    };
     const [isTokenListCollapsed, setIsTokenListCollapsed] = useState(false);
     
     // Exchange-related states
@@ -1941,6 +2003,31 @@ const Launchpad: React.FC = () => {
     const handleBuy = () => {
         if (isLoading || !selectedToken || !tradeAmount || !poolInfo.poolAddress) return;
         
+        // Validate amount
+        const amount = parseFloat(tradeAmount);
+        if (isNaN(amount) || amount <= 0) {
+            toaster.create({
+                title: "Invalid Amount",
+                description: "Please enter a valid amount greater than 0",
+                status: "error"
+            });
+            return;
+        }
+        
+        // Check balance
+        const availableBalance = useWeth 
+            ? parseFloat(formatEther(wethBalance || "0"))
+            : parseFloat(formatEther(balance?.value || "0"));
+            
+        if (amount > availableBalance) {
+            toaster.create({
+                title: "Insufficient Balance",
+                description: `You only have ${availableBalance.toFixed(4)} ${useWeth ? 'WETH' : 'ETH'}`,
+                status: "error"
+            });
+            return;
+        }
+        
         // Validate token addresses
         if (!selectedToken.token0 || !selectedToken.token1) {
             toaster.create({
@@ -2005,6 +2092,28 @@ const Launchpad: React.FC = () => {
     
     const handleSell = () => {
         if (isLoading || !selectedToken || !tradeAmount || !poolInfo.poolAddress) return;
+        
+        // Validate amount
+        const amount = parseFloat(tradeAmount);
+        if (isNaN(amount) || amount <= 0) {
+            toaster.create({
+                title: "Invalid Amount",
+                description: "Please enter a valid amount greater than 0",
+                status: "error"
+            });
+            return;
+        }
+        
+        // Check token balance
+        const tokenBalanceNum = parseFloat(formatEther(tokenBalance || "0"));
+        if (amount > tokenBalanceNum) {
+            toaster.create({
+                title: "Insufficient Balance",
+                description: `You only have ${tokenBalanceNum.toFixed(4)} ${selectedToken.symbol}`,
+                status: "error"
+            });
+            return;
+        }
         
         // Validate token addresses
         if (!selectedToken.token0 || !selectedToken.token1) {
@@ -2906,15 +3015,21 @@ const Launchpad: React.FC = () => {
                             <Input
                                 placeholder="0.00"
                                 value={tradeAmount}
-                                onChange={(e) => setTradeAmount(e.target.value)}
+                                onChange={(e) => validateAndSetTradeAmount(e.target.value)}
                                 bg="#2a2a2a"
                                 border="none"
                                 size="lg"
                                 _placeholder={{ color: "#666" }}
                                 mt={-2}
+                                borderColor={!getTradeValidationState().isValid ? "#ff6b6b" : "transparent"}
+                                borderWidth={!getTradeValidationState().isValid ? "1px" : "0"}
                             />
                             <Box h="20px" mt={1} display="flex" alignItems="center">
-                                {showQuoteLoading ? (
+                                {!getTradeValidationState().isValid ? (
+                                    <Text color="#ff6b6b" fontSize="xs">
+                                        {getTradeValidationState().message}
+                                    </Text>
+                                ) : showQuoteLoading ? (
                                     <Spinner size="xs" color="#4ade80" />
                                 ) : quote ? (
                                     <Text color="#666" fontSize="xs">
@@ -2963,7 +3078,7 @@ const Launchpad: React.FC = () => {
                             fontSize="lg"
                             fontWeight="bold"
                             onClick={isBuying ? handleBuy : handleSell}
-                            isDisabled={!selectedToken || !tradeAmount || isLoading || isLoadingExecuteTrade}
+                            isDisabled={!selectedToken || !tradeAmount || isLoading || isLoadingExecuteTrade || !getTradeValidationState().isValid}
                             isLoading={isLoading || isLoadingExecuteTrade}
                             loadingText="Processing..."
                             _hover={{
@@ -3065,7 +3180,7 @@ const Launchpad: React.FC = () => {
                                     <Input
                                         placeholder="0.00"
                                         value={tradeAmount}
-                                        onChange={(e) => setTradeAmount(e.target.value)}
+                                        onChange={(e) => validateAndSetTradeAmount(e.target.value)}
                                         bg="#2a2a2a"
                                         border="none"
                                         size="lg"
@@ -3122,7 +3237,7 @@ const Launchpad: React.FC = () => {
                                     fontSize="lg"
                                     fontWeight="bold"
                                     onClick={isBuying ? handleBuy : handleSell}
-                                    isDisabled={!selectedToken || !tradeAmount || isLoading}
+                                    isDisabled={!selectedToken || !tradeAmount || isLoading || !getTradeValidationState().isValid}
                                     isLoading={isLoading}
                                     _hover={{
                                         bg: isBuying ? "#22c55e" : "#dc2626"
