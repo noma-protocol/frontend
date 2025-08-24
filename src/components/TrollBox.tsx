@@ -11,23 +11,65 @@ import {
   Portal,
   Badge,
 } from '@chakra-ui/react';
-import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare } from 'react-icons/fi';
+import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
+import { useTrollbox } from '../hooks/useTrollbox';
 
 interface Message {
   id: string;
-  address: string;
-  text: string;
-  timestamp: Date;
+  username: string;
+  content: string;
+  timestamp: string;
+  clientId: string;
+  address?: string;
 }
 
+let instanceCounter = 0;
+
 const TrollBox: React.FC = () => {
+  const instanceId = useRef(++instanceCounter);
+  console.log(`TrollBox instance ${instanceId.current} created`);
+  
   const { address, isConnected } = useAccount();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [newMessage, setNewMessage] = useState('');
+  const [username, setUsername] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [prevMessageCount, setPrevMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Use the WebSocket hook
+  const { 
+    messages, 
+    connected, 
+    authenticated,
+    username: serverUsername,
+    canChangeUsername,
+    cooldownRemaining,
+    userCount,
+    sendMessage, 
+    authenticate,
+    changeUsername,
+    disconnect,
+    reconnect,
+    error 
+  } = useTrollbox();
+  
+  // Authenticate when connected and have address
+  useEffect(() => {
+    if (connected && address && !authenticated) {
+      // Don't send username on initial auth - let user set it
+      authenticate(address);
+    }
+  }, [connected, address, authenticated, authenticate]);
+  
+  // Update local username when server username changes
+  useEffect(() => {
+    if (serverUsername) {
+      setUsername(serverUsername);
+    }
+  }, [serverUsername]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -44,7 +86,13 @@ const TrollBox: React.FC = () => {
         }
       }
     }
-  }, [messages]);
+    
+    // Update unread count if not expanded and new messages arrived
+    if (!isExpanded && messages.length > prevMessageCount) {
+      setUnreadCount(prev => prev + (messages.length - prevMessageCount));
+    }
+    setPrevMessageCount(messages.length);
+  }, [messages, isExpanded, prevMessageCount]);
 
   useEffect(() => {
     if (isExpanded) {
@@ -52,67 +100,45 @@ const TrollBox: React.FC = () => {
     }
   }, [isExpanded]);
 
-  // Add initial messages after component mounts
+  // Show connection status
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMessages([
-        {
-          id: '1',
-          address: '0x1234...5678',
-          text: 'Welcome to the troll box! 🚀',
-          timestamp: new Date(Date.now() - 5 * 60 * 1000),
-        },
-        {
-          id: '2',
-          address: '0xabcd...efgh',
-          text: 'NOMA to the moon! 🌙',
-          timestamp: new Date(Date.now() - 3 * 60 * 1000),
-        },
-      ]);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    if (error) {
+      console.error('Trollbox error:', error);
+    }
+  }, [error]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !isConnected) return;
-
-    const message: Message = {
-      id: Date.now().toString(),
-      address: address || '',
-      text: newMessage.trim(),
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, message]);
-    setNewMessage('');
+    if (!newMessage.trim() || !connected || !authenticated) return;
     
-    // Simulate receiving messages
-    if (Math.random() > 0.7) {
-      setTimeout(() => {
-        const randomMessages = [
-          'LFG! 🔥',
-          'When lambo? 🏎️',
-          'Diamond hands! 💎🙌',
-          'This is the way!',
-          'WAGMI! 🚀',
-        ];
-        const randomAddress = `0x${Math.random().toString(16).slice(2, 6)}...${Math.random().toString(16).slice(2, 6)}`;
-        const randomMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          address: randomAddress,
-          text: randomMessages[Math.floor(Math.random() * randomMessages.length)],
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, randomMessage]);
-        if (!isExpanded) {
-          setUnreadCount(prev => prev + 1);
-        }
-      }, 2000);
+    sendMessage(newMessage.trim(), username || 'Anonymous');
+    setNewMessage('');
+  };
+  
+  const handleChangeUsername = () => {
+    const trimmed = username.trim();
+    if (!trimmed || !canChangeUsername) return;
+    
+    // Client-side validation
+    if (trimmed.length < 3 || trimmed.length > 20) {
+      return;
     }
+    
+    if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
+      return;
+    }
+    
+    changeUsername(trimmed);
+  };
+  
+  const isUsernameValid = (name: string) => {
+    const trimmed = name.trim();
+    return trimmed.length >= 3 && 
+           trimmed.length <= 20 && 
+           /^[a-zA-Z0-9_-]+$/.test(trimmed);
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
@@ -123,54 +149,129 @@ const TrollBox: React.FC = () => {
       borderRadius="lg"
       position="relative"
       transition="all 0.2s"
-      h="300px"
-      maxH="300px"
+      h={isCollapsed ? "auto" : "450px"}
+      maxH={isCollapsed ? "auto" : "450px"}
       display="flex"
       flexDirection="column"
       overflow="hidden"
     >
       {/* Header */}
-      <HStack
-        justify="space-between"
+      <VStack
         p={3}
         borderBottom="1px solid #2a2a2a"
         cursor="pointer"
         onClick={() => setIsExpanded(true)}
         _hover={{ bg: '#2a2a2a' }}
+        align="stretch"
+        gap={2}
       >
-        <HStack>
-          <Box> <FiMessageSquare size={20} color="#4ade80" /></Box>
-          <Box><Text color="white" fontWeight="bold">Troll Box</Text></Box>
+        {/* First row: Title and buttons */}
+        <HStack justify="space-between">
+          <HStack>
+            <Box> <FiMessageSquare size={20} color="#4ade80" /></Box>
+            <Box><Text color="white" fontWeight="bold">Troll Box</Text></Box>
+          </HStack>
+            <HStack gap={1}>
+              <Button
+                size="xs"
+                bg="#3a3a3a"
+                color="white"
+                fontSize="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCollapsed(!isCollapsed);
+                }}
+                _hover={{ bg: '#4a4a4a' }}
+                px={2}
+                minW="24px"
+                h="24px"
+                title={isCollapsed ? "Expand" : "Collapse"}
+              >
+                {isCollapsed ? '+' : '−'}
+              </Button>
+              {connected ? (
+                <Button
+                  size="xs"
+                  bg="#ff6b6b"
+                  color="white"
+                  fontSize="xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    disconnect();
+                  }}
+                  _hover={{ bg: "#e53e3e" }}
+                  h="24px"
+                  w="85px"
+                >
+                  Disconnect
+                </Button>
+              ) : (
+                <Button
+                  size="xs"
+                  bg="#4ade80"
+                  color="black"
+                  fontSize="xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    reconnect();
+                  }}
+                  _hover={{ bg: "#22c55e" }}
+                  h="24px"
+                  w="85px"
+                >
+                  Connect
+                </Button>
+              )}
+              {!isCollapsed && (
+                <Button
+                  size="xs"
+                  bg="#3a3a3a"
+                  color="white"
+                  fontSize="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsExpanded(true);
+                  }}
+                  _hover={{ bg: '#4a4a4a' }}
+                  px={2}
+                  minW="24px"
+                  h="24px"
+                  title="Expand"
+                >
+                  ⤢
+                </Button>
+              )}
+            </HStack>
         </HStack>
-        <HStack>
-          {unreadCount > 0 && (
-            <Badge colorScheme="green" borderRadius="full" px={2}>
-              {unreadCount}
-            </Badge>
+        
+        {/* Second row: Connection status and stats */}
+        <HStack justify="space-between" onClick={(e) => e.stopPropagation()}>
+          <HStack gap={2}>
+            {connected ? (
+              <Box w="6px" h="6px" borderRadius="full" bg="#4ade80" title="Connected" />
+            ) : (
+              <Box w="6px" h="6px" borderRadius="full" bg="#ff6b6b" title="Disconnected" />
+            )}
+            <Text color="#888" fontSize="xs">
+              {connected ? 'Connected' : 'Disconnected'}
+            </Text>
+          </HStack>
+          {connected && (
+            <Text color="#888" fontSize="xs">
+              {userCount} users • {messages.length} messages
+            </Text>
           )}
-          <IconButton
-            aria-label="Expand"
-            icon={<FiMaximize2 />}
-            size="sm"
-            variant="ghost"
-            color="white"
-            _hover={{ bg: '#3a3a3a' }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(true);
-            }}
-          />
         </HStack>
-      </HStack>
+      </VStack>
       
-      {/* Messages */}
-      <VStack
+      {!isCollapsed && (
+        <>
+          {/* Messages */}
+          <Box
         flex="1"
         overflowY="auto"
         overflowX="hidden"
-        p={3}
-        gap={2}
-        align="stretch"
+        p={2}
         position="relative"
         css={{
           '&::-webkit-scrollbar': {
@@ -185,65 +286,110 @@ const TrollBox: React.FC = () => {
           },
         }}
       >
-        {messages.slice(-3).map((msg) => (
+        {messages.length === 0 ? (
+          <Text color="#666" fontSize="xs" textAlign="center">
+            {connected ? 'No messages yet. Be the first!' : 'Connecting...'}
+          </Text>
+        ) : (
+          messages.slice(-5).map((msg) => (
           <Box key={msg.id} mb={1}>
-            <Box
-              bg="#2a2a2a"
-              p={2}
-              borderRadius="sm"
-              borderLeft="2px solid #4ade80"
-            >
-              <Text color="white" fontSize="xs" noOfLines={1}>
-                {msg.text}
-              </Text>
-            </Box>
+            <HStack gap={2} align="flex-start">
+              <Box>
+                <Text 
+                  color="#4ade80" 
+                  fontSize="xs" 
+                  fontWeight="bold" 
+                  minW="60px"
+                  maxW="60px"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                  whiteSpace="nowrap"
+                  title={msg.username}
+                >
+                  {msg.username}
+                </Text>
+              </Box>
+              <Box flex="1">
+                <Text color="white" fontSize="xs">
+                  {msg.content}
+                </Text>
+              </Box>
+              <Box>
+                <Text color="#666" fontSize="xs" flexShrink={0}>
+                  {formatTime(msg.timestamp)}
+                </Text>
+              </Box>
+            </HStack>
           </Box>
-        ))}
+        ))
+        )}
         <div ref={messagesEndRef} />
-      </VStack>
+      </Box>
 
       {/* Input */}
       <Box p={3} borderTop="1px solid #2a2a2a">
-        {isConnected ? (
+        {connected && authenticated ? (
           <HStack>
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Type message..."
-              bg="#2a2a2a"
-              border="none"
-              color="white"
-              h="36px"
-              _placeholder={{ color: '#666' }}
-              _hover={{ bg: '#3a3a3a' }}
-              _focus={{ bg: '#3a3a3a', outline: 'none' }}
-            />
-            <Button
-              size="sm"
-              bg="#4ade80"
-              color="black"
-              fontWeight="600"
-              onClick={handleSendMessage}
-              isDisabled={!newMessage.trim()}
-              _hover={{ bg: "#22c55e" }}
-              _disabled={{ 
-                bg: "#2a2a2a", 
-                color: "#666",
-                cursor: "not-allowed" 
-              }}
-              leftIcon={<FiSend />}
-              px={4}
-            >
-              Send
-            </Button>
+            <Box flex="1">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Type message..."
+                bg="#2a2a2a"
+                border="none"
+                color="white"
+                h="36px"
+                w="100%"
+                _placeholder={{ color: '#666' }}
+                _hover={{ bg: '#3a3a3a' }}
+                _focus={{ bg: '#3a3a3a', outline: 'none' }}
+              />
+            </Box>
+            <Box>
+              <Button
+                size="sm"
+                bg="#4ade80"
+                color="black"
+                fontWeight="600"
+                onClick={handleSendMessage}
+                isDisabled={!newMessage.trim()}
+                _hover={{ bg: "#22c55e" }}
+                _disabled={{ 
+                  bg: "#2a2a2a", 
+                  color: "#666",
+                  cursor: "not-allowed" 
+                }}
+                leftIcon={<FiSend />}
+                px={4}
+              >
+                Send
+              </Button>
+            </Box>
           </HStack>
         ) : (
-          <Text color="#888" textAlign="center" fontSize="xs">
-            Connect wallet to chat
-          </Text>
+          <VStack>
+            <Text color="#888" textAlign="center" fontSize="xs">
+              {error || (!connected ? 'Not connected to chat' : 'Authenticating...')}
+            </Text>
+            {!connected && (
+              <Button
+                size="sm"
+                bg="#4ade80"
+                color="black"
+                fontWeight="600"
+                onClick={reconnect}
+                _hover={{ bg: "#22c55e" }}
+                px={4}
+              >
+                Connect to Chat
+              </Button>
+            )}
+          </VStack>
         )}
       </Box>
+        </>
+      )}
     </Box>
   );
 
@@ -266,11 +412,11 @@ const TrollBox: React.FC = () => {
           left="50%"
           transform="translate(-50%, -50%)"
           w="60vw"
-          h="70vh"
+          h="80vh"
           minW="600px"
-          minH="500px"
+          minH="600px"
           maxW="900px"
-          maxH="700px"
+          maxH="800px"
           bg="#1a1a1a"
           borderRadius="xl"
           overflow="hidden"
@@ -280,43 +426,87 @@ const TrollBox: React.FC = () => {
           boxShadow="0 20px 40px rgba(0, 0, 0, 0.5)"
         >
           {/* Header */}
-          <HStack
-            justify="space-between"
+          <VStack
             p={4}
             borderBottom="1px solid #2a2a2a"
             bg="#0a0a0a"
+            align="stretch"
+            gap={3}
           >
-            <HStack>
-              <Box> <FiMessageSquare size={20} color="#4ade80" /> </Box>
-              <Box>
-              <Text color="white" fontWeight="bold" fontSize="lg">
-                Troll Box
-              </Text>
-              </Box>
-              <Box>
-              <Text color="#888" fontSize="sm">
-                ({messages.length} messages)
-              </Text>
-              </Box>
+            {/* First row: Title and buttons */}
+            <HStack justify="space-between">
+              <HStack>
+                <Box> <FiMessageSquare size={24} color="#4ade80" /> </Box>
+                <Box>
+                <Text color="white" fontWeight="bold" fontSize="lg">
+                  Troll Box
+                </Text>
+                </Box>
+              </HStack>
+              <HStack gap={2}>
+                {connected ? (
+                  <Button
+                    size="sm"
+                    bg="#ff6b6b"
+                    color="white"
+                    fontSize="sm"
+                    onClick={disconnect}
+                    _hover={{ bg: "#e53e3e" }}
+                    w="120px"
+                  >
+                    Disconnect
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    bg="#4ade80"
+                    color="black"
+                    fontSize="sm"
+                    onClick={reconnect}
+                    _hover={{ bg: "#22c55e" }}
+                    w="120px"
+                  >
+                    Connect
+                  </Button>
+                )}
+                <IconButton
+                  aria-label="Minimize"
+                  icon={<FiMinimize2 />}
+                  size="sm"
+                  variant="ghost"
+                  color="white"
+                  onClick={() => setIsExpanded(false)}
+                  _hover={{ bg: '#2a2a2a' }}
+                  title="Minimize"
+                />
+              </HStack>
             </HStack>
-            <IconButton
-              aria-label="Minimize"
-              icon={<FiMinimize2 />}
-              size="sm"
-              variant="ghost"
-              color="white"
-              onClick={() => setIsExpanded(false)}
-              _hover={{ bg: '#2a2a2a' }}
-            />
-          </HStack>
+            
+            {/* Second row: Connection status and stats */}
+            <HStack justify="space-between">
+              <HStack gap={2}>
+                {connected ? (
+                  <Box w="8px" h="8px" borderRadius="full" bg="#4ade80" title="Connected" />
+                ) : (
+                  <Box w="8px" h="8px" borderRadius="full" bg="#ff6b6b" title="Disconnected" />
+                )}
+                <Text color="#888" fontSize="sm">
+                  {connected ? 'Connected' : 'Disconnected'}
+                </Text>
+              </HStack>
+              {connected && (
+                <Text color="#888" fontSize="sm">
+                  {userCount} users • {messages.length} messages
+                </Text>
+              )}
+            </HStack>
+          </VStack>
 
           {/* Messages */}
-          <VStack
+          <Box
             flex="1"
             overflowY="auto"
-            p={4}
-            gap={3}
-            align="stretch"
+            p={3}
             css={{
               '&::-webkit-scrollbar': {
                 width: '4px',
@@ -330,27 +520,106 @@ const TrollBox: React.FC = () => {
               },
             }}
           >
-            {messages.map((msg) => (
-              <Box key={msg.id}>
-                <Box
-                  bg="#2a2a2a"
-                  p={3}
-                  borderRadius="md"
-                  borderLeft="2px solid #4ade80"
-                >
-                  <Text color="white" fontSize="sm">
-                    {msg.text}
-                  </Text>
-                </Box>
+            {messages.length === 0 ? (
+              <Flex flex="1" align="center" justify="center">
+                <Text color="#666" fontSize="sm">
+                  {connected ? 'No messages yet. Start the conversation!' : 'Connecting to chat server...'}
+                </Text>
+              </Flex>
+            ) : (
+              messages.map((msg) => (
+              <Box key={msg.id} mb={2}>
+                <HStack gap={3} align="flex-start">
+                  <Box>
+                    <Text 
+                      color="#4ade80" 
+                      fontSize="sm" 
+                      fontWeight="bold" 
+                      minW="80px"
+                      maxW="80px"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                      whiteSpace="nowrap"
+                      title={msg.username}
+                    >
+                      {msg.username}
+                    </Text>
+                  </Box>
+                  <Box flex="1">
+                    <Text color="white" fontSize="sm">
+                      {msg.content}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text color="#666" fontSize="xs" flexShrink={0}>
+                      {formatTime(msg.timestamp)}
+                    </Text>
+                  </Box>
+                </HStack>
               </Box>
-            ))}
+            ))
+            )}
             <div ref={messagesEndRef} />
-          </VStack>
+          </Box>
 
           {/* Input */}
           <Box p={4} borderTop="1px solid #2a2a2a" bg="#0a0a0a">
-            {isConnected ? (
-              <HStack>
+            {connected && authenticated ? (
+              <VStack gap={3} align="stretch">
+                {/* Compact username section */}
+                <HStack gap={2} align="center">
+                  <Text color="#888" fontSize="xs" minW="fit-content">Username:</Text>
+                  <Input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.slice(0, 20))}
+                    placeholder={serverUsername ? "Change username" : "Choose username"}
+                    bg="#2a2a2a"
+                    border="none"
+                    color="white"
+                    h="32px"
+                    maxW="150px"
+                    fontSize="sm"
+                    isDisabled={!canChangeUsername}
+                    _placeholder={{ color: '#666', fontSize: 'sm' }}
+                    _hover={{ 
+                      bg: canChangeUsername ? '#3a3a3a' : '#2a2a2a'
+                    }}
+                    _focus={{ 
+                      bg: canChangeUsername ? '#3a3a3a' : '#2a2a2a', 
+                      outline: 'none' 
+                    }}
+                  />                    
+                  {canChangeUsername ? (
+                    <Button
+                      size="sm"
+                      h="32px"
+                      bg="#4ade80"
+                      color="black"
+                      fontWeight="600"
+                      onClick={handleChangeUsername}
+                      isDisabled={!username.trim() || username === serverUsername || !isUsernameValid(username)}
+                      _hover={{ bg: '#22c55e' }}
+                      _disabled={{ 
+                        bg: "#2a2a2a", 
+                        color: "#666",
+                        cursor: "not-allowed" 
+                      }}
+                      px={4}
+                    >
+                      Set
+                    </Button>
+                  ) : (
+                    <Text color="#666" fontSize="xs">
+                      {cooldownRemaining > 0 ? `${Math.ceil(cooldownRemaining / (60 * 60 * 1000))}h cooldown` : 'Locked'}
+                    </Text>
+                  )}
+                  {username.trim() && username !== serverUsername && !isUsernameValid(username) && canChangeUsername && (
+                    <Text color="#ff6b6b" fontSize="xs" whiteSpace="nowrap">
+                      3-20 chars, a-z, 0-9, -, _
+                    </Text>
+                  )}
+                </HStack>
+                <HStack>
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -381,11 +650,26 @@ const TrollBox: React.FC = () => {
                 >
                   Send
                 </Button>
-              </HStack>
+                </HStack>
+              </VStack>
             ) : (
-              <Text color="#888" textAlign="center" fontSize="sm">
-                Connect your wallet to chat
-              </Text>
+              <VStack gap={3}>
+                <Text color="#888" textAlign="center" fontSize="sm">
+                  {error || (!connected ? 'Not connected to chat server' : 'Authenticating...')}
+                </Text>
+                {!connected && (
+                  <Button
+                    bg="#4ade80"
+                    color="black"
+                    fontWeight="600"
+                    onClick={reconnect}
+                    _hover={{ bg: "#22c55e" }}
+                    px={6}
+                  >
+                    Connect to Chat
+                  </Button>
+                )}
+              </VStack>
             )}
           </Box>
         </Flex>

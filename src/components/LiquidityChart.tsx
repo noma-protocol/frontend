@@ -11,7 +11,8 @@ import {
   Heading,
   Text,
   Table,
-  Spinner
+  Spinner,
+  HStack
 } from "@chakra-ui/react";
 import { isMobile } from "react-device-detect";
 import Chart from './Chart';
@@ -117,37 +118,49 @@ return (
                 <Table.Row _hover={{ bg: "#3a3a3a" }}>
                   <Table.Cell p={2}><Text color="#4ade80" fontWeight="600">Tick Lower</Text></Table.Cell>
                   <Table.Cell isNumeric p={2}>
-                    <Text fontSize="sm">{commifyPatched(tickToPrice(data["Floor"]?.lowerTick)[0])}</Text>
-                    <Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Floor"]?.lowerTick || 0)[0] * priceUSD)})</Text>
-                    <Text fontSize="xs" color="#666">Tick: {Number(data["Floor"]?.lowerTick)}</Text>
+                    <HStack>
+                        <Box><Text fontSize="sm">{commifyPatched(tickToPrice(data["Floor"]?.lowerTick)[0])}</Text></Box>
+                        <Box><Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Floor"]?.lowerTick || 0)[0] * priceUSD)})</Text></Box>
+                        <Box><Text fontSize="xs" color="#666">Tick: {Number(data["Floor"]?.lowerTick)}</Text></Box>
+                    </HStack>
                   </Table.Cell>
                   <Table.Cell isNumeric p={2}>
-                    <Text fontSize="sm">{commifyPatched(tickToPrice(data["Anchor"]?.lowerTick))}</Text>
-                    <Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Anchor"]?.lowerTick || 0)[0] * priceUSD)})</Text>
-                    <Text fontSize="xs" color="#666">Tick: {Number(data["Anchor"]?.lowerTick)}</Text>
+                    <HStack>
+                      <Box><Text fontSize="sm">{commifyPatched(tickToPrice(data["Anchor"]?.lowerTick))}</Text></Box>
+                    <Box><Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Anchor"]?.lowerTick || 0)[0] * priceUSD)})</Text></Box>
+                    <Box><Text fontSize="xs" color="#666">Tick: {Number(data["Anchor"]?.lowerTick)}</Text></Box>
+                    </HStack>
                   </Table.Cell>
                   <Table.Cell isNumeric p={2}>
-                    <Text fontSize="sm">{commifyPatched(tickToPrice(data["Discovery"]?.lowerTick))}</Text>
-                    <Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Discovery"]?.lowerTick || 0)[0] * priceUSD)})</Text>
-                    <Text fontSize="xs" color="#666">Tick: {Number(data["Discovery"]?.lowerTick)}</Text>
+                    <HStack>
+                      <Box><Text fontSize="sm">{commifyPatched(tickToPrice(data["Discovery"]?.lowerTick))}</Text></Box>
+                      <Box><Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Discovery"]?.lowerTick || 0)[0] * priceUSD)})</Text></Box>
+                      <Box> <Text fontSize="xs" color="#666">Tick: {Number(data["Discovery"]?.lowerTick)}</Text></Box>
+                    </HStack>
                   </Table.Cell>
                 </Table.Row>
                 <Table.Row _hover={{ bg: "#3a3a3a" }}>
                   <Table.Cell p={2}><Text color="#4ade80" fontWeight="600">Tick Upper</Text></Table.Cell>
                   <Table.Cell isNumeric p={2}>
-                    <Text fontSize="sm">{commifyPatched(tickToPrice(data["Floor"]?.upperTick))}</Text>
-                    <Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Floor"]?.upperTick || 0)[0] * priceUSD)})</Text>
-                    <Text fontSize="xs" color="#666">Tick: {Number(data["Floor"]?.upperTick)}</Text>
+                  <HStack>
+                    <Box><Text fontSize="sm">{commifyPatched(tickToPrice(data["Floor"]?.upperTick))}</Text></Box>
+                    <Box><Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Floor"]?.upperTick || 0)[0] * priceUSD)})</Text></Box>
+                    <Box><Text fontSize="xs" color="#666">Tick: {Number(data["Floor"]?.upperTick)}</Text></Box>
+                  </HStack>
                   </Table.Cell>
                   <Table.Cell isNumeric p={2}>
-                    <Text fontSize="sm">{commifyPatched(tickToPrice(data["Anchor"]?.upperTick))}</Text>
-                    <Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Anchor"]?.upperTick || 0)[0] * priceUSD)})</Text>
-                    <Text fontSize="xs" color="#666">Tick: {Number(data["Anchor"]?.upperTick)}</Text>
+                    <HStack>
+                   <Box> <Text fontSize="sm">{commifyPatched(tickToPrice(data["Anchor"]?.upperTick))}</Text></Box>
+                    <Box><Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Anchor"]?.upperTick || 0)[0] * priceUSD)})</Text></Box>
+                    <Box><Text fontSize="xs" color="#666">Tick: {Number(data["Anchor"]?.upperTick)}</Text></Box>
+                    </HStack>
                   </Table.Cell>
                   <Table.Cell isNumeric p={2}>
-                    <Text fontSize="sm">{commifyPatched(tickToPrice(data["Discovery"]?.upperTick))}</Text>
-                    <Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Discovery"]?.upperTick || 0)[0] * priceUSD)})</Text>
-                    <Text fontSize="xs" color="#666">Tick: {Number(data["Discovery"]?.upperTick)}</Text>
+                    <HStack>
+                      <Box><Text fontSize="sm">{commifyPatched(tickToPrice(data["Discovery"]?.upperTick))}</Text></Box>
+                    <Box><Text fontSize="xs" color="#888">(${commify(tickToPrice(data["Discovery"]?.upperTick || 0)[0] * priceUSD)})</Text></Box>
+                    <Box><Text fontSize="xs" color="#666">Tick: {Number(data["Discovery"]?.upperTick)}</Text></Box>
+                    </HStack>
                   </Table.Cell>
                 </Table.Row>
               </Table.Body>

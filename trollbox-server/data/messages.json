@@ -1,0 +1,86 @@
+[
+  {
+    "id": "e84dc302-d55a-470e-8bc2-b4fa78afaf0b",
+    "type": "message",
+    "content": "yooooooo",
+    "username": "ondan321",
+    "timestamp": "2025-08-23T15:58:32.956Z",
+    "clientId": "609cc79d-617f-4082-b782-1969d8738783"
+  },
+  {
+    "id": "fe304ba7-3091-4ad1-af69-d5c31341c433",
+    "type": "message",
+    "content": "test",
+    "username": "ondan321",
+    "timestamp": "2025-08-23T16:05:19.859Z",
+    "clientId": "609cc79d-617f-4082-b782-1969d8738783"
+  },
+  {
+    "id": "da5c96a8-6da1-43a9-a368-9fa24670d623",
+    "type": "message",
+    "content": "test",
+    "username": "ondan",
+    "timestamp": "2025-08-23T16:16:05.847Z",
+    "clientId": "354c4cb5-649e-461c-bc48-68c31e1a4bbb"
+  },
+  {
+    "id": "92685033-3565-49b3-8655-8ab7b8feb6e0",
+    "type": "message",
+    "content": "hi",
+    "username": "0xcC91...D111",
+    "timestamp": "2025-08-23T16:18:58.542Z",
+    "clientId": "de6c3e06-6750-41bd-b6db-fba7bb0584cc"
+  },
+  {
+    "id": "a41fd276-3c1c-488d-8db1-beab750e4659",
+    "type": "message",
+    "content": "test",
+    "username": "ondan",
+    "timestamp": "2025-08-23T16:19:15.587Z",
+    "clientId": "de6c3e06-6750-41bd-b6db-fba7bb0584cc"
+  },
+  {
+    "id": "e7eab195-4b57-447c-983f-b9b810fb0f84",
+    "type": "message",
+    "content": "test",
+    "username": "ondan123",
+    "timestamp": "2025-08-23T16:19:24.484Z",
+    "clientId": "de6c3e06-6750-41bd-b6db-fba7bb0584cc"
+  },
+  {
+    "id": "3c468e11-7333-4361-b89f-37717374f4f3",
+    "type": "message",
+    "content": "Hello from authenticated user!",
+    "username": "TestUser1",
+    "address": "0x1234567890123456789012345678901234567890",
+    "timestamp": "2025-08-23T20:36:56.139Z",
+    "clientId": "8da0e52f-a4a4-4186-80e7-75c01887e706"
+  },
+  {
+    "id": "1efaf1c0-8fd3-4b13-b067-a980e5c76829",
+    "type": "message",
+    "content": "test",
+    "username": "0x98f2...1bBd",
+    "address": "0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd",
+    "timestamp": "2025-08-24T05:15:14.841Z",
+    "clientId": "01dc8cc3-8e46-4173-930f-4dd18fe91725"
+  },
+  {
+    "id": "6e64f1a3-98a9-497b-8ca1-0d0caa3ba301",
+    "type": "message",
+    "content": "tst",
+    "username": "0x98f2...1bBd",
+    "address": "0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd",
+    "timestamp": "2025-08-24T05:15:21.224Z",
+    "clientId": "01dc8cc3-8e46-4173-930f-4dd18fe91725"
+  },
+  {
+    "id": "a762f9c3-fa2d-4081-8854-1cf806bc14c6",
+    "type": "message",
+    "content": "ttest6",
+    "username": "0x98f2...1bBd",
+    "address": "0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd",
+    "timestamp": "2025-08-24T05:24:34.137Z",
+    "clientId": "87767aed-5b98-447d-b8e4-784acd0a4e22"
+  }
+]

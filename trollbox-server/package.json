@@ -1,0 +1,18 @@
+{
+  "name": "trollbox-server",
+  "version": "1.0.0",
+  "description": "WebSocket server for trollbox chat with JSON persistence",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
