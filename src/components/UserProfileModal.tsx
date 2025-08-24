@@ -117,10 +117,24 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   };
 
   return (
-    <DialogRoot open={isOpen} onOpenChange={(e) => !e.open && onClose()} size="xl">
+    <DialogRoot open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
       <DialogBackdrop bg="rgba(0, 0, 0, 0.8)" />
-      <DialogContent bg="#1a1a1a" border="1px solid #2a2a2a">
-        <DialogHeader color="white" borderBottom="1px solid #2a2a2a" pb={4}>
+      <DialogContent 
+        bg="#1a1a1a" 
+        border="1px solid #2a2a2a"
+        position="fixed"
+        top="50%"
+        left="50%"
+        transform="translate(-50%, -50%)"
+        w="60vw"
+        maxW="900px"
+        minW="600px"
+        maxH="80vh"
+        borderRadius="xl"
+        boxShadow="0 20px 40px rgba(0, 0, 0, 0.5)"
+        overflow="hidden"
+      >
+        <DialogHeader color="white" borderBottom="1px solid #2a2a2a" bg="#0a0a0a" p={4}>
           <HStack>
             <FiUser size={20} />
             <Text fontSize="lg" fontWeight="bold">User Profile</Text>
@@ -128,7 +142,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         </DialogHeader>
         <DialogCloseTrigger />
         
-        <DialogBody p={6}>
+        <DialogBody p={6} overflowY="auto" maxH="calc(80vh - 100px)">
           {isLoading ? (
             <Flex justify="center" align="center" h="300px">
               <Spinner size="lg" color="#4ade80" />
