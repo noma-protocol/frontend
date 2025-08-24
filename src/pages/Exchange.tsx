@@ -197,8 +197,8 @@ const Launchpad: React.FC = () => {
         
         if (isBuying) {
             const availableBalance = useWeth 
-                ? parseFloat(formatEther(wethBalance || "0"))
-                : parseFloat(formatEther(balance?.value || "0"));
+                ? parseFloat(wethBalance || "0")
+                : parseFloat(ethBalance || "0");
             
             if (amount > availableBalance) {
                 return { 
@@ -207,7 +207,7 @@ const Launchpad: React.FC = () => {
                 };
             }
         } else {
-            const tokenBalanceNum = parseFloat(formatEther(tokenBalance || "0"));
+            const tokenBalanceNum = parseFloat(tokenBalance || "0");
             if (amount > tokenBalanceNum) {
                 return { 
                     isValid: false, 
@@ -2016,8 +2016,8 @@ const Launchpad: React.FC = () => {
         
         // Check balance
         const availableBalance = useWeth 
-            ? parseFloat(formatEther(wethBalance || "0"))
-            : parseFloat(formatEther(balance?.value || "0"));
+            ? parseFloat(wethBalance || "0")
+            : parseFloat(ethBalance || "0");
             
         if (amount > availableBalance) {
             toaster.create({
@@ -2105,7 +2105,7 @@ const Launchpad: React.FC = () => {
         }
         
         // Check token balance
-        const tokenBalanceNum = parseFloat(formatEther(tokenBalance || "0"));
+        const tokenBalanceNum = parseFloat(tokenBalance || "0");
         if (amount > tokenBalanceNum) {
             toaster.create({
                 title: "Insufficient Balance",
