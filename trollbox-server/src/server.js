@@ -3,11 +3,14 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
+import express from 'express';
+import cors from 'cors';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
 const MESSAGES_FILE = join(DATA_DIR, 'messages.json');
 const USERNAMES_FILE = join(DATA_DIR, 'usernames.json');
+const PROFILES_FILE = join(DATA_DIR, 'profiles.json');
 const PORT = process.env.PORT || 9090;
 
 // Ensure data directory exists
@@ -169,6 +172,54 @@ class UsernameStore {
   }
 }
 
+// Profile store for tracking user data
+class ProfileStore {
+  constructor() {
+    this.profiles = this.loadProfiles();
+  }
+
+  loadProfiles() {
+    try {
+      if (existsSync(PROFILES_FILE)) {
+        const data = readFileSync(PROFILES_FILE, 'utf8');
+        return JSON.parse(data);
+      }
+    } catch (error) {
+      console.error('Error loading profiles:', error);
+    }
+    return {};
+  }
+
+  saveProfiles() {
+    try {
+      writeFileSync(PROFILES_FILE, JSON.stringify(this.profiles, null, 2));
+    } catch (error) {
+      console.error('Error saving profiles:', error);
+    }
+  }
+
+  getProfile(address) {
+    return this.profiles[address] || null;
+  }
+
+  createOrUpdateProfile(address) {
+    if (!this.profiles[address]) {
+      // First time connection
+      this.profiles[address] = {
+        firstConnected: new Date().toISOString(),
+        lastConnected: new Date().toISOString(),
+        reputation: 100, // Starting reputation
+      };
+    } else {
+      // Update last connected
+      this.profiles[address].lastConnected = new Date().toISOString();
+    }
+    
+    this.saveProfiles();
+    return this.profiles[address];
+  }
+}
+
 // Rate limiting
 class RateLimiter {
   constructor() {
@@ -207,6 +258,7 @@ class RateLimiter {
 // Initialize components
 const messageStore = new MessageStore();
 const usernameStore = new UsernameStore();
+const profileStore = new ProfileStore();
 const rateLimiter = new RateLimiter();
 
 // Create WebSocket server
@@ -288,6 +340,9 @@ wss.on('connection', (ws, req) => {
           }
           
           ws.address = message.address.toLowerCase();
+          
+          // Create or update user profile
+          profileStore.createOrUpdateProfile(ws.address);
           
           // Check if username is provided for setting/changing
           if (message.username && message.username.trim()) {
@@ -419,5 +474,32 @@ wss.on('connection', (ws, req) => {
 setInterval(() => {
   rateLimiter.cleanup();
 }, 60000);
+
+// Create Express app for REST API
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// API endpoint to get user profile
+app.get('/api/profile/:address', (req, res) => {
+  const { address } = req.params;
+  const profile = profileStore.getProfile(address.toLowerCase());
+  
+  if (profile) {
+    res.json({
+      firstConnected: profile.firstConnected,
+      reputation: profile.reputation,
+      nfts: [] // Placeholder - would integrate with blockchain
+    });
+  } else {
+    res.status(404).json({ error: 'Profile not found' });
+  }
+});
+
+// Start Express server
+const HTTP_PORT = process.env.HTTP_PORT || 9091;
+app.listen(HTTP_PORT, () => {
+  console.log(`HTTP API server running on port ${HTTP_PORT}`);
+});
 
 console.log(`Trollbox WebSocket server running on port ${PORT}`);

@@ -14,6 +14,7 @@ import {
 import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
 import { useTrollbox } from '../hooks/useTrollbox';
+import UserProfileModal from './UserProfileModal';
 
 interface Message {
   id: string;
@@ -38,6 +39,7 @@ const TrollBox: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [prevMessageCount, setPrevMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [selectedUser, setSelectedUser] = useState<{ username: string; address: string } | null>(null);
   
   // Use the WebSocket hook
   const { 
@@ -140,6 +142,12 @@ const TrollBox: React.FC = () => {
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+  
+  const handleUsernameClick = (username: string, address?: string) => {
+    if (address) {
+      setSelectedUser({ username, address });
+    }
   };
 
   // Collapsed view
@@ -313,6 +321,9 @@ const TrollBox: React.FC = () => {
                   textOverflow="ellipsis"
                   whiteSpace="nowrap"
                   title={msg.username}
+                  cursor="pointer"
+                  _hover={{ textDecoration: "underline" }}
+                  onClick={() => handleUsernameClick(msg.username, msg.address)}
                 >
                   {msg.username}
                 </Text>
@@ -558,6 +569,9 @@ const TrollBox: React.FC = () => {
                       textOverflow="ellipsis"
                       whiteSpace="nowrap"
                       title={msg.username}
+                      cursor="pointer"
+                      _hover={{ textDecoration: "underline" }}
+                      onClick={() => handleUsernameClick(msg.username, msg.address)}
                     >
                       {msg.username}
                     </Text>
@@ -707,7 +721,19 @@ const TrollBox: React.FC = () => {
     </Portal>
   );
 
-  return isExpanded ? ExpandedView : CollapsedView;
+  return (
+    <>
+      {isExpanded ? ExpandedView : CollapsedView}
+      {selectedUser && (
+        <UserProfileModal
+          isOpen={!!selectedUser}
+          onClose={() => setSelectedUser(null)}
+          username={selectedUser.username}
+          address={selectedUser.address}
+        />
+      )}
+    </>
+  );
 };
 
 export default TrollBox;
