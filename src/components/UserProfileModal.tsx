@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
   VStack,
   HStack,
   Text,
@@ -16,6 +10,14 @@ import {
   Spinner,
   Flex,
 } from '@chakra-ui/react';
+import {
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogBackdrop,
+} from './ui/dialog';
 import { FiUser, FiCalendar, FiStar, FiImage } from 'react-icons/fi';
 
 interface UserProfileModalProps {
@@ -115,18 +117,18 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
-      <ModalOverlay bg="rgba(0, 0, 0, 0.8)" />
-      <ModalContent bg="#1a1a1a" border="1px solid #2a2a2a">
-        <ModalHeader color="white" borderBottom="1px solid #2a2a2a">
+    <DialogRoot open={isOpen} onOpenChange={(e) => !e.open && onClose()} size="xl">
+      <DialogBackdrop bg="rgba(0, 0, 0, 0.8)" />
+      <DialogContent bg="#1a1a1a" border="1px solid #2a2a2a">
+        <DialogHeader color="white" borderBottom="1px solid #2a2a2a" pb={4}>
           <HStack>
             <FiUser size={20} />
-            <Text>User Profile</Text>
+            <Text fontSize="lg" fontWeight="bold">User Profile</Text>
           </HStack>
-        </ModalHeader>
-        <ModalCloseButton color="white" />
+        </DialogHeader>
+        <DialogCloseTrigger />
         
-        <ModalBody p={6}>
+        <DialogBody p={6}>
           {isLoading ? (
             <Flex justify="center" align="center" h="300px">
               <Spinner size="lg" color="#4ade80" />
@@ -260,9 +262,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
               Failed to load profile
             </Text>
           )}
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        </DialogBody>
+      </DialogContent>
+    </DialogRoot>
   );
 };
 
