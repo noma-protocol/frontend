@@ -14,7 +14,6 @@ import {
   Grid,
   Image,
   Spinner,
-  Divider,
   Flex,
 } from '@chakra-ui/react';
 import { FiUser, FiCalendar, FiStar, FiImage } from 'react-icons/fi';
@@ -163,7 +162,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 </VStack>
               </Box>
 
-              <Divider borderColor="#2a2a2a" />
+              <Box h="1px" bg="#2a2a2a" w="100%" />
 
               {/* Account Stats */}
               <Box>
@@ -192,7 +191,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 </Grid>
               </Box>
 
-              <Divider borderColor="#2a2a2a" />
+              <Box h="1px" bg="#2a2a2a" w="100%" />
 
               {/* NFT Collection */}
               <Box>
