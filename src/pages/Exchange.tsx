@@ -220,7 +220,7 @@ const Launchpad: React.FC = () => {
                 if (amount > availableBalance) {
                     toaster.create({
                         title: "Insufficient Balance",
-                        description: `You only have ${availableBalance.toFixed(4)} ${useWeth ? 'WETH' : 'ETH'}`,
+                        description: `You only have ${availableBalance.toFixed(4)} ${useWeth ? 'WMON' : 'MON'}`,
                         status: "error",
                         duration: 3000
                     });
@@ -256,7 +256,7 @@ const Launchpad: React.FC = () => {
             if (amount > availableBalance) {
                 return { 
                     isValid: false, 
-                    message: `Insufficient ${useWeth ? 'WETH' : 'ETH'} balance` 
+                    message: `Insufficient ${useWeth ? 'WMON' : 'MON'} balance` 
                 };
             }
         } else {
@@ -2075,7 +2075,7 @@ const Launchpad: React.FC = () => {
         if (amount > availableBalance) {
             toaster.create({
                 title: "Insufficient Balance",
-                description: `You only have ${availableBalance.toFixed(4)} ${useWeth ? 'WETH' : 'ETH'}`,
+                description: `You only have ${availableBalance.toFixed(4)} ${useWeth ? 'WMON' : 'MON'}`,
                 status: "error"
             });
             return;
@@ -3080,7 +3080,7 @@ const Launchpad: React.FC = () => {
                                     <Spinner size="xs" color="#4ade80" />
                                 ) : quote ? (
                                     <Text color="#666" fontSize="xs">
-                                        You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                        You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
                                     </Text>
                                 ) : null}
                             </Box>
@@ -3103,7 +3103,7 @@ const Launchpad: React.FC = () => {
                                 </Box>
                                 <Box>
                                     <Text color="white" fontSize="sm">
-                                        {quote || "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                        {quote || "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
                                     </Text>
                                 </Box>
                             </Flex>
@@ -3239,7 +3239,7 @@ const Launchpad: React.FC = () => {
                                             <Spinner size="xs" color="#4ade80" />
                                         ) : quote ? (
                                             <Text color="#666" fontSize="xs">
-                                                You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                                You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
                                             </Text>
                                         ) : null}
                                     </Box>
@@ -3262,7 +3262,7 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                         <Box>
                                             <Text color="white" fontSize="sm">
-                                                {quote || "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WETH" : "ETH")}
+                                                {quote || "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
                                             </Text>
                                         </Box>
                                     </Flex>
