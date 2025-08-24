@@ -246,21 +246,29 @@ const TrollBox: React.FC = () => {
         
         {/* Second row: Connection status and stats */}
         <HStack justify="space-between" onClick={(e) => e.stopPropagation()}>
-          <HStack gap={2}>
-            {connected ? (
-              <Box w="6px" h="6px" borderRadius="full" bg="#4ade80" title="Connected" />
-            ) : (
-              <Box w="6px" h="6px" borderRadius="full" bg="#ff6b6b" title="Disconnected" />
-            )}
-            <Text color="#888" fontSize="xs">
-              {connected ? 'Connected' : 'Disconnected'}
-            </Text>
-          </HStack>
-          {connected && (
-            <Text color="#888" fontSize="xs">
-              {userCount} users • {messages.length} messages
-            </Text>
-          )}
+              <Box>
+            <HStack gap={2}>
+                <Box>
+                {connected ? (
+                  <Box w="6px" h="6px" borderRadius="full" bg="#4ade80" title="Connected" />
+                ) : (
+                  <Box w="6px" h="6px" borderRadius="full" bg="#ff6b6b" title="Disconnected" />
+                )}
+                </Box>
+                <Box>
+                <Text color="#888" fontSize="xs">
+                  {connected ? 'Connected' : 'Disconnected'}
+                </Text>                
+                </Box>
+            </HStack>                
+              </Box>
+                <Box>
+                {connected && (
+                  <Text color="#888" fontSize="xs">
+                    {userCount} users • {messages.length} messages
+                  </Text>
+                )}                  
+                </Box>
         </HStack>
       </VStack>
       
@@ -484,21 +492,30 @@ const TrollBox: React.FC = () => {
             
             {/* Second row: Connection status and stats */}
             <HStack justify="space-between">
+              <Box>
               <HStack gap={2}>
+                <Box>
                 {connected ? (
                   <Box w="8px" h="8px" borderRadius="full" bg="#4ade80" title="Connected" />
                 ) : (
                   <Box w="8px" h="8px" borderRadius="full" bg="#ff6b6b" title="Disconnected" />
                 )}
+                </Box>
+                <Box>
                 <Text color="#888" fontSize="sm">
                   {connected ? 'Connected' : 'Disconnected'}
-                </Text>
+                </Text>                  
+                </Box>
               </HStack>
+              </Box>
+                <Box>
               {connected && (
                 <Text color="#888" fontSize="sm">
                   {userCount} users • {messages.length} messages
                 </Text>
               )}
+                </Box>
+
             </HStack>
           </VStack>
 
@@ -568,88 +585,101 @@ const TrollBox: React.FC = () => {
               <VStack gap={3} align="stretch">
                 {/* Compact username section */}
                 <HStack gap={2} align="center">
-                  <Text color="#888" fontSize="xs" minW="fit-content">Username:</Text>
-                  <Input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value.slice(0, 20))}
-                    placeholder={serverUsername ? "Change username" : "Choose username"}
-                    bg="#2a2a2a"
-                    border="none"
-                    color="white"
-                    h="32px"
-                    maxW="150px"
-                    fontSize="sm"
-                    isDisabled={!canChangeUsername}
-                    _placeholder={{ color: '#666', fontSize: 'sm' }}
-                    _hover={{ 
-                      bg: canChangeUsername ? '#3a3a3a' : '#2a2a2a'
-                    }}
-                    _focus={{ 
-                      bg: canChangeUsername ? '#3a3a3a' : '#2a2a2a', 
-                      outline: 'none' 
-                    }}
-                  />                    
-                  {canChangeUsername ? (
-                    <Button
-                      size="sm"
+                  <Box>
+                    <Text color="#888" fontSize="xs" minW="fit-content">Username:</Text>
+                  </Box>
+                  <Box>
+                    <Input
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.slice(0, 20))}
+                      placeholder={serverUsername ? "Change username" : "Choose username"}
+                      bg="#2a2a2a"
+                      border="none"
+                      color="white"
                       h="32px"
+                      maxW="150px"
+                      fontSize="sm"
+                      isDisabled={!canChangeUsername}
+                      _placeholder={{ color: '#666', fontSize: 'sm' }}
+                      _hover={{ 
+                        bg: canChangeUsername ? '#3a3a3a' : '#2a2a2a'
+                      }}
+                      _focus={{ 
+                        bg: canChangeUsername ? '#3a3a3a' : '#2a2a2a', 
+                        outline: 'none' 
+                      }}
+                    />
+                  </Box>
+                  <Box>
+                    {canChangeUsername ? (
+                      <Button
+                        size="sm"
+                        h="32px"
+                        bg="#4ade80"
+                        color="black"
+                        fontWeight="600"
+                        onClick={handleChangeUsername}
+                        isDisabled={!username.trim() || username === serverUsername || !isUsernameValid(username)}
+                        _hover={{ bg: '#22c55e' }}
+                        _disabled={{ 
+                          bg: "#2a2a2a", 
+                          color: "#666",
+                          cursor: "not-allowed" 
+                        }}
+                        px={4}
+                      >
+                        Set
+                      </Button>
+                    ) : (
+                      <Text color="#666" fontSize="xs">
+                        {cooldownRemaining > 0 ? `${Math.ceil(cooldownRemaining / (60 * 60 * 1000))}h cooldown` : 'Locked'}
+                      </Text>
+                    )}
+                  </Box>
+                  {username.trim() && username !== serverUsername && !isUsernameValid(username) && canChangeUsername && (
+                    <Box>
+                      <Text color="#ff6b6b" fontSize="xs" whiteSpace="nowrap">
+                        3-20 chars, a-z, 0-9, -, _
+                      </Text>
+                    </Box>
+                  )}
+                </HStack>
+                <HStack>
+                  <Box flex="1">
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      placeholder="Type your message..."
+                      bg="#2a2a2a"
+                      border="none"
+                      color="white"
+                      h="44px"
+                      w="100%"
+                      _placeholder={{ color: '#666' }}
+                      _hover={{ bg: '#3a3a3a' }}
+                      _focus={{ bg: '#3a3a3a', outline: 'none' }}
+                    />
+                  </Box>
+                  <Box>
+                    <Button
                       bg="#4ade80"
                       color="black"
                       fontWeight="600"
-                      onClick={handleChangeUsername}
-                      isDisabled={!username.trim() || username === serverUsername || !isUsernameValid(username)}
-                      _hover={{ bg: '#22c55e' }}
+                      onClick={handleSendMessage}
+                      isDisabled={!newMessage.trim()}
+                      _hover={{ bg: "#22c55e" }}
                       _disabled={{ 
                         bg: "#2a2a2a", 
                         color: "#666",
                         cursor: "not-allowed" 
                       }}
-                      px={4}
+                      leftIcon={<FiSend />}
+                      px={6}
                     >
-                      Set
+                      Send
                     </Button>
-                  ) : (
-                    <Text color="#666" fontSize="xs">
-                      {cooldownRemaining > 0 ? `${Math.ceil(cooldownRemaining / (60 * 60 * 1000))}h cooldown` : 'Locked'}
-                    </Text>
-                  )}
-                  {username.trim() && username !== serverUsername && !isUsernameValid(username) && canChangeUsername && (
-                    <Text color="#ff6b6b" fontSize="xs" whiteSpace="nowrap">
-                      3-20 chars, a-z, 0-9, -, _
-                    </Text>
-                  )}
-                </HStack>
-                <HStack>
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Type your message..."
-                  bg="#2a2a2a"
-                  border="none"
-                  color="white"
-                  h="44px"
-                  _placeholder={{ color: '#666' }}
-                  _hover={{ bg: '#3a3a3a' }}
-                  _focus={{ bg: '#3a3a3a', outline: 'none' }}
-                />
-                <Button
-                  bg="#4ade80"
-                  color="black"
-                  fontWeight="600"
-                  onClick={handleSendMessage}
-                  isDisabled={!newMessage.trim()}
-                  _hover={{ bg: "#22c55e" }}
-                  _disabled={{ 
-                    bg: "#2a2a2a", 
-                    color: "#666",
-                    cursor: "not-allowed" 
-                  }}
-                  leftIcon={<FiSend />}
-                  px={6}
-                >
-                  Send
-                </Button>
+                  </Box>
                 </HStack>
               </VStack>
             ) : (
