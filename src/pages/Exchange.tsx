@@ -165,25 +165,78 @@ const Launchpad: React.FC = () => {
         // Ensure only one decimal point
         const parts = cleanedValue.split('.');
         if (parts.length > 2) {
+            toaster.create({
+                title: "Invalid Input",
+                description: "Only one decimal point allowed",
+                status: "error",
+                duration: 2000
+            });
             return; // Invalid input, don't update
         }
         
         // Limit decimal places to 18 (ETH precision)
         if (parts.length === 2 && parts[1].length > 18) {
+            toaster.create({
+                title: "Invalid Input",
+                description: "Maximum 18 decimal places allowed",
+                status: "error",
+                duration: 2000
+            });
             return; // Too many decimal places
         }
         
         // Prevent leading zeros (except 0. or 0)
         if (cleanedValue.length > 1 && cleanedValue[0] === '0' && cleanedValue[1] !== '.') {
+            toaster.create({
+                title: "Invalid Input",
+                description: "Remove leading zeros",
+                status: "error",
+                duration: 2000
+            });
             return;
         }
         
         // Validate it's a valid number
         if (cleanedValue !== '' && cleanedValue !== '.' && isNaN(parseFloat(cleanedValue))) {
+            toaster.create({
+                title: "Invalid Input",
+                description: "Enter a valid number",
+                status: "error",
+                duration: 2000
+            });
             return;
         }
         
         setTradeAmount(cleanedValue);
+        
+        // Check balance after setting amount
+        if (cleanedValue && parseFloat(cleanedValue) > 0) {
+            const amount = parseFloat(cleanedValue);
+            if (isBuying) {
+                const availableBalance = useWeth 
+                    ? parseFloat(wethBalance || "0")
+                    : parseFloat(ethBalance || "0");
+                
+                if (amount > availableBalance) {
+                    toaster.create({
+                        title: "Insufficient Balance",
+                        description: `You only have ${availableBalance.toFixed(4)} ${useWeth ? 'WETH' : 'ETH'}`,
+                        status: "error",
+                        duration: 3000
+                    });
+                }
+            } else if (selectedToken) {
+                const tokenBalanceNum = parseFloat(tokenBalance || "0");
+                if (amount > tokenBalanceNum) {
+                    toaster.create({
+                        title: "Insufficient Balance",
+                        description: `You only have ${tokenBalanceNum.toFixed(4)} ${selectedToken.symbol}`,
+                        status: "error",
+                        duration: 3000
+                    });
+                }
+            }
+        }
     };
     
     // Helper to get validation state
@@ -3021,15 +3074,9 @@ const Launchpad: React.FC = () => {
                                 size="lg"
                                 _placeholder={{ color: "#666" }}
                                 mt={-2}
-                                borderColor={!getTradeValidationState().isValid ? "#ff6b6b" : "transparent"}
-                                borderWidth={!getTradeValidationState().isValid ? "1px" : "0"}
                             />
                             <Box h="20px" mt={1} display="flex" alignItems="center">
-                                {!getTradeValidationState().isValid ? (
-                                    <Text color="#ff6b6b" fontSize="xs">
-                                        {getTradeValidationState().message}
-                                    </Text>
-                                ) : showQuoteLoading ? (
+                                {showQuoteLoading ? (
                                     <Spinner size="xs" color="#4ade80" />
                                 ) : quote ? (
                                     <Text color="#666" fontSize="xs">
