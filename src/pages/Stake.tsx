@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Image, Flex, Container, Heading, HStack, Box, Button, Spinner, Text, SimpleGrid, GridItem, VStack, Grid, Link, Badge } from "@chakra-ui/react";
+import { Input, Image, Flex, Container, Heading, HStack, Box, Button, Spinner, Text, SimpleGrid, GridItem, VStack, Grid, Link, Badge, FormatNumber } from "@chakra-ui/react";
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
@@ -826,7 +826,8 @@ const Stake = () => {
                                     <SimpleGrid 
                                         key={`${item.txHash}-${index}`} 
                                         columns={{ base: 3, md: 4 }} 
-                                        gap={{ base: "24px", md: "40px" }}
+                                        gap={{ base: "16px", md: "24px" }}
+                                        columnGap={{ base: "40px", md: "30px" }}
                                         p="12px 16px"
                                         bg="transparent"
                                         position="relative"
@@ -857,7 +858,7 @@ const Stake = () => {
                                             bg: index === stakeHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).length - 1 ? "transparent" : "rgba(255, 255, 255, 0.04)"
                                         }}
                                     >
-                                        <GridItem colSpan={{ base: 1, md: 1 }}>
+                                        <GridItem colSpan={{ base: 1, md: 1 }} maxW="90px">
                                             <Badge
                                                 colorPalette={item.type === 'stake' ? 'green' : 'red'}
                                                 size="sm"
@@ -865,15 +866,27 @@ const Stake = () => {
                                                 {item.type.toUpperCase()}
                                             </Badge>
                                         </GridItem>
-                                        <GridItem colSpan={{ base: 1, md: 2 }}>
+                                        <GridItem colSpan={{ base: 2, md: 2 }} ml={-20}>
                                             <HStack>
-                                                <Box>
+                                                <Box w="20%">
+                                                    <HStack>
+                                                        <Box w="80%">
                                                     <Text color="white" fontWeight="bold">
                                                         {item.type === 'stake' ? 
-                                                            `${commify(item.amount, 4)} ${item.token}` :
-                                                            `${commify(item.originalAmount || item.amount, 4)} ${item.token}`
+                                                            `${formatNumberPrecise(commify(item.amount, 4))}` :
+                                                            `${formatNumberPrecise(
+                                                                commify(item.originalAmount || item.amount, 4)
+                                                            )}`
                                                         }   
-                                                    </Text>                                                     
+                                                    </Text>    
+                                                        </Box>
+                                                        <Box>
+                                                        {item.type === 'stake' || item.type == 'unstake' ? 
+                                                          `${item.token}` : <></>
+                                                        }  
+                                                        </Box>
+                                                    </HStack>
+                                                 
                                                 </Box>
                                                 <Box >
                                                     <Text color="#666" fontSize="xs">

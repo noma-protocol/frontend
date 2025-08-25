@@ -1266,7 +1266,7 @@ const Borrow = () => {
                                     
                                     <HStack justify="space-between" align="center" mb={6}>
                                         <Text fontSize="xl" fontWeight="bold" color="white" letterSpacing="-0.02em">
-                                            Active Loan Details
+                                            Active Loan
                                         </Text>
                                         <Badge 
                                             colorPalette="green" 
@@ -1367,15 +1367,15 @@ const Borrow = () => {
                                                     letterSpacing="-0.02em"
                                                     lineHeight="1"
                                                 >
-                                                    {commifyDecimals(ltv, 2)}%
+                                                    {commifyDecimals(ltv, 2)}
                                                 </Text>
-                                                <Box 
+                                                {/* <Box 
                                                     w="8px" 
                                                     h="8px" 
                                                     borderRadius="full"
                                                     bg={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"}
                                                     animation={ltv > 80 ? "pulse 2s infinite" : "none"}
-                                                />
+                                                /> */}
                                             </HStack>
                                         </Box>
                                         
