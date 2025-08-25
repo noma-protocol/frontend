@@ -62,7 +62,7 @@ const LoanRoll = ({
                     cursor: "not-allowed"
                 }}
             >
-            {isLoading ? <Spinner size="sm" /> : "Roll"}
+            <Box as="span">{isLoading ? <Spinner size="sm" /> : "Roll"}</Box>
             </Button>
             </DrawerTrigger>
             <DrawerBackdrop backdropFilter="blur(4px)" bg="rgba(0, 0, 0, 0.6)" />

@@ -65,7 +65,7 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                 cursor: "not-allowed"
             }}
         >
-        {isRepaying  ? <Spinner size="sm" /> : "Repay"}
+        <Box as="span">{isRepaying  ? <Spinner size="sm" /> : "Repay"}</Box>
         </Button>
         </DrawerTrigger>
         <DrawerBackdrop backdropFilter="blur(4px)" bg="rgba(0, 0, 0, 0.6)" />

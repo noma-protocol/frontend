@@ -82,7 +82,6 @@ const WalletNotConnected: React.FC = () => {
                         borderRadius="full"
                         border="2px solid #4ade80"
                         opacity={0.3}
-                        animation="pulse 2s infinite"
                     />
                 </Box>
                 
@@ -127,7 +126,6 @@ const WalletNotConnected: React.FC = () => {
                         boxShadow: "0 2px 15px rgba(74, 222, 128, 0.3)"
                     }}
                     onClick={handleConnect}
-                    leftIcon={<Icon as={FaWallet} />}
                 >
                     Connect Wallet
                 </Button>
@@ -138,23 +136,6 @@ const WalletNotConnected: React.FC = () => {
                 </Text>
             </VStack>
             
-            {/* CSS Animation */}
-            <style jsx global>{`
-                @keyframes pulse {
-                    0% {
-                        transform: scale(1);
-                        opacity: 0.3;
-                    }
-                    50% {
-                        transform: scale(1.1);
-                        opacity: 0.1;
-                    }
-                    100% {
-                        transform: scale(1);
-                        opacity: 0.3;
-                    }
-                }
-            `}</style>
         </Box>
     );
 };

@@ -61,6 +61,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                     borderColor: "rgba(255, 255, 255, 0.12)"
                 }}
             >
+            
                 {/* Icon */}
                 <Box 
                     w="24px" 
@@ -77,11 +78,12 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         alt={symbol}
                         w="16px"
                         h="16px"
+                        mt={1}
                     />
                 </Box>
                 
                 {/* Symbol */}
-                <Box mb="15px">
+                <Box mt={1}>
                     <Text color="white" fontSize="sm" fontWeight="600">{symbol}</Text>
                 </Box>
                 
@@ -89,7 +91,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 <Box />
                 
                 {/* Amounts */}
-                <Box textAlign="right">
+                <Box textAlign="right" mt={1}>
                     <Text color="white" fontWeight="bold" fontSize="sm" lineHeight="1.2">
                         {commify(balanceValue, 4)}
                     </Text>

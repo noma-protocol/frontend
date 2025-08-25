@@ -107,7 +107,7 @@ const LoanActiveLoan = ({}) => {
                             cursor: "not-allowed"
                         }}
                     >
-                    {isLoading ? <Spinner size="sm" /> : "Roll"}
+                    <Box as="span">{isLoading ? <Spinner size="sm" /> : "Roll"}</Box>
                     </Button>
                     </DrawerTrigger>
                     <DrawerBackdrop />

@@ -89,7 +89,7 @@ const LoanAddCollateral = ({
                     cursor: "not-allowed"
                 }}
             >
-            {isAdding ? <Spinner size="sm" /> : "Add"}
+            <Box as="span">{isAdding ? <Spinner size="sm" /> : "Add"}</Box>
             </Button>
             </DrawerTrigger>
             <DrawerBackdrop backdropFilter="blur(4px)" bg="rgba(0, 0, 0, 0.6)" />

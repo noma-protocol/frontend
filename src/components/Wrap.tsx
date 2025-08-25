@@ -79,9 +79,7 @@ const Wrap = ({
                         borderRadius={5}
                         _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
                     >
-                        {/* <Box minH="20px" minW="60px" display="flex" alignItems="center" justifyContent="center"> */}
-                            {isWrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Wrap</Text>}
-                        {/* </Box> */}
+                        <Box as="span">{isWrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Wrap</Text>}</Box>
                     </Button>
                 </DrawerTrigger>
                 <DrawerBackdrop />

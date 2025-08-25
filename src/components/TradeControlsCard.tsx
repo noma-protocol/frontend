@@ -544,7 +544,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                 boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
               }}
             >
-              {isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#4ade80">Execute</Text>}
+              <Box as="span">{isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#4ade80">Execute</Text>}</Box>
             </Button>
             <br />       <br />       <br />            
             </>
@@ -625,7 +625,7 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                       boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
                     }}
                   >
-                    {isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#4ade80">Execute</Text>}
+                    <Box as="span">{isLoadingExecuteTrade ? <Spinner size="sm" color="white" /> : <Text fontSize="sm" color="#4ade80">Execute</Text>}</Box>
                 </Button>
                 )}
 

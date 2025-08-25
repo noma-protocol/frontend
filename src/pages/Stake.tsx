@@ -617,7 +617,7 @@ const Stake = () => {
                                     </Box>
                                     <Box>
                                         <Text color="white" fontSize="sm" fontWeight="500">
-                                            {isTokenInfoLoading ? <Spinner size="sm" /> : token0Info?.tokenSymbol}
+                                            <Box as="span">{isTokenInfoLoading ? <Spinner size="sm" /> : token0Info?.tokenSymbol}</Box>
                                         </Text>
                                     </Box>
                                 </HStack>
@@ -819,11 +819,44 @@ const Stake = () => {
                         {stakeHistory.length > 0 && (
                             <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
                                 <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Stake History</Text>
-                                <VStack align="stretch" spacing={2}>
+                                <VStack align="stretch" spacing={0}>
                                     {stakeHistory
                                         .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
                                         .map((item, index) => (
-                                    <SimpleGrid key={`${item.txHash}-${index}`} columns={{ base: 3, md: 4 }} gap={{ base: "24px", md: "40px" }}>
+                                    <SimpleGrid 
+                                        key={`${item.txHash}-${index}`} 
+                                        columns={{ base: 3, md: 4 }} 
+                                        gap={{ base: "24px", md: "40px" }}
+                                        p="12px 16px"
+                                        bg="transparent"
+                                        position="relative"
+                                        cursor="pointer"
+                                        transition="all 0.2s"
+                                        _hover={{ 
+                                            bg: "rgba(255, 255, 255, 0.02)",
+                                            borderRadius: "md",
+                                            "&::before": {
+                                                content: '""',
+                                                position: "absolute",
+                                                top: 0,
+                                                left: 0,
+                                                right: 0,
+                                                bottom: 0,
+                                                border: "1px solid rgba(255, 255, 255, 0.08)",
+                                                borderRadius: "md",
+                                                pointerEvents: "none"
+                                            }
+                                        }}
+                                        _before={{
+                                            content: '""',
+                                            position: "absolute",
+                                            bottom: 0,
+                                            left: "16px",
+                                            right: "16px",
+                                            height: "1px",
+                                            bg: index === stakeHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).length - 1 ? "transparent" : "rgba(255, 255, 255, 0.04)"
+                                        }}
+                                    >
                                         <GridItem colSpan={{ base: 1, md: 1 }}>
                                             <Badge
                                                 colorPalette={item.type === 'stake' ? 'green' : 'red'}
@@ -876,8 +909,8 @@ const Stake = () => {
                                                         {item.txHash.slice(0, 6)}...
                                                     </Text>
                                                 </Box>
-                                                <Box pl="50%">
-                                                    <Text color="#888" fontSize="xs" textAlign="right" minW="25px" mt={-10}>
+                                                <Box>
+                                                    <Text color="#888" fontSize="xs" textAlign="right" minW="25px" ml={4}>
                                                         {Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 60000) < 60
                                                             ? `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 60000)}m`
                                                             : Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 3600000) < 24

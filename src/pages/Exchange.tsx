@@ -3727,66 +3727,66 @@ const Launchpad: React.FC = () => {
                                                                 {paginatedMyTrades.map((trade) => (
                                                                     <Box
                                                                         key={trade.id}
-                                                            p={3}
-                                                            bg="#2a2a2a"
-                                                            borderRadius="md"
-                                                            cursor="pointer"
-                                                            _hover={{ bg: "#333" }}
-                                                        >
-                                                            {/* First Row: Badge, Token, Amount */}
-                                                            <Flex justifyContent="space-between" alignItems="center" mb={2}>
-                                                                <HStack gap={2}>
-                                                                    <Box>
-                                                                        <Badge
-                                                                            colorPalette={trade.type === "buy" ? "green" : "red"}
-                                                                            size="sm"
-                                                                        >
-                                                                            {trade.type.toUpperCase()}
-                                                                        </Badge>
+                                                                        p={3}
+                                                                        bg="#2a2a2a"
+                                                                        borderRadius="md"
+                                                                        cursor="pointer"
+                                                                        _hover={{ bg: "#333" }}
+                                                                    >
+                                                                        {/* First Row: Badge, Token, Amount */}
+                                                                        <Flex justifyContent="space-between" alignItems="center" mb={2}>
+                                                                            <HStack gap={2}>
+                                                                                <Box>
+                                                                                    <Badge
+                                                                                        colorPalette={trade.type === "buy" ? "green" : "red"}
+                                                                                        size="sm"
+                                                                                    >
+                                                                                        {trade.type.toUpperCase()}
+                                                                                    </Badge>
+                                                                                </Box>
+                                                                                <Box>
+                                                                                    <Text color="white" fontWeight="bold">
+                                                                                        {trade.token}
+                                                                                    </Text>
+                                                                                </Box>
+                                                                            </HStack>
+                                                                            <Box>
+                                                                                <Text color="white" fontWeight="bold">
+                                                                                    ${trade.total.toFixed(2)}
+                                                                                </Text>
+                                                                            </Box>
+                                                                        </Flex>
+                                                                        
+                                                                        {/* Second Row: Trade details and time */}
+                                                                        <Flex justifyContent="space-between" alignItems="center">
+                                                                            <Box>
+                                                                                <Text color="#888" fontSize="xs">
+                                                                                    {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
+                                                                                </Text>
+                                                                            </Box>
+                                                                            <HStack gap={3}>
+                                                                                <Box>
+                                                                                    <Text 
+                                                                                        color="#4ade80" 
+                                                                                        fontSize="xs"
+                                                                                        cursor="pointer"
+                                                                                        _hover={{ textDecoration: "underline" }}
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank");
+                                                                                        }}
+                                                                                    >
+                                                                                        {trade.txHash}
+                                                                                    </Text>
+                                                                                </Box>
+                                                                                <Box>
+                                                                                    <Text color="#888" fontSize="xs">
+                                                                                        {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                                                    </Text>
+                                                                                </Box>
+                                                                            </HStack>
+                                                                        </Flex>
                                                                     </Box>
-                                                                    <Box>
-                                                                        <Text color="white" fontWeight="bold">
-                                                                            {trade.token}
-                                                                        </Text>
-                                                                    </Box>
-                                                                </HStack>
-                                                                <Box>
-                                                                    <Text color="white" fontWeight="bold">
-                                                                        ${trade.total.toFixed(2)}
-                                                                    </Text>
-                                                                </Box>
-                                                            </Flex>
-                                                            
-                                                            {/* Second Row: Trade details and time */}
-                                                            <Flex justifyContent="space-between" alignItems="center">
-                                                                <Box>
-                                                                    <Text color="#888" fontSize="xs">
-                                                                        {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
-                                                                    </Text>
-                                                                </Box>
-                                                                <HStack gap={3}>
-                                                                    <Box>
-                                                                        <Text 
-                                                                            color="#4ade80" 
-                                                                            fontSize="xs"
-                                                                            cursor="pointer"
-                                                                            _hover={{ textDecoration: "underline" }}
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank");
-                                                                            }}
-                                                                        >
-                                                                            {trade.txHash}
-                                                                        </Text>
-                                                                    </Box>
-                                                                    <Box>
-                                                                        <Text color="#888" fontSize="xs">
-                                                                            {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
-                                                                        </Text>
-                                                                    </Box>
-                                                                </HStack>
-                                                            </Flex>
-                                                        </Box>
                                                                     ))}
                                                                     
                                                                     {/* Pagination Controls for My Transactions Mobile */}

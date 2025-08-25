@@ -109,5 +109,14 @@
     "address": "0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd",
     "timestamp": "2025-08-24T23:24:10.009Z",
     "clientId": "bedcb822-169a-4312-a713-07ddddc4d14f"
+  },
+  {
+    "id": "45319d87-1fa3-47c8-9840-7c95e8ed767e",
+    "type": "message",
+    "content": "Pi pa pa pa ro po",
+    "username": "IamScatMan",
+    "address": "0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd",
+    "timestamp": "2025-08-25T23:08:33.486Z",
+    "clientId": "e4c101db-876e-4bbf-8360-c060ba40e83f"
   }
 ]

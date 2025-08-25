@@ -13,6 +13,15 @@ import monadLogo from '../assets/images/monad.png';
 import LoanAddCollateral from '../components/LoanAddCollateral';
 import LoanRepay from '../components/LoanRepay';
 import LoanRoll from '../components/LoanRoll';
+import {
+    DialogRoot,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogBody,
+    DialogFooter,
+    DialogActionTrigger,
+} from '../components/ui/dialog';
 import placeholderLogo from '../assets/images/question.svg';
 import placeholderLogoDark from '../assets/images/question_white.svg';
 import WalletNotConnected from '../components/WalletNotConnected';
@@ -125,6 +134,7 @@ const Borrow = () => {
     const [processedTxHashes] = useState(() => new Set());
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false);
 
     // if (token1Info?.tokenSymbol == "WMON") {
     //     setToken1Info({
@@ -497,29 +507,7 @@ const Borrow = () => {
             setIsBorrowing(false);
             setIsLoading(false);
             
-            // Manually add to history
-            const newLoan = {
-                id: Date.now() + Math.random(),
-                type: "borrow",
-                user: address,
-                amount: parseFloat(borrowAmount),
-                collateral: collateral,
-                duration: duration / 86400, // Convert to days
-                time: new Date(),
-                txHash: data.hash,
-                shortTxHash: `${data.hash.slice(0, 6)}...${data.hash.slice(-4)}`
-            };
-            
-            setLoanHistory(prev => {
-                const updated = [newLoan, ...prev.slice(0, 199)];
-                // Save immediately
-                try {
-                    localStorage.setItem('oikos_loan_history', JSON.stringify(updated));
-                } catch (error) {
-                    console.error("Error saving loan history:", error);
-                }
-                return updated;
-            });
+            // Don't add to history here - the event listener will handle it
             
             setTimeout(() => {
                 window.location.reload();
@@ -1254,54 +1242,191 @@ const Borrow = () => {
                             
                             {/* Active Loan Box - Below New Loan */}
                             {loanData?.borrowAmount > 0 && (
-                                <Box bg="#1a1a1a" borderRadius="lg" p={6} mt={4}>
-                                    <Text fontSize="xl" fontWeight="bold" color="white" mb={4}>
-                                        Active Loan Details
-                                    </Text>
+                                <Box 
+                                    bg="rgba(26, 26, 26, 0.6)" 
+                                    border="1px solid rgba(74, 222, 128, 0.2)"
+                                    borderRadius="xl" 
+                                    p={8} 
+                                    mt={6}
+                                    position="relative"
+                                    overflow="hidden"
+                                >
+                                    {/* Background gradient effect */}
+                                    <Box
+                                        position="absolute"
+                                        top="0"
+                                        right="0"
+                                        w="200px"
+                                        h="200px"
+                                        bg="rgba(74, 222, 128, 0.05)"
+                                        borderRadius="full"
+                                        filter="blur(80px)"
+                                        pointerEvents="none"
+                                    />
                                     
-                                    <SimpleGrid columns={2} gap={4} mb={4}>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm" mb={2}>Collateral Amount</Text>
-                                            <HStack>
-                                                <Box>
-                                                    <Text color="white" fontSize="2xl" fontWeight="bold">
-                                                        {displayedCollateral}
-                                                    </Text>
-                                                </Box>
-                                                <Box>
-                                                    <Text color="#888" fontSize="lg">{token0Info.tokenSymbol}</Text>
-                                                </Box>
+                                    <HStack justify="space-between" align="center" mb={6}>
+                                        <Text fontSize="xl" fontWeight="bold" color="white" letterSpacing="-0.02em">
+                                            Active Loan Details
+                                        </Text>
+                                        <Badge 
+                                            colorPalette="green" 
+                                            size="sm"
+                                            px={3}
+                                            py={1}
+                                        >
+                                            ACTIVE
+                                        </Badge>
+                                    </HStack>
+                                    
+                                    <SimpleGrid columns={2} gap={6} mb={6}>
+                                        <Box 
+                                            bg="rgba(0, 0, 0, 0.3)" 
+                                            p={4} 
+                                            borderRadius="lg"
+                                            border="1px solid rgba(255, 255, 255, 0.05)"
+                                        >
+                                            <Text 
+                                                color="rgba(255, 255, 255, 0.6)" 
+                                                fontSize="xs" 
+                                                fontWeight="600"
+                                                letterSpacing="0.1em"
+                                                textTransform="uppercase"
+                                                mb={3}
+                                            >
+                                                Collateral Amount
+                                            </Text>
+                                            <HStack align="baseline" spacing={3}>
+                                                <Text 
+                                                    color="white" 
+                                                    fontSize="2xl" 
+                                                    fontWeight="700"
+                                                    letterSpacing="-0.02em"
+                                                    lineHeight="1"
+                                                >
+                                                    {displayedCollateral}
+                                                </Text>
+                                                <Text color="rgba(255, 255, 255, 0.5)" fontSize="sm" fontWeight="500">
+                                                    {token0Info.tokenSymbol}
+                                                </Text>
                                             </HStack>
                                         </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm" mb={2}>Borrowed Amount</Text>
-                                            <HStack>
-                                                <Box>
-                                                    <Text color="white" fontSize="2xl" fontWeight="bold">
-                                                        {commify(formatEther(`${loanData.borrowAmount}`), 4)}
-                                                    </Text>
-                                                </Box>
-                                                <Box>
-                                                    <Text color="#888" fontSize="lg">{token1Info.tokenSymbol}</Text>
-                                                </Box>
+                                        
+                                        <Box 
+                                            bg="rgba(0, 0, 0, 0.3)" 
+                                            p={4} 
+                                            borderRadius="lg"
+                                            border="1px solid rgba(255, 255, 255, 0.05)"
+                                        >
+                                            <Text 
+                                                color="rgba(255, 255, 255, 0.6)" 
+                                                fontSize="xs" 
+                                                fontWeight="600"
+                                                letterSpacing="0.1em"
+                                                textTransform="uppercase"
+                                                mb={3}
+                                            >
+                                                Borrowed Amount
+                                            </Text>
+                                            <HStack align="baseline" spacing={3}>
+                                                <Text 
+                                                    color="white" 
+                                                    fontSize="2xl" 
+                                                    fontWeight="700"
+                                                    letterSpacing="-0.02em"
+                                                    lineHeight="1"
+                                                >
+                                                    {commify(formatEther(`${loanData.borrowAmount}`), 4)}
+                                                </Text>
+                                                <Text color="rgba(255, 255, 255, 0.5)" fontSize="sm" fontWeight="500">
+                                                    {token1Info.tokenSymbol}
+                                                </Text>
                                             </HStack>
                                         </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm" mb={2}>Current LTV</Text>
-                                            <Text color={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"} fontSize="2xl" fontWeight="bold">
-                                                {commifyDecimals(ltv, 2)}%
+                                        
+                                        <Box 
+                                            bg="rgba(0, 0, 0, 0.3)" 
+                                            p={4} 
+                                            borderRadius="lg"
+                                            border="1px solid rgba(255, 255, 255, 0.05)"
+                                        >
+                                            <Text 
+                                                color="rgba(255, 255, 255, 0.6)" 
+                                                fontSize="xs" 
+                                                fontWeight="600"
+                                                letterSpacing="0.1em"
+                                                textTransform="uppercase"
+                                                mb={3}
+                                            >
+                                                Current LTV
                                             </Text>
+                                            <HStack align="center" spacing={2}>
+                                                <Text 
+                                                    color={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"} 
+                                                    fontSize="2xl" 
+                                                    fontWeight="700"
+                                                    letterSpacing="-0.02em"
+                                                    lineHeight="1"
+                                                >
+                                                    {commifyDecimals(ltv, 2)}%
+                                                </Text>
+                                                <Box 
+                                                    w="8px" 
+                                                    h="8px" 
+                                                    borderRadius="full"
+                                                    bg={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"}
+                                                    animation={ltv > 80 ? "pulse 2s infinite" : "none"}
+                                                />
+                                            </HStack>
                                         </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm" mb={2}>Expires In</Text>
-                                            <Text color="white" fontSize="2xl" fontWeight="bold">
-                                                {getDaysLeft(`${loanData?.expires}`)} days
+                                        
+                                        <Box 
+                                            bg="rgba(0, 0, 0, 0.3)" 
+                                            p={4} 
+                                            borderRadius="lg"
+                                            border="1px solid rgba(255, 255, 255, 0.05)"
+                                        >
+                                            <Text 
+                                                color="rgba(255, 255, 255, 0.6)" 
+                                                fontSize="xs" 
+                                                fontWeight="600"
+                                                letterSpacing="0.1em"
+                                                textTransform="uppercase"
+                                                mb={3}
+                                            >
+                                                Expires In
                                             </Text>
+                                            <HStack align="baseline" spacing={2}>
+                                                <Text 
+                                                    color="white" 
+                                                    fontSize="2xl" 
+                                                    fontWeight="700"
+                                                    letterSpacing="-0.02em"
+                                                    lineHeight="1"
+                                                >
+                                                    {getDaysLeft(`${loanData?.expires}`)}
+                                                </Text>
+                                                <Text color="rgba(255, 255, 255, 0.5)" fontSize="sm" fontWeight="500">
+                                                    days
+                                                </Text>
+                                            </HStack>
                                         </Box>
                                     </SimpleGrid>
                                     
-                                    <Box borderTop="1px solid #2a2a2a" pt={4}>
-                                        <Text color="#888" fontSize="sm" mb={3}>Quick Actions</Text>
+                                    <Box 
+                                        borderTop="1px solid rgba(255, 255, 255, 0.08)" 
+                                        pt={6}
+                                        mt={2}
+                                    >
+                                        <Text 
+                                            color="rgba(255, 255, 255, 0.6)" 
+                                            fontSize="xs" 
+                                            fontWeight="600"
+                                            letterSpacing="0.1em"
+                                            textTransform="uppercase"
+                                            mb={4}
+                                        >
+                                            Quick Actions
+                                        </Text>
                                         <HStack gap={3} w="100%">
                                             <Box flex="3">
                                                 <LoanAddCollateral
@@ -1387,103 +1512,112 @@ const Borrow = () => {
                                     {console.log("Rendering loan history, length:", loanHistory.length)}
                                     {loanHistory.length > 0 && (
                                         <Button
+                                            mb={5}
                                             size="sm"
-                                            onClick={() => {
-                                                setLoanHistory([]);
-                                                processedTxHashes.clear();
-                                                localStorage.removeItem('oikos_loan_history');
-                                            }}
+                                            onClick={() => setShowClearHistoryDialog(true)}
                                             bg="#2a2a2a"
-                                            _hover={{ bg: "#3a3a3a" }}
+                                            _hover={{ bg: "#3a3a3a", border: "1px solid green"  }}
                                         >
-                                            Clear History
+                                            <Text size="sm" color="white">Clear History</Text>
                                         </Button>
                                     )}
                                 </Flex>
                                 
                                 {loanHistory.length > 0 ? (
                                     <>
-                                        <VStack align="stretch" spacing="2px">
-                                            {getPaginatedData(loanHistory, currentPage, itemsPerPage).map((loan) => (
-                                                // <Grid
-                                                //     key={loan.id}
-                                                //     templateColumns="90px auto 1fr auto auto"
-                                                //     gap="8px"
-                                                //     alignItems="center"
-                                                //     p="4px 8px"
-                                                //     bg="#2a2a2a"
-                                                //     borderRadius="md"
-                                                //     cursor="pointer"
-                                                //     _hover={{ bg: "#333" }}
-                                                //     fontSize="sm"
-                                                // >
-                                                <SimpleGrid _hover={{ bg: "#333" }} key={loan.id} p="4px 8px" columns={5} w="100%" mt={-5} fontSize={"sm"} borderRadius="md"  bg="#2a2a2a">
+                                        <VStack align="stretch" spacing={0}>
+                                            {getPaginatedData(loanHistory, currentPage, itemsPerPage).map((loan, index) => (
+                                                <SimpleGrid 
+                                                    key={loan.id} 
+                                                    p="12px 16px" 
+                                                    columns={5} 
+                                                    w="100%" 
+                                                    fontSize="sm" 
+                                                    bg="transparent"
+                                                    position="relative"
+                                                    cursor="pointer"
+                                                    transition="all 0.2s"
+                                                    _hover={{ 
+                                                        bg: "rgba(255, 255, 255, 0.02)",
+                                                        borderRadius: "md",
+                                                        "&::before": {
+                                                            content: '""',
+                                                            position: "absolute",
+                                                            top: 0,
+                                                            left: 0,
+                                                            right: 0,
+                                                            bottom: 0,
+                                                            border: "1px solid rgba(255, 255, 255, 0.08)",
+                                                            borderRadius: "md",
+                                                            pointerEvents: "none"
+                                                        }
+                                                    }}
+                                                    _before={{
+                                                        content: '""',
+                                                        position: "absolute",
+                                                        bottom: 0,
+                                                        left: "16px",
+                                                        right: "16px",
+                                                        height: "1px",
+                                                        bg: index === getPaginatedData(loanHistory, currentPage, itemsPerPage).length - 1 ? "transparent" : "rgba(255, 255, 255, 0.04)"
+                                                    }}
+                                                >
                                                     {/* Badge */}
                                                     <GridItem>
-                                                        <Box mt={6} ml={2}>
-                                                            <Badge
-                                                                colorPalette={
-                                                                    loan.type === "borrow" ? "blue" : 
-                                                                    loan.type === "repay" ? "green" : 
-                                                                    loan.type === "add_collateral" ? "orange" :
-                                                                    "purple"
-                                                                }
-                                                                size="sm"
-                                                            >
-                                                                {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
-                                                            </Badge>
-                                                        </Box>
+                                                        <Badge
+                                                            colorPalette={
+                                                                loan.type === "borrow" ? "blue" : 
+                                                                loan.type === "repay" ? "green" : 
+                                                                loan.type === "add_collateral" ? "orange" :
+                                                                "purple"
+                                                            }
+                                                            size="sm"
+                                                        >
+                                                            {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
+                                                        </Badge>
                                                     </GridItem>
                                                     {/* Amount */}
-                                                    <GridItem>
-                                                        <Text color="white" fontWeight="bold">
-                                                            {loan.type === "borrow" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
-                                                            {loan.type === "repay" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
-                                                            {loan.type === "roll" && `Extended loan`}
-                                                            {loan.type === "add_collateral" && `${loan.amount.toFixed(4)} ${token0Info?.tokenSymbol || "TOKEN"}`}
-                                                        </Text>
-                                                    </GridItem>
+                                                    <Text color="white" fontWeight="bold">
+                                                        {loan.type === "borrow" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
+                                                        {loan.type === "repay" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
+                                                        {loan.type === "roll" && `Extended loan`}
+                                                        {loan.type === "add_collateral" && `${loan.amount.toFixed(4)} ${token0Info?.tokenSymbol || "TOKEN"}`}
+                                                    </Text>
                                                     
                                                     {/* Details (or spacer) */}
-                                                    <GridItem>
-                                                        <Text color="#666" fontSize="xs">
-                                                            {loan.type === "borrow" && `${loan.duration || 0}d • ${loan.collateral?.toFixed(2) || "0"} ${token0Info?.tokenSymbol || "TOKEN"}`}
-                                                            {loan.type === "repay" && `Fully repaid`}
-                                                            {loan.type === "roll" && `Extended to ${loan.duration || 0}d`}
-                                                            {loan.type === "add_collateral" && `Added collateral`}
-                                                        </Text>
-                                                    </GridItem>
+                                                    <Text color="#666" fontSize="xs">
+                                                        {loan.type === "borrow" && `${loan.duration || 0}d • ${loan.collateral?.toFixed(2) || "0"} ${token0Info?.tokenSymbol || "TOKEN"}`}
+                                                        {loan.type === "repay" && `Fully repaid`}
+                                                        {loan.type === "roll" && `Extended to ${loan.duration || 0}d`}
+                                                        {loan.type === "add_collateral" && `Added collateral`}
+                                                    </Text>
                                                     
                                                     {/* Transaction Hash */}
-                                                    <GridItem>
-                                                        <Text 
-                                                            color="#4ade80" 
-                                                            fontSize="xs"
-                                                            cursor="pointer"
-                                                            _hover={{ textDecoration: "underline" }}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                const explorerUrl = config.chain === "monad" 
-                                                                    ? `https://monadexplorer.com/tx/${loan.txHash}`
-                                                                    : `https://bscscan.com/tx/${loan.txHash}`;
-                                                                window.open(explorerUrl, "_blank");
-                                                            }}
-                                                        >
-                                                            {loan.shortTxHash}
-                                                        </Text>
-                                                    </GridItem>
+                                                    <Text 
+                                                        color="#4ade80" 
+                                                        fontSize="xs"
+                                                        cursor="pointer"
+                                                        _hover={{ textDecoration: "underline" }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const explorerUrl = config.chain === "monad" 
+                                                                ? `https://monadexplorer.com/tx/${loan.txHash}`
+                                                                : `https://bscscan.com/tx/${loan.txHash}`;
+                                                            window.open(explorerUrl, "_blank");
+                                                        }}
+                                                    >
+                                                        {loan.shortTxHash}
+                                                    </Text>
                                                     
                                                     {/* Time */}
-                                                    <GridItem>
-                                                        <Text color="#888" fontSize="xs" textAlign="right" minW="25px">
-                                                            {Math.floor((Date.now() - loan.time.getTime()) / 60000) < 60
-                                                                ? `${Math.floor((Date.now() - loan.time.getTime()) / 60000)}m`
-                                                                : Math.floor((Date.now() - loan.time.getTime()) / 3600000) < 24
-                                                                ? `${Math.floor((Date.now() - loan.time.getTime()) / 3600000)}h`
-                                                                : `${Math.floor((Date.now() - loan.time.getTime()) / 86400000)}d`
-                                                            }
-                                                        </Text>
-                                                    </GridItem>
+                                                    <Text color="#888" fontSize="xs" textAlign="right" minW="25px">
+                                                        {Math.floor((Date.now() - loan.time.getTime()) / 60000) < 60
+                                                            ? `${Math.floor((Date.now() - loan.time.getTime()) / 60000)}m`
+                                                            : Math.floor((Date.now() - loan.time.getTime()) / 3600000) < 24
+                                                            ? `${Math.floor((Date.now() - loan.time.getTime()) / 3600000)}h`
+                                                            : `${Math.floor((Date.now() - loan.time.getTime()) / 86400000)}d`
+                                                        }
+                                                    </Text>
                                                 </SimpleGrid>
                                             ))}
                                         </VStack>
@@ -1547,6 +1681,113 @@ const Borrow = () => {
                     <Text color="#666">Invalid vault address</Text>
                 </Box>
             )}
+            
+            {/* Clear History Confirmation Dialog */}
+            <DialogRoot 
+                open={showClearHistoryDialog} 
+                onOpenChange={(e) => setShowClearHistoryDialog(e.open)}
+                placement="center"
+                motionPreset="scale"
+            >
+                <DialogContent
+                    position="fixed"
+                    top="50%"
+                    left="50%"
+                    transform="translate(-50%, -50%)"
+                    bg="rgba(26, 26, 26, 0.98)"
+                    backdropFilter="blur(20px)"
+                    border="1px solid rgba(255, 255, 255, 0.1)"
+                    borderRadius="2xl"
+                    boxShadow="0 25px 50px -12px rgba(0, 0, 0, 0.8)"
+                    w="90%"
+                    maxW="450px"
+                    p={0}
+                >
+                    <DialogHeader 
+                        borderBottom="1px solid rgba(255, 255, 255, 0.08)" 
+                        p={6}
+                        pb={5}
+                    >
+                        <DialogTitle 
+                            fontSize="2xl" 
+                            fontWeight="bold" 
+                            color="white"
+                            letterSpacing="-0.02em"
+                        >
+                            Clear Loan History
+                        </DialogTitle>
+                    </DialogHeader>
+                    
+                    <DialogBody px={6} py={8}>
+                        <VStack align="start" spacing={4}>
+                            <Text 
+                                color="rgba(255, 255, 255, 0.85)" 
+                                fontSize="md"
+                                lineHeight="1.6"
+                            >
+                                Are you sure you want to clear all loan history?
+                            </Text>
+                            <Text 
+                                color="rgba(255, 255, 255, 0.5)" 
+                                fontSize="sm"
+                                fontStyle="italic"
+                            >
+                                This action cannot be undone. All transaction records will be permanently deleted.
+                            </Text>
+                        </VStack>
+                    </DialogBody>
+                    
+                    <DialogFooter 
+                        gap={3} 
+                        borderTop="1px solid rgba(255, 255, 255, 0.08)" 
+                        p={6}
+                        pt={5}
+                    >
+                        <DialogActionTrigger asChild>
+                            <Button 
+                                variant="outline"
+                                size="md"
+                                px={6}
+                                bg="transparent"
+                                borderColor="rgba(255, 255, 255, 0.15)"
+                                color="rgba(255, 255, 255, 0.8)"
+                                fontWeight="500"
+                                _hover={{ 
+                                    bg: "rgba(255, 255, 255, 0.05)",
+                                    borderColor: "rgba(255, 255, 255, 0.25)",
+                                    color: "white"
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                        </DialogActionTrigger>
+                        <Button 
+                            size="md"
+                            px={6}
+                            bg="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+                            color="white"
+                            fontWeight="600"
+                            boxShadow="0 4px 12px rgba(239, 68, 68, 0.3)"
+                            _hover={{ 
+                                bg: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
+                                boxShadow: "0 6px 16px rgba(239, 68, 68, 0.4)",
+                                transform: "translateY(-1px)"
+                            }}
+                            _active={{
+                                transform: "translateY(0)"
+                            }}
+                            onClick={() => {
+                                setLoanHistory([]);
+                                processedTxHashes.clear();
+                                localStorage.removeItem('oikos_loan_history');
+                                setShowClearHistoryDialog(false);
+                            }}
+                        >
+                            Clear History
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </DialogRoot>
         </Container>
     );
 };
