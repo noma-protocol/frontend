@@ -823,7 +823,7 @@ const Stake = () => {
                                     {stakeHistory
                                         .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
                                         .map((item, index) => (
-                                    <SimpleGrid columns={{ base: 3, md: 4 }} gap={{ base: "24px", md: "40px" }}>
+                                    <SimpleGrid key={`${item.txHash}-${index}`} columns={{ base: 3, md: 4 }} gap={{ base: "24px", md: "40px" }}>
                                         <GridItem colSpan={{ base: 1, md: 1 }}>
                                             <Badge
                                                 colorPalette={item.type === 'stake' ? 'green' : 'red'}

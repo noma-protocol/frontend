@@ -1435,47 +1435,55 @@ const Borrow = () => {
                                                         </Box>
                                                     </GridItem>
                                                     {/* Amount */}
-                                                    <Text color="white" fontWeight="bold">
-                                                        {loan.type === "borrow" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
-                                                        {loan.type === "repay" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
-                                                        {loan.type === "roll" && `Extended loan`}
-                                                        {loan.type === "add_collateral" && `${loan.amount.toFixed(4)} ${token0Info?.tokenSymbol || "TOKEN"}`}
-                                                    </Text>
+                                                    <GridItem>
+                                                        <Text color="white" fontWeight="bold">
+                                                            {loan.type === "borrow" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
+                                                            {loan.type === "repay" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
+                                                            {loan.type === "roll" && `Extended loan`}
+                                                            {loan.type === "add_collateral" && `${loan.amount.toFixed(4)} ${token0Info?.tokenSymbol || "TOKEN"}`}
+                                                        </Text>
+                                                    </GridItem>
                                                     
                                                     {/* Details (or spacer) */}
-                                                    <Text color="#666" fontSize="xs">
-                                                        {loan.type === "borrow" && `${loan.duration || 0}d • ${loan.collateral?.toFixed(2) || "0"} ${token0Info?.tokenSymbol || "TOKEN"}`}
-                                                        {loan.type === "repay" && `Fully repaid`}
-                                                        {loan.type === "roll" && `Extended to ${loan.duration || 0}d`}
-                                                        {loan.type === "add_collateral" && `Added collateral`}
-                                                    </Text>
+                                                    <GridItem>
+                                                        <Text color="#666" fontSize="xs">
+                                                            {loan.type === "borrow" && `${loan.duration || 0}d • ${loan.collateral?.toFixed(2) || "0"} ${token0Info?.tokenSymbol || "TOKEN"}`}
+                                                            {loan.type === "repay" && `Fully repaid`}
+                                                            {loan.type === "roll" && `Extended to ${loan.duration || 0}d`}
+                                                            {loan.type === "add_collateral" && `Added collateral`}
+                                                        </Text>
+                                                    </GridItem>
                                                     
                                                     {/* Transaction Hash */}
-                                                    <Text 
-                                                        color="#4ade80" 
-                                                        fontSize="xs"
-                                                        cursor="pointer"
-                                                        _hover={{ textDecoration: "underline" }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const explorerUrl = config.chain === "monad" 
-                                                                ? `https://monadexplorer.com/tx/${loan.txHash}`
-                                                                : `https://bscscan.com/tx/${loan.txHash}`;
-                                                            window.open(explorerUrl, "_blank");
-                                                        }}
-                                                    >
-                                                        {loan.shortTxHash}
-                                                    </Text>
+                                                    <GridItem>
+                                                        <Text 
+                                                            color="#4ade80" 
+                                                            fontSize="xs"
+                                                            cursor="pointer"
+                                                            _hover={{ textDecoration: "underline" }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const explorerUrl = config.chain === "monad" 
+                                                                    ? `https://monadexplorer.com/tx/${loan.txHash}`
+                                                                    : `https://bscscan.com/tx/${loan.txHash}`;
+                                                                window.open(explorerUrl, "_blank");
+                                                            }}
+                                                        >
+                                                            {loan.shortTxHash}
+                                                        </Text>
+                                                    </GridItem>
                                                     
                                                     {/* Time */}
-                                                    <Text color="#888" fontSize="xs" textAlign="right" minW="25px">
-                                                        {Math.floor((Date.now() - loan.time.getTime()) / 60000) < 60
-                                                            ? `${Math.floor((Date.now() - loan.time.getTime()) / 60000)}m`
-                                                            : Math.floor((Date.now() - loan.time.getTime()) / 3600000) < 24
-                                                            ? `${Math.floor((Date.now() - loan.time.getTime()) / 3600000)}h`
-                                                            : `${Math.floor((Date.now() - loan.time.getTime()) / 86400000)}d`
-                                                        }
-                                                    </Text>
+                                                    <GridItem>
+                                                        <Text color="#888" fontSize="xs" textAlign="right" minW="25px">
+                                                            {Math.floor((Date.now() - loan.time.getTime()) / 60000) < 60
+                                                                ? `${Math.floor((Date.now() - loan.time.getTime()) / 60000)}m`
+                                                                : Math.floor((Date.now() - loan.time.getTime()) / 3600000) < 24
+                                                                ? `${Math.floor((Date.now() - loan.time.getTime()) / 3600000)}h`
+                                                                : `${Math.floor((Date.now() - loan.time.getTime()) / 86400000)}d`
+                                                            }
+                                                        </Text>
+                                                    </GridItem>
                                                 </SimpleGrid>
                                             ))}
                                         </VStack>
