@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {  HStack, Box, Button, Spinner, Text, VStack } from "@chakra-ui/react";
+import {  HStack, Box, Button, Spinner, Text, VStack, Flex } from "@chakra-ui/react";
 import { commify, commifyDecimals, } from '../utils';
 
 import {
@@ -168,31 +168,29 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                         TRANSACTION PREVIEW
                     </Text>
                     <VStack align="stretch" spacing={3}>
-                        <Box>
-                            <HStack justify="space-between" mb={1}>
-                                <Text color="#888" fontSize="sm">Repaying</Text>
-                                <HStack>
-                                    <Text color="white" fontSize="sm" fontWeight="bold">
-                                        {repayAmount == 0 ? commify(formatEther(`${loanAmount}`), 4) : commify(`${repayAmount}`)}
-                                    </Text>
-                                    <Text color="#888" fontSize="sm">
-                                        {isLoading ? <Spinner size="sm" /> : "WMON"}
-                                    </Text>
-                                </HStack>
-                            </HStack>
-                        </Box>
+                        <Flex justify="space-between" align="center">
+                            <Text color="#888" fontSize="sm">Repaying</Text>
+                            <Flex align="center" gap={3}>
+                                <Text color="white" fontSize="sm" fontWeight="bold">
+                                    {repayAmount == 0 ? commify(formatEther(`${loanAmount}`), 4) : commify(`${repayAmount}`)}
+                                </Text>
+                                <Text color="#888" fontSize="sm" ml="auto">
+                                    {isLoading ? <Spinner size="sm" /> : "WMON"}
+                                </Text>
+                            </Flex>
+                        </Flex>
                         <Box borderTop="1px solid rgba(255, 255, 255, 0.05)" pt={3}>
-                            <HStack justify="space-between">
+                            <Flex justify="space-between" align="center">
                                 <Text color="#888" fontSize="sm">Collateral to Withdraw</Text>
-                                <HStack>
+                                <Flex align="center" gap={3}>
                                     <Text color="#4ade80" fontSize="sm" fontWeight="bold">
                                         {commify(collateral)}
                                     </Text>
-                                    <Text color="#888" fontSize="sm">
+                                    <Text color="#888" fontSize="sm" ml="auto">
                                         {isLoading ? <Spinner size="sm" /> : token0Symbol}
                                     </Text>
-                                </HStack>
-                            </HStack>
+                                </Flex>
+                            </Flex>
                         </Box>
                     </VStack>
                 </Box>
