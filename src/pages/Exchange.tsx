@@ -48,6 +48,7 @@ import { Toaster, toaster } from "../components/ui/toaster"
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
 import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress } from "../utils";
+import WalletSidebar from "../components/WalletSidebar";
 import { useToken } from "../contexts/TokenContext";
 
 import Logo from "../assets/images/noma_logo_transparent.png";
@@ -296,6 +297,11 @@ const Launchpad: React.FC = () => {
     const [tradeHistory, setTradeHistory] = useState([]);
     const [processedTxHashes] = useState(() => new Set());
     
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+    const [myTxCurrentPage, setMyTxCurrentPage] = useState(1);
+    
     // Load trade history from local storage on mount
     useEffect(() => {
         const loadTradeHistory = () => {
@@ -339,6 +345,17 @@ const Launchpad: React.FC = () => {
         setTradeHistory([]);
         processedTxHashes.clear();
         localStorage.removeItem('oikos_trade_history');
+    };
+    
+    // Pagination helper functions
+    const getPaginatedData = (data, page, perPage) => {
+        const startIndex = (page - 1) * perPage;
+        const endIndex = startIndex + perPage;
+        return data.slice(startIndex, endIndex);
+    };
+    
+    const getTotalPages = (data, perPage) => {
+        return Math.ceil(data.length / perPage);
     };
     
     // Mock data for price chart
@@ -2715,7 +2732,7 @@ const Launchpad: React.FC = () => {
                                     
                                     <Tabs.Content value="all">
                                         <VStack gap={2} align="stretch">
-                                                {tradeHistory.map((trade) => (
+                                                {getPaginatedData(tradeHistory, currentPage, itemsPerPage).map((trade) => (
                                                     <Flex
                                                         key={trade.id}
                                                         p={2}
@@ -2779,29 +2796,76 @@ const Launchpad: React.FC = () => {
                                                     </Flex>
                                                 ))}
                                             </VStack>
+                                            
+                                            {/* Pagination Controls */}
+                                            {getTotalPages(tradeHistory, itemsPerPage) > 1 && (
+                                                <HStack justify="center" mt={4} gap={2}>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                                        isDisabled={currentPage === 1}
+                                                        bg="#2a2a2a"
+                                                        _hover={{ bg: "#3a3a3a" }}
+                                                    >
+                                                        Previous
+                                                    </Button>
+                                                    <HStack gap={1}>
+                                                        {Array.from({ length: Math.min(5, getTotalPages(tradeHistory, itemsPerPage)) }, (_, i) => {
+                                                            const pageNum = currentPage <= 3 ? i + 1 : currentPage + i - 2;
+                                                            if (pageNum > 0 && pageNum <= getTotalPages(tradeHistory, itemsPerPage)) {
+                                                                return (
+                                                                    <Button
+                                                                        key={pageNum}
+                                                                        size="sm"
+                                                                        onClick={() => setCurrentPage(pageNum)}
+                                                                        bg={currentPage === pageNum ? "#4ade80" : "#2a2a2a"}
+                                                                        color={currentPage === pageNum ? "black" : "white"}
+                                                                        _hover={{ bg: currentPage === pageNum ? "#4ade80" : "#3a3a3a" }}
+                                                                        minW="40px"
+                                                                    >
+                                                                        {pageNum}
+                                                                    </Button>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })}
+                                                    </HStack>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => setCurrentPage(prev => Math.min(getTotalPages(tradeHistory, itemsPerPage), prev + 1))}
+                                                        isDisabled={currentPage === getTotalPages(tradeHistory, itemsPerPage)}
+                                                        bg="#2a2a2a"
+                                                        _hover={{ bg: "#3a3a3a" }}
+                                                    >
+                                                        Next
+                                                    </Button>
+                                                </HStack>
+                                            )}
                                     </Tabs.Content>
                                     
                                     <Tabs.Content value="my">
                                         {address ? (
                                                 <VStack gap={2} align="stretch">
-                                                    {tradeHistory.filter(trade => 
-                                                        trade.sender?.toLowerCase() === address.toLowerCase() || 
-                                                        trade.recipient?.toLowerCase() === address.toLowerCase()
-                                                    ).length > 0 ? (
-                                                        tradeHistory.filter(trade => 
+                                                    {(() => {
+                                                        const myTrades = tradeHistory.filter(trade => 
                                                             trade.sender?.toLowerCase() === address.toLowerCase() || 
                                                             trade.recipient?.toLowerCase() === address.toLowerCase()
-                                                        ).map((trade) => (
-                                                        <Flex
-                                                            key={trade.id}
-                                                            p={2}
-                                                            bg="#2a2a2a"
-                                                            borderRadius="md"
-                                                            cursor="pointer"
-                                                            _hover={{ bg: "#333" }}
-                                                            alignItems="center"
-                                                            gap={4}
-                                                        >
+                                                        );
+                                                        const paginatedMyTrades = getPaginatedData(myTrades, myTxCurrentPage, itemsPerPage);
+                                                        
+                                                        return myTrades.length > 0 ? (
+                                                            <>
+                                                                {paginatedMyTrades.map((trade) => (
+                                                                    <Flex
+                                                                        key={trade.id}
+                                                                        p={2}
+                                                                        bg="#2a2a2a"
+                                                                        borderRadius="md"
+                                                                        cursor="pointer"
+                                                                        _hover={{ bg: "#333" }}
+                                                                        alignItems="center"
+                                                                        gap={4}
+                                                                    >
                                                             <Box>
                                                                 <Badge
                                                                     colorPalette={trade.type === "buy" ? "green" : "red"}
@@ -2857,12 +2921,59 @@ const Launchpad: React.FC = () => {
                                                                 </Text>
                                                             </Box>
                                                         </Flex>
-                                                    ))
-                                                    ) : (
+                                                                    ))}
+                                                                    
+                                                                    {/* Pagination Controls for My Transactions */}
+                                                                    {getTotalPages(myTrades, itemsPerPage) > 1 && (
+                                                                        <HStack justify="center" mt={4} gap={2}>
+                                                                            <Button
+                                                                                size="sm"
+                                                                                onClick={() => setMyTxCurrentPage(prev => Math.max(1, prev - 1))}
+                                                                                isDisabled={myTxCurrentPage === 1}
+                                                                                bg="#2a2a2a"
+                                                                                _hover={{ bg: "#3a3a3a" }}
+                                                                            >
+                                                                                Previous
+                                                                            </Button>
+                                                                            <HStack gap={1}>
+                                                                                {Array.from({ length: Math.min(5, getTotalPages(myTrades, itemsPerPage)) }, (_, i) => {
+                                                                                    const pageNum = myTxCurrentPage <= 3 ? i + 1 : myTxCurrentPage + i - 2;
+                                                                                    if (pageNum > 0 && pageNum <= getTotalPages(myTrades, itemsPerPage)) {
+                                                                                        return (
+                                                                                            <Button
+                                                                                                key={pageNum}
+                                                                                                size="sm"
+                                                                                                onClick={() => setMyTxCurrentPage(pageNum)}
+                                                                                                bg={myTxCurrentPage === pageNum ? "#4ade80" : "#2a2a2a"}
+                                                                                                color={myTxCurrentPage === pageNum ? "black" : "white"}
+                                                                                                _hover={{ bg: myTxCurrentPage === pageNum ? "#4ade80" : "#3a3a3a" }}
+                                                                                                minW="40px"
+                                                                                            >
+                                                                                                {pageNum}
+                                                                                            </Button>
+                                                                                        );
+                                                                                    }
+                                                                                    return null;
+                                                                                })}
+                                                                            </HStack>
+                                                                            <Button
+                                                                                size="sm"
+                                                                                onClick={() => setMyTxCurrentPage(prev => Math.min(getTotalPages(myTrades, itemsPerPage), prev + 1))}
+                                                                                isDisabled={myTxCurrentPage === getTotalPages(myTrades, itemsPerPage)}
+                                                                                bg="#2a2a2a"
+                                                                                _hover={{ bg: "#3a3a3a" }}
+                                                                            >
+                                                                                Next
+                                                                            </Button>
+                                                                        </HStack>
+                                                                    )}
+                                                                </>
+                                                            ) : (
                                                         <Text color="#666" textAlign="center" py={8}>
                                                             No transactions found
                                                         </Text>
-                                                    )}
+                                                            );
+                                                        })()}
                                                 </VStack>
                                             ) : (
                                                 <Text color="#666" textAlign="center" py={8}>
@@ -2893,114 +3004,16 @@ const Launchpad: React.FC = () => {
                     <Box w="300px">
                         <VStack gap={4}>
                         {/* Wallet Balance Box */}
-                        <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
-                        <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
-                            Wallet
-                        </Text>
-                        
-                        <VStack align="stretch" gap={3}>
-                            {/* MON Balance */}
-                            <Box>
-                                <Flex justifyContent="space-between" alignItems="center">
-                                    <HStack>
-                                        <Box w="20px" h="20px">
-                                            <Image
-                                                src={monadLogo}
-                                                alt="MON"
-                                                w="20px"
-                                                h="20px"
-                                            />
-                                        </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm">MON</Text>
-                                        </Box>
-                                    </HStack>
-                                    <Box>
-                                        <Text color="white" fontWeight="bold">
-                                            {address ? parseFloat(ethBalance).toFixed(4) : "0.00"}
-                                        </Text>
-                                    </Box>
-                                </Flex>
-                                <Text color="#666" fontSize="xs" textAlign="right">
-                                    ≈ ${address ? (parseFloat(ethBalance) * 50).toFixed(2) : "0.00"}
-                                </Text>
-                            </Box>
-                            
-                            {/* WMON Balance */}
-                            <Box>
-                                <Flex justifyContent="space-between" alignItems="center">
-                                    <HStack>
-                                        <Box w="20px" h="20px">
-                                            <Image
-                                                src={monadLogo}
-                                                alt="WMON"
-                                                w="20px"
-                                                h="20px"
-                                            />
-                                        </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm">WMON</Text>
-                                        </Box>
-                                    </HStack>
-                                    <Box>
-                                        <Text color="white" fontWeight="bold">
-                                            {address ? parseFloat(wethBalance).toFixed(4) : "0.00"}
-                                        </Text>
-                                    </Box>
-                                </Flex>
-                                <Text color="#666" fontSize="xs" textAlign="right">
-                                    ≈ ${address ? (parseFloat(wethBalance) * 50).toFixed(2) : "0.00"}
-                                </Text>
-                            </Box>
-                            
-                            {/* Selected Token Balance */}
-                            {selectedToken && (
-                                <Box>
-                                    <Flex justifyContent="space-between" alignItems="center">
-                                        <HStack>
-                                            <Box w="20px" h="20px">
-                                                <Image
-                                                    src={placeholderLogo}
-                                                    alt={selectedToken.symbol}
-                                                    w="20px"
-                                                    h="20px"
-                                                />
-                                            </Box>
-                                            <Box>
-                                                <Text color="#888" fontSize="sm">{selectedToken.symbol}</Text>
-                                            </Box>
-                                        </HStack>
-                                        <Box>
-                                            <Text color="white" fontWeight="bold">
-                                                {address ? parseFloat(tokenBalance).toFixed(2) : "0.00"}
-                                            </Text>
-                                        </Box>
-                                    </Flex>
-                                    <Text color="#666" fontSize="xs" textAlign="right">
-                                        ≈ ${address && selectedToken ? (parseFloat(tokenBalance) * selectedToken.price).toFixed(2) : "0.00"}
-                                    </Text>
-                                </Box>
-                            )}
-                            
-                            {/* Total Portfolio Value */}
-                            <Box borderTop="1px solid #2a2a2a" pt={3} mt={2}>
-                                <Flex justifyContent="space-between" alignItems="center">
-                                    <Box>
-                                        <Text color="#888" fontSize="sm">Total Value</Text>
-                                    </Box>
-                                    <Box>
-                                        <Text color="#4ade80" fontWeight="bold" fontSize="lg">
-                                            ${address ? (
-                                                parseFloat(ethBalance) * 50 + 
-                                                parseFloat(wethBalance) * 50 +
-                                                (selectedToken ? parseFloat(tokenBalance) * selectedToken.price : 0)
-                                            ).toFixed(2) : "0.00"}
-                                        </Text>
-                                    </Box>
-                                </Flex>
-                            </Box>
-                        </VStack>
-                    </Box>
+                        <WalletSidebar 
+                            ethBalance={BigInt(Math.floor(parseFloat(ethBalance) * 1e18))}
+                            token1Info={{
+                                tokenSymbol: "WMON",
+                                balance: BigInt(Math.floor(parseFloat(wethBalance) * 1e18))
+                            }}
+                            selectedToken={selectedToken?.symbol}
+                            selectedTokenBalance={BigInt(Math.floor(parseFloat(tokenBalance) * 1e18))}
+                            address={address}
+                        />
                     
                     {/* Trading Panel */}
                     <Box 
@@ -3592,7 +3605,7 @@ const Launchpad: React.FC = () => {
                                     
                                     <Tabs.Content value="all">
                                         <VStack gap={2} align="stretch">
-                                                {tradeHistory.map((trade) => (
+                                                {getPaginatedData(tradeHistory, currentPage, itemsPerPage).map((trade) => (
                                                     <Box
                                                         key={trade.id}
                                                         p={3}
@@ -3656,22 +3669,69 @@ const Launchpad: React.FC = () => {
                                                         </Flex>
                                                     </Box>
                                                 ))}
+                                                
+                                                {/* Pagination Controls for Mobile */}
+                                                {getTotalPages(tradeHistory, itemsPerPage) > 1 && (
+                                                    <HStack justify="center" mt={4} gap={2}>
+                                                        <Button
+                                                            size="sm"
+                                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                                            isDisabled={currentPage === 1}
+                                                            bg="#2a2a2a"
+                                                            _hover={{ bg: "#3a3a3a" }}
+                                                        >
+                                                            Previous
+                                                        </Button>
+                                                        <HStack gap={1}>
+                                                            {Array.from({ length: Math.min(3, getTotalPages(tradeHistory, itemsPerPage)) }, (_, i) => {
+                                                                const pageNum = currentPage <= 2 ? i + 1 : currentPage + i - 1;
+                                                                if (pageNum > 0 && pageNum <= getTotalPages(tradeHistory, itemsPerPage)) {
+                                                                    return (
+                                                                        <Button
+                                                                            key={pageNum}
+                                                                            size="sm"
+                                                                            onClick={() => setCurrentPage(pageNum)}
+                                                                            bg={currentPage === pageNum ? "#4ade80" : "#2a2a2a"}
+                                                                            color={currentPage === pageNum ? "black" : "white"}
+                                                                            _hover={{ bg: currentPage === pageNum ? "#4ade80" : "#3a3a3a" }}
+                                                                            minW="35px"
+                                                                        >
+                                                                            {pageNum}
+                                                                        </Button>
+                                                                    );
+                                                                }
+                                                                return null;
+                                                            })}
+                                                        </HStack>
+                                                        <Button
+                                                            size="sm"
+                                                            onClick={() => setCurrentPage(prev => Math.min(getTotalPages(tradeHistory, itemsPerPage), prev + 1))}
+                                                            isDisabled={currentPage === getTotalPages(tradeHistory, itemsPerPage)}
+                                                            bg="#2a2a2a"
+                                                            _hover={{ bg: "#3a3a3a" }}
+                                                        >
+                                                            Next
+                                                        </Button>
+                                                    </HStack>
+                                                )}
                                             </VStack>
                                     </Tabs.Content>
                                     
                                     <Tabs.Content value="my">
                                         {address ? (
                                                 <VStack gap={2} align="stretch">
-                                                    {tradeHistory.filter(trade => 
-                                                        trade.sender?.toLowerCase() === address.toLowerCase() || 
-                                                        trade.recipient?.toLowerCase() === address.toLowerCase()
-                                                    ).length > 0 ? (
-                                                        tradeHistory.filter(trade => 
+                                                    {(() => {
+                                                        const myTrades = tradeHistory.filter(trade => 
                                                             trade.sender?.toLowerCase() === address.toLowerCase() || 
                                                             trade.recipient?.toLowerCase() === address.toLowerCase()
-                                                        ).map((trade) => (
-                                                        <Box
-                                                            key={trade.id}
+                                                        );
+                                                        const paginatedMyTrades = getPaginatedData(myTrades, myTxCurrentPage, itemsPerPage);
+                                                        
+                                                        return myTrades.length > 0 ? (
+                                                            <>
+                                                                {paginatedMyTrades.map((trade) => (
+                                                                    <Box
+                                                                        key={trade.id}
                                                             p={3}
                                                             bg="#2a2a2a"
                                                             borderRadius="md"
@@ -3732,12 +3792,59 @@ const Launchpad: React.FC = () => {
                                                                 </HStack>
                                                             </Flex>
                                                         </Box>
-                                                    ))
-                                                    ) : (
-                                                        <Text color="#666" textAlign="center" py={8}>
-                                                            No transactions found
-                                                        </Text>
-                                                    )}
+                                                                    ))}
+                                                                    
+                                                                    {/* Pagination Controls for My Transactions Mobile */}
+                                                                    {getTotalPages(myTrades, itemsPerPage) > 1 && (
+                                                                        <HStack justify="center" mt={4} gap={2}>
+                                                                            <Button
+                                                                                size="sm"
+                                                                                onClick={() => setMyTxCurrentPage(prev => Math.max(1, prev - 1))}
+                                                                                isDisabled={myTxCurrentPage === 1}
+                                                                                bg="#2a2a2a"
+                                                                                _hover={{ bg: "#3a3a3a" }}
+                                                                            >
+                                                                                Previous
+                                                                            </Button>
+                                                                            <HStack gap={1}>
+                                                                                {Array.from({ length: Math.min(3, getTotalPages(myTrades, itemsPerPage)) }, (_, i) => {
+                                                                                    const pageNum = myTxCurrentPage <= 2 ? i + 1 : myTxCurrentPage + i - 1;
+                                                                                    if (pageNum > 0 && pageNum <= getTotalPages(myTrades, itemsPerPage)) {
+                                                                                        return (
+                                                                                            <Button
+                                                                                                key={pageNum}
+                                                                                                size="sm"
+                                                                                                onClick={() => setMyTxCurrentPage(pageNum)}
+                                                                                                bg={myTxCurrentPage === pageNum ? "#4ade80" : "#2a2a2a"}
+                                                                                                color={myTxCurrentPage === pageNum ? "black" : "white"}
+                                                                                                _hover={{ bg: myTxCurrentPage === pageNum ? "#4ade80" : "#3a3a3a" }}
+                                                                                                minW="35px"
+                                                                                            >
+                                                                                                {pageNum}
+                                                                                            </Button>
+                                                                                        );
+                                                                                    }
+                                                                                    return null;
+                                                                                })}
+                                                                            </HStack>
+                                                                            <Button
+                                                                                size="sm"
+                                                                                onClick={() => setMyTxCurrentPage(prev => Math.min(getTotalPages(myTrades, itemsPerPage), prev + 1))}
+                                                                                isDisabled={myTxCurrentPage === getTotalPages(myTrades, itemsPerPage)}
+                                                                                bg="#2a2a2a"
+                                                                                _hover={{ bg: "#3a3a3a" }}
+                                                                            >
+                                                                                Next
+                                                                            </Button>
+                                                                        </HStack>
+                                                                    )}
+                                                                </>
+                                                            ) : (
+                                                                <Text color="#666" textAlign="center" py={8}>
+                                                                    No transactions found
+                                                                </Text>
+                                                            );
+                                                        })()}
                                                 </VStack>
                                             ) : (
                                                 <Text color="#666" textAlign="center" py={8}>

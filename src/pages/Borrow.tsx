@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Image, Flex, Container, Heading, HStack, Box, Grid, GridItem, Button, Spinner, Text, createListCollection, SimpleGrid, NumberInput, VStack } from "@chakra-ui/react";
+import { Input, Image, Flex, Container, Heading, HStack, Box, Grid, GridItem, Button, Spinner, Text, createListCollection, SimpleGrid, NumberInput, VStack, Badge } from "@chakra-ui/react";
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
@@ -12,8 +12,10 @@ import bnbLogo from '../assets/images/bnb.png';
 import monadLogo from '../assets/images/monad.png';
 import LoanAddCollateral from '../components/LoanAddCollateral';
 import LoanRepay from '../components/LoanRepay';
+import LoanRoll from '../components/LoanRoll';
 import placeholderLogo from '../assets/images/question.svg';
 import placeholderLogoDark from '../assets/images/question_white.svg';
+import WalletSidebar from '../components/WalletSidebar';
 
 import {
     SelectContent,
@@ -116,6 +118,12 @@ const Borrow = () => {
     const [isComputing, setIsComputing] = useState(false);
     const [ltv, setLtv] = useState(0);
     let loanData ;
+    
+    // Transaction history state
+    const [loanHistory, setLoanHistory] = useState([]);
+    const [processedTxHashes] = useState(() => new Set());
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
 
     // if (token1Info?.tokenSymbol == "WMON") {
     //     setToken1Info({
@@ -143,6 +151,57 @@ const Borrow = () => {
     }
 
   }, [vaultAddress]);
+  
+  // Load loan history from local storage on mount
+  useEffect(() => {
+    const loadLoanHistory = () => {
+      try {
+        const stored = localStorage.getItem('oikos_loan_history');
+        console.log("Loading loan history from localStorage:", stored);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          // Convert time strings back to Date objects
+          const history = parsed.map(loan => ({
+            ...loan,
+            time: new Date(loan.time)
+          }));
+          console.log("Parsed loan history:", history);
+          setLoanHistory(history);
+          // Add loaded tx hashes to processed set
+          history.forEach(loan => {
+            if (loan.txHash) {
+              processedTxHashes.add(loan.txHash);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error loading loan history:", error);
+      }
+    };
+    loadLoanHistory();
+  }, []);
+  
+  // Save loan history to local storage whenever it changes
+  useEffect(() => {
+    if (loanHistory.length > 0) {
+      try {
+        localStorage.setItem('oikos_loan_history', JSON.stringify(loanHistory));
+      } catch (error) {
+        console.error("Error saving loan history:", error);
+      }
+    }
+  }, [loanHistory]);
+  
+  // Pagination helper functions
+  const getPaginatedData = (data, page, perPage) => {
+    const startIndex = (page - 1) * perPage;
+    const endIndex = startIndex + perPage;
+    return data.slice(startIndex, endIndex);
+  };
+  
+  const getTotalPages = (data, perPage) => {
+    return Math.ceil(data.length / perPage);
+  };
 
   useEffect(() => {
     const interval  = setInterval(() => {
@@ -198,6 +257,133 @@ const Borrow = () => {
             setLtv(calculatedLTV);
         }
     }, [IMV, loanData]);
+    
+    // Listen to loan events from ExtVault contract
+    useEffect(() => {
+        if (!vaultAddress || vaultAddress === "0x0000000000000000000000000000000000000000") return;
+        
+        console.log("Setting up event listeners for vault:", vaultAddress);
+        
+        const extVaultContract = new ethers.Contract(
+            vaultAddress,
+            ExtVaultAbi,
+            localProvider
+        );
+        
+        // Handler for Borrow events
+        const handleBorrow = async (who, borrowAmount, duration, event) => {
+            console.log("Borrow event received:", { who, borrowAmount: borrowAmount.toString(), duration: duration.toString() });
+            try {
+                const txHash = event.transactionHash;
+                
+                // Skip if already processed
+                if (processedTxHashes.has(txHash)) {
+                    return;
+                }
+                
+                // Mark as processed
+                processedTxHashes.add(txHash);
+                
+                const block = await event.getBlock();
+                const timestamp = new Date(block.timestamp * 1000);
+                
+                const newLoan = {
+                    id: Date.now() + Math.random(),
+                    type: "borrow",
+                    user: who,
+                    amount: parseFloat(formatEther(borrowAmount)),
+                    duration: parseInt(duration.toString()) / 86400, // Convert to days
+                    collateral: collateral ? parseFloat(collateral) : 0,
+                    time: timestamp,
+                    txHash: txHash,
+                    shortTxHash: `${txHash.slice(0, 6)}...${txHash.slice(-4)}`
+                };
+                
+                setLoanHistory(prev => [newLoan, ...prev.slice(0, 199)]); // Keep last 200 loans
+            } catch (error) {
+                console.error("Error processing borrow event:", error);
+            }
+        };
+        
+        // Handler for Payback events
+        const handlePayback = async (who, event) => {
+            try {
+                const txHash = event.transactionHash;
+                
+                // Skip if already processed
+                if (processedTxHashes.has(txHash)) {
+                    return;
+                }
+                
+                // Mark as processed
+                processedTxHashes.add(txHash);
+                
+                const block = await event.getBlock();
+                const timestamp = new Date(block.timestamp * 1000);
+                
+                // Get transaction details to extract repay amount
+                const tx = await event.getTransaction();
+                const receipt = await event.getTransactionReceipt();
+                
+                const newLoan = {
+                    id: Date.now() + Math.random(),
+                    type: "repay",
+                    user: who,
+                    amount: repayAmount ? parseFloat(repayAmount) : 0, // We'll use the state value
+                    time: timestamp,
+                    txHash: txHash,
+                    shortTxHash: `${txHash.slice(0, 6)}...${txHash.slice(-4)}`
+                };
+                
+                setLoanHistory(prev => [newLoan, ...prev.slice(0, 199)]);
+            } catch (error) {
+                console.error("Error processing payback event:", error);
+            }
+        };
+        
+        // Handler for RollLoan events
+        const handleRollLoan = async (who, event) => {
+            try {
+                const txHash = event.transactionHash;
+                
+                // Skip if already processed
+                if (processedTxHashes.has(txHash)) {
+                    return;
+                }
+                
+                // Mark as processed
+                processedTxHashes.add(txHash);
+                
+                const block = await event.getBlock();
+                const timestamp = new Date(block.timestamp * 1000);
+                
+                const newLoan = {
+                    id: Date.now() + Math.random(),
+                    type: "roll",
+                    user: who,
+                    time: timestamp,
+                    txHash: txHash,
+                    shortTxHash: `${txHash.slice(0, 6)}...${txHash.slice(-4)}`
+                };
+                
+                setLoanHistory(prev => [newLoan, ...prev.slice(0, 199)]);
+            } catch (error) {
+                console.error("Error processing roll loan event:", error);
+            }
+        };
+        
+        // Attach event listeners
+        extVaultContract.on("Borrow", handleBorrow);
+        extVaultContract.on("Payback", handlePayback);
+        extVaultContract.on("RollLoan", handleRollLoan);
+        
+        // Cleanup
+        return () => {
+            extVaultContract.off("Borrow", handleBorrow);
+            extVaultContract.off("Payback", handlePayback);
+            extVaultContract.off("RollLoan", handleRollLoan);
+        };
+    }, [vaultAddress, collateral, repayAmount]);
 
     // const {
     //     data: loanFees,
@@ -220,7 +406,7 @@ const Borrow = () => {
         functionName: "approve",
         args: [
             vaultAddress,
-            parseEther(`${collateral}`).add(parseEther(`${0.000001}`))
+            parseEther(`${collateral}`) + parseEther(`0.000001`)
         ],
         onSuccess(data) {
             borrow();
@@ -247,13 +433,15 @@ const Borrow = () => {
         functionName: "approve",
         args: [
             vaultAddress,
-            parseEther(`${extraCollateral}`).add(parseEther(`${0.000001}`))
+            parseEther(`${extraCollateral}`)
         ],
         onSuccess(data) {
+            console.log("Approval successful, transaction hash:", data.hash);
             addCollateral();
         },
         onError(error) {
             console.error(`add collateral approval failed: ${error.message}`);
+            console.error("Full error object:", error);
             setIsLoading(false);
             setIsAdding(false);
 
@@ -307,6 +495,31 @@ const Borrow = () => {
             console.log(data)
             setIsBorrowing(false);
             setIsLoading(false);
+            
+            // Manually add to history
+            const newLoan = {
+                id: Date.now() + Math.random(),
+                type: "borrow",
+                user: address,
+                amount: parseFloat(borrowAmount),
+                collateral: collateral,
+                duration: duration / 86400, // Convert to days
+                time: new Date(),
+                txHash: data.hash,
+                shortTxHash: `${data.hash.slice(0, 6)}...${data.hash.slice(-4)}`
+            };
+            
+            setLoanHistory(prev => {
+                const updated = [newLoan, ...prev.slice(0, 199)];
+                // Save immediately
+                try {
+                    localStorage.setItem('oikos_loan_history', JSON.stringify(updated));
+                } catch (error) {
+                    console.error("Error saving loan history:", error);
+                }
+                return updated;
+            });
+            
             setTimeout(() => {
                 window.location.reload();
               }, 4000); // 4000ms = 4 seconds
@@ -346,6 +559,29 @@ const Borrow = () => {
         onSuccess(data) {
             setIsRepaying(false);
             setIsLoading(false);
+            
+            // Manually add to history
+            const newLoan = {
+                id: Date.now() + Math.random(),
+                type: "repay",
+                user: address,
+                amount: repayAmount == 0 ? parseFloat(formatEther(`${loanData?.borrowAmount}`)) : parseFloat(repayAmount),
+                time: new Date(),
+                txHash: data.hash,
+                shortTxHash: `${data.hash.slice(0, 6)}...${data.hash.slice(-4)}`
+            };
+            
+            setLoanHistory(prev => {
+                const updated = [newLoan, ...prev.slice(0, 199)];
+                // Save immediately
+                try {
+                    localStorage.setItem('oikos_loan_history', JSON.stringify(updated));
+                } catch (error) {
+                    console.error("Error saving loan history:", error);
+                }
+                return updated;
+            });
+            
             setTimeout(() => {
                 window.location.reload();
               }, 4000); // 4000ms = 4 seconds
@@ -377,6 +613,29 @@ const Borrow = () => {
         onSuccess(data) {
             setIsRolling(false);
             setIsLoading(false);
+            
+            // Manually add to history
+            const newLoan = {
+                id: Date.now() + Math.random(),
+                type: "roll",
+                user: address,
+                duration: duration / 86400, // Convert to days
+                time: new Date(),
+                txHash: data.hash,
+                shortTxHash: `${data.hash.slice(0, 6)}...${data.hash.slice(-4)}`
+            };
+            
+            setLoanHistory(prev => {
+                const updated = [newLoan, ...prev.slice(0, 199)];
+                // Save immediately
+                try {
+                    localStorage.setItem('oikos_loan_history', JSON.stringify(updated));
+                } catch (error) {
+                    console.error("Error saving loan history:", error);
+                }
+                return updated;
+            });
+            
             setTimeout(() => {
                   window.location.reload();
             }, 4000); // 4000ms = 4 seconds
@@ -408,8 +667,34 @@ const Borrow = () => {
             parseEther(`${extraCollateral}`),
         ],
         onSuccess(data) {
+            console.log("Add collateral success:", data);
             setIsAdding(false);
             setIsLoading(false);
+            
+            // Manually add to loan history since there's no event for addCollateral
+            const newLoan = {
+                id: Date.now() + Math.random(),
+                type: "add_collateral",
+                user: address,
+                amount: parseFloat(extraCollateral),
+                time: new Date(),
+                txHash: data.hash,
+                shortTxHash: `${data.hash.slice(0, 6)}...${data.hash.slice(-4)}`
+            };
+            
+            console.log("Adding to loan history:", newLoan);
+            setLoanHistory(prev => {
+                const updated = [newLoan, ...prev.slice(0, 199)];
+                console.log("Updated loan history:", updated);
+                // Save to localStorage immediately
+                try {
+                    localStorage.setItem('oikos_loan_history', JSON.stringify(updated));
+                } catch (error) {
+                    console.error("Error saving loan history:", error);
+                }
+                return updated;
+            });
+            
             setTimeout(() => {
                 window.location.reload();
               }, 4000); // 4000ms = 4 seconds
@@ -451,8 +736,16 @@ const Borrow = () => {
                 const tokenDecimals = await tokenContract.decimals();
 
                 const balance = await tokenContract.balanceOf(address);
+                
+                // Verify this is an ERC20 contract by checking for totalSupply
+                try {
+                    const totalSupply = await tokenContract.totalSupply();
+                    console.log(`Token ${tokenSymbol} (${tokenAddress}) has totalSupply: ${totalSupply.toString()}`);
+                } catch (e) {
+                    console.warn(`Token at ${tokenAddress} might not be a standard ERC20 token`);
+                }
 
-                return { tokenName, tokenSymbol, tokenDecimals, balance };
+                return { tokenName, tokenSymbol, tokenDecimals, balance, address: tokenAddress };
             } catch (error) {
                 console.error(`Error fetching token info for ${tokenAddress}:`, error);
                 return null;
@@ -487,6 +780,10 @@ const Borrow = () => {
                     if (token0Data) {
                         setToken0Info(token0Data);
                         setToken0(plainVaultDescription.token0);
+                        
+                        // Debug: Log token0 details
+                        console.log("Token0 set to:", plainVaultDescription.token0);
+                        console.log("Token0 info:", token0Data);
                     }
 
                     const token1Data = await fetchTokenInfo(plainVaultDescription.token1);
@@ -584,6 +881,22 @@ const Borrow = () => {
             return;
         }
 
+        // Debug logging
+        console.log("Add Collateral Debug Info:");
+        console.log("token0 address:", token0);
+        console.log("vault address:", vaultAddress);
+        console.log("extraCollateral amount:", extraCollateral);
+        console.log("token0Info:", token0Info);
+        
+        // Verify token0 is a valid address
+        if (!token0 || token0 === "0x0000000000000000000000000000000000000000") {
+            toaster.create({
+                title: "Error",
+                description: "Invalid token0 address. Please refresh and try again.",
+            });
+            return;
+        }
+
         setIsAdding(true);
         setIsLoading(true);
         approveAddCollateral();
@@ -623,7 +936,7 @@ const Borrow = () => {
         formatNumberPrecise(formatEther(`${loanData?.collateralAmount || 0}`), 5) ;
     
     return (
-        <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
+        <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh" overflow="visible">
             <Toaster />
 
             {!isConnected ? (
@@ -639,44 +952,119 @@ const Borrow = () => {
             ) : isMobile && isLandscape ? (
                 <RotateDeviceMessage />
             ) : isAddress(vaultAddress) ? (
-                <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4} minH="calc(100vh - 80px)">
+                <>
+                    <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4}>
                         {/* Left side - Loan Information */}
                         <Box 
                             flex={isMobile ? "1" : "0 0 350px"} 
                             maxW={isMobile ? "100%" : "350px"} 
                             w={isMobile ? "100%" : "350px"}
                         >
-                            <Box bg="#1a1a1a" borderRadius="lg" p={4}>
-                                <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Vault Information</Text>
-                                <VStack align="stretch" gap={2}>
-                                    <HStack justify="space-between">
-                                        <Box>
-                                            <Text color="#888" fontSize="sm">Token Pair</Text>
-                                        </Box>
-                                        <Box>
-                                            <Text color="white" fontSize="sm" fontWeight="500">
-                                                {isTokenInfoLoading ? <Spinner size="sm" /> : `${token0Info?.tokenSymbol}/${token1Info?.tokenSymbol}`}
+                            <Box 
+                                bg="rgba(26, 26, 26, 0.8)" 
+                                borderRadius="lg" 
+                                p={5}
+                                backdropFilter="blur(10px)"
+                                border="1px solid rgba(74, 222, 128, 0.1)"
+                                boxShadow="0 4px 12px rgba(0, 0, 0, 0.2)"
+                            >
+                                <HStack mb={4} align="center">
+                                    <Text fontSize="lg" fontWeight="bold" color="white">
+                                        Vault Information
+                                    </Text>
+                                </HStack>
+                                
+                                <VStack align="stretch" gap={3}>
+                                    <Box 
+                                        p={3} 
+                                        bg="rgba(255, 255, 255, 0.02)"
+                                        borderRadius="md"
+                                        border="1px solid rgba(255, 255, 255, 0.05)"
+                                    >
+                                        <Text color="#4ade80" fontSize="xs" fontWeight="600" mb={1}>
+                                            TOKEN PAIR
+                                        </Text>
+                                        <HStack gap={2}>
+                                            {isTokenInfoLoading ? (
+                                                <Box><Spinner size="sm" color="#4ade80" /></Box>
+                                            ) : (
+                                                <Box>
+                                                    <HStack>
+                                                    <Box>
+                                                    <Text color="white" fontSize="lg" fontWeight="bold">
+                                                        {token0Info?.tokenSymbol}
+                                                    </Text>
+                                                    </Box>
+                                                    <Box><Text color="#666" fontSize="sm">/</Text></Box>
+                                                    <Box>
+                                                    <Text color="white" fontSize="lg" fontWeight="bold">
+                                                        {token1Info?.tokenSymbol}
+                                                    </Text>                                                        
+                                                    </Box>
+                                                    </HStack>
+                                                </Box>
+                                            )}
+                                        </HStack>
+                                    </Box>
+                                    
+                                    <SimpleGrid columns={2} gap={3}>
+                                        <Box 
+                                            p={3} 
+                                            bg="rgba(255, 255, 255, 0.02)"
+                                            borderRadius="md"
+                                            border="1px solid rgba(255, 255, 255, 0.05)"
+                                        >
+                                            <Box>
+                                                <HStack>
+                                                    <Box>
+                                                    <Text color="#888" fontSize="xs" mb={1}>
+                                                        IMV 
+                                                    </Text>                                                        
+                                                    </Box>
+                                                    <Box>
+                                                        <Image src={placeholderLogoDark} w="15px" />
+                                                    </Box>
+                                                </HStack>
+                                            </Box>
+                                            <Text color="#4ade80" fontSize="xl" fontWeight="bold">
+                                                {commifyDecimals(formatEther(`${IMV || 0}`) || 0, 4)}
                                             </Text>
                                         </Box>
-                                    </HStack>
-                                    <HStack justify="space-between">
-                                        <Box>
-                                            <Text color="#888" fontSize="sm">IMV</Text>
-                                        </Box>
-                                        <Box>
-                                            <Text color="white" fontSize="sm" fontWeight="500">
-                                                {commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}
+                                        
+                                        <Box 
+                                            p={3} 
+                                            bg="rgba(255, 255, 255, 0.02)"
+                                            borderRadius="md"
+                                            border="1px solid rgba(255, 255, 255, 0.05)"
+                                        >
+                                            <Text color="#888" fontSize="xs" mb={1}>
+                                                DAILY FEE
+                                            </Text>
+                                            <Text color="white" fontSize="xl" fontWeight="bold">
+                                                0.027%
                                             </Text>
                                         </Box>
-                                    </HStack>
-                                    <HStack justify="space-between">
-                                        <Box>
-                                            <Text color="#888" fontSize="sm">Loan Fee Rate</Text>
-                                        </Box>
-                                        <Box>
-                                            <Text color="white" fontSize="sm" fontWeight="500">0.027% per day</Text>
-                                        </Box>
-                                    </HStack>
+                                    </SimpleGrid>
+                                    
+                                    <Box 
+                                        p={3} 
+                                        bg="rgba(74, 222, 128, 0.05)"
+                                        borderRadius="md"
+                                        border="1px solid rgba(74, 222, 128, 0.2)"
+                                    >
+                                        <HStack justify="space-between">
+                                            <Box>
+                                            <Text color="#4ade80" fontSize="xs" fontWeight="600">
+                                                PROTOCOL STATUS
+                                            </Text>
+                                            </Box>
+                                            <Box>
+                                            <Badge colorPalette="green" size="sm">
+                                                ACTIVE
+                                            </Badge>
+                                            </Box>
+                                        </HStack>
+                                    </Box>
                                 </VStack>
                             </Box>
                             
@@ -921,10 +1309,10 @@ const Borrow = () => {
                                     
                                     <Box borderTop="1px solid #2a2a2a" pt={4}>
                                         <Text color="#888" fontSize="sm" mb={3}>Quick Actions</Text>
-                                        <HStack gap={2}>
-                                            <Box>
+                                        <HStack gap={3} w="100%">
+                                            <Box flex="3">
                                                 <LoanAddCollateral
-                                                size="sm"
+                                                size="lg"
                                                 token0Symbol={token0Info.tokenSymbol}
                                                 handleSetCollateral={setCollateral}
                                                 handleSetExtraCollateral={handleSetExtraCollateral}
@@ -940,9 +1328,9 @@ const Borrow = () => {
                                                 token0Balance={token0Info?.balance}
                                                 />
                                             </Box>
-                                            <Box>
+                                            <Box flex="3">
                                                 <LoanRepay
-                                                size="sm"
+                                                size="lg"
                                                 fullCollateral={loanData?.collateralAmount}
                                                 loanAmount={loanData?.borrowAmount}
                                                 token0Symbol={token0Info.tokenSymbol}
@@ -957,18 +1345,22 @@ const Borrow = () => {
                                                 isLoading={isTokenInfoLoading}
                                                 />
                                             </Box>
-                                            <Box>
-                                                <Button
-                                                variant="outline"
-                                                size="sm"
-                                                disabled={isRolling || isTokenInfoLoading || ltv <= 1}
-                                                border="1px solid #4ade80"
-                                                color="#4ade80"
-                                                _hover={{ bg: "rgba(74, 222, 128, 0.1)" }}
-                                                onClick={() => setIsRolling(true)}
-                                            >
-                                                {isRolling ? <Spinner size="sm" /> : "Roll"}
-                                                </Button>
+                                            <Box flex="3">
+                                                <LoanRoll
+                                                size="lg"
+                                                isRolling={isRolling}
+                                                setIsRolling={setIsRolling}
+                                                isLoading={isLoading}
+                                                isTokenInfoLoading={isTokenInfoLoading}
+                                                ltv={ltv}
+                                                duration={duration}
+                                                loanData={loanData}
+                                                rollLoanAmount={rollLoanAmount}
+                                                token1Info={token1Info}
+                                                handleClickRoll={handleClickRoll}
+                                                getDaysLeft={getDaysLeft}
+                                                calculateExpiryDate={calculateExpiryDate}
+                                                />
                                             </Box>
                                         </HStack>
                                     </Box>
@@ -978,119 +1370,176 @@ const Borrow = () => {
                         
                         {/* Right side - Wallet Box */}
                         {!isMobile && (
-                            <Box w="300px">
-                                <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
-                                    <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
-                                        Wallet
-                                    </Text>
-                                    
-                                    <VStack align="stretch" gap={3}>
-                                        {/* MON Balance */}
-                                        <Box>
-                                            <Flex justifyContent="space-between" alignItems="center">
-                                                <HStack>
-                                                    <Box w="20px" h="20px">
-                                                        <Image
-                                                            src={monadLogo}
-                                                            alt="MON"
-                                                            w="20px"
-                                                            h="20px"
-                                                        />
-                                                    </Box>
-                                                    <Box>
-                                                        <Text color="#888" fontSize="sm">MON</Text>
-                                                    </Box>
-                                                </HStack>
-                                                <Box>
-                                                    <Text color="white" fontWeight="bold">
-                                                        {address ? parseFloat(formatEther(ethBalance)).toFixed(4) : "0.00"}
-                                                    </Text>
-                                                </Box>
-                                            </Flex>
-                                            <Text color="#666" fontSize="xs" textAlign="right">
-                                                ≈ ${address ? (parseFloat(formatEther(ethBalance)) * 50).toFixed(2) : "0.00"}
-                                            </Text>
-                                        </Box>
-                                        
-                                        {/* Token0 Balance */}
-                                        {token0Info?.tokenSymbol && (
-                                            <Box>
-                                                <Flex justifyContent="space-between" alignItems="center">
-                                                    <HStack>
-                                                        <Box w="20px" h="20px">
-                                                            <Image
-                                                                src={placeholderLogoDark}
-                                                                alt={token0Info.tokenSymbol}
-                                                                w="20px"
-                                                                h="20px"
-                                                            />
-                                                        </Box>
-                                                        <Box>
-                                                            <Text color="#888" fontSize="sm">{token0Info.tokenSymbol}</Text>
-                                                        </Box>
-                                                    </HStack>
-                                                    <Box>
-                                                        <Text color="white" fontWeight="bold">
-                                                            {token0Info?.balance ? parseFloat(formatEther(token0Info.balance)).toFixed(4) : "0.00"}
-                                                        </Text>
-                                                    </Box>
-                                                </Flex>
-                                                <Text color="#666" fontSize="xs" textAlign="right">
-                                                    ≈ $0.00
-                                                </Text>
-                                            </Box>
-                                        )}
-                                        
-                                        {/* Token1 Balance */}
-                                        {token1Info?.tokenSymbol && (
-                                            <Box>
-                                                <Flex justifyContent="space-between" alignItems="center">
-                                                    <HStack>
-                                                        <Box w="20px" h="20px">
-                                                            <Image
-                                                                src={token1Info.tokenSymbol === "WMON" ? monadLogo : placeholderLogoDark}
-                                                                alt={token1Info.tokenSymbol}
-                                                                w="20px"
-                                                                h="20px"
-                                                            />
-                                                        </Box>
-                                                        <Box>
-                                                            <Text color="#888" fontSize="sm">{token1Info.tokenSymbol}</Text>
-                                                        </Box>
-                                                    </HStack>
-                                                    <Box>
-                                                        <Text color="white" fontWeight="bold">
-                                                            {token1Info?.balance ? parseFloat(formatEther(token1Info.balance)).toFixed(4) : "0.00"}
-                                                        </Text>
-                                                    </Box>
-                                                </Flex>
-                                                <Text color="#666" fontSize="xs" textAlign="right">
-                                                    ≈ ${token1Info?.tokenSymbol === "WMON" ? (parseFloat(formatEther(token1Info.balance || "0")) * 50).toFixed(2) : "0.00"}
-                                                </Text>
-                                            </Box>
-                                        )}
-                                        
-                                        {/* Total Portfolio Value */}
-                                        <Box borderTop="1px solid #2a2a2a" pt={3} mt={2}>
-                                            <Flex justifyContent="space-between" alignItems="center">
-                                                <Box>
-                                                    <Text color="#888" fontSize="sm">Total Value</Text>
-                                                </Box>
-                                                <Box>
-                                                    <Text color="#4ade80" fontWeight="bold" fontSize="lg">
-                                                        ${address ? (
-                                                            parseFloat(formatEther(ethBalance)) * 50 + 
-                                                            (token1Info?.tokenSymbol === "WMON" ? parseFloat(formatEther(token1Info.balance || "0")) * 50 : 0)
-                                                        ).toFixed(2) : "0.00"}
-                                                    </Text>
-                                                </Box>
-                                            </Flex>
-                                        </Box>
-                                    </VStack>
-                                </Box>
-                            </Box>
+                            <WalletSidebar 
+                                ethBalance={ethBalance}
+                                token0Info={token0Info}
+                                token1Info={token1Info}
+                                address={address}
+                            />
                         )}
                     </Flex>
+                    
+                    {/* Loan History Section */}
+                    <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4}>
+                        {!isMobile && <Box w="350px" />}
+                        <Box 
+                            flex="1"
+                            maxW={isMobile ? "100%" : "calc(100% - 350px - 300px - 32px)"}
+                        >
+                        <Box bg="#1a1a1a" borderRadius="lg" p={6}>
+                                <Flex justify="space-between" align="center" mb={4}>
+                                    <Text fontSize="lg" fontWeight="bold" color="white">
+                                        Loan History
+                                    </Text>
+                                    {console.log("Rendering loan history, length:", loanHistory.length)}
+                                    {loanHistory.length > 0 && (
+                                        <Button
+                                            size="sm"
+                                            onClick={() => {
+                                                setLoanHistory([]);
+                                                processedTxHashes.clear();
+                                                localStorage.removeItem('oikos_loan_history');
+                                            }}
+                                            bg="#2a2a2a"
+                                            _hover={{ bg: "#3a3a3a" }}
+                                        >
+                                            Clear History
+                                        </Button>
+                                    )}
+                                </Flex>
+                                
+                                {loanHistory.length > 0 ? (
+                                    <>
+                                        <VStack gap={2} align="stretch">
+                                            {getPaginatedData(loanHistory, currentPage, itemsPerPage).map((loan) => (
+                                                <Box
+                                                    key={loan.id}
+                                                    p={3}
+                                                    bg="#2a2a2a"
+                                                    borderRadius="md"
+                                                    cursor="pointer"
+                                                    _hover={{ bg: "#333" }}
+                                                >
+                                                    <Flex alignItems="center" gap={3}>
+                                                        {/* Main action line */}
+                                                        <Box flex="1">
+                                                            <HStack gap={2} flexWrap="wrap">
+                                                                <Badge
+                                                                    colorPalette={
+                                                                        loan.type === "borrow" ? "blue" : 
+                                                                        loan.type === "repay" ? "green" : 
+                                                                        loan.type === "add_collateral" ? "orange" :
+                                                                        "purple"
+                                                                    }
+                                                                    size="sm"
+                                                                >
+                                                                    {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
+                                                                </Badge>
+                                                                <Text color="white" fontWeight="bold" fontSize="sm">
+                                                                    {loan.type === "borrow" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
+                                                                    {loan.type === "repay" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
+                                                                    {loan.type === "roll" && `Extended loan`}
+                                                                    {loan.type === "add_collateral" && `${loan.amount.toFixed(4)} ${token0Info?.tokenSymbol || "TOKEN"}`}
+                                                                </Text>
+                                                            </HStack>
+                                                        </Box>
+                                                        
+                                                        {/* Transaction Hash */}
+                                                        <Text 
+                                                            color="#4ade80" 
+                                                            fontSize="xs"
+                                                            cursor="pointer"
+                                                            _hover={{ textDecoration: "underline" }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const explorerUrl = config.chain === "monad" 
+                                                                    ? `https://monadexplorer.com/tx/${loan.txHash}`
+                                                                    : `https://bscscan.com/tx/${loan.txHash}`;
+                                                                window.open(explorerUrl, "_blank");
+                                                            }}
+                                                        >
+                                                            {loan.shortTxHash}
+                                                        </Text>
+                                                        
+                                                        {/* Time */}
+                                                        <Text color="#888" fontSize="xs" minW="60px" textAlign="right">
+                                                            {Math.floor((Date.now() - loan.time.getTime()) / 60000) < 60
+                                                                ? `${Math.floor((Date.now() - loan.time.getTime()) / 60000)}m ago`
+                                                                : Math.floor((Date.now() - loan.time.getTime()) / 3600000) < 24
+                                                                ? `${Math.floor((Date.now() - loan.time.getTime()) / 3600000)}h ago`
+                                                                : `${Math.floor((Date.now() - loan.time.getTime()) / 86400000)}d ago`
+                                                            }
+                                                        </Text>
+                                                    </Flex>
+                                                    
+                                                    {/* Details line - only show if there are details */}
+                                                    {((loan.type === "borrow" && (loan.duration || loan.collateral)) ||
+                                                      (loan.type === "roll" && loan.duration) ||
+                                                      loan.type === "repay") && (
+                                                        <Text color="#888" fontSize="xs" mt={1} ml={2}>
+                                                            {loan.type === "borrow" && `Duration: ${loan.duration} days • Collateral: ${loan.collateral?.toFixed(4) || "0"} ${token0Info?.tokenSymbol || "TOKEN"}`}
+                                                            {loan.type === "repay" && "Loan fully repaid"}
+                                                            {loan.type === "roll" && `New duration: ${loan.duration || "N/A"} days`}
+                                                        </Text>
+                                                    )}
+                                                </Box>
+                                            ))}
+                                        </VStack>
+                                        
+                                        {/* Pagination Controls */}
+                                        {getTotalPages(loanHistory, itemsPerPage) > 1 && (
+                                            <HStack justify="center" mt={4} gap={2}>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                                    isDisabled={currentPage === 1}
+                                                    bg="#2a2a2a"
+                                                    _hover={{ bg: "#3a3a3a" }}
+                                                >
+                                                    Previous
+                                                </Button>
+                                                <HStack gap={1}>
+                                                    {Array.from({ length: Math.min(5, getTotalPages(loanHistory, itemsPerPage)) }, (_, i) => {
+                                                        const pageNum = currentPage <= 3 ? i + 1 : currentPage + i - 2;
+                                                        if (pageNum > 0 && pageNum <= getTotalPages(loanHistory, itemsPerPage)) {
+                                                            return (
+                                                                <Button
+                                                                    key={pageNum}
+                                                                    size="sm"
+                                                                    onClick={() => setCurrentPage(pageNum)}
+                                                                    bg={currentPage === pageNum ? "#4ade80" : "#2a2a2a"}
+                                                                    color={currentPage === pageNum ? "black" : "white"}
+                                                                    _hover={{ bg: currentPage === pageNum ? "#4ade80" : "#3a3a3a" }}
+                                                                    minW="40px"
+                                                                >
+                                                                    {pageNum}
+                                                                </Button>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })}
+                                                </HStack>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(prev => Math.min(getTotalPages(loanHistory, itemsPerPage), prev + 1))}
+                                                    isDisabled={currentPage === getTotalPages(loanHistory, itemsPerPage)}
+                                                    bg="#2a2a2a"
+                                                    _hover={{ bg: "#3a3a3a" }}
+                                                >
+                                                    Next
+                                                </Button>
+                                            </HStack>
+                                        )}
+                                    </>
+                                ) : (
+                                    <Text color="#666" textAlign="center" py={8}>
+                                        No loan history yet
+                                    </Text>
+                                )}
+                            </Box>
+                        </Box>
+                    </Flex>
+                </>
             ) : (
                 <Box py={8} textAlign="center">
                     <Text color="#666">Invalid vault address</Text>

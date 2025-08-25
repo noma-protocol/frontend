@@ -36,13 +36,13 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
     }
 
     return (
-    <Box p={2} textAlign="center" display="flex" alignItems="center" justifyContent="center">
-        <DrawerRoot >
+    <Box w="100%" textAlign="center" display="flex" alignItems="center" justifyContent="center">
+        <DrawerRoot w="100%">
         <DrawerTrigger asChild>
         <Button 
             h={size == "lg" ? "38px" : "32px"}
             disabled={isRepaying || isLoading}
-            w={size == "lg" ? "90px" : "80px"}
+            w="100%"
             bg="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
             backdropFilter="blur(10px)"
             color="white"
@@ -68,76 +68,174 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
         {isRepaying  ? <Spinner size="sm" /> : "Repay"}
         </Button>
         </DrawerTrigger>
-        <DrawerBackdrop />
-        <DrawerContent>
-            <Box mt="80%" ml={5}>
-            <DrawerHeader>
-                <DrawerTitle>
-                    <Text as="h3" color="#4ade80">Repay loan</Text>
-                </DrawerTitle>
-                <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRepaying}>
-                    <Button variant="ghost" size="sm" onClick={() => setIsRepaying(false)}>×</Button>
-                </DrawerCloseTrigger>
+        <DrawerBackdrop backdropFilter="blur(4px)" bg="rgba(0, 0, 0, 0.6)" />
+        <DrawerContent 
+            bg="rgba(26, 26, 26, 0.95)"
+            backdropFilter="blur(20px)"
+            borderLeft="1px solid rgba(239, 68, 68, 0.2)"
+            boxShadow="-10px 0 30px rgba(0, 0, 0, 0.5)"
+        >
+            <Box>
+            <DrawerHeader 
+                borderBottom="1px solid rgba(255, 255, 255, 0.1)"
+                p={6}
+            >
+                <HStack justify="space-between" align="center">
+                    <HStack gap={3}>
+                        <Box 
+                            w="4px" 
+                            h="24px" 
+                            bg="#ef4444" 
+                            borderRadius="full"
+                        />
+                        <DrawerTitle>
+                            <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
+                                Repay Loan
+                            </Text>
+                        </DrawerTitle>
+                    </HStack>
+                    <DrawerCloseTrigger asChild>
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setIsRepaying(false)}
+                            color="#888"
+                            _hover={{ color: "white", bg: "rgba(255, 255, 255, 0.1)" }}
+                            fontSize="xl"
+                            w="32px"
+                            h="32px"
+                            borderRadius="full"
+                        >
+                            ×
+                        </Button>
+                    </DrawerCloseTrigger>
+                </HStack>
             </DrawerHeader>
-            <DrawerBody>
+            <DrawerBody p={6}>
                 {/* <Input
                     placeholder="Amount to roll"
                     // onChange={(e) => setWrapAmount(e.target.value)}
                     w="80%"
                 /> */}        
-            <Box >
-                <HStack>
-                    <Box w="auto">
-                    <NumberInputRoot
-                        isMobile={isMobile}
-                        min={0}
-                        max={999999999}
-                        step={0.1}
-                        onChange={_handleSetRepayAmount}
-                        ml={isMobile ? 0 : 1.5}
-                        marginRight={"5px"}
-                        defaultValue='0'
-                        targetValue={repayAmount}
-                        // setValue={setRepayAmount}
-                        customStep={0.1}
-                    >
-                        <NumberInputLabel h={"38px"} w={{ base: "", lg: "auto" }} />
-                        <NumberInputField h={"38px"} w={{ base: "", lg: "200px" }} />
-                    </NumberInputRoot>
-                    <Text color="white" ml={2} fontSize="sm">
-                         <i>{"0 to repay full loan"}</i>
+            <VStack spacing={6} align="stretch">
+                {/* Amount Input Section */}
+                <Box>
+                    <Text color="#888" fontSize="sm" mb={3} fontWeight="600">
+                        REPAYMENT AMOUNT
                     </Text>
+                    <Box 
+                        bg="rgba(255, 255, 255, 0.02)"
+                        borderRadius="lg"
+                        border="1px solid rgba(255, 255, 255, 0.1)"
+                        p={4}
+                    >
+                        <NumberInputRoot
+                            isMobile={isMobile}
+                            min={0}
+                            max={999999999}
+                            step={0.1}
+                            onChange={_handleSetRepayAmount}
+                            defaultValue='0'
+                            targetValue={repayAmount}
+                            customStep={0.1}
+                        >
+                            <NumberInputField 
+                                h="48px" 
+                                bg="transparent"
+                                border="none"
+                                color="white"
+                                fontSize="xl"
+                                fontWeight="bold"
+                                placeholder="0.00"
+                                _placeholder={{ color: "#666" }}
+                                _focus={{ outline: "none" }}
+                            />
+                        </NumberInputRoot>
+                        <Text color="#666" fontSize="xs" mt={3} fontStyle="italic">
+                            Enter 0 to repay full loan
+                        </Text>
                     </Box>
-                </HStack>
-                <VStack border="1px solid #4ade80" borderRadius="md" p={3} mt={5} spacing={2} w="80%" alignItems="flex-start">
-                <Box>
-                    <Text color="#4ade80" fontSize="sm">Repaying:</Text>
                 </Box>
-                <Box>
-                    <Text color="#f3f7c6" ml={2} fontSize="sm">{repayAmount == 0 ? commify(formatEther(`${loanAmount}`), 4) : commify(`${repayAmount}`)} {isLoading ? <Spinner size="sm" /> : "WMON"}</Text>
-                </Box>                
-                <Box>
-                    <Text color="#4ade80" fontSize="sm">Withdrawing:</Text>
+
+                {/* Preview Section */}
+                <Box 
+                    bg="rgba(239, 68, 68, 0.05)"
+                    border="1px solid rgba(239, 68, 68, 0.2)"
+                    borderRadius="lg"
+                    p={4}
+                >
+                    <Text color="#ef4444" fontSize="xs" fontWeight="600" mb={3}>
+                        TRANSACTION PREVIEW
+                    </Text>
+                    <VStack align="stretch" spacing={3}>
+                        <Box>
+                            <HStack justify="space-between" mb={1}>
+                                <Text color="#888" fontSize="sm">Repaying</Text>
+                                <HStack>
+                                    <Text color="white" fontSize="sm" fontWeight="bold">
+                                        {repayAmount == 0 ? commify(formatEther(`${loanAmount}`), 4) : commify(`${repayAmount}`)}
+                                    </Text>
+                                    <Text color="#888" fontSize="sm">
+                                        {isLoading ? <Spinner size="sm" /> : "WMON"}
+                                    </Text>
+                                </HStack>
+                            </HStack>
+                        </Box>
+                        <Box borderTop="1px solid rgba(255, 255, 255, 0.05)" pt={3}>
+                            <HStack justify="space-between">
+                                <Text color="#888" fontSize="sm">Collateral to Withdraw</Text>
+                                <HStack>
+                                    <Text color="#4ade80" fontSize="sm" fontWeight="bold">
+                                        {commify(collateral)}
+                                    </Text>
+                                    <Text color="#888" fontSize="sm">
+                                        {isLoading ? <Spinner size="sm" /> : token0Symbol}
+                                    </Text>
+                                </HStack>
+                            </HStack>
+                        </Box>
+                    </VStack>
                 </Box>
-                <Box>
-                    <Text color="#f3f7c6" ml={2} fontSize="sm">{commify(collateral)} {isLoading ? <Spinner size="sm" /> : token0Symbol}</Text>
-                </Box>
-                </VStack>
-                {/* <HStack>
-                    <Box>Loan Fees:</Box>
-                    <Box><Text color="white">{commifyDecimals(rollLoanAmount * 0.00027 * getDaysLeft(`${loanData?.expires}`), 4)} {isTokenInfoLoading ? <Spinner size="sm" />: token1Info.tokenSymbol}</Text></Box>
-                </HStack> */}
-            </Box>  
-            <Box mt={10}>
-            <DrawerActionTrigger asChild>
-                    <Button variant="outline"  w="120px" onClick={() => setIsRepaying(false)}>
-                        Cancel
+
+                {/* Action Buttons */}
+                <HStack spacing={3} pt={4}>
+                    <DrawerActionTrigger asChild>
+                        <Button 
+                            variant="outline"
+                            flex="1"
+                            h="48px"
+                            onClick={() => setIsRepaying(false)}
+                            bg="transparent"
+                            borderColor="rgba(255, 255, 255, 0.2)"
+                            color="white"
+                            _hover={{ 
+                                bg: "rgba(255, 255, 255, 0.05)",
+                                borderColor: "rgba(255, 255, 255, 0.3)"
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                    </DrawerActionTrigger>
+                    <Button 
+                        flex="1"
+                        h="48px"
+                        onClick={handleClickRepayAmount}
+                        bg="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+                        color="white"
+                        fontWeight="bold"
+                        _hover={{ 
+                            bg: "linear-gradient(135deg, #f87171 0%, #b91c1c 100%)",
+                            transform: "translateY(-1px)",
+                            boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)"
+                        }}
+                        _active={{
+                            transform: "translateY(0)"
+                        }}
+                    >
+                        {isRepaying ? <Spinner size="sm" /> : "Repay Loan"}
                     </Button>
-                </DrawerActionTrigger>
-                <Button colorScheme="blue" onClick={handleClickRepayAmount} w="120px" ml={2}>
-                     {isRepaying ? <Spinner size="sm" /> : "Confirm"} 
-                </Button>                                
-            </Box>                                
+                </HStack>
+            </VStack>                                
             </DrawerBody>
             </Box>
             {/* <DrawerFooter>
