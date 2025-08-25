@@ -1414,7 +1414,7 @@ const Borrow = () => {
                                             {getPaginatedData(loanHistory, currentPage, itemsPerPage).map((loan) => (
                                                 <Grid
                                                     key={loan.id}
-                                                    templateColumns="auto auto 1fr auto auto"
+                                                    templateColumns="90px auto 1fr auto auto"
                                                     gap="8px"
                                                     alignItems="center"
                                                     p="4px 8px"
@@ -1425,17 +1425,19 @@ const Borrow = () => {
                                                     fontSize="sm"
                                                 >
                                                     {/* Badge */}
-                                                    <Badge
-                                                        colorPalette={
-                                                            loan.type === "borrow" ? "blue" : 
-                                                            loan.type === "repay" ? "green" : 
-                                                            loan.type === "add_collateral" ? "orange" :
-                                                            "purple"
-                                                        }
-                                                        size="sm"
-                                                    >
-                                                        {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
-                                                    </Badge>
+                                                    <Box>
+                                                        <Badge
+                                                            colorPalette={
+                                                                loan.type === "borrow" ? "blue" : 
+                                                                loan.type === "repay" ? "green" : 
+                                                                loan.type === "add_collateral" ? "orange" :
+                                                                "purple"
+                                                            }
+                                                            size="sm"
+                                                        >
+                                                            {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
+                                                        </Badge>
+                                                    </Box>
                                                     
                                                     {/* Amount */}
                                                     <Text color="white" fontWeight="bold">
