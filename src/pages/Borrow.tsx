@@ -944,13 +944,13 @@ const Borrow = () => {
                             <Box 
                                 bg="rgba(26, 26, 26, 0.8)" 
                                 borderRadius="lg" 
-                                p={5}
+                                p={{ base: 4, md: 5 }}
                                 backdropFilter="blur(10px)"
                                 border="1px solid rgba(74, 222, 128, 0.1)"
                                 boxShadow="0 4px 12px rgba(0, 0, 0, 0.2)"
                             >
                                 <HStack mb={4} align="center">
-                                    <Text fontSize="lg" fontWeight="bold" color="white">
+                                    <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color="white">
                                         Vault Information
                                     </Text>
                                 </HStack>
@@ -988,7 +988,7 @@ const Borrow = () => {
                                         </HStack>
                                     </Box>
                                     
-                                    <SimpleGrid columns={2} gap={3}>
+                                    <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
                                         <Box 
                                             p={3} 
                                             bg="rgba(255, 255, 255, 0.02)"
@@ -1055,8 +1055,8 @@ const Borrow = () => {
                         {/* Middle - Main Content */}
                         <Box flex={isMobile ? "1" : "2"} w={isMobile ? "100%" : "auto"}>
                             {/* New Loan Form */}
-                            <Box bg="#1a1a1a" borderRadius="lg" p={6}>
-                                <Text fontSize="xl" fontWeight="bold" color="white" mb={4}>
+                            <Box bg="#1a1a1a" borderRadius="lg" p={{ base: 4, md: 6 }}>
+                                <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="white" mb={4}>
                                     New Loan
                                 </Text>
                                 
@@ -1066,8 +1066,8 @@ const Borrow = () => {
                                         <Text color="#888" fontSize="sm">Manage your existing loan below or repay it to create a new one.</Text>
                                     </Box>
                                 ) : (
-                                    <VStack gap={4} align="stretch">
-                                        <SimpleGrid columns={2} gap={4}>
+                                    <VStack gap={{ base: 3, md: 4 }} align="stretch">
+                                        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
                                             <Box>
                                                 <Text fontSize="sm" color="#888" mb={2}>Borrow Amount</Text>
                                                 <HStack>
@@ -1173,7 +1173,7 @@ const Borrow = () => {
                                         </SimpleGrid>
                                         
                                         <Box bg="#2a2a2a" p={4} borderRadius="md">
-                                            <SimpleGrid columns={2} gap={4}>
+                                            <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
                                                 <Box>
                                                     <Text fontSize="xs" color="#888" mb={1}>Collateral Required</Text>
                                                     {isComputing ? (
@@ -1246,8 +1246,8 @@ const Borrow = () => {
                                     bg="rgba(26, 26, 26, 0.6)" 
                                     border="1px solid rgba(74, 222, 128, 0.2)"
                                     borderRadius="xl" 
-                                    p={8} 
-                                    mt={6}
+                                    p={{ base: 4, md: 8 }} 
+                                    mt={{ base: 4, md: 6 }}
                                     position="relative"
                                     overflow="hidden"
                                 >
@@ -1265,7 +1265,7 @@ const Borrow = () => {
                                     />
                                     
                                     <HStack justify="space-between" align="center" mb={6}>
-                                        <Text fontSize="xl" fontWeight="bold" color="white" letterSpacing="-0.02em">
+                                        <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="white" letterSpacing="-0.02em">
                                             Active Loan
                                         </Text>
                                         <Badge 
@@ -1278,7 +1278,7 @@ const Borrow = () => {
                                         </Badge>
                                     </HStack>
                                     
-                                    <SimpleGrid columns={2} gap={6} mb={6}>
+                                    <SimpleGrid columns={{ base: 1, md: 2 }} gap={{ base: 4, md: 6 }} mb={6}>
                                         <Box 
                                             bg="rgba(0, 0, 0, 0.3)" 
                                             p={4} 
@@ -1427,8 +1427,8 @@ const Borrow = () => {
                                         >
                                             Quick Actions
                                         </Text>
-                                        <HStack gap={3} w="100%">
-                                            <Box flex="3">
+                                        <SimpleGrid columns={{ base: 1, md: 3 }} gap={3} w="100%">
+                                            <Box>
                                                 <LoanAddCollateral
                                                 size="lg"
                                                 token0Symbol={token0Info.tokenSymbol}
@@ -1446,7 +1446,7 @@ const Borrow = () => {
                                                 token0Balance={token0Info?.balance}
                                                 />
                                             </Box>
-                                            <Box flex="3">
+                                            <Box>
                                                 <LoanRepay
                                                 size="lg"
                                                 fullCollateral={loanData?.collateralAmount}
@@ -1463,7 +1463,7 @@ const Borrow = () => {
                                                 isLoading={isTokenInfoLoading}
                                                 />
                                             </Box>
-                                            <Box flex="3">
+                                            <Box>
                                                 <LoanRoll
                                                 size="lg"
                                                 isRolling={isRolling}
@@ -1480,7 +1480,7 @@ const Borrow = () => {
                                                 calculateExpiryDate={calculateExpiryDate}
                                                 />
                                             </Box>
-                                        </HStack>
+                                        </SimpleGrid>
                                     </Box>
                                 </Box>
                             )}
@@ -1497,6 +1497,18 @@ const Borrow = () => {
                         )}
                     </Flex>
                     
+                    {/* Mobile Wallet Sidebar */}
+                    {isMobile && isConnected && (
+                        <Flex px={2} pb={4}>
+                            <WalletSidebar 
+                                ethBalance={ethBalance}
+                                token0Info={token0Info}
+                                token1Info={token1Info}
+                                address={address}
+                            />
+                        </Flex>
+                    )}
+                    
                     {/* Loan History Section */}
                     <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4}>
                         {!isMobile && <Box w="350px" />}
@@ -1504,9 +1516,9 @@ const Borrow = () => {
                             flex="1"
                             maxW={isMobile ? "100%" : "calc(100% - 350px - 300px - 32px)"}
                         >
-                        <Box bg="#1a1a1a" borderRadius="lg" p={6}>
-                                <Flex justify="space-between" align="center" mb={4}>
-                                    <Text fontSize="lg" fontWeight="bold" color="white">
+                        <Box bg="#1a1a1a" borderRadius="lg" p={{ base: 4, md: 6 }}>
+                                <Flex justify="space-between" align="center" mb={4} flexWrap="wrap" gap={2}>
+                                    <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color="white">
                                         Loan History
                                     </Text>
                                     {console.log("Rendering loan history, length:", loanHistory.length)}
@@ -1529,10 +1541,10 @@ const Borrow = () => {
                                             {getPaginatedData(loanHistory, currentPage, itemsPerPage).map((loan, index) => (
                                                 <SimpleGrid 
                                                     key={loan.id} 
-                                                    p="12px 16px" 
-                                                    columns={5} 
+                                                    p={{ base: "10px 12px", md: "12px 16px" }} 
+                                                    columns={{ base: 2, md: 5 }} 
                                                     w="100%" 
-                                                    fontSize="sm" 
+                                                    fontSize={{ base: "xs", md: "sm" }} 
                                                     bg="transparent"
                                                     position="relative"
                                                     cursor="pointer"
@@ -1584,19 +1596,20 @@ const Borrow = () => {
                                                         {loan.type === "add_collateral" && `${loan.amount.toFixed(4)} ${token0Info?.tokenSymbol || "TOKEN"}`}
                                                     </Text>
                                                     
-                                                    {/* Details (or spacer) */}
-                                                    <Text color="#666" fontSize="xs">
+                                                    {/* Details (or spacer) - hide on mobile */}
+                                                    <Text color="#666" fontSize="xs" display={{ base: "none", md: "block" }}>
                                                         {loan.type === "borrow" && `${loan.duration || 0}d • ${loan.collateral?.toFixed(2) || "0"} ${token0Info?.tokenSymbol || "TOKEN"}`}
                                                         {loan.type === "repay" && `Fully repaid`}
                                                         {loan.type === "roll" && `Extended to ${loan.duration || 0}d`}
                                                         {loan.type === "add_collateral" && `Added collateral`}
                                                     </Text>
                                                     
-                                                    {/* Transaction Hash */}
+                                                    {/* Transaction Hash - hide on mobile */}
                                                     <Text 
                                                         color="#4ade80" 
                                                         fontSize="xs"
                                                         cursor="pointer"
+                                                        display={{ base: "none", md: "block" }}
                                                         _hover={{ textDecoration: "underline" }}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -1609,8 +1622,8 @@ const Borrow = () => {
                                                         {loan.shortTxHash}
                                                     </Text>
                                                     
-                                                    {/* Time */}
-                                                    <Text color="#888" fontSize="xs" textAlign="right" minW="25px">
+                                                    {/* Time - always visible */}
+                                                    <Text color="#888" fontSize="xs" textAlign={{ base: "left", md: "right" }} minW="25px">
                                                         {Math.floor((Date.now() - loan.time.getTime()) / 60000) < 60
                                                             ? `${Math.floor((Date.now() - loan.time.getTime()) / 60000)}m`
                                                             : Math.floor((Date.now() - loan.time.getTime()) / 3600000) < 24
