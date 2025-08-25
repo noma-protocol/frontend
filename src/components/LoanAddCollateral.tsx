@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {  VStack, HStack, Box, Button, Spinner, Text } from "@chakra-ui/react";
+import {  VStack, HStack, Box, Button, Spinner, Text, Flex, Grid } from "@chakra-ui/react";
 import { formatNumberPrecise, commifyDecimals, commify } from '../utils';
 import { formatEther, parseEther } from "viem";
 
@@ -50,7 +50,7 @@ const LoanAddCollateral = ({
         handleSetExtraCollateral(value);
     }
 
-    const displayCollateral = extraCollateral >= 1000000 ? formatNumberPrecise(extraCollateral, 5) : commify(extraCollateral, 4);
+    const displayCollateral = extraCollateral ? (extraCollateral >= 1000000 ? formatNumberPrecise(extraCollateral, 5) : commify(extraCollateral, 4)) : "0";
 
     const handleUseMax = () => {
         if (token0Balance) {
@@ -135,23 +135,26 @@ const LoanAddCollateral = ({
                         </DrawerCloseTrigger>
                     </HStack>
                 </DrawerHeader>
-                <DrawerBody p={6}>
-                    {/* <Input
-                        placeholder="Amount to roll"
-                        // onChange={(e) => setWrapAmount(e.target.value)}
-                        w="80%"
-                    /> */}        
+                <DrawerBody p={6}>     
                 <VStack spacing={6} align="stretch">
                     {/* Amount Input Section */}
                     <Box>
-                        <Text color="#888" fontSize="sm" mb={3} fontWeight="600">
-                            COLLATERAL AMOUNT
+                        <Text 
+                            color="#666" 
+                            fontSize="xs" 
+                            mb={3} 
+                            fontWeight="600" 
+                            letterSpacing="0.1em"
+                            textTransform="uppercase"
+                        >
+                            Collateral Amount
                         </Text>
                         <Box 
-                            bg="rgba(255, 255, 255, 0.02)"
-                            borderRadius="lg"
+                            bg="rgba(0, 0, 0, 0.3)"
+                            borderRadius="12px"
                             border="1px solid rgba(255, 255, 255, 0.1)"
                             p={4}
+                            pb={3}
                         >
                             <NumberInputRoot
                                 isMobile={isMobile}
@@ -168,63 +171,80 @@ const LoanAddCollateral = ({
                                     bg="transparent"
                                     border="none"
                                     color="white"
-                                    fontSize="xl"
-                                    fontWeight="bold"
-                                    _placeholder={{ color: "#666" }}
+                                    fontSize="3xl"
+                                    fontWeight="600"
+                                    textAlign="center"
+                                    placeholder="0"
+                                    _placeholder={{ color: "#444" }}
                                     _focus={{ outline: "none" }}
+                                    p={0}
                                 />
                             </NumberInputRoot>
-                            <HStack justify="space-between" mt={3}>
-                                <Text color="#666" fontSize="sm">
-                                    Balance: {token0Balance ? formatEther(token0Balance).slice(0, 10) : "0"} {token0Symbol}
-                                </Text>
-                                <Text 
-                                    color="#4ade80" 
-                                    fontSize="sm" 
-                                    cursor="pointer" 
+                            
+                            <Grid templateColumns="1fr auto auto" gap={2} mt={3} alignItems="center">
+                                <Flex gap={1} align="center">
+                                    <Text color="#666" fontSize="xs">Balance:</Text>
+                                    <Text color="#999" fontSize="xs">
+                                        {token0Balance ? commify(formatEther(token0Balance), 3) : "0"}
+                                    </Text>
+                                </Flex>
+                                <Text color="#666" fontSize="xs">{token0Symbol}</Text>
+                                <Button
+                                    size="xs"
+                                    variant="unstyled"
+                                    color="#4ade80"
                                     onClick={handleUseMax}
-                                    _hover={{ textDecoration: "underline" }}
+                                    fontSize="xs"
                                     fontWeight="600"
+                                    _hover={{ color: "#3fd873" }}
+                                    h="auto"
+                                    minW="auto"
+                                    p={0}
                                 >
                                     Use Max
-                                </Text>
-                            </HStack>
+                                </Button>
+                            </Grid>
                         </Box>
                     </Box>
 
                     {/* Preview Section */}
                     <Box 
-                        bg="rgba(74, 222, 128, 0.05)"
-                        border="1px solid rgba(74, 222, 128, 0.2)"
-                        borderRadius="lg"
+                        bg="transparent"
+                        border="1px solid rgba(74, 222, 128, 0.3)"
+                        borderRadius="12px"
                         p={4}
                     >
-                        <Text color="#4ade80" fontSize="xs" fontWeight="600" mb={3}>
-                            TRANSACTION PREVIEW
+                        <Text 
+                            color="#4ade80" 
+                            fontSize="xs" 
+                            fontWeight="600" 
+                            mb={4} 
+                            letterSpacing="0.1em"
+                            textTransform="uppercase"
+                        >
+                            Transaction Preview
                         </Text>
-                        <VStack align="stretch" spacing={2}>
-                            <HStack justify="space-between">
-                                <Text color="#888" fontSize="sm">You're Adding</Text>
-                                <HStack>
-                                    <Text color="white" fontSize="sm" fontWeight="bold">
-                                        {displayCollateral}
-                                    </Text>
-                                    <Text color="#888" fontSize="sm">
-                                        {isLoading ? <Spinner size="sm" /> : token0Symbol}
-                                    </Text>
-                                </HStack>
-                            </HStack>
-                            <HStack justify="space-between">
-                                <Text color="#888" fontSize="sm">New LTV</Text>
-                                <Text color="#4ade80" fontSize="sm" fontWeight="bold">
-                                    {ltv ? `${((ltv + parseFloat(extraCollateral || 0)) * 100).toFixed(2)}%` : "N/A"}
+                        <VStack align="stretch" spacing={3}>
+                            <Flex justify="space-between" align="center">
+                                <Text color="#666" fontSize="sm">You're Adding</Text>
+                                <Text color="white" fontSize="sm">
+                                    <Text as="span" fontWeight="600">{displayCollateral}</Text>
+                                    {" "}
+                                    <Text as="span" color="#666">{token0Symbol}</Text>
                                 </Text>
-                            </HStack>
+                            </Flex>
+                            
+                            <Flex justify="space-between" align="center">
+                                <Text color="#666" fontSize="sm">New LTV</Text>
+                                <Text color="#4ade80" fontSize="lg" fontWeight="600">
+                                    {ltv ? `${(ltv * 100).toFixed(2)}%` : "100.00%"}
+                                </Text>
+                            </Flex>
                         </VStack>
                     </Box>
 
                     {/* Action Buttons */}
-                    <HStack spacing={3} pt={4}>
+                    <HStack spacing={3} mt="auto">
                         <DrawerActionTrigger asChild>
                             <Button 
                                 variant="outline"
@@ -234,6 +254,8 @@ const LoanAddCollateral = ({
                                 bg="transparent"
                                 borderColor="rgba(255, 255, 255, 0.2)"
                                 color="white"
+                                fontSize="sm"
+                                fontWeight="500"
                                 _hover={{ 
                                     bg: "rgba(255, 255, 255, 0.05)",
                                     borderColor: "rgba(255, 255, 255, 0.3)"
@@ -246,16 +268,15 @@ const LoanAddCollateral = ({
                             flex="1"
                             h="48px"
                             onClick={handleClickAdd}
-                            bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
+                            bg="#4ade80"
                             color="black"
-                            fontWeight="bold"
+                            fontSize="sm"
+                            fontWeight="600"
                             _hover={{ 
-                                bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
-                                transform: "translateY(-1px)",
-                                boxShadow: "0 4px 12px rgba(74, 222, 128, 0.3)"
+                                bg: "#3fd873"
                             }}
                             _active={{
-                                transform: "translateY(0)"
+                                bg: "#22c55e"
                             }}
                             isDisabled={!extraCollateral || parseFloat(extraCollateral) <= 0}
                         >
@@ -265,8 +286,6 @@ const LoanAddCollateral = ({
                 </VStack>                                
                 </DrawerBody>
                 </Box>
-                {/* <DrawerFooter>
-                </DrawerFooter> */}
             </DrawerContent>
             </DrawerRoot>
         </Box>

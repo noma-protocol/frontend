@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HStack, Box, Button, Spinner, Text, VStack } from "@chakra-ui/react";
+import { HStack, Box, Button, Spinner, Text, VStack, Flex } from "@chakra-ui/react";
 import { commifyDecimals } from '../utils';
 
 import {
@@ -122,18 +122,18 @@ const LoanRoll = ({
                             p={4}
                         >
                             <VStack align="stretch" spacing={3}>
-                                <HStack justify="space-between">
+                                <Flex justify="space-between" align="center">
                                     <Text color="#888" fontSize="sm">New Duration</Text>
                                     <Text color="white" fontSize="sm" fontWeight="bold">
                                         {duration / 86400} days
                                     </Text>
-                                </HStack>
-                                <HStack justify="space-between">
+                                </Flex>
+                                <Flex justify="space-between" align="center">
                                     <Text color="#888" fontSize="sm">New Expiry Date</Text>
                                     <Text color="white" fontSize="sm" fontWeight="bold">
                                         {calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}
                                     </Text>
-                                </HStack>
+                                </Flex>
                             </VStack>
                         </Box>
                     </Box>
@@ -149,29 +149,29 @@ const LoanRoll = ({
                             TRANSACTION PREVIEW
                         </Text>
                         <VStack align="stretch" spacing={3}>
-                            <HStack justify="space-between">
+                            <Flex justify="space-between" align="center">
                                 <Text color="#888" fontSize="sm">Loan Amount</Text>
-                                <HStack>
+                                <Flex align="center" gap={3}>
                                     <Text color="white" fontSize="sm" fontWeight="bold">
                                         {commifyDecimals(rollLoanAmount, 4)}
                                     </Text>
-                                    <Text color="#888" fontSize="sm">
+                                    <Text color="#888" fontSize="sm" ml="auto">
                                         {isTokenInfoLoading ? <Spinner size="sm" />: token1Info?.tokenSymbol}
                                     </Text>
-                                </HStack>
-                            </HStack>
+                                </Flex>
+                            </Flex>
                             <Box borderTop="1px solid rgba(255, 255, 255, 0.05)" pt={3}>
-                                <HStack justify="space-between">
+                                <Flex justify="space-between" align="center">
                                     <Text color="#888" fontSize="sm">Extension Fee</Text>
-                                    <HStack>
+                                    <Flex align="center" gap={3}>
                                         <Text color="#8a2be2" fontSize="sm" fontWeight="bold">
                                             {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}
                                         </Text>
-                                        <Text color="#888" fontSize="sm">
+                                        <Text color="#888" fontSize="sm" ml="auto">
                                             {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info?.tokenSymbol}
                                         </Text>
-                                    </HStack>
-                                </HStack>
+                                    </Flex>
+                                </Flex>
                             </Box>
                         </VStack>
                     </Box>
