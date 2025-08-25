@@ -162,10 +162,14 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         justifyContent="space-between" 
                         alignItems="center"
                     >
-                        <Text color="#888" fontSize="sm" fontWeight="600">Total Value</Text>
-                        <Text color="#4ade80" fontWeight="bold" fontSize="lg">
-                            ${commify(totalValue, 2)}
-                        </Text>
+                        <HStack>
+                            <Box><Text color="#888" fontSize="sm" fontWeight="600">Total Value</Text></Box>
+                            <Box ml={5}>
+                            <Text color="#4ade80" fontWeight="bold" fontSize="lg">
+                                ${commify(totalValue, 2)}
+                            </Text>                                
+                            </Box>
+                        </HStack>
                     </Flex>
                 </VStack>
             </Box>

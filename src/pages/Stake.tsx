@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Image, Flex, Container, Heading, HStack, Box, Button, Spinner, Text, SimpleGrid, VStack, Grid, Link, Badge } from "@chakra-ui/react";
+import { Input, Image, Flex, Container, Heading, HStack, Box, Button, Spinner, Text, SimpleGrid, GridItem, VStack, Grid, Link, Badge } from "@chakra-ui/react";
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
@@ -823,75 +823,73 @@ const Stake = () => {
                                     {stakeHistory
                                         .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
                                         .map((item, index) => (
-                                        <Grid
-                                            key={item.id}
-                                            templateColumns="90px auto 1fr auto auto"
-                                            gap="8px"
-                                            alignItems="center"
-                                            p="4px 8px"
-                                            bg="#2a2a2a"
-                                            borderRadius="md"
-                                            cursor="pointer"
-                                            _hover={{ bg: "#333" }}
-                                            fontSize="sm"
-                                        >
-                                            {/* Badge */}
-                                            <Box>
-                                                <Badge
-                                                    colorPalette={item.type === 'stake' ? 'green' : 'red'}
-                                                    size="sm"
-                                                >
-                                                    {item.type.toUpperCase()}
-                                                </Badge>
-                                            </Box>
-                                            
-                                            {/* Amount */}
-                                            <Box>
-                                                <Text color="white" fontWeight="bold">
-                                                    {item.type === 'stake' ? 
-                                                        `${commify(item.amount, 4)} ${item.token}` :
-                                                        `${commify(item.originalAmount || item.amount, 4)} ${item.token}`
-                                                    }
-                                                </Text>
-                                                {item.type === 'unstake' && item.rewards && parseFloat(item.rewards) > 0 && (
-                                                    <Text color="#4ade80" fontSize="xs">
-                                                        +{item.rewards} rewards
-                                                    </Text>
-                                                )}
-                                            </Box>
-                                            
-                                            {/* Details */}
-                                            <Text color="#666" fontSize="xs">
-                                                {item.type === 'stake' ? 'Staked' : 'Unstaked (total: ' + commify(item.amount, 4) + ')'}
-                                            </Text>
-                                            
-                                            {/* Transaction Hash */}
-                                            <Text 
-                                                color="#4ade80" 
-                                                fontSize="xs"
-                                                cursor="pointer"
-                                                _hover={{ textDecoration: "underline" }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const explorerUrl = config.chain === "monad" 
-                                                        ? `https://monadexplorer.com/tx/${item.txHash}`
-                                                        : `https://etherscan.io/tx/${item.txHash}`;
-                                                    window.open(explorerUrl, "_blank");
-                                                }}
+                                    <SimpleGrid columns={{ base: 3, md: 4 }} gap={{ base: "24px", md: "40px" }}>
+                                        <GridItem colSpan={{ base: 1, md: 1 }}>
+                                            <Badge
+                                                colorPalette={item.type === 'stake' ? 'green' : 'red'}
+                                                size="sm"
                                             >
-                                                {item.txHash.slice(0, 6)}...
-                                            </Text>
-                                            
-                                            {/* Time */}
-                                            <Text color="#888" fontSize="xs" textAlign="right" minW="25px">
-                                                {Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 60000) < 60
-                                                    ? `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 60000)}m`
-                                                    : Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 3600000) < 24
-                                                    ? `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 3600000)}h`
-                                                    : `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 86400000)}d`
-                                                }
-                                            </Text>
-                                        </Grid>
+                                                {item.type.toUpperCase()}
+                                            </Badge>
+                                        </GridItem>
+                                        <GridItem colSpan={{ base: 1, md: 2 }}>
+                                            <HStack>
+                                                <Box>
+                                                    <Text color="white" fontWeight="bold">
+                                                        {item.type === 'stake' ? 
+                                                            `${commify(item.amount, 4)} ${item.token}` :
+                                                            `${commify(item.originalAmount || item.amount, 4)} ${item.token}`
+                                                        }   
+                                                    </Text>                                                     
+                                                </Box>
+                                                <Box >
+                                                    <Text color="#666" fontSize="xs">
+                                                        {item.type === 'stake' ? 'Staked' : 'Unstaked (total: ' + commify(item.amount, 4) + ')'}
+                                                    </Text>                                                        
+                                                </Box>
+                                                <Box>
+                                                    {item.type === 'unstake' && item.rewards && parseFloat(item.rewards) > 0 && (
+                                                        <Text color="#4ade80" fontSize="xs">
+                                                            +{item.rewards} rewards
+                                                        </Text>
+                                                    )}
+                                                </Box>
+                                            </HStack>
+
+                                        </GridItem>
+                                        <GridItem colSpan={{ base: 1, md: 1 }}>
+                                            <HStack>
+                                                <Box>
+                                                    <Text 
+                                                        color="#4ade80" 
+                                                        fontSize="xs"
+                                                        cursor="pointer"
+                                                        _hover={{ textDecoration: "underline" }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const explorerUrl = config.chain === "monad" 
+                                                                ? `https://monadexplorer.com/tx/${item.txHash}`
+                                                                : `https://etherscan.io/tx/${item.txHash}`;
+                                                            window.open(explorerUrl, "_blank");
+                                                        }}
+                                                    >
+                                                        {item.txHash.slice(0, 6)}...
+                                                    </Text>
+                                                </Box>
+                                                <Box pl="50%">
+                                                    <Text color="#888" fontSize="xs" textAlign="right" minW="25px" mt={-10}>
+                                                        {Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 60000) < 60
+                                                            ? `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 60000)}m`
+                                                            : Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 3600000) < 24
+                                                            ? `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 3600000)}h`
+                                                            : `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 86400000)}d`
+                                                        }
+                                                    </Text>
+                                                </Box>
+                                            </HStack>
+
+                                        </GridItem>                                            
+                                    </SimpleGrid>
                                     ))}
                                 </VStack>
                                 

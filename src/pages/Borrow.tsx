@@ -1405,33 +1405,35 @@ const Borrow = () => {
                                     <>
                                         <VStack align="stretch" spacing="2px">
                                             {getPaginatedData(loanHistory, currentPage, itemsPerPage).map((loan) => (
-                                                <Grid
-                                                    key={loan.id}
-                                                    templateColumns="90px auto 1fr auto auto"
-                                                    gap="8px"
-                                                    alignItems="center"
-                                                    p="4px 8px"
-                                                    bg="#2a2a2a"
-                                                    borderRadius="md"
-                                                    cursor="pointer"
-                                                    _hover={{ bg: "#333" }}
-                                                    fontSize="sm"
-                                                >
+                                                // <Grid
+                                                //     key={loan.id}
+                                                //     templateColumns="90px auto 1fr auto auto"
+                                                //     gap="8px"
+                                                //     alignItems="center"
+                                                //     p="4px 8px"
+                                                //     bg="#2a2a2a"
+                                                //     borderRadius="md"
+                                                //     cursor="pointer"
+                                                //     _hover={{ bg: "#333" }}
+                                                //     fontSize="sm"
+                                                // >
+                                                <SimpleGrid _hover={{ bg: "#333" }} key={loan.id} p="4px 8px" columns={5} w="100%" mt={-5} fontSize={"sm"} borderRadius="md"  bg="#2a2a2a">
                                                     {/* Badge */}
-                                                    <Box>
-                                                        <Badge
-                                                            colorPalette={
-                                                                loan.type === "borrow" ? "blue" : 
-                                                                loan.type === "repay" ? "green" : 
-                                                                loan.type === "add_collateral" ? "orange" :
-                                                                "purple"
-                                                            }
-                                                            size="sm"
-                                                        >
-                                                            {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
-                                                        </Badge>
-                                                    </Box>
-                                                    
+                                                    <GridItem>
+                                                        <Box mt={6} ml={2}>
+                                                            <Badge
+                                                                colorPalette={
+                                                                    loan.type === "borrow" ? "blue" : 
+                                                                    loan.type === "repay" ? "green" : 
+                                                                    loan.type === "add_collateral" ? "orange" :
+                                                                    "purple"
+                                                                }
+                                                                size="sm"
+                                                            >
+                                                                {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
+                                                            </Badge>
+                                                        </Box>
+                                                    </GridItem>
                                                     {/* Amount */}
                                                     <Text color="white" fontWeight="bold">
                                                         {loan.type === "borrow" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
@@ -1474,7 +1476,7 @@ const Borrow = () => {
                                                             : `${Math.floor((Date.now() - loan.time.getTime()) / 86400000)}d`
                                                         }
                                                     </Text>
-                                                </Grid>
+                                                </SimpleGrid>
                                             ))}
                                         </VStack>
                                         
