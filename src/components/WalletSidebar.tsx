@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Text, VStack, HStack, Flex, Image } from "@chakra-ui/react";
 import { formatEther } from 'viem';
+import { commify } from '../utils';
 import monadLogo from '../assets/images/monad.png';
 import wmonLogo from '../assets/images/monad.png';
 import placeholderLogoDark from '../assets/images/question_white.svg';
@@ -46,9 +47,13 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
 
         return (
             <Box 
+                display="grid"
+                gridTemplateColumns="24px 50px 1fr 120px"
+                gap="8px"
+                alignItems="start"
                 bg="rgba(255, 255, 255, 0.03)"
-                borderRadius="lg"
-                p={3}
+                borderRadius="md"
+                p="6px 12px"
                 border={`1px solid ${isSelected ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`}
                 transition="all 0.2s"
                 _hover={{
@@ -56,37 +61,42 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                     borderColor: "rgba(255, 255, 255, 0.12)"
                 }}
             >
-                <Flex justifyContent="space-between" alignItems="center">
-                    <HStack>
-                        <Box 
-                            w="32px" 
-                            h="32px"
-                            bg="rgba(74, 222, 128, 0.1)"
-                            borderRadius="full"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            <Image
-                                src={logo}
-                                alt={symbol}
-                                w="20px"
-                                h="20px"
-                            />
-                        </Box>
-                        <Box>
-                            <Text color="white" fontSize="sm" fontWeight="600">{symbol}</Text>
-                        </Box>
-                    </HStack>
-                    <Box textAlign="right">
-                        <Text color="white" fontWeight="bold">
-                            {balanceValue.toFixed(4)}
-                        </Text>
-                        <Text color="#4ade80" fontSize="xs">
-                            ≈ ${usdValue.toFixed(2)}
-                        </Text>
-                    </Box>
-                </Flex>
+                {/* Icon */}
+                <Box 
+                    w="24px" 
+                    h="24px"
+                    bg="rgba(74, 222, 128, 0.1)"
+                    borderRadius="full"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    mb="15px"
+                >
+                    <Image
+                        src={logo}
+                        alt={symbol}
+                        w="16px"
+                        h="16px"
+                    />
+                </Box>
+                
+                {/* Symbol */}
+                <Box mb="15px">
+                    <Text color="white" fontSize="sm" fontWeight="600">{symbol}</Text>
+                </Box>
+                
+                {/* Spacer */}
+                <Box />
+                
+                {/* Amounts */}
+                <Box textAlign="right">
+                    <Text color="white" fontWeight="bold" fontSize="sm" lineHeight="1.2">
+                        {commify(balanceValue, 4)}
+                    </Text>
+                    <Text color="#4ade80" fontSize="xs" lineHeight="1.2">
+                        ≈ ${commify(usdValue, 2)}
+                    </Text>
+                </Box>
             </Box>
         );
     };
@@ -107,10 +117,8 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 border="1px solid rgba(255, 255, 255, 0.1)"
                 boxShadow="0 4px 12px rgba(0, 0, 0, 0.3)"
             >
-                <HStack mb={4} gap={2} align="center">
-                    <Text fontSize="lg" fontWeight="bold" color="white">Wallet</Text>
-                </HStack>
-                <VStack align="stretch" gap={3}>
+                <Text fontSize="lg" fontWeight="bold" color="white" mb={2}>Wallet</Text>
+                <VStack align="stretch" gap="6px">
                     {/* MON Balance */}
                     <TokenBalanceCard 
                         symbol="MON"
@@ -147,22 +155,18 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                     )}
                     
                     {/* Total Portfolio Value */}
-                    <Box 
+                    <Flex 
                         borderTop="1px solid rgba(255, 255, 255, 0.1)" 
-                        pt={3} 
-                        mt={2}
+                        pt={2} 
+                        mt={1}
+                        justifyContent="space-between" 
+                        alignItems="center"
                     >
-                        <Flex justifyContent="space-between" alignItems="center">
-                            <Box>
-                                <Text color="#888" fontSize="sm" fontWeight="600">Total Value</Text>
-                            </Box>
-                            <Box>
-                                <Text color="#4ade80" fontWeight="bold" fontSize="lg">
-                                    ${totalValue.toFixed(2)}
-                                </Text>
-                            </Box>
-                        </Flex>
-                    </Box>
+                        <Text color="#888" fontSize="sm" fontWeight="600">Total Value</Text>
+                        <Text color="#4ade80" fontWeight="bold" fontSize="lg">
+                            ${commify(totalValue, 2)}
+                        </Text>
+                    </Flex>
                 </VStack>
             </Box>
         </Box>

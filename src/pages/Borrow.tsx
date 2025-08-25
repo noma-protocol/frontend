@@ -1410,79 +1410,76 @@ const Borrow = () => {
                                 
                                 {loanHistory.length > 0 ? (
                                     <>
-                                        <VStack gap={2} align="stretch">
+                                        <VStack align="stretch" spacing="2px">
                                             {getPaginatedData(loanHistory, currentPage, itemsPerPage).map((loan) => (
-                                                <Box
+                                                <Grid
                                                     key={loan.id}
-                                                    p={3}
+                                                    templateColumns="auto auto 1fr auto auto"
+                                                    gap="8px"
+                                                    alignItems="center"
+                                                    p="4px 8px"
                                                     bg="#2a2a2a"
                                                     borderRadius="md"
                                                     cursor="pointer"
                                                     _hover={{ bg: "#333" }}
+                                                    fontSize="sm"
                                                 >
-                                                    <Flex alignItems="center" gap={3}>
-                                                        {/* Main action line */}
-                                                        <Box flex="1">
-                                                            <HStack gap={2} flexWrap="wrap">
-                                                                <Badge
-                                                                    colorPalette={
-                                                                        loan.type === "borrow" ? "blue" : 
-                                                                        loan.type === "repay" ? "green" : 
-                                                                        loan.type === "add_collateral" ? "orange" :
-                                                                        "purple"
-                                                                    }
-                                                                    size="sm"
-                                                                >
-                                                                    {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
-                                                                </Badge>
-                                                                <Text color="white" fontWeight="bold" fontSize="sm">
-                                                                    {loan.type === "borrow" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
-                                                                    {loan.type === "repay" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
-                                                                    {loan.type === "roll" && `Extended loan`}
-                                                                    {loan.type === "add_collateral" && `${loan.amount.toFixed(4)} ${token0Info?.tokenSymbol || "TOKEN"}`}
-                                                                </Text>
-                                                            </HStack>
-                                                        </Box>
-                                                        
-                                                        {/* Transaction Hash */}
-                                                        <Text 
-                                                            color="#4ade80" 
-                                                            fontSize="xs"
-                                                            cursor="pointer"
-                                                            _hover={{ textDecoration: "underline" }}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                const explorerUrl = config.chain === "monad" 
-                                                                    ? `https://monadexplorer.com/tx/${loan.txHash}`
-                                                                    : `https://bscscan.com/tx/${loan.txHash}`;
-                                                                window.open(explorerUrl, "_blank");
-                                                            }}
-                                                        >
-                                                            {loan.shortTxHash}
-                                                        </Text>
-                                                        
-                                                        {/* Time */}
-                                                        <Text color="#888" fontSize="xs" minW="60px" textAlign="right">
-                                                            {Math.floor((Date.now() - loan.time.getTime()) / 60000) < 60
-                                                                ? `${Math.floor((Date.now() - loan.time.getTime()) / 60000)}m ago`
-                                                                : Math.floor((Date.now() - loan.time.getTime()) / 3600000) < 24
-                                                                ? `${Math.floor((Date.now() - loan.time.getTime()) / 3600000)}h ago`
-                                                                : `${Math.floor((Date.now() - loan.time.getTime()) / 86400000)}d ago`
-                                                            }
-                                                        </Text>
-                                                    </Flex>
+                                                    {/* Badge */}
+                                                    <Badge
+                                                        colorPalette={
+                                                            loan.type === "borrow" ? "blue" : 
+                                                            loan.type === "repay" ? "green" : 
+                                                            loan.type === "add_collateral" ? "orange" :
+                                                            "purple"
+                                                        }
+                                                        size="sm"
+                                                    >
+                                                        {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
+                                                    </Badge>
                                                     
-                                                    {/* Details line - only show if there are details */}
-                                                    {((loan.type === "borrow" && (loan.duration || loan.collateral)) ||
-                                                      (loan.type === "roll" && loan.duration) ||
-                                                      loan.type === "repay") && (
-                                                        <Text color="#888" fontSize="xs" mt={1} ml={2}>
-                                                            {loan.type === "borrow" && `Duration: ${loan.duration} days • Collateral: ${loan.collateral?.toFixed(4) || "0"} ${token0Info?.tokenSymbol || "TOKEN"}`}
-                                                            {loan.type === "repay" && "Loan fully repaid"}
-                                                            {loan.type === "roll" && `New duration: ${loan.duration || "N/A"} days`}
-                                                        </Text>
-                                                    )}
-                                                </Box>
+                                                    {/* Amount */}
+                                                    <Text color="white" fontWeight="bold">
+                                                        {loan.type === "borrow" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
+                                                        {loan.type === "repay" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
+                                                        {loan.type === "roll" && `Extended loan`}
+                                                        {loan.type === "add_collateral" && `${loan.amount.toFixed(4)} ${token0Info?.tokenSymbol || "TOKEN"}`}
+                                                    </Text>
+                                                    
+                                                    {/* Details (or spacer) */}
+                                                    <Text color="#666" fontSize="xs">
+                                                        {loan.type === "borrow" && `${loan.duration || 0}d • ${loan.collateral?.toFixed(2) || "0"} ${token0Info?.tokenSymbol || "TOKEN"}`}
+                                                        {loan.type === "repay" && `Fully repaid`}
+                                                        {loan.type === "roll" && `Extended to ${loan.duration || 0}d`}
+                                                        {loan.type === "add_collateral" && `Added collateral`}
+                                                    </Text>
+                                                    
+                                                    {/* Transaction Hash */}
+                                                    <Text 
+                                                        color="#4ade80" 
+                                                        fontSize="xs"
+                                                        cursor="pointer"
+                                                        _hover={{ textDecoration: "underline" }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const explorerUrl = config.chain === "monad" 
+                                                                ? `https://monadexplorer.com/tx/${loan.txHash}`
+                                                                : `https://bscscan.com/tx/${loan.txHash}`;
+                                                            window.open(explorerUrl, "_blank");
+                                                        }}
+                                                    >
+                                                        {loan.shortTxHash}
+                                                    </Text>
+                                                    
+                                                    {/* Time */}
+                                                    <Text color="#888" fontSize="xs" textAlign="right" minW="25px">
+                                                        {Math.floor((Date.now() - loan.time.getTime()) / 60000) < 60
+                                                            ? `${Math.floor((Date.now() - loan.time.getTime()) / 60000)}m`
+                                                            : Math.floor((Date.now() - loan.time.getTime()) / 3600000) < 24
+                                                            ? `${Math.floor((Date.now() - loan.time.getTime()) / 3600000)}h`
+                                                            : `${Math.floor((Date.now() - loan.time.getTime()) / 86400000)}d`
+                                                        }
+                                                    </Text>
+                                                </Grid>
                                             ))}
                                         </VStack>
                                         
