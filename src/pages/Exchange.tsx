@@ -2526,38 +2526,40 @@ const Launchpad: React.FC = () => {
                                                 </Text>
                                             </Box>
                                         </HStack>
-                                        <HStack spacing={2}>
-                                            <Box>
-                                                <Text color="#888" fontSize="xs">
-                                                    {selectedToken.symbol}/{token1Symbol}
-                                                </Text>
-                                            </Box>
-                                            <Box>
-                                                <Text color="#888" fontSize="xs">
-                                                    (${commifyDecimals((spotPrice > 0 ? spotPrice : (selectedToken.price || 0)) * (priceUSD || 0), 2)})
-                                                </Text>
-                                            </Box>
-                                            <Box>
-                                                <HStack spacing={1}>
-                                                    <Box>
-                                                        {percentChange > 0 ? (
-                                                            <FaArrowTrendUp color="#4ade80" size={isMobile ? "10" : "12"} />
-                                                        ) : percentChange < 0 ? (
-                                                            <FaArrowTrendDown color="#ef4444" size={isMobile ? "10" : "12"} />
-                                                        ) : null}
-                                                    </Box>
-                                                    <Box>
-                                                        <Text 
-                                                            color={percentChange < 0 ? "#ef4444" : percentChange > 0 ? "#4ade80" : "#888"} 
-                                                            fontSize="xs" 
-                                                            fontWeight="bold"
-                                                        >
-                                                            ({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)
-                                                        </Text>
-                                                    </Box>
-                                                </HStack>
-                                            </Box>
-                                        </HStack>
+                                        <Box maxW="90%">
+                                            <HStack spacing={2} flexWrap="wrap">
+                                                <Box>
+                                                    <Text color="#888" fontSize="xs">
+                                                        {selectedToken.symbol}/{token1Symbol}
+                                                    </Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="xs">
+                                                        (${commifyDecimals((spotPrice > 0 ? spotPrice : (selectedToken.price || 0)) * (priceUSD || 0), 2)})
+                                                    </Text>
+                                                </Box>
+                                                <Box>
+                                                    <HStack spacing={1}>
+                                                        <Box>
+                                                            {percentChange > 0 ? (
+                                                                <FaArrowTrendUp color="#4ade80" size={isMobile ? "10" : "12"} />
+                                                            ) : percentChange < 0 ? (
+                                                                <FaArrowTrendDown color="#ef4444" size={isMobile ? "10" : "12"} />
+                                                            ) : null}
+                                                        </Box>
+                                                        <Box>
+                                                            <Text 
+                                                                color={percentChange < 0 ? "#ef4444" : percentChange > 0 ? "#4ade80" : "#888"} 
+                                                                fontSize="xs" 
+                                                                fontWeight="bold"
+                                                            >
+                                                                ({percentChange > 0 ? "+" : ""}{commifyDecimals(percentChange, 2)}%)
+                                                            </Text>
+                                                        </Box>
+                                                    </HStack>
+                                                </Box>
+                                            </HStack>
+                                        </Box>
                                     </VStack>
                                 </Box>
                                 
