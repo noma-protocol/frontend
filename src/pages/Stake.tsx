@@ -16,6 +16,7 @@ import walletIcon from '../assets/images/walletIcon.svg';
 import placeholderLogo from '../assets/images/question.svg';
 import placeholderLogoDark from '../assets/images/question_white.svg';
 import WalletSidebar from '../components/WalletSidebar';
+import WalletNotConnected from '../components/WalletNotConnected';
 
 import {
     SelectContent,
@@ -402,10 +403,26 @@ const Stake = () => {
                         return prev;
                     }
                     
+                    // For unstake, amount includes principal + rewards
+                    // Try to find the original stake amount to calculate rewards
+                    const totalAmount = parseFloat(formatEther(amount));
+                    let originalStake = 0;
+                    let rewards = 0;
+                    
+                    // Look for stake transactions to estimate the original amount
+                    const stakeTransactions = prev.filter(item => item.type === 'stake');
+                    if (stakeTransactions.length > 0) {
+                        // Sum all stake amounts (simple approach)
+                        originalStake = stakeTransactions.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+                        rewards = totalAmount - originalStake;
+                    }
+                    
                     const newHistoryItem = {
                         id: Date.now(),
                         type: 'unstake',
                         amount: formatEther(amount),
+                        originalAmount: originalStake.toFixed(4),
+                        rewards: rewards > 0 ? rewards.toFixed(4) : "0",
                         token: token0Info?.tokenSymbol || 'OKS',
                         timestamp: new Date().toISOString(),
                         txHash: txHash
@@ -580,15 +597,7 @@ const Stake = () => {
         <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
             <Toaster />
             {!isConnected ? (
-                <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    height="100vh"
-                    color="white"
-                >
-                    <Heading as="h2">Connect your wallet</Heading>
-                </Box>
+                <WalletNotConnected />
             ) : isMobile && isLandscape ? (
                 <RotateDeviceMessage />
             ) : isAddress(vaultAddress) ? (
@@ -837,13 +846,23 @@ const Stake = () => {
                                             </Box>
                                             
                                             {/* Amount */}
-                                            <Text color="white" fontWeight="bold">
-                                                {commify(item.amount, 4)} {item.token}
-                                            </Text>
+                                            <Box>
+                                                <Text color="white" fontWeight="bold">
+                                                    {item.type === 'stake' ? 
+                                                        `${commify(item.amount, 4)} ${item.token}` :
+                                                        `${commify(item.originalAmount || item.amount, 4)} ${item.token}`
+                                                    }
+                                                </Text>
+                                                {item.type === 'unstake' && item.rewards && parseFloat(item.rewards) > 0 && (
+                                                    <Text color="#4ade80" fontSize="xs">
+                                                        +{item.rewards} rewards
+                                                    </Text>
+                                                )}
+                                            </Box>
                                             
                                             {/* Details */}
                                             <Text color="#666" fontSize="xs">
-                                                {item.type === 'stake' ? 'Staked' : 'Unstaked'}
+                                                {item.type === 'stake' ? 'Staked' : 'Unstaked (total: ' + commify(item.amount, 4) + ')'}
                                             </Text>
                                             
                                             {/* Transaction Hash */}

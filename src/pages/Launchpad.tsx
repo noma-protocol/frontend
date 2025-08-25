@@ -24,6 +24,7 @@ import {
     SelectValueText,
   } from "../components/ui/select";
 import { Checkbox } from "../components/ui/checkbox"
+import WalletNotConnected from '../components/WalletNotConnected';
   
 import { useAccount, useBalance, useContractWrite } from "wagmi";
 import { isMobile } from "react-device-detect";
@@ -524,20 +525,7 @@ const Launchpad: React.FC = () => {
             
             <Toaster />
             {!isConnected ? (
-                <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    height="100vh"
-                    color="white"
-                    bg="#0a0a0a"
-                >
-                    <VStack spacing={4}>
-                        <FaRocket size={60} color="#4ade80" />
-                        <Heading as="h2" color="white">Connect your wallet</Heading>
-                        <Text color="#888">To launch your token on the protocol</Text>
-                    </VStack>
-                </Box>
+                <WalletNotConnected />
             ) : (            
             <Box
                 w="100%"

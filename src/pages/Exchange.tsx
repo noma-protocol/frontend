@@ -49,6 +49,7 @@ import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
 import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress } from "../utils";
 import WalletSidebar from "../components/WalletSidebar";
+import WalletNotConnected from '../components/WalletNotConnected';
 import { useToken } from "../contexts/TokenContext";
 
 import Logo from "../assets/images/noma_logo_transparent.png";
@@ -2243,15 +2244,7 @@ const Launchpad: React.FC = () => {
         <Container maxW="100%" p={0} bg="#0a0a0a"> 
             <Toaster />
             {!isConnected ? (
-                <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    height="100vh"
-                    color="white"
-                >
-                    <Heading as="h2">Connect your wallet</Heading>
-                </Box>
+                <WalletNotConnected />
             ) : (
             <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4} minH="calc(100vh - 80px)">
                 {/* Left side - Token List */}

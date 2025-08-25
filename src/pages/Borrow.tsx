@@ -15,6 +15,7 @@ import LoanRepay from '../components/LoanRepay';
 import LoanRoll from '../components/LoanRoll';
 import placeholderLogo from '../assets/images/question.svg';
 import placeholderLogoDark from '../assets/images/question_white.svg';
+import WalletNotConnected from '../components/WalletNotConnected';
 import WalletSidebar from '../components/WalletSidebar';
 
 import {
@@ -940,15 +941,7 @@ const Borrow = () => {
             <Toaster />
 
             {!isConnected ? (
-                <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    height="100vh"
-                    color="white"
-                >
-                    <Heading as="h2">Connect your wallet</Heading>
-                </Box>
+                <WalletNotConnected />
             ) : isMobile && isLandscape ? (
                 <RotateDeviceMessage />
             ) : isAddress(vaultAddress) ? (
