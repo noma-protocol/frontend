@@ -104,21 +104,18 @@ const LoanAddCollateral = ({
                     borderBottom="1px solid rgba(255, 255, 255, 0.1)"
                     p={6}
                 >
-                    <HStack justify="space-between" align="center">
-                        <HStack gap={3}>
-                            <Box 
-                                w="4px" 
-                                h="24px" 
-                                bg="#4ade80" 
-                                borderRadius="full"
-                            />
+                    <HStack justify="space-between" align="start">
+                        <Box>
+                        <HStack gap={1}>
                             <DrawerTitle>
                                 <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
                                     Add Collateral
                                 </Text>
                             </DrawerTitle>
-                        </HStack>
-                        <DrawerCloseTrigger asChild>
+                        </HStack>                            
+                        </Box>
+                    <Box>
+                        <DrawerCloseTrigger asChild >
                             <Button 
                                 variant="ghost" 
                                 size="sm" 
@@ -132,13 +129,15 @@ const LoanAddCollateral = ({
                             >
                                 ×
                             </Button>
-                        </DrawerCloseTrigger>
+                        </DrawerCloseTrigger>                        
+                    </Box>
                     </HStack>
                 </DrawerHeader>
                 <DrawerBody p={6}>     
                 <VStack spacing={6} align="stretch">
                     {/* Amount Input Section */}
                     <Box>
+                        <Box>
                         <Text 
                             color="#666" 
                             fontSize="xs" 
@@ -148,7 +147,10 @@ const LoanAddCollateral = ({
                             textTransform="uppercase"
                         >
                             Collateral Amount
-                        </Text>
+                        </Text>                            
+                        </Box>
+                        <HStack>
+                        <Box>
                         <Box 
                             bg="rgba(0, 0, 0, 0.3)"
                             borderRadius="12px"
@@ -183,10 +185,12 @@ const LoanAddCollateral = ({
                             
                             <Grid templateColumns="1fr auto auto" gap={2} mt={3} alignItems="center">
                                 <Flex gap={1} align="center">
-                                    <Text color="#666" fontSize="xs">Balance:</Text>
+                                    <Box><Text color="#666" fontSize="xs">Balance:</Text></Box>
+                                    <Box>
                                     <Text color="#999" fontSize="xs">
                                         {token0Balance ? commify(formatEther(token0Balance), 3) : "0"}
-                                    </Text>
+                                    </Text>                                        
+                                    </Box>
                                 </Flex>
                                 <Text color="#666" fontSize="xs">{token0Symbol}</Text>
                                 <Button
@@ -204,7 +208,12 @@ const LoanAddCollateral = ({
                                     Use Max
                                 </Button>
                             </Grid>
+                        </Box>                            
                         </Box>
+
+
+                        </HStack>
+
                     </Box>
 
                     {/* Preview Section */}
@@ -226,19 +235,23 @@ const LoanAddCollateral = ({
                         </Text>
                         <VStack align="stretch" spacing={3}>
                             <Flex justify="space-between" align="center">
-                                <Text color="#666" fontSize="sm">You're Adding</Text>
+                                <Box><Text color="#666" fontSize="sm">Adding</Text></Box>
+                                <Box>
                                 <Text color="white" fontSize="sm">
                                     <Text as="span" fontWeight="600">{displayCollateral}</Text>
                                     {" "}
                                     <Text as="span" color="#666">{token0Symbol}</Text>
-                                </Text>
+                                </Text>                                    
+                                </Box>
                             </Flex>
                             
                             <Flex justify="space-between" align="center">
-                                <Text color="#666" fontSize="sm">New LTV</Text>
+                                <Box> <Text color="#666" fontSize="sm">New LTV</Text></Box>
+                                <Box>
                                 <Text color="#4ade80" fontSize="lg" fontWeight="600">
                                     {ltv ? `${(ltv * 100).toFixed(2)}%` : "100.00%"}
-                                </Text>
+                                </Text>                                    
+                                </Box>
                             </Flex>
                         </VStack>
                     </Box>

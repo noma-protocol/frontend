@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Image, Flex, Container, Heading, HStack, Box, Button, Spinner, Text, SimpleGrid, VStack } from "@chakra-ui/react";
+import { Input, Image, Flex, Container, Heading, HStack, Box, Button, Spinner, Text, SimpleGrid, VStack, Grid, Link, Badge } from "@chakra-ui/react";
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
@@ -98,6 +98,9 @@ const Stake = () => {
 
     const [token0Info, setToken0Info] = useState({});
     const [token1Info, setToken1Info] = useState({});
+    const [stakeHistory, setStakeHistory] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     const [ethBalance, setEthBalance] = useState("0");
     const [wrapAmount, setWrapAmount] = useState("0");
@@ -342,6 +345,89 @@ const Stake = () => {
         };
     }, []);
 
+    // Load history from localStorage and set up event listeners
+    useEffect(() => {
+        if (!vaultAddress || !vaultDescription?.stakingContract) return;
+
+        // Load history from localStorage
+        const savedHistory = localStorage.getItem(`stakeHistory_${vaultAddress}`);
+        if (savedHistory) {
+            try {
+                setStakeHistory(JSON.parse(savedHistory));
+            } catch (e) {
+                console.error("Failed to parse stake history:", e);
+            }
+        }
+
+        // Set up event listeners for Stake and Unstake events
+        const stakingContract = new ethers.Contract(
+            vaultDescription.stakingContract,
+            StakingContractAbi,
+            localProvider
+        );
+
+        const handleStakeEvent = (user, amount, event) => {
+            if (user.toLowerCase() === address?.toLowerCase()) {
+                const txHash = event.transactionHash;
+                
+                setStakeHistory(prev => {
+                    // Check if this transaction already exists
+                    if (prev.some(item => item.txHash === txHash)) {
+                        return prev;
+                    }
+                    
+                    const newHistoryItem = {
+                        id: Date.now(),
+                        type: 'stake',
+                        amount: formatEther(amount),
+                        token: token0Info?.tokenSymbol || 'OKS',
+                        timestamp: new Date().toISOString(),
+                        txHash: txHash
+                    };
+                    
+                    const updated = [newHistoryItem, ...prev];
+                    localStorage.setItem(`stakeHistory_${vaultAddress}`, JSON.stringify(updated));
+                    return updated;
+                });
+            }
+        };
+
+        const handleUnstakeEvent = (user, amount, event) => {
+            if (user.toLowerCase() === address?.toLowerCase()) {
+                const txHash = event.transactionHash;
+                
+                setStakeHistory(prev => {
+                    // Check if this transaction already exists
+                    if (prev.some(item => item.txHash === txHash)) {
+                        return prev;
+                    }
+                    
+                    const newHistoryItem = {
+                        id: Date.now(),
+                        type: 'unstake',
+                        amount: formatEther(amount),
+                        token: token0Info?.tokenSymbol || 'OKS',
+                        timestamp: new Date().toISOString(),
+                        txHash: txHash
+                    };
+                    
+                    const updated = [newHistoryItem, ...prev];
+                    localStorage.setItem(`stakeHistory_${vaultAddress}`, JSON.stringify(updated));
+                    return updated;
+                });
+            }
+        };
+
+        // Listen to Staked and Unstaked events
+        stakingContract.on("Staked", handleStakeEvent);
+        stakingContract.on("Unstaked", handleUnstakeEvent);
+
+        return () => {
+            stakingContract.off("Staked", handleStakeEvent);
+            stakingContract.off("Unstaked", handleUnstakeEvent);
+        };
+    }, [vaultAddress, vaultDescription?.stakingContract, address, token0Info?.tokenSymbol]);
+
     const {
         write: approve
     } = useContractWrite({
@@ -411,6 +497,9 @@ const Stake = () => {
         args: [],
         onSuccess(data) {
             setIsUnstaking(false);
+            setTimeout(() => {
+                window.location.reload();
+            }, 4000);
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
@@ -688,10 +777,10 @@ const Stake = () => {
                                     fontWeight="600"
                                     onClick={handleStake}
                                     isLoading={isStaking}
-                                    isDisabled={!stakeAmount || Number(stakeAmount) <= 0 || (lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0)}
+                                    isDisabled={!stakeAmount || Number(stakeAmount) <= 0 || (stakedBalance > 0 && lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0)}
                                     _hover={{ bg: "#22c55e" }}
                                 >
-                                    {lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0 ? 
+                                    {stakedBalance > 0 && lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0 ? 
                                         "Cooldown Active" : "Stake"}
                                 </Button>
                                 
@@ -716,6 +805,107 @@ const Stake = () => {
                                 )}
                             </VStack>
                         </Box>
+
+                        {/* Stake History Box */}
+                        {stakeHistory.length > 0 && (
+                            <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
+                                <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Stake History</Text>
+                                <VStack align="stretch" spacing={2}>
+                                    {stakeHistory
+                                        .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+                                        .map((item, index) => (
+                                        <Grid
+                                            key={item.id}
+                                            templateColumns="90px auto 1fr auto auto"
+                                            gap="8px"
+                                            alignItems="center"
+                                            p="4px 8px"
+                                            bg="#2a2a2a"
+                                            borderRadius="md"
+                                            cursor="pointer"
+                                            _hover={{ bg: "#333" }}
+                                            fontSize="sm"
+                                        >
+                                            {/* Badge */}
+                                            <Box>
+                                                <Badge
+                                                    colorPalette={item.type === 'stake' ? 'green' : 'red'}
+                                                    size="sm"
+                                                >
+                                                    {item.type.toUpperCase()}
+                                                </Badge>
+                                            </Box>
+                                            
+                                            {/* Amount */}
+                                            <Text color="white" fontWeight="bold">
+                                                {commify(item.amount, 4)} {item.token}
+                                            </Text>
+                                            
+                                            {/* Details */}
+                                            <Text color="#666" fontSize="xs">
+                                                {item.type === 'stake' ? 'Staked' : 'Unstaked'}
+                                            </Text>
+                                            
+                                            {/* Transaction Hash */}
+                                            <Text 
+                                                color="#4ade80" 
+                                                fontSize="xs"
+                                                cursor="pointer"
+                                                _hover={{ textDecoration: "underline" }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const explorerUrl = config.chain === "monad" 
+                                                        ? `https://monadexplorer.com/tx/${item.txHash}`
+                                                        : `https://etherscan.io/tx/${item.txHash}`;
+                                                    window.open(explorerUrl, "_blank");
+                                                }}
+                                            >
+                                                {item.txHash.slice(0, 6)}...
+                                            </Text>
+                                            
+                                            {/* Time */}
+                                            <Text color="#888" fontSize="xs" textAlign="right" minW="25px">
+                                                {Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 60000) < 60
+                                                    ? `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 60000)}m`
+                                                    : Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 3600000) < 24
+                                                    ? `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 3600000)}h`
+                                                    : `${Math.floor((Date.now() - new Date(item.timestamp).getTime()) / 86400000)}d`
+                                                }
+                                            </Text>
+                                        </Grid>
+                                    ))}
+                                </VStack>
+                                
+                                {/* Pagination controls */}
+                                {stakeHistory.length > ITEMS_PER_PAGE && (
+                                    <HStack justify="center" mt={4}>
+                                        <Button
+                                            size="sm"
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                            isDisabled={currentPage === 1}
+                                            bg="transparent"
+                                            color="#888"
+                                            _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
+                                        >
+                                            Previous
+                                        </Button>
+                                        <Text color="#666" fontSize="sm">
+                                            Page {currentPage} of {Math.ceil(stakeHistory.length / ITEMS_PER_PAGE)}
+                                        </Text>
+                                        <Button
+                                            size="sm"
+                                            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(stakeHistory.length / ITEMS_PER_PAGE), prev + 1))}
+                                            isDisabled={currentPage === Math.ceil(stakeHistory.length / ITEMS_PER_PAGE)}
+                                            bg="transparent"
+                                            color="#888"
+                                            _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
+                                        >
+                                            Next
+                                        </Button>
+                                    </HStack>
+                                )}
+                            </Box>
+                        )}
                     </Box>
                     
                     {/* Right side - Wallet Box */}
