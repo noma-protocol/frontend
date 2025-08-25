@@ -100,5 +100,14 @@
     "address": "0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd",
     "timestamp": "2025-08-24T17:05:38.433Z",
     "clientId": "f9c5c9d5-7269-486f-8dc6-6b21035a5d7f"
+  },
+  {
+    "id": "cfd339f3-468d-4993-b4ec-c6cfaa0266d8",
+    "type": "message",
+    "content": "test",
+    "username": "0x98f2...1bBd",
+    "address": "0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd",
+    "timestamp": "2025-08-24T23:24:10.009Z",
+    "clientId": "bedcb822-169a-4312-a713-07ddddc4d14f"
   }
 ]

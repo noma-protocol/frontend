@@ -3024,94 +3024,70 @@ const Launchpad: React.FC = () => {
                         <Flex mb={4}>
                             <Button
                                 flex={1}
-                                bg={isBuying ? "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)" : "transparent"}
-                                background={isBuying ? "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)" : "rgba(255, 255, 255, 0.08)"}
-                                css={{
-                                    backdropFilter: "blur(20px) saturate(180%)",
-                                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                                    "&::before": {
-                                        content: '""',
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        borderRadius: "8px",
-                                        background: isBuying ? "linear-gradient(135deg, rgba(74, 222, 128, 0.3) 0%, rgba(34, 197, 94, 0.3) 100%)" : "none",
-                                        opacity: isBuying ? 1 : 0,
-                                        transition: "opacity 0.3s",
-                                        zIndex: -1
-                                    }
-                                }}
-                                color={isBuying ? "black" : "rgba(255, 255, 255, 0.9)"}
+                                bg={isBuying 
+                                    ? "linear-gradient(145deg, #52e88d, #1fa055)" 
+                                    : "linear-gradient(145deg, #2a2a2a, #1a1a1a)"}
+                                color={isBuying ? "white" : "#888"}
                                 onClick={() => setIsBuying(true)}
-                                borderRadius="lg"
-                                border={isBuying ? "1px solid rgba(74, 222, 128, 0.5)" : "1px solid rgba(255, 255, 255, 0.2)"}
-                                boxShadow={isBuying ? "0 8px 32px rgba(74, 222, 128, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)" : "0 4px 16px rgba(0, 0, 0, 0.2)"}
+                                borderRadius="0"
+                                border="none"
+                                boxShadow={isBuying 
+                                    ? "0 0 15px rgba(74,222,128,0.3), 0 4px 8px rgba(0,0,0,0.2)" 
+                                    : "0 2px 8px rgba(0,0,0,0.2)"}
                                 _hover={{
-                                    background: isBuying ? "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)" : "rgba(74, 222, 128, 0.15)",
-                                    transform: "translateY(-2px) scale(1.02)",
-                                    boxShadow: isBuying ? "0 12px 40px rgba(74, 222, 128, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4)" : "0 6px 24px rgba(74, 222, 128, 0.3)",
-                                    border: isBuying ? "1px solid rgba(74, 222, 128, 0.6)" : "1px solid rgba(74, 222, 128, 0.3)"
+                                    transform: isBuying ? "scale(1.02)" : "scale(1.01)",
+                                    boxShadow: isBuying 
+                                        ? "0 0 20px rgba(74,222,128,0.4), 0 6px 12px rgba(0,0,0,0.3)" 
+                                        : "0 0 10px rgba(74,222,128,0.2), 0 4px 8px rgba(0,0,0,0.2)"
                                 }}
                                 _active={{
-                                    transform: "translateY(0) scale(0.98)",
-                                    boxShadow: isBuying ? "0 4px 20px rgba(74, 222, 128, 0.3), inset 0 1px 1px rgba(0, 0, 0, 0.1)" : "0 2px 8px rgba(74, 222, 128, 0.2)"
+                                    transform: "scale(0.98)",
+                                    boxShadow: isBuying 
+                                        ? "0 0 10px rgba(74,222,128,0.2), inset 0 2px 4px rgba(0,0,0,0.2)" 
+                                        : "inset 0 2px 4px rgba(0,0,0,0.2)"
                                 }}
                                 position="relative"
                                 overflow="hidden"
-                                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                                fontWeight="700"
-                                letterSpacing="0.025em"
-                                textTransform="uppercase"
+                                transition="all 0.3s ease"
+                                fontWeight="600"
+                                fontSize="sm"
+                                h="36px"
                             >
-                                Buy
+                                BUY
                             </Button>
                             <Button
                                 flex={1}
                                 ml={2}
-                                bg={!isBuying ? "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)" : "transparent"}
-                                background={!isBuying ? "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)" : "rgba(255, 255, 255, 0.08)"}
-                                css={{
-                                    backdropFilter: "blur(20px) saturate(180%)",
-                                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                                    "&::before": {
-                                        content: '""',
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        borderRadius: "8px",
-                                        background: !isBuying ? "linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.3) 100%)" : "none",
-                                        opacity: !isBuying ? 1 : 0,
-                                        transition: "opacity 0.3s",
-                                        zIndex: -1
-                                    }
-                                }}
-                                color="rgba(255, 255, 255, 0.95)"
+                                bg={!isBuying 
+                                    ? "linear-gradient(145deg, #ff4d4d, #cc0000)" 
+                                    : "linear-gradient(145deg, #2a2a2a, #1a1a1a)"}
+                                color={!isBuying ? "white" : "#888"}
                                 onClick={() => setIsBuying(false)}
-                                borderRadius="lg"
-                                border={!isBuying ? "1px solid rgba(239, 68, 68, 0.5)" : "1px solid rgba(255, 255, 255, 0.2)"}
-                                boxShadow={!isBuying ? "0 8px 32px rgba(239, 68, 68, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)" : "0 4px 16px rgba(0, 0, 0, 0.2)"}
+                                borderRadius="0"
+                                border="none"
+                                boxShadow={!isBuying 
+                                    ? "0 0 15px rgba(239,68,68,0.3), 0 4px 8px rgba(0,0,0,0.2)" 
+                                    : "0 2px 8px rgba(0,0,0,0.2)"}
                                 _hover={{
-                                    background: !isBuying ? "linear-gradient(135deg, #f87171 0%, #b91c1c 100%)" : "rgba(239, 68, 68, 0.15)",
-                                    transform: "translateY(-2px) scale(1.02)",
-                                    boxShadow: !isBuying ? "0 12px 40px rgba(239, 68, 68, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4)" : "0 6px 24px rgba(239, 68, 68, 0.3)",
-                                    border: !isBuying ? "1px solid rgba(239, 68, 68, 0.6)" : "1px solid rgba(239, 68, 68, 0.3)"
+                                    transform: !isBuying ? "scale(1.02)" : "scale(1.01)",
+                                    boxShadow: !isBuying 
+                                        ? "0 0 20px rgba(239,68,68,0.4), 0 6px 12px rgba(0,0,0,0.3)" 
+                                        : "0 0 10px rgba(239,68,68,0.2), 0 4px 8px rgba(0,0,0,0.2)"
                                 }}
                                 _active={{
-                                    transform: "translateY(0) scale(0.98)",
-                                    boxShadow: !isBuying ? "0 4px 20px rgba(239, 68, 68, 0.3), inset 0 1px 1px rgba(0, 0, 0, 0.1)" : "0 2px 8px rgba(239, 68, 68, 0.2)"
+                                    transform: "scale(0.98)",
+                                    boxShadow: !isBuying 
+                                        ? "0 0 10px rgba(239,68,68,0.2), inset 0 2px 4px rgba(0,0,0,0.2)" 
+                                        : "inset 0 2px 4px rgba(0,0,0,0.2)"
                                 }}
                                 position="relative"
                                 overflow="hidden"
-                                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                                fontWeight="700"
-                                letterSpacing="0.025em"
-                                textTransform="uppercase"
+                                transition="all 0.3s ease"
+                                fontWeight="600"
+                                fontSize="sm"
+                                h="36px"
                             >
-                                Sell
+                                SELL
                             </Button>
                         </Flex>
                         
@@ -3216,74 +3192,46 @@ const Launchpad: React.FC = () => {
                         
                         <Button
                             w="100%"
-                            h="64px"
-                            bg={isBuying ? "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)" : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"}
-                            background={isBuying ? "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)" : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"}
-                            css={{
-                                backdropFilter: "blur(20px) saturate(200%)",
-                                WebkitBackdropFilter: "blur(20px) saturate(200%)",
-                                "&::before": {
-                                    content: '""',
-                                    position: "absolute",
-                                    top: "-2px",
-                                    left: "-2px",
-                                    right: "-2px",
-                                    bottom: "-2px",
-                                    borderRadius: "16px",
-                                    background: isBuying ? "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)" : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-                                    opacity: 0.5,
-                                    filter: "blur(8px)",
-                                    transition: "all 0.3s",
-                                    zIndex: -1
-                                },
-                                "&:hover::before": {
-                                    opacity: 0.8,
-                                    filter: "blur(12px)"
-                                }
-                            }}
-                            color={isBuying ? "black" : "white"}
-                            fontSize="xl"
-                            fontWeight="800"
+                            h="48px"
+                            bg={isBuying 
+                                ? "linear-gradient(145deg, #52e88d, #1fa055)" 
+                                : "linear-gradient(145deg, #ff4d4d, #cc0000)"}
+                            color="white"
+                            fontSize="lg"
+                            fontWeight="700"
                             onClick={isBuying ? handleBuy : handleSell}
                             isDisabled={!selectedToken || !tradeAmount || isLoading || isLoadingExecuteTrade || !getTradeValidationState().isValid}
                             isLoading={isLoading || isLoadingExecuteTrade}
                             loadingText="Processing..."
-                            borderRadius="2xl"
+                            borderRadius="0"
+                            border="none"
                             boxShadow={isBuying 
-                                ? "0 10px 40px rgba(74, 222, 128, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.1)" 
-                                : "0 10px 40px rgba(239, 68, 68, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.1)"}
+                                ? "0 0 20px rgba(74,222,128,0.3), 0 4px 12px rgba(0,0,0,0.3)" 
+                                : "0 0 20px rgba(239,68,68,0.3), 0 4px 12px rgba(0,0,0,0.3)"}
                             _hover={{
-                                background: isBuying ? "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)" : "linear-gradient(135deg, #f87171 0%, #b91c1c 100%)",
-                                transform: "translateY(-3px) scale(1.02)",
+                                transform: "translateY(-2px)",
                                 boxShadow: isBuying 
-                                    ? "0 20px 50px rgba(74, 222, 128, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.5), inset 0 -2px 4px rgba(0, 0, 0, 0.1)" 
-                                    : "0 20px 50px rgba(239, 68, 68, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.1)"
+                                    ? "0 0 30px rgba(74,222,128,0.5), 0 8px 20px rgba(0,0,0,0.4)" 
+                                    : "0 0 30px rgba(239,68,68,0.5), 0 8px 20px rgba(0,0,0,0.4)"
                             }}
                             _active={{
-                                transform: "translateY(0) scale(0.98)",
+                                transform: "scale(0.98)",
                                 boxShadow: isBuying 
-                                    ? "0 5px 20px rgba(74, 222, 128, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.2)" 
-                                    : "0 5px 20px rgba(239, 68, 68, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.2)"
+                                    ? "0 0 15px rgba(74,222,128,0.2), inset 0 2px 4px rgba(0,0,0,0.2)" 
+                                    : "0 0 15px rgba(239,68,68,0.2), inset 0 2px 4px rgba(0,0,0,0.2)"
                             }}
                             _disabled={{
-                                bg: "rgba(255, 255, 255, 0.05)",
-                                background: "rgba(255, 255, 255, 0.05)",
-                                backdropFilter: "blur(5px)",
+                                bg: "linear-gradient(145deg, #3a3a3a, #2a2a2a)",
                                 color: "#666",
                                 cursor: "not-allowed",
                                 transform: "none",
-                                boxShadow: "none",
-                                "&::before": {
-                                    display: "none"
-                                }
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
                             }}
                             opacity={isLoading || isLoadingExecuteTrade ? 0.8 : 1}
                             cursor={isLoading || isLoadingExecuteTrade ? "not-allowed" : "pointer"}
-                            transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                            transition="all 0.3s ease"
                             position="relative"
-                            overflow="visible"
-                            letterSpacing="0.05em"
-                            textTransform="uppercase"
+                            letterSpacing="0.1em"
                         >
                             {(isLoading || isLoadingExecuteTrade) ? (
                                 <Spinner size="sm" color={isBuying ? "black" : "white"} />

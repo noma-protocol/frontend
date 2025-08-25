@@ -36,23 +36,36 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
     }
 
     return (
-    <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
-        <Box mt={isMobile ? 0 : -5} >
+    <Box p={2} textAlign="center" display="flex" alignItems="center" justifyContent="center">
         <DrawerRoot >
         <DrawerTrigger asChild>
         <Button 
-            variant={"outline"}
-            h={size == "lg" ? 8 : 6}
-            ml={size == "lg" ? 0 : isMobile ? -1 : 2}
-            mt={size == "lg" ? 0 : isMobile ? 0 : 2}
-            // onClick={() => setIsRepaying(true)}
+            h={size == "lg" ? "38px" : "32px"}
             disabled={isRepaying || isLoading}
             w={size == "lg" ? "90px" : "80px"}
-            border="1px solid #f3f7c6"
-            borderRadius={5}
-            _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
+            bg="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+            backdropFilter="blur(10px)"
+            color="white"
+            borderRadius="md"
+            border="1px solid rgba(239, 68, 68, 0.3)"
+            boxShadow="0 4px 12px rgba(239, 68, 68, 0.2)"
+            fontWeight="600"
+            fontSize={size == "lg" ? "sm" : "xs"}
+            _hover={{
+                bg: "linear-gradient(135deg, #f87171 0%, #b91c1c 100%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 6px 16px rgba(239, 68, 68, 0.25)"
+            }}
+            _active={{
+                transform: "translateY(0)",
+                boxShadow: "0 2px 8px rgba(239, 68, 68, 0.2)"
+            }}
+            _disabled={{
+                opacity: 0.6,
+                cursor: "not-allowed"
+            }}
         >
-        {isRepaying  ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Repay</Text>}
+        {isRepaying  ? <Spinner size="sm" /> : "Repay"}
         </Button>
         </DrawerTrigger>
         <DrawerBackdrop />
@@ -131,7 +144,6 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
             </DrawerFooter> */}
         </DrawerContent>
         </DrawerRoot>
-    </Box>
     </Box>
     )
 

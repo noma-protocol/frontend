@@ -8,7 +8,7 @@ import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import { Toaster, toaster } from "../components/ui/toaster";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
-import ethLogo from '../assets/images/weth.svg';
+import wmonLogo from '../assets/images/monad.png';
 import nomaLogo from '../assets/images/noma.png';
 import monadLogo from '../assets/images/monad.png';
 
@@ -251,7 +251,7 @@ const Stake = () => {
                     setEthBalance(balance);
                 }
             } catch (error) {
-                console.error("Error fetching ETH balance:", error);
+                console.error("Error fetching MON balance:", error);
             }
         };
 
@@ -467,6 +467,8 @@ const Stake = () => {
     const handleStake = async () => {
         setIsStaking(true);
         approve();
+
+        console.log(`Staking stake amount ${stakeAmount}`)
     }
 
     const handleUnstake = async () => {
@@ -552,12 +554,16 @@ const Stake = () => {
                                         </Box>
                                         <Box>
                                             <HStack spacing={1}>
-                                                <Text color="white" fontSize="sm" fontWeight="500">
-                                                    {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
-                                                </Text>
-                                                <Text color="#888" fontSize="sm">
-                                                    {token0Info?.tokenSymbol}
-                                                </Text>
+                                                <Box>
+                                                    <Text color="white" fontSize="sm" fontWeight="500">
+                                                        {formatNumberPrecise(formatEther(`${stakedBalance || 0}`), 4)}
+                                                    </Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="sm">
+                                                        {token0Info?.tokenSymbol}
+                                                    </Text>
+                                                </Box>
                                             </HStack>
                                         </Box>
                                     </HStack>
@@ -567,12 +573,16 @@ const Stake = () => {
                                         </Box>
                                         <Box>
                                             <HStack spacing={1}>
-                                                <Text color="white" fontSize="sm" fontWeight="500">
-                                                    {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 4)}
-                                                </Text>
-                                                <Text color="#888" fontSize="sm">
-                                                    s{token0Info?.tokenSymbol || "OKS"}
-                                                </Text>
+                                                <Box>
+                                                    <Text color="white" fontSize="sm" fontWeight="500">
+                                                        {formatNumberPrecise(formatEther(`${sNomaBalance || 0}`), 4)}
+                                                    </Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="sm">
+                                                        s{token0Info?.tokenSymbol || "OKS"}
+                                                    </Text>
+                                                </Box>
                                             </HStack>
                                         </Box>
                                     </HStack>
@@ -582,12 +592,16 @@ const Stake = () => {
                                         </Box>
                                         <Box>
                                             <HStack spacing={1}>
-                                                <Text color="#4ade80" fontSize="sm" fontWeight="500">
-                                                    {commify(rewards, 4)}
-                                                </Text>
-                                                <Text color="#888" fontSize="sm">
-                                                    {token0Info?.tokenSymbol}
-                                                </Text>
+                                                <Box>
+                                                    <Text color="#4ade80" fontSize="sm" fontWeight="500">
+                                                        {commify(rewards, 4)}
+                                                    </Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="sm">
+                                                        {token0Info?.tokenSymbol}
+                                                    </Text>
+                                                </Box>
                                             </HStack>
                                         </Box>
                                     </HStack>
@@ -709,20 +723,20 @@ const Stake = () => {
                             <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
                                 <Text fontSize="lg" fontWeight="bold" color="white" mb={4}>Wallet</Text>
                                 <VStack align="stretch" gap={3}>
-                                    {/* ETH Balance */}
+                                    {/* MON Balance */}
                                     <Box>
                                         <Flex justifyContent="space-between" alignItems="center">
                                             <HStack>
                                                 <Box w="20px" h="20px">
                                                     <Image
-                                                        src={ethLogo}
-                                                        alt="ETH"
+                                                        src={monadLogo}
+                                                        alt="MON"
                                                         w="20px"
                                                         h="20px"
                                                     />
                                                 </Box>
                                                 <Box>
-                                                    <Text color="#888" fontSize="sm">ETH</Text>
+                                                    <Text color="#888" fontSize="sm">MON</Text>
                                                 </Box>
                                             </HStack>
                                             <Box>
@@ -772,7 +786,7 @@ const Stake = () => {
                                                 <HStack>
                                                     <Box w="20px" h="20px">
                                                         <Image
-                                                            src={token1Info.tokenSymbol === "WMON" ? ethLogo : placeholderLogoDark}
+                                                            src={token1Info.tokenSymbol === "WMON" ? wmonLogo : placeholderLogoDark}
                                                             alt={token1Info.tokenSymbol}
                                                             w="20px"
                                                             h="20px"
