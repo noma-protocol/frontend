@@ -49,8 +49,8 @@ const LoanActiveLoan = ({}) => {
                     </Box>
                     <Box px={2}  mt={2}> {commifyDecimals(ltv, 2)}</Box>
                     <Box px={2}  mt={2}> {getDaysLeft(`${loanData?.expires}`)} days</Box>
-                    <Box px={2}  mt={2} ml={-10}> 
-                    <VStack>
+                    <Box px={2} mt={2}> 
+                    <HStack spacing={2}>
                     <LoanAddCollateral
                         token0Symbol={token0Info.tokenSymbol}
                         handleSetCollateral={setExtraCollateral}
@@ -81,15 +81,33 @@ const LoanActiveLoan = ({}) => {
                     <DrawerRoot >
                     <DrawerTrigger asChild>
                     <Button 
-                        variant={"outline"}
-                        h={8}
-                        // onClick={() => setIsLoading(true)}
+                        h="38px"
                         disabled={isRolling || isLoading || isTokenInfoLoading || ltv <= 1}
-                        w={"120px"}
-                        border="1px solid #f3f7c6"
-                        _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
+                        w="90px"
+                        bg="rgba(255, 255, 255, 0.05)"
+                        backdropFilter="blur(10px)"
+                        color="white"
+                        borderRadius="md"
+                        border="1px solid rgba(255, 255, 255, 0.1)"
+                        boxShadow="0 2px 8px rgba(0, 0, 0, 0.1)"
+                        fontWeight="600"
+                        fontSize="sm"
+                        _hover={{
+                            bg: "rgba(74, 222, 128, 0.1)",
+                            transform: "translateY(-1px)",
+                            boxShadow: "0 4px 12px rgba(74, 222, 128, 0.15)",
+                            borderColor: "rgba(74, 222, 128, 0.3)"
+                        }}
+                        _active={{
+                            transform: "translateY(0)",
+                            boxShadow: "0 2px 6px rgba(74, 222, 128, 0.1)"
+                        }}
+                        _disabled={{
+                            opacity: 0.6,
+                            cursor: "not-allowed"
+                        }}
                     >
-                    {isLoading ? <Spinner size="sm" /> : <Text color={"#f3f7c6"}>Roll</Text>}
+                    {isLoading ? <Spinner size="sm" /> : "Roll"}
                     </Button>
                     </DrawerTrigger>
                     <DrawerBackdrop />
@@ -150,7 +168,7 @@ const LoanActiveLoan = ({}) => {
                     </DrawerContent>
                     </DrawerRoot>
 
-                    </VStack>
+                    </HStack>
                     </Box>
 
                     </>

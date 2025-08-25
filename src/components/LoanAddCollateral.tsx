@@ -21,7 +21,7 @@ import {
     NumberInputField,
   } from "../components/ui/number-input";
 
-const LoadAddCollateral = ({  
+const LoanAddCollateral = ({  
     size,
     token0Symbol, 
     extraCollateral, 
@@ -60,23 +60,36 @@ const LoadAddCollateral = ({
     };
 
     return (
-        <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
-            <Box mt={-1}>
+        <Box p={2} textAlign="center" display="flex" alignItems="center" justifyContent="center">
             <DrawerRoot >
             <DrawerTrigger asChild>
             <Button 
-                variant={"outline"}
-                h={size == "lg" ? 8 : 6}
-                ml={size == "lg" ? 0 : 2}
-                mt={size == "lg" ? 0 : 2}
-                // onClick={() => setIsLoading(true)}
+                h={size == "lg" ? "38px" : "32px"}
                 disabled={isTokenInfoLoading}
                 w={size == "lg" ? "90px" : "80px"}
-                border="1px solid #f3f7c6"
-                borderRadius={5}
-                _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
+                bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
+                backdropFilter="blur(10px)"
+                color="black"
+                borderRadius="md"
+                border="1px solid rgba(74, 222, 128, 0.3)"
+                boxShadow="0 4px 12px rgba(74, 222, 128, 0.2)"
+                fontWeight="600"
+                fontSize={size == "lg" ? "sm" : "xs"}
+                _hover={{
+                    bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 6px 16px rgba(74, 222, 128, 0.25)"
+                }}
+                _active={{
+                    transform: "translateY(0)",
+                    boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
+                }}
+                _disabled={{
+                    opacity: 0.6,
+                    cursor: "not-allowed"
+                }}
             >
-            {isAdding ? <Spinner size="sm" /> : <Text fontSize={"xs"} color={"#f3f7c6"}>Add </Text>}
+            {isAdding ? <Spinner size="sm" /> : "Add"}
             </Button>
             </DrawerTrigger>
             <DrawerBackdrop />
@@ -149,10 +162,9 @@ const LoadAddCollateral = ({
                 </DrawerFooter> */}
             </DrawerContent>
             </DrawerRoot>
-            </Box>
         </Box>
     )
 
 }
 
-export default LoadAddCollateral;
+export default LoanAddCollateral;

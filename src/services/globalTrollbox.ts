@@ -12,7 +12,7 @@ declare global {
 
 // Initialize global state ONLY ONCE
 if (!window.__trollboxInitialized) {
-  console.log('Initializing global trollbox for the first time');
+  // console.log('Initializing global trollbox for the first time');
   window.__trollboxInitialized = true;
   window.__trollboxListeners = new Set();
   
@@ -46,7 +46,7 @@ const connect = (wsUrl: string = 'ws://localhost:9090'): Promise<void> => {
     return Promise.resolve();
   }
 
-  console.log('Creating NEW WebSocket connection (for real this time)');
+  // console.log('Creating NEW WebSocket connection (for real this time)');
   
   window.__trollboxConnectionPromise = new Promise((resolve, reject) => {
     try {
@@ -59,7 +59,7 @@ const connect = (wsUrl: string = 'ws://localhost:9090'): Promise<void> => {
       window.__trollboxWs = new WebSocket(wsUrl);
       
       window.__trollboxWs.onopen = () => {
-        console.log('WebSocket connected successfully');
+        // console.log('WebSocket connected successfully');
         window.__trollboxConnectionPromise = undefined;
         window.__trollboxConnecting = false;
         notifyListeners({ type: 'connected' });
@@ -133,7 +133,7 @@ const notifyListeners = (data: any) => {
 
 // Only start ONE ping interval globally
 if (!window.__trollboxPingInterval) {
-  console.log('Starting global ping interval');
+  // console.log('Starting global ping interval');
   (window as any).__trollboxPingInterval = setInterval(() => {
     if (window.__trollboxWs && window.__trollboxWs.readyState === WebSocket.OPEN) {
       sendMessage({ type: 'ping' });

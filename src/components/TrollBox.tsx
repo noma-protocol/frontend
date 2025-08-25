@@ -29,7 +29,7 @@ let instanceCounter = 0;
 
 const TrollBox: React.FC = () => {
   const instanceId = useRef(++instanceCounter);
-  console.log(`TrollBox instance ${instanceId.current} created`);
+  // console.log(`TrollBox instance ${instanceId.current} created`);
   
   const { address, isConnected } = useAccount();
   const [isExpanded, setIsExpanded] = useState(false);
