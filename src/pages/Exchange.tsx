@@ -1168,6 +1168,9 @@ const Launchpad: React.FC = () => {
     };
     
     const WETH_ADDRESS = config.protocolAddresses.WMON;
+    const [wrapAmount, setWrapAmount] = useState(0);
+    const [isWrapping, setIsWrapping] = useState(false);
+    const [isUnwrapping, setIsUnwrapping] = useState(false);
     
     // Fetch all deployers from factory contract
     const {
@@ -1764,6 +1767,77 @@ const Launchpad: React.FC = () => {
         return () => clearTimeout(timer); // Cleanup timer
     }, [tradeAmount, selectedToken, isBuying, quoteData]);
     
+    // Contract write hooks for WMON wrap/unwrap
+    const {
+        write: deposit
+    } = useContractWrite({
+        address: WETH_ADDRESS,
+        abi: IWETHAbi,
+        functionName: "deposit",
+        value: parseEther(`${wrapAmount}`),
+        onSuccess(data) {
+            setIsWrapping(false);
+            toaster.create({
+                title: "Success",
+                description: `Wrapped ${wrapAmount} MON to WMON`,
+            });
+            setWrapAmount(0);
+            // Refresh balances after 2 seconds
+            setTimeout(async () => {
+                const ethBal = await localProvider.getBalance(address);
+                setEthBalance(formatEther(ethBal));
+                const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
+                const wethBal = await wethContract.balanceOf(address);
+                setWethBalance(formatEther(wethBal));
+            }, 2000);
+        },
+        onError(error) {
+            setIsWrapping(false);
+            const msg = Number(error.message.toString().indexOf("exceeds")) > -1 ? "Not enough balance" :
+                        error.message.indexOf("User rejected the request.") > -1 ? "Rejected operation" : error.message;
+            toaster.create({
+                title: "Error",
+                description: msg,
+            });
+            setWrapAmount(0);
+        }
+    });
+
+    const {
+        write: withdraw
+    } = useContractWrite({
+        address: WETH_ADDRESS,
+        abi: IWETHAbi,
+        functionName: "withdraw",
+        args: [parseEther(`${wrapAmount}`)],
+        onSuccess(data) {
+            setIsUnwrapping(false);
+            toaster.create({
+                title: "Success",
+                description: `Unwrapped ${wrapAmount} WMON to MON`,
+            });
+            setWrapAmount(0);
+            // Refresh balances after 2 seconds
+            setTimeout(async () => {
+                const ethBal = await localProvider.getBalance(address);
+                setEthBalance(formatEther(ethBal));
+                const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
+                const wethBal = await wethContract.balanceOf(address);
+                setWethBalance(formatEther(wethBal));
+            }, 2000);
+        },
+        onError(error) {
+            setIsUnwrapping(false);
+            const msg = Number(error.message.toString().indexOf("burn amount exceeds balance")) > -1 ? "Not enough balance" :
+                        error.message.toString().indexOf("User rejected the request.") > -1 ? "Rejected operation" : error.message;
+            toaster.create({
+                title: "Error",
+                description: msg,
+            });
+            setWrapAmount(0);
+        }
+    });
+
     // Contract write hooks for trading
     const {
         write: buyTokensETH
@@ -3008,6 +3082,14 @@ const Launchpad: React.FC = () => {
                             selectedToken={selectedToken?.symbol}
                             selectedTokenBalance={BigInt(Math.floor(parseFloat(tokenBalance) * 1e18))}
                             address={address}
+                            deposit={deposit}
+                            withdraw={withdraw}
+                            isWrapping={isWrapping}
+                            isUnwrapping={isUnwrapping}
+                            setIsWrapping={setIsWrapping}
+                            setIsUnwrapping={setIsUnwrapping}
+                            wrapAmount={wrapAmount}
+                            setWrapAmount={setWrapAmount}
                         />
                     
                     {/* Trading Panel */}

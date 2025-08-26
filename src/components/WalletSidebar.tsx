@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Text, VStack, HStack, Flex, Image } from "@chakra-ui/react";
 import { formatEther } from 'viem';
 import { commify } from '../utils';
 import monadLogo from '../assets/images/monad.png';
 import wmonLogo from '../assets/images/monad.png';
 import placeholderLogoDark from '../assets/images/question_white.svg';
+import Wrap from './Wrap';
+import Unwrap from './Unwrap';
 
 interface TokenInfo {
     tokenSymbol?: string;
@@ -18,6 +20,14 @@ interface WalletSidebarProps {
     selectedToken?: string;
     selectedTokenBalance?: bigint;
     address?: string;
+    deposit?: () => void;
+    withdraw?: () => void;
+    isWrapping?: boolean;
+    isUnwrapping?: boolean;
+    setIsWrapping?: (value: boolean) => void;
+    setIsUnwrapping?: (value: boolean) => void;
+    wrapAmount?: number | string;
+    setWrapAmount?: (value: number | string) => void;
 }
 
 const WalletSidebar: React.FC<WalletSidebarProps> = ({
@@ -26,21 +36,46 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
     token1Info,
     selectedToken,
     selectedTokenBalance,
-    address
+    address,
+    deposit,
+    withdraw,
+    isWrapping = false,
+    isUnwrapping = false,
+    setIsWrapping,
+    setIsUnwrapping,
+    wrapAmount = '',
+    setWrapAmount
 }) => {
+    const [actionType, setActionType] = useState('');
     const ethBalanceValue = typeof ethBalance === 'string' ? BigInt(ethBalance) : ethBalance;
     const monPrice = 50; // Hardcoded for now, could be passed as prop
+
+    const handleAction = () => {
+        if (wrapAmount === '' || wrapAmount === '0') return;
+        
+        if (actionType === 'wrap' && deposit && setIsWrapping) {
+            setIsWrapping(true);
+            deposit();
+        } else if (actionType === 'unwrap' && withdraw && setIsUnwrapping) {
+            setIsUnwrapping(true);
+            withdraw();
+        }
+    };
 
     const TokenBalanceCard = ({ 
         symbol, 
         balance, 
         logo, 
-        isSelected = false 
+        isSelected = false,
+        showWrapButton = false,
+        showUnwrapButton = false 
     }: { 
         symbol: string; 
         balance: bigint | undefined; 
         logo: string;
         isSelected?: boolean;
+        showWrapButton?: boolean;
+        showUnwrapButton?: boolean;
     }) => {
         const balanceValue = balance ? parseFloat(formatEther(balance)) : 0;
         const usdValue = symbol === 'MON' || symbol === 'WMON' ? balanceValue * monPrice : 0;
@@ -48,7 +83,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
         return (
             <Box 
                 display="grid"
-                gridTemplateColumns="24px 50px 1fr 120px"
+                gridTemplateColumns={showWrapButton || showUnwrapButton ? "24px 50px 1fr 80px 60px" : "24px 50px 1fr 120px"}
                 gap="8px"
                 alignItems="start"
                 bg="rgba(255, 255, 255, 0.03)"
@@ -99,6 +134,40 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         ≈ ${commify(usdValue, 2)}
                     </Text>
                 </Box>
+                
+                {/* Wrap/Unwrap Button */}
+                {(showWrapButton || showUnwrapButton) && (
+                    <Box display="flex" alignItems="center" justifyContent="flex-end" mt={-2}>
+                        {showWrapButton && deposit && setWrapAmount && (
+                            <Wrap
+                                wrapAmount={String(wrapAmount)}
+                                isWrapping={isWrapping}
+                                setWrapAmount={setWrapAmount}
+                                handleAction={handleAction}
+                                setActionType={setActionType}
+                                actionType={actionType}
+                                fontSize="xs"
+                                buttonSize="60px"
+                                bnbBalance={balance}
+                                size="lg"
+                            />
+                        )}
+                        {showUnwrapButton && withdraw && setWrapAmount && (
+                            <Unwrap
+                                isUnwrapping={isUnwrapping}
+                                setWrapAmount={setWrapAmount}
+                                handleAction={handleAction}
+                                setActionType={setActionType}
+                                actionType={actionType}
+                                fontSize="xs"
+                                buttonSize="60px"
+                                token1Balance={balance}
+                                wrapAmount={String(wrapAmount)}
+                                size="lg"
+                            />
+                        )}
+                    </Box>
+                )}
             </Box>
         );
     };
@@ -126,10 +195,11 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         symbol="MON"
                         balance={ethBalanceValue}
                         logo={monadLogo}
+                        showWrapButton={deposit !== undefined}
                     />
                     
                     {/* Token0 Balance */}
-                    {token0Info?.tokenSymbol && (
+                    {token0Info?.tokenSymbol && token0Info.tokenSymbol !== "WMON" && (
                         <TokenBalanceCard 
                             symbol={token0Info.tokenSymbol}
                             balance={token0Info.balance}
@@ -137,12 +207,23 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         />
                     )}
                     
-                    {/* Token1 Balance */}
-                    {token1Info?.tokenSymbol && (
+                    {/* WMON Balance - either from token0 or token1 */}
+                    {((token0Info?.tokenSymbol === "WMON" && token0Info.balance) || 
+                      (token1Info?.tokenSymbol === "WMON" && token1Info.balance)) && (
+                        <TokenBalanceCard 
+                            symbol="WMON"
+                            balance={token0Info?.tokenSymbol === "WMON" ? token0Info.balance : token1Info?.balance}
+                            logo={wmonLogo}
+                            showUnwrapButton={withdraw !== undefined}
+                        />
+                    )}
+                    
+                    {/* Token1 Balance (if not WMON) */}
+                    {token1Info?.tokenSymbol && token1Info.tokenSymbol !== "WMON" && (
                         <TokenBalanceCard 
                             symbol={token1Info.tokenSymbol}
                             balance={token1Info.balance}
-                            logo={token1Info.tokenSymbol === "WMON" ? wmonLogo : placeholderLogoDark}
+                            logo={placeholderLogoDark}
                         />
                     )}
                     

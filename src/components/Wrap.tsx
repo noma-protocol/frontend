@@ -30,13 +30,16 @@ import { formatEther, parseEther } from "viem";
 //declare types of props
 type WrapProps = {
     isWrapping: boolean;
-    setIsWrapping: (isWrapping: boolean) => void;
+    setIsWrapping?: (isWrapping: boolean) => void;
     handleAction: () => void;
     actionType: string;
     setActionType: (actionType: string) => void;
     wrapAmount: string;
     setWrapAmount: (wrapAmount: string) => void;
     buttonSize?: string;
+    fontSize?: string;
+    bnbBalance?: any;
+    size?: string;
 };
 
 const Wrap = ({
