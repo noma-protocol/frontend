@@ -11,7 +11,7 @@ import {
   Portal,
   Badge,
 } from '@chakra-ui/react';
-import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown, FiSmile } from 'react-icons/fi';
+import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
 import { useTrollbox } from '../hooks/useTrollbox';
 import UserProfileModal from './UserProfileModal';
@@ -43,6 +43,7 @@ const TrollBox: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<{ username: string; address: string } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showEmojiPickerExpanded, setShowEmojiPickerExpanded] = useState(false);
+  const emojiButtonRef = useRef<HTMLButtonElement>(null);
   
   // Use the WebSocket hook
   const { 
@@ -437,28 +438,59 @@ const TrollBox: React.FC = () => {
               />
             </Box>
             <Box position="relative">
-              <IconButton
+              <Button
+                ref={emojiButtonRef}
                 aria-label="Select emoji"
-                icon={<FiSmile />}
                 size="sm"
                 bg="#2a2a2a"
-                color="#4ade80"
                 _hover={{ bg: '#3a3a3a' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowEmojiPicker(!showEmojiPicker);
                 }}
-              />
+                px={2}
+                minW="auto"
+              >
+                😊
+              </Button>
               {showEmojiPicker && (
                 <Box
-                  position="absolute"
-                  bottom="100%"
-                  right="0"
-                  mb={2}
-                  zIndex={1000}
+                  position="fixed"
+                  bottom="auto"
+                  left="auto"
+                  zIndex={10000}
                   boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
                   borderRadius="md"
                   onClick={(e) => e.stopPropagation()}
+                  sx={{
+                    transform: 'translateY(-100%) translateY(-8px)',
+                    maxHeight: 'calc(100vh - 100px)',
+                    overflow: 'auto'
+                  }}
+                  ref={(el) => {
+                    if (el && emojiButtonRef.current) {
+                      const buttonRect = emojiButtonRef.current.getBoundingClientRect();
+                      const pickerWidth = 300;
+                      const pickerHeight = 350;
+                      
+                      // Calculate position
+                      let left = buttonRect.left + (buttonRect.width / 2) - (pickerWidth / 2);
+                      let top = buttonRect.top - pickerHeight - 8;
+                      
+                      // Adjust if going off screen
+                      if (left < 10) left = 10;
+                      if (left + pickerWidth > window.innerWidth - 10) {
+                        left = window.innerWidth - pickerWidth - 10;
+                      }
+                      if (top < 10) {
+                        // Show below if not enough space above
+                        top = buttonRect.bottom + 8;
+                      }
+                      
+                      el.style.left = `${left}px`;
+                      el.style.top = `${top}px`;
+                    }
+                  }}
                 >
                   <EmojiPicker
                     onEmojiClick={handleEmojiClick}
@@ -841,19 +873,22 @@ const TrollBox: React.FC = () => {
                     />
                   </Box>
                   <Box position="relative">
-                    <IconButton
+                    <Button
                       aria-label="Select emoji"
-                      icon={<FiSmile />}
                       size="md"
                       h="44px"
                       bg="#2a2a2a"
-                      color="#4ade80"
+                      fontSize="20px"
                       _hover={{ bg: '#3a3a3a' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowEmojiPickerExpanded(!showEmojiPickerExpanded);
                       }}
-                    />
+                      px={3}
+                      minW="auto"
+                    >
+                      😊
+                    </Button>
                     {showEmojiPickerExpanded && (
                       <Box
                         position="absolute"
