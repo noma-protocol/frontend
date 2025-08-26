@@ -87,8 +87,11 @@ const TrollBox: React.FC = () => {
   };
 
   useEffect(() => {
-    // Only scroll if user is already near the bottom
-    if (messagesEndRef.current) {
+    // For expanded view, always scroll to bottom when new messages arrive
+    if (isExpanded && messagesEndRef.current && messages.length > prevMessageCount) {
+      scrollToBottom();
+    } else if (!isExpanded && messagesEndRef.current) {
+      // For collapsed view, only scroll if user is already near the bottom
       const container = messagesEndRef.current.parentElement;
       if (container) {
         const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
@@ -108,6 +111,10 @@ const TrollBox: React.FC = () => {
   useEffect(() => {
     if (isExpanded) {
       setUnreadCount(0);
+      // Scroll to bottom when expanded view opens
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     }
   }, [isExpanded]);
 
