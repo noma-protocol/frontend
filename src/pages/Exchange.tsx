@@ -2601,7 +2601,7 @@ const Launchpad: React.FC = () => {
                                                 <Box>
                                                     <Text color="#888" fontSize="xs">
                                                         {selectedToken.symbol}/{token1Symbol}
-                                                    </Text>
+                                                    </Text> 
                                                 </Box>
                                                 <Box>
                                                     <Text color="#888" fontSize="xs">
