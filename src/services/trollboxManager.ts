@@ -4,7 +4,7 @@ let connectionPromise: Promise<void> | null = null;
 let isConnecting = false;
 const listeners = new Set<(data: any) => void>();
 
-const connect = (wsUrl: string = 'ws://localhost:9090'): Promise<void> => {
+const connect = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Promise<void> => {
   console.trace('Connect called from:');
   
   // If already connecting, return existing promise

@@ -25,7 +25,7 @@ if (!window.__trollboxInitialized) {
   console.log('Global trollbox already initialized');
 }
 
-const connect = (wsUrl: string = 'ws://localhost:9090'): Promise<void> => {
+const connect = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Promise<void> => {
   // Rate limit connection attempts
   const now = Date.now();
   if (window.__trollboxLastConnectionAttempt && now - window.__trollboxLastConnectionAttempt < 1000) {

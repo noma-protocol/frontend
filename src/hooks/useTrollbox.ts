@@ -26,7 +26,7 @@ interface UseTrollboxReturn {
   error: string | null;
 }
 
-export const useTrollbox = (wsUrl: string = 'ws://localhost:9090'): UseTrollboxReturn => {
+export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): UseTrollboxReturn => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [connected, setConnected] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);

@@ -57,7 +57,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     setIsLoading(true);
     try {
       // Fetch user profile from server
-      const response = await fetch(`http://localhost:9091/api/profile/${address}`);
+      const response = await fetch(`https://trollbox.noma.money/api/profile/${address}`);
       if (response.ok) {
         const data = await response.json();
         setProfile(data);

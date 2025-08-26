@@ -19,7 +19,7 @@ class TrollboxConnection {
     this.wsUrl = wsUrl;
   }
 
-  static getInstance(wsUrl: string = 'ws://localhost:9090'): TrollboxConnection {
+  static getInstance(wsUrl: string = 'wss://trollbox-ws.noma.money'): TrollboxConnection {
     // Use global window object to persist singleton across HMR reloads
     if (!window.__trollboxConnection) {
       console.log('Creating NEW TrollboxConnection singleton instance');
