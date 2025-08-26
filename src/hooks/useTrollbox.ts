@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { globalTrollbox } from '../services/globalTrollbox';
+import { useSignMessage } from 'wagmi';
 
 interface Message {
   id: string;
@@ -8,6 +9,11 @@ interface Message {
   username: string;
   timestamp: string;
   clientId: string;
+  replyTo?: {
+    id: string;
+    username: string;
+    content: string;
+  };
 }
 
 interface UseTrollboxReturn {
@@ -18,15 +24,21 @@ interface UseTrollboxReturn {
   canChangeUsername: boolean;
   cooldownRemaining: number;
   userCount: number;
-  sendMessage: (content: string, username?: string) => void;
+  sendMessage: (content: string, username?: string, replyTo?: { id: string; username: string; content: string }) => void;
   authenticate: (address: string, username?: string) => void;
   changeUsername: (username: string) => void;
   disconnect: () => void;
   reconnect: () => void;
+  clearAuth: (address?: string) => void;
   error: string | null;
 }
 
+// Auth storage keys
+const AUTH_STORAGE_KEY = 'trollbox_auth';
+const AUTH_MESSAGE_PREFIX = 'Sign this message to authenticate with the Noma Trollbox\n\nTimestamp: ';
+
 export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): UseTrollboxReturn => {
+  const { signMessageAsync } = useSignMessage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [connected, setConnected] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -80,6 +92,27 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
           setCanChangeUsername(data.canChangeUsername);
           setCooldownRemaining(data.cooldownRemaining);
           setError(null);
+          
+          // Store auth in localStorage if not from cache
+          if (!data.fromCache && data.address) {
+            const authData = localStorage.getItem(AUTH_STORAGE_KEY);
+            let authMap = {};
+            if (authData) {
+              try {
+                authMap = JSON.parse(authData);
+              } catch (e) {}
+            }
+            authMap[data.address.toLowerCase()] = {
+              timestamp: Date.now(),
+              username: data.username
+            };
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authMap));
+          }
+          break;
+          
+        case 'requireAuth':
+          // Server requires new authentication
+          setAuthenticated(false);
           break;
           
         case 'state':
@@ -135,7 +168,7 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     };
   }, [wsUrl]);
   
-  const sendMessage = useCallback((content: string, username: string = 'Anonymous') => {
+  const sendMessage = useCallback((content: string, username: string = 'Anonymous', replyTo?: { id: string; username: string; content: string }) => {
     const trimmedContent = content.trim();
     if (!trimmedContent) return;
     
@@ -147,7 +180,8 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     const success = globalTrollbox.sendMessage({
       type: 'message',
       content: trimmedContent,
-      username: username.trim() || 'Anonymous'
+      username: username.trim() || 'Anonymous',
+      replyTo
     });
     
     if (!success) {
@@ -155,22 +189,61 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     }
   }, [authenticated]);
   
-  const authenticate = useCallback((address: string, username?: string) => {
+  const authenticate = useCallback(async (address: string, username?: string) => {
     if (!connected) {
       setError('Not connected to chat server');
       return;
     }
     
-    const success = globalTrollbox.sendMessage({
-      type: 'auth',
-      address,
-      username
-    });
-    
-    if (!success) {
-      setError('Failed to authenticate');
+    try {
+      // Check if we have valid cached auth
+      const authData = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (authData) {
+        try {
+          const authMap = JSON.parse(authData);
+          const cachedAuth = authMap[address.toLowerCase()];
+          
+          // Check if cached auth is still valid (24 hours)
+          if (cachedAuth && Date.now() - cachedAuth.timestamp < 24 * 60 * 60 * 1000) {
+            // Try to use cached auth first
+            const success = globalTrollbox.sendMessage({
+              type: 'checkAuth',
+              address
+            });
+            
+            if (success) {
+              return; // Wait for server response
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing auth cache:', e);
+        }
+      }
+      
+      // Generate auth message with timestamp
+      const timestamp = Date.now();
+      const message = AUTH_MESSAGE_PREFIX + timestamp;
+      
+      // Request signature from wallet
+      const signature = await signMessageAsync({ message });
+      
+      // Send authentication with signature
+      const success = globalTrollbox.sendMessage({
+        type: 'auth',
+        address,
+        signature,
+        message,
+        username
+      });
+      
+      if (!success) {
+        setError('Failed to authenticate');
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      setError('Failed to sign authentication message');
     }
-  }, [connected]);
+  }, [connected, signMessageAsync]);
   
   const changeUsername = useCallback((username: string) => {
     if (!authenticated) {
@@ -205,6 +278,24 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     globalTrollbox.connect(wsUrl);
   }, [wsUrl]);
   
+  const clearAuth = useCallback((address?: string) => {
+    const authData = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (authData) {
+      try {
+        const authMap = JSON.parse(authData);
+        if (address) {
+          delete authMap[address.toLowerCase()];
+        } else {
+          // Clear all auth if no address specified
+          Object.keys(authMap).forEach(key => delete authMap[key]);
+        }
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authMap));
+      } catch (e) {
+        console.error('Error clearing auth:', e);
+      }
+    }
+  }, []);
+  
   return { 
     messages, 
     connected, 
@@ -218,6 +309,7 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     changeUsername,
     disconnect,
     reconnect,
+    clearAuth,
     error 
   };
 };

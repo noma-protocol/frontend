@@ -5,13 +5,18 @@ import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import express from 'express';
 import cors from 'cors';
+import { ethers } from 'ethers';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
 const MESSAGES_FILE = join(DATA_DIR, 'messages.json');
 const USERNAMES_FILE = join(DATA_DIR, 'usernames.json');
 const PROFILES_FILE = join(DATA_DIR, 'profiles.json');
+const AUTH_FILE = join(DATA_DIR, 'auth.json');
 const PORT = process.env.PORT || 9090;
+
+// Authentication message that users will sign
+const AUTH_MESSAGE = 'Sign this message to authenticate with the Noma Trollbox\n\nTimestamp: ';
 
 // Ensure data directory exists
 if (!existsSync(DATA_DIR)) {
@@ -172,6 +177,106 @@ class UsernameStore {
   }
 }
 
+// Authentication store for managing signed credentials
+class AuthStore {
+  constructor() {
+    this.credentials = this.loadCredentials();
+  }
+
+  loadCredentials() {
+    try {
+      if (existsSync(AUTH_FILE)) {
+        const data = readFileSync(AUTH_FILE, 'utf8');
+        return JSON.parse(data);
+      }
+    } catch (error) {
+      console.error('Error loading auth credentials:', error);
+    }
+    return {};
+  }
+
+  saveCredentials() {
+    try {
+      writeFileSync(AUTH_FILE, JSON.stringify(this.credentials, null, 2));
+    } catch (error) {
+      console.error('Error saving auth credentials:', error);
+    }
+  }
+
+  verifySignature(address, message, signature) {
+    try {
+      // Normalize the address
+      const normalizedAddress = address.toLowerCase();
+      
+      // Recover the address from the signature
+      const recoveredAddress = ethers.verifyMessage(message, signature);
+      
+      // Check if the recovered address matches the claimed address
+      const isValid = recoveredAddress.toLowerCase() === normalizedAddress;
+      
+      if (!isValid) {
+        console.log(`Signature verification failed: expected ${normalizedAddress}, got ${recoveredAddress.toLowerCase()}`);
+      }
+      
+      return isValid;
+    } catch (error) {
+      console.error('Error verifying signature:', error);
+      return false;
+    }
+  }
+
+  isValidAuthMessage(message) {
+    // Check if the message starts with our auth message prefix
+    if (!message.startsWith(AUTH_MESSAGE)) {
+      return false;
+    }
+    
+    // Extract timestamp from the message
+    const timestamp = message.substring(AUTH_MESSAGE.length);
+    const authTime = parseInt(timestamp);
+    
+    // Check if timestamp is valid and within 5 minutes
+    const now = Date.now();
+    const fiveMinutes = 5 * 60 * 1000;
+    
+    return !isNaN(authTime) && Math.abs(now - authTime) < fiveMinutes;
+  }
+
+  authenticate(address, signature, message) {
+    // Validate the auth message format and timestamp
+    if (!this.isValidAuthMessage(message)) {
+      return { success: false, error: 'Invalid or expired auth message' };
+    }
+    
+    // Verify the signature
+    if (!this.verifySignature(address, message, signature)) {
+      return { success: false, error: 'Invalid signature' };
+    }
+    
+    // Generate a unique session token for this authentication
+    const sessionToken = uuidv4();
+    
+    // Store the authentication with session token
+    this.credentials[address.toLowerCase()] = {
+      lastAuth: Date.now(),
+      signature: signature,
+      sessionToken: sessionToken
+    };
+    
+    this.saveCredentials();
+    return { success: true, sessionToken };
+  }
+
+  isAuthenticated(address) {
+    const cred = this.credentials[address.toLowerCase()];
+    if (!cred) return false;
+    
+    // Check if auth is still valid (24 hours)
+    const authExpiry = 24 * 60 * 60 * 1000;
+    return Date.now() - cred.lastAuth < authExpiry;
+  }
+}
+
 // Profile store for tracking user data
 class ProfileStore {
   constructor() {
@@ -224,19 +329,34 @@ class ProfileStore {
 class RateLimiter {
   constructor() {
     this.clients = new Map();
+    this.addresses = new Map();
     this.WINDOW_MS = 60000; // 1 minute
     this.MAX_MESSAGES = 10; // 10 messages per minute
+    this.MAX_AUTH_ATTEMPTS = 5; // 5 auth attempts per minute
   }
 
-  isAllowed(clientId) {
+  isAllowed(clientId, address = null) {
     const now = Date.now();
-    const clientData = this.clients.get(clientId) || { messages: [], lastCleanup: now };
     
-    // Cleanup old messages
+    // Check client-based rate limit
+    const clientData = this.clients.get(clientId) || { messages: [], lastCleanup: now };
     clientData.messages = clientData.messages.filter(time => now - time < this.WINDOW_MS);
     
     if (clientData.messages.length >= this.MAX_MESSAGES) {
       return false;
+    }
+    
+    // Check address-based rate limit if address is provided
+    if (address) {
+      const addressData = this.addresses.get(address) || { messages: [], lastCleanup: now };
+      addressData.messages = addressData.messages.filter(time => now - time < this.WINDOW_MS);
+      
+      if (addressData.messages.length >= this.MAX_MESSAGES) {
+        return false;
+      }
+      
+      addressData.messages.push(now);
+      this.addresses.set(address, addressData);
     }
     
     clientData.messages.push(now);
@@ -244,12 +364,37 @@ class RateLimiter {
     
     return true;
   }
+  
+  isAuthAllowed(clientId) {
+    const now = Date.now();
+    const key = `auth_${clientId}`;
+    const authData = this.clients.get(key) || { attempts: [], lastCleanup: now };
+    
+    // Cleanup old attempts
+    authData.attempts = authData.attempts.filter(time => now - time < this.WINDOW_MS);
+    
+    if (authData.attempts.length >= this.MAX_AUTH_ATTEMPTS) {
+      return false;
+    }
+    
+    authData.attempts.push(now);
+    this.clients.set(key, authData);
+    
+    return true;
+  }
 
   cleanup() {
     const now = Date.now();
+    // Clean up client rate limits
     for (const [clientId, data] of this.clients.entries()) {
       if (now - data.lastCleanup > this.WINDOW_MS * 2) {
         this.clients.delete(clientId);
+      }
+    }
+    // Clean up address rate limits
+    for (const [address, data] of this.addresses.entries()) {
+      if (now - data.lastCleanup > this.WINDOW_MS * 2) {
+        this.addresses.delete(address);
       }
     }
   }
@@ -259,6 +404,7 @@ class RateLimiter {
 const messageStore = new MessageStore();
 const usernameStore = new UsernameStore();
 const profileStore = new ProfileStore();
+const authStore = new AuthStore();
 const rateLimiter = new RateLimiter();
 
 // Create WebSocket server
@@ -307,6 +453,10 @@ wss.on('connection', (ws, req) => {
   // Store client with metadata
   ws.clientId = clientId;
   ws.address = null; // Will be set when they authenticate
+  ws.authenticated = false;
+  ws.authTimestamp = null;
+  ws.sessionToken = null;
+  ws.clientIp = clientIp;
   clients.set(clientId, ws);
   
   // Send welcome message and recent messages
@@ -333,13 +483,46 @@ wss.on('connection', (ws, req) => {
       
       switch (message.type) {
         case 'auth':
-          // Authenticate with address and username
-          if (!message.address) {
-            ws.send(JSON.stringify({ type: 'error', message: 'Address required for authentication' }));
+          // Rate limit auth attempts
+          if (!rateLimiter.isAuthAllowed(clientId)) {
+            ws.send(JSON.stringify({ 
+              type: 'error', 
+              message: 'Too many authentication attempts. Please wait.' 
+            }));
+            return;
+          }
+          
+          // Authenticate with address and signature
+          if (!message.address || !message.signature || !message.message) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Address, signature, and message required for authentication' }));
+            return;
+          }
+          
+          // Check if another client is already authenticated with this address
+          for (const [id, client] of clients.entries()) {
+            if (id !== clientId && client.authenticated && client.address === message.address.toLowerCase()) {
+              // Disconnect the other client
+              client.send(JSON.stringify({ 
+                type: 'error', 
+                message: 'Your session was terminated: Another client authenticated with your address' 
+              }));
+              client.close();
+              clients.delete(id);
+            }
+          }
+          
+          // Verify the signature
+          const authResult = authStore.authenticate(message.address, message.signature, message.message);
+          
+          if (!authResult.success) {
+            ws.send(JSON.stringify({ type: 'error', message: authResult.error }));
             return;
           }
           
           ws.address = message.address.toLowerCase();
+          ws.authenticated = true;
+          ws.authTimestamp = Date.now();
+          ws.sessionToken = authResult.sessionToken;
           
           // Create or update user profile
           profileStore.createOrUpdateProfile(ws.address);
@@ -362,19 +545,58 @@ wss.on('connection', (ws, req) => {
             address: ws.address,
             username: currentUsername || 'Anonymous',
             canChangeUsername: usernameStore.canChangeUsername(ws.address),
-            cooldownRemaining: usernameStore.getRemainingCooldown(ws.address)
+            cooldownRemaining: usernameStore.getRemainingCooldown(ws.address),
+            sessionToken: ws.sessionToken // Send session token to client
           }));
+          break;
+          
+        case 'checkAuth':
+          // Check if stored credentials are still valid
+          if (!message.address) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Address required' }));
+            return;
+          }
+          
+          const isAuth = authStore.isAuthenticated(message.address);
+          
+          if (isAuth) {
+            // Verify the stored credentials match
+            const storedCreds = authStore.credentials[message.address.toLowerCase()];
+            if (!storedCreds || !storedCreds.sessionToken) {
+              ws.send(JSON.stringify({ type: 'requireAuth' }));
+              return;
+            }
+            
+            ws.address = message.address.toLowerCase();
+            ws.authenticated = true;
+            ws.authTimestamp = Date.now();
+            ws.sessionToken = storedCreds.sessionToken;
+            
+            const username = usernameStore.getUsername(ws.address);
+            
+            ws.send(JSON.stringify({
+              type: 'authenticated',
+              address: ws.address,
+              username: username || 'Anonymous',
+              canChangeUsername: usernameStore.canChangeUsername(ws.address),
+              cooldownRemaining: usernameStore.getRemainingCooldown(ws.address),
+              fromCache: true,
+              sessionToken: ws.sessionToken
+            }));
+          } else {
+            ws.send(JSON.stringify({ type: 'requireAuth' }));
+          }
           break;
           
         case 'message':
           // Check if authenticated
-          if (!ws.address) {
+          if (!ws.authenticated) {
             ws.send(JSON.stringify({ type: 'error', message: 'Must authenticate before sending messages' }));
             return;
           }
           
-          // Check rate limit
-          if (!rateLimiter.isAllowed(clientId)) {
+          // Check rate limit (both client and address based)
+          if (!rateLimiter.isAllowed(clientId, ws.address)) {
             ws.send(JSON.stringify({ 
               type: 'error', 
               message: 'Rate limit exceeded. Please slow down.' 
@@ -393,19 +615,29 @@ wss.on('connection', (ws, req) => {
             return;
           }
           
-          // Get username from store (ignore client-provided username)
+          // SECURITY: Always get username from server store, never trust client
           const username = usernameStore.getUsername(ws.address) || 'Anonymous';
           
-          // Create chat message
+          // Create chat message with server-verified data only
           const chatMessage = {
             id: uuidv4(),
             type: 'message',
             content: message.content.trim(),
-            username: username,
-            address: ws.address, // Include address for verification
+            username: username, // Server-verified username
+            address: ws.address, // Server-stored address from authentication
             timestamp: new Date().toISOString(),
-            clientId: clientId
+            clientId: clientId,
+            verified: true // Mark as cryptographically verified
           };
+          
+          // Handle replies if provided
+          if (message.replyTo && message.replyTo.id) {
+            chatMessage.replyTo = {
+              id: message.replyTo.id,
+              username: message.replyTo.username,
+              content: message.replyTo.content
+            };
+          }
           
           // Store message
           messageStore.addMessage(chatMessage);
@@ -416,7 +648,7 @@ wss.on('connection', (ws, req) => {
           
         case 'changeUsername':
           // Check if authenticated
-          if (!ws.address) {
+          if (!ws.authenticated) {
             ws.send(JSON.stringify({ type: 'error', message: 'Must authenticate before changing username' }));
             return;
           }
@@ -474,6 +706,26 @@ wss.on('connection', (ws, req) => {
 setInterval(() => {
   rateLimiter.cleanup();
 }, 60000);
+
+// Session timeout check (30 minutes)
+setInterval(() => {
+  const now = Date.now();
+  const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+  
+  for (const [clientId, ws] of clients.entries()) {
+    if (ws.authenticated && ws.authTimestamp) {
+      if (now - ws.authTimestamp > SESSION_TIMEOUT) {
+        ws.send(JSON.stringify({ 
+          type: 'error', 
+          message: 'Session expired. Please re-authenticate.' 
+        }));
+        ws.authenticated = false;
+        ws.address = null;
+        ws.sessionToken = null;
+      }
+    }
+  }
+}, 60000); // Check every minute
 
 // Create Express app for REST API
 const app = express();

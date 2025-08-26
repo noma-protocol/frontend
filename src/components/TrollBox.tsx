@@ -11,7 +11,7 @@ import {
   Portal,
   Badge,
 } from '@chakra-ui/react';
-import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown, FiImage, FiYoutube } from 'react-icons/fi';
+import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown, FiImage, FiYoutube, FiCornerUpRight } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
 import { useTrollbox } from '../hooks/useTrollbox';
 import UserProfileModal from './UserProfileModal';
@@ -27,6 +27,11 @@ interface Message {
   timestamp: string;
   clientId: string;
   address?: string;
+  replyTo?: {
+    id: string;
+    username: string;
+    content: string;
+  };
 }
 
 let instanceCounter = 0;
@@ -36,6 +41,7 @@ const TrollBox: React.FC = () => {
   // console.log(`TrollBox instance ${instanceId.current} created`);
   
   const { address, isConnected } = useAccount();
+  const [prevAddress, setPrevAddress] = useState<string | undefined>(undefined);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -43,6 +49,8 @@ const TrollBox: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [prevMessageCount, setPrevMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const collapsedInputRef = useRef<HTMLInputElement>(null);
+  const expandedInputRef = useRef<HTMLInputElement>(null);
   const [selectedUser, setSelectedUser] = useState<{ username: string; address: string } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showEmojiPickerExpanded, setShowEmojiPickerExpanded] = useState(false);
@@ -57,6 +65,7 @@ const TrollBox: React.FC = () => {
   const [showYouTubeVideos, setShowYouTubeVideos] = useState(true);
   const [contentLoading, setContentLoading] = useState(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   
   // Use the WebSocket hook
   const { 
@@ -77,11 +86,31 @@ const TrollBox: React.FC = () => {
   
   // Authenticate when connected and have address
   useEffect(() => {
+    // Check if wallet address changed or disconnected
+    if (prevAddress && prevAddress !== address) {
+      // User switched accounts or disconnected wallet
+      disconnect();
+      
+      // Clear auth from localStorage for the previous address
+      const authData = localStorage.getItem('trollbox_auth');
+      if (authData) {
+        try {
+          const authMap = JSON.parse(authData);
+          delete authMap[prevAddress.toLowerCase()];
+          localStorage.setItem('trollbox_auth', JSON.stringify(authMap));
+        } catch (e) {}
+      }
+    }
+    
+    setPrevAddress(address);
+    
     if (connected && address && !authenticated) {
       // Don't send username on initial auth - let user set it
-      authenticate(address);
+      authenticate(address).catch(err => {
+        console.error('Authentication failed:', err);
+      });
     }
-  }, [connected, address, authenticated, authenticate]);
+  }, [connected, address, authenticated, authenticate, disconnect, prevAddress]);
   
   // Update local username when server username changes
   useEffect(() => {
@@ -229,7 +258,37 @@ const TrollBox: React.FC = () => {
   const handleSendMessage = () => {
     if (!newMessage.trim() || !connected || !authenticated) return;
     
-    sendMessage(newMessage.trim(), username || 'Anonymous');
+    const messageContent = newMessage.trim();
+    
+    // Pass reply data if replying
+    sendMessage(
+      messageContent, 
+      username || 'Anonymous',
+      replyingTo ? {
+        id: replyingTo.id,
+        username: replyingTo.username,
+        content: replyingTo.content
+      } : undefined
+    );
+    
+    setNewMessage('');
+    setReplyingTo(null); // Clear reply after sending
+  };
+  
+  const handleReply = (message: Message) => {
+    setReplyingTo(message);
+    // Add @username to input
+    setNewMessage(`@${message.username} `);
+    // Focus appropriate input
+    if (isExpanded && expandedInputRef.current) {
+      expandedInputRef.current.focus();
+    } else if (!isExpanded && collapsedInputRef.current) {
+      collapsedInputRef.current.focus();
+    }
+  };
+  
+  const cancelReply = () => {
+    setReplyingTo(null);
     setNewMessage('');
   };
   
@@ -826,9 +885,37 @@ const TrollBox: React.FC = () => {
       {/* Input */}
       <Box p={3} borderTop="1px solid #2a2a2a">
         {connected && authenticated ? (
-          <HStack position="relative">
-            <Box flex="1" position="relative">
+          <VStack align="stretch" gap={2}>
+            {replyingTo && (
+              <Box 
+                p={1.5} 
+                bg="rgba(74, 222, 128, 0.05)" 
+                borderRadius="md" 
+                borderLeft="2px solid #4ade80"
+                fontSize="xs"
+              >
+                <HStack justify="space-between">
+                  <HStack gap={1}>
+                    <FiCornerUpRight size={10} color="#4ade80" />
+                    <Text fontSize="xs" color="#4ade80">
+                      @{replyingTo.username}
+                    </Text>
+                    <Text fontSize="xs" color="#888" noOfLines={1} flex="1">
+                      {replyingTo.content.length > 40 
+                        ? replyingTo.content.substring(0, 40) + '...' 
+                        : replyingTo.content}
+                    </Text>
+                  </HStack>
+                  <Box cursor="pointer" onClick={cancelReply}>
+                    <FiX size={12} color="#666" />
+                  </Box>
+                </HStack>
+              </Box>
+            )}
+            <HStack position="relative">
+              <Box flex="1" position="relative">
               <Input
+                ref={collapsedInputRef}
                 value={newMessage}
                 onChange={handleInputChange}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -1024,6 +1111,7 @@ const TrollBox: React.FC = () => {
               </Button>
             </Box>
           </HStack>
+          </VStack>
         ) : (
           <VStack>
             <Text color="#888" textAlign="center" fontSize="xs">
@@ -1268,15 +1356,45 @@ const TrollBox: React.FC = () => {
                     </Text>
                   </Box>
                   <Box flex="1">
+                    {msg.replyTo && (
+                      <Box 
+                        mb={1} 
+                        p={2} 
+                        bg="rgba(74, 222, 128, 0.05)" 
+                        borderRadius="md" 
+                        borderLeft="2px solid #4ade80"
+                      >
+                        <HStack gap={1} align="center">
+                          <FiCornerUpRight size={12} color="#4ade80" />
+                          <Text fontSize="xs" color="#4ade80" fontWeight="500">
+                            @{msg.replyTo.username}
+                          </Text>
+                          <Text fontSize="xs" color="#888" noOfLines={1}>
+                            {msg.replyTo.content.length > 50 
+                              ? msg.replyTo.content.substring(0, 50) + '...' 
+                              : msg.replyTo.content}
+                          </Text>
+                        </HStack>
+                      </Box>
+                    )}
                     <Box color="white" fontSize="sm">
                       {renderMessageContent(msg.content, true)}
                     </Box>
                   </Box>
-                  <Box>
+                  <HStack>
+                    <IconButton
+                      aria-label="Reply"
+                      icon={<FiCornerUpRight />}
+                      size="xs"
+                      variant="ghost"
+                      color="#666"
+                      _hover={{ color: '#4ade80', bg: 'rgba(74, 222, 128, 0.1)' }}
+                      onClick={() => handleReply(msg)}
+                    />
                     <Text color="#666" fontSize="xs" flexShrink={0}>
                       {formatTime(msg.timestamp)}
                     </Text>
-                  </Box>
+                  </HStack>
                 </HStack>
               </Box>
             ))
@@ -1362,9 +1480,41 @@ const TrollBox: React.FC = () => {
                     </Box>
                   )}
                 </HStack>
+                {replyingTo && (
+                  <Box 
+                    p={2} 
+                    bg="rgba(74, 222, 128, 0.05)" 
+                    borderRadius="md" 
+                    borderLeft="2px solid #4ade80"
+                  >
+                    <HStack justify="space-between">
+                      <HStack gap={1}>
+                        <FiCornerUpRight size={14} color="#4ade80" />
+                        <Text fontSize="sm" color="#4ade80">
+                          Replying to @{replyingTo.username}
+                        </Text>
+                        <Text fontSize="sm" color="#888" noOfLines={1} flex="1">
+                          {replyingTo.content.length > 80 
+                            ? replyingTo.content.substring(0, 80) + '...' 
+                            : replyingTo.content}
+                        </Text>
+                      </HStack>
+                      <IconButton
+                        aria-label="Cancel reply"
+                        icon={<FiX />}
+                        size="xs"
+                        variant="ghost"
+                        color="#666"
+                        _hover={{ color: '#ff6b6b' }}
+                        onClick={cancelReply}
+                      />
+                    </HStack>
+                  </Box>
+                )}
                 <HStack position="relative">
                   <Box flex="1" position="relative">
                     <Input
+                      ref={expandedInputRef}
                       value={newMessage}
                       onChange={handleInputChange}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
