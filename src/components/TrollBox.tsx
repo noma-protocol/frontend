@@ -309,7 +309,7 @@ const TrollBox: React.FC = () => {
   };
 
   // Function to parse text and highlight @mentions and YouTube links
-  const parseTextWithMentions = (text: string, showVideos: boolean = true): React.ReactNode => {
+  const parseTextWithMentions = (text: string, showVideos: boolean = true, showYouTube: boolean = true): React.ReactNode => {
     // First check for YouTube URLs
     const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})(?:[^\s]*)?/g;
     const mentionRegex = /@(\w+)/g;
@@ -344,7 +344,7 @@ const TrollBox: React.FC = () => {
       
       if (item.type === 'youtube') {
         const videoId = extractYouTubeVideoId(match[0]);
-        if (videoId && showVideos) {
+        if (videoId && showVideos && showYouTube) {
           parts.push(
             <Box key={match.index} my={2} width="100%" maxW="300px">
               <Box
@@ -438,7 +438,7 @@ const TrollBox: React.FC = () => {
     while ((match = imageRegex.exec(content)) !== null) {
       // Add text before the image (with mention and YouTube parsing)
       if (match.index > lastIndex) {
-        parts.push(parseTextWithMentions(content.substring(lastIndex, match.index), showImages));
+        parts.push(parseTextWithMentions(content.substring(lastIndex, match.index), showImages, showYouTubeVideos));
       }
       
       // Add the image or indicator based on showImages parameter
@@ -524,12 +524,12 @@ const TrollBox: React.FC = () => {
     
     // Add remaining text (with mention and YouTube parsing)
     if (lastIndex < content.length) {
-      parts.push(parseTextWithMentions(content.substring(lastIndex), showImages));
+      parts.push(parseTextWithMentions(content.substring(lastIndex), showImages, showYouTubeVideos));
     }
     
     // If no parts were created, parse the entire content for mentions and YouTube
     if (parts.length === 0) {
-      return parseTextWithMentions(content, showImages);
+      return parseTextWithMentions(content, showImages, showYouTubeVideos);
     }
     
     return <>{parts}</>;
@@ -1065,20 +1065,21 @@ const TrollBox: React.FC = () => {
                 </Box>
               </HStack>
               <HStack gap={2}>
-                <IconButton
+                <Button
                   aria-label="Toggle YouTube videos"
-                  icon={<FiYoutube />}
                   size="sm"
-                  variant={showYouTubeVideos ? "solid" : "ghost"}
-                  color={showYouTubeVideos ? "black" : "white"}
+                  p={2}
+                  minW="auto"
                   bg={showYouTubeVideos ? "#ff0000" : "transparent"}
+                  border={showYouTubeVideos ? "none" : "1px solid #333"}
                   onClick={() => setShowYouTubeVideos(!showYouTubeVideos)}
                   _hover={{ 
                     bg: showYouTubeVideos ? "#cc0000" : '#2a2a2a',
-                    color: showYouTubeVideos ? "black" : "white"
                   }}
                   title={showYouTubeVideos ? "Hide YouTube videos" : "Show YouTube videos"}
-                />
+                >
+                  <FiYoutube size={16} color={showYouTubeVideos ? "white" : "#888"} />
+                </Button>
                 {connected ? (
                   <Button
                     size="sm"
@@ -1128,16 +1129,19 @@ const TrollBox: React.FC = () => {
                     Connect
                   </Button>
                 )}
-                <IconButton
+                <Button
                   aria-label="Minimize"
-                  icon={<FiMinimize2 />}
                   size="sm"
-                  variant="ghost"
-                  color="white"
+                  p={2}
+                  minW="auto"
+                  bg="transparent"
+                  border="1px solid #333"
                   onClick={() => setIsExpanded(false)}
                   _hover={{ bg: '#2a2a2a' }}
                   title="Minimize"
-                />
+                >
+                  <FiMinimize2 size={16} color="white" />
+                </Button>
               </HStack>
             </HStack>
             
@@ -1218,7 +1222,7 @@ const TrollBox: React.FC = () => {
                   </Box>
                   <Box flex="1">
                     <Box color="white" fontSize="sm">
-                      {renderMessageContent(msg.content, showYouTubeVideos)}
+                      {renderMessageContent(msg.content, true)}
                     </Box>
                   </Box>
                   <Box>
