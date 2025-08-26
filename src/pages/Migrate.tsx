@@ -27,7 +27,7 @@ import { formatEther } from "viem";
 import { formatNumberPrecise, getContractAddress, commify } from "../utils";
 import { Toaster, toaster } from "../components/ui/toaster";
 import metamaskLogo from "../assets/images/metamask.svg";
-import WalletNotConnected from '../components/WalletNotConnected';
+// import WalletNotConnected from '../components/WalletNotConnected';
 
 const addresses = config.chain === "local"
   ? addressesLocal
@@ -259,7 +259,9 @@ const Migrate: React.FC = () => {
       <Toaster />
 
       {!isConnected ? (
-        <WalletNotConnected />
+        <Box display="flex" alignItems="center" justifyContent="center" minH="100vh">
+          <Text color="white" fontSize="xl">Please connect your wallet</Text>
+        </Box>
       ) : isMobile && isLandscape ? (
         <RotateDeviceMessage />
       ) : (

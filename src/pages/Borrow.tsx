@@ -24,7 +24,7 @@ import {
 } from '../components/ui/dialog';
 import placeholderLogo from '../assets/images/question.svg';
 import placeholderLogoDark from '../assets/images/question_white.svg';
-import WalletNotConnected from '../components/WalletNotConnected';
+// import WalletNotConnected from '../components/WalletNotConnected';
 import WalletSidebar from '../components/WalletSidebar';
 
 import {
@@ -929,7 +929,9 @@ const Borrow = () => {
             <Toaster />
 
             {!isConnected ? (
-                <WalletNotConnected />
+                <Box display="flex" alignItems="center" justifyContent="center" minH="100vh">
+                    <Text color="white" fontSize="xl">Please connect your wallet</Text>
+                </Box>
             ) : isMobile && isLandscape ? (
                 <RotateDeviceMessage />
             ) : isAddress(vaultAddress) ? (

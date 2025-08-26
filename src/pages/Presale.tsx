@@ -38,7 +38,7 @@ import PresaleDetails from "../components/PresaleDetails";
 import usePresaleContract from '../hooks/usePresaleContract';
 
 import metamaskLogo from "../assets/images/metamask.svg";
-import WalletNotConnected from '../components/WalletNotConnected';
+// import WalletNotConnected from '../components/WalletNotConnected';
 import placeholderLogo from "../assets/images/question_white.svg"; 
 import monadLogo from "../assets/images/monad.png";
 
@@ -732,7 +732,9 @@ const Presale: React.FC = () => {
     <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
       <Toaster />
       {!isConnected ? (
-        <WalletNotConnected />
+        <Box display="flex" alignItems="center" justifyContent="center" minH="100vh">
+          <Text color="white" fontSize="xl">Please connect your wallet</Text>
+        </Box>
       ) : contractAddress && contractAddress !== "0x0000000000000000000000000000000000000000" ? ( 
         <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4} minH="calc(100vh - 80px)">
           {/* Left side - Presale Information */}

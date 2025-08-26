@@ -33,7 +33,7 @@ import uniswapLogo from "../assets/images/uniswap.png";
 import pancakeLogo from "../assets/images/pancake.png";
 import walletIcon from '../assets/images/walletIcon.svg';
 import addressesBsc from "../assets/deployment.json";
-import WalletNotConnected from '../components/WalletNotConnected';
+// import WalletNotConnected from '../components/WalletNotConnected';
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
@@ -448,7 +448,9 @@ const Markets: React.FC = () => {
       <Toaster />
       {/* Prompt user to connect their wallet if not connected */}
       {!isConnected ? (
-        <WalletNotConnected />
+        <Box display="flex" alignItems="center" justifyContent="center" minH="100vh">
+          <Text color="white" fontSize="xl">Please connect your wallet</Text>
+        </Box>
       ) : (
         <Box
           color="white"

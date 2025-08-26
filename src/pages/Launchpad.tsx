@@ -24,7 +24,7 @@ import {
     SelectValueText,
   } from "../components/ui/select";
 import { Checkbox } from "../components/ui/checkbox"
-import WalletNotConnected from '../components/WalletNotConnected';
+// import WalletNotConnected from '../components/WalletNotConnected';
   
 import { useAccount, useBalance, useContractWrite } from "wagmi";
 import { isMobile } from "react-device-detect";
@@ -525,7 +525,9 @@ const Launchpad: React.FC = () => {
             
             <Toaster />
             {!isConnected ? (
-                <WalletNotConnected />
+                <Box display="flex" alignItems="center" justifyContent="center" minH="100vh">
+                    <Text color="white" fontSize="xl">Please connect your wallet</Text>
+                </Box>
             ) : (            
             <Box
                 w="100%"

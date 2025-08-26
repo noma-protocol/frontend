@@ -16,7 +16,7 @@ import walletIcon from '../assets/images/walletIcon.svg';
 import placeholderLogo from '../assets/images/question.svg';
 import placeholderLogoDark from '../assets/images/question_white.svg';
 import WalletSidebar from '../components/WalletSidebar';
-import WalletNotConnected from '../components/WalletNotConnected';
+// import WalletNotConnected from '../components/WalletNotConnected';
 
 import {
     SelectContent,
@@ -597,7 +597,9 @@ const Stake = () => {
         <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
             <Toaster />
             {!isConnected ? (
-                <WalletNotConnected />
+                <Box display="flex" alignItems="center" justifyContent="center" minH="100vh">
+                    <Text color="white" fontSize="xl">Please connect your wallet</Text>
+                </Box>
             ) : isMobile && isLandscape ? (
                 <RotateDeviceMessage />
             ) : isAddress(vaultAddress) ? (
