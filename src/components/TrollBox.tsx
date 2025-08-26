@@ -18,6 +18,7 @@ import UserProfileModal from './UserProfileModal';
 import EmojiPicker from 'emoji-picker-react';
 import GifPicker from './GifPicker';
 import { Image } from '@chakra-ui/react';
+import { toaster } from '../components/ui/toaster';
 
 interface Message {
   id: string;
@@ -49,6 +50,10 @@ const TrollBox: React.FC = () => {
   const [showGifPickerExpanded, setShowGifPickerExpanded] = useState(false);
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
   const gifButtonRef = useRef<HTMLButtonElement>(null);
+  const [lastProcessedMessageId, setLastProcessedMessageId] = useState<string>('');
+  const [showUserSuggestions, setShowUserSuggestions] = useState(false);
+  const [userSuggestions, setUserSuggestions] = useState<string[]>([]);
+  const [mentionStartIndex, setMentionStartIndex] = useState(-1);
   
   // Use the WebSocket hook
   const { 
@@ -81,6 +86,33 @@ const TrollBox: React.FC = () => {
       setUsername(serverUsername);
     }
   }, [serverUsername]);
+
+  // Check for mentions in new messages
+  useEffect(() => {
+    if (!serverUsername || messages.length === 0) return;
+    
+    const lastMessage = messages[messages.length - 1];
+    
+    // Avoid processing the same message twice
+    if (lastMessage.id === lastProcessedMessageId) return;
+    
+    // Don't notify for own messages
+    if (lastMessage.username === serverUsername) return;
+    
+    // Check if current user is mentioned
+    const mentionPattern = new RegExp(`@${serverUsername}\\b`, 'gi');
+    if (mentionPattern.test(lastMessage.content)) {
+      toaster.create({
+        title: `${lastMessage.username} mentioned you`,
+        description: lastMessage.content.length > 50 
+          ? lastMessage.content.substring(0, 50) + '...' 
+          : lastMessage.content,
+        duration: 5000,
+      });
+    }
+    
+    setLastProcessedMessageId(lastMessage.id);
+  }, [messages, serverUsername, lastProcessedMessageId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -118,7 +150,7 @@ const TrollBox: React.FC = () => {
     }
   }, [isExpanded]);
 
-  // Close emoji/gif pickers when clicking outside
+  // Close emoji/gif pickers and user suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -130,13 +162,16 @@ const TrollBox: React.FC = () => {
         setShowGifPicker(false);
         setShowGifPickerExpanded(false);
       }
+      if (!target.closest('.user-suggestions') && !target.closest('input')) {
+        setShowUserSuggestions(false);
+      }
     };
 
-    if (showEmojiPicker || showEmojiPickerExpanded || showGifPicker || showGifPickerExpanded) {
+    if (showEmojiPicker || showEmojiPickerExpanded || showGifPicker || showGifPickerExpanded || showUserSuggestions) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [showEmojiPicker, showEmojiPickerExpanded, showGifPicker, showGifPickerExpanded]);
+  }, [showEmojiPicker, showEmojiPickerExpanded, showGifPicker, showGifPickerExpanded, showUserSuggestions]);
 
   // Show connection status
   useEffect(() => {
@@ -198,6 +233,100 @@ const TrollBox: React.FC = () => {
     setShowGifPickerExpanded(false);
   };
 
+  // Handle input change for @ mention detection
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewMessage(value);
+    
+    // Check if user is typing a mention
+    const lastAtIndex = value.lastIndexOf('@');
+    if (lastAtIndex >= 0 && lastAtIndex === value.length - 1) {
+      // User just typed @
+      setMentionStartIndex(lastAtIndex);
+      const uniqueUsernames = [...new Set(messages.map(m => m.username))];
+      setUserSuggestions(uniqueUsernames);
+      setShowUserSuggestions(true);
+    } else if (mentionStartIndex >= 0 && lastAtIndex >= mentionStartIndex) {
+      // User is continuing to type after @
+      const searchTerm = value.substring(mentionStartIndex + 1);
+      const uniqueUsernames = [...new Set(messages.map(m => m.username))];
+      const filtered = uniqueUsernames.filter(u => 
+        u.toLowerCase().startsWith(searchTerm.toLowerCase())
+      );
+      setUserSuggestions(filtered);
+      setShowUserSuggestions(filtered.length > 0);
+    } else {
+      // No active mention
+      setShowUserSuggestions(false);
+      setMentionStartIndex(-1);
+    }
+  };
+
+  // Handle selecting a user from suggestions
+  const handleSelectUserSuggestion = (username: string) => {
+    if (mentionStartIndex >= 0) {
+      const beforeMention = newMessage.substring(0, mentionStartIndex);
+      const afterMention = newMessage.substring(mentionStartIndex);
+      const currentSearch = afterMention.substring(1); // Remove @
+      
+      // Replace the @search with @username
+      setNewMessage(beforeMention + '@' + username + ' ');
+      setShowUserSuggestions(false);
+      setMentionStartIndex(-1);
+    }
+  };
+
+  // Function to parse text and highlight @mentions
+  const parseTextWithMentions = (text: string): React.ReactNode => {
+    const mentionRegex = /@(\w+)/g;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = mentionRegex.exec(text)) !== null) {
+      // Add text before the mention
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      
+      // Add the mention as a highlighted span
+      const mentionedUser = match[1];
+      const isCurrentUser = mentionedUser.toLowerCase() === serverUsername?.toLowerCase();
+      
+      parts.push(
+        <Text
+          key={match.index}
+          as="span"
+          color={isCurrentUser ? "#fbbf24" : "#4ade80"}
+          fontWeight="bold"
+          bg={isCurrentUser ? "rgba(251, 191, 36, 0.1)" : "transparent"}
+          px={isCurrentUser ? 1 : 0}
+          borderRadius="sm"
+          cursor="pointer"
+          _hover={{ textDecoration: "underline" }}
+          onClick={() => {
+            // Find if this user exists in messages and has an address
+            const userMessage = messages.find(m => m.username.toLowerCase() === mentionedUser.toLowerCase());
+            if (userMessage?.address) {
+              handleUsernameClick(mentionedUser, userMessage.address);
+            }
+          }}
+        >
+          @{mentionedUser}
+        </Text>
+      );
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+    
+    return parts.length > 0 ? <>{parts}</> : text;
+  };
+
   // Function to render message content with GIFs and images
   const renderMessageContent = (content: string, showImages: boolean = true) => {
     // Check if content contains markdown image syntax ![alt](url)
@@ -207,9 +336,9 @@ const TrollBox: React.FC = () => {
     let match;
 
     while ((match = imageRegex.exec(content)) !== null) {
-      // Add text before the image
+      // Add text before the image (with mention parsing)
       if (match.index > lastIndex) {
-        parts.push(content.substring(lastIndex, match.index));
+        parts.push(parseTextWithMentions(content.substring(lastIndex, match.index)));
       }
       
       // Add the image or indicator based on showImages parameter
@@ -293,12 +422,17 @@ const TrollBox: React.FC = () => {
       lastIndex = match.index + match[0].length;
     }
     
-    // Add remaining text
+    // Add remaining text (with mention parsing)
     if (lastIndex < content.length) {
-      parts.push(content.substring(lastIndex));
+      parts.push(parseTextWithMentions(content.substring(lastIndex)));
     }
     
-    return parts.length > 0 ? <>{parts}</> : content;
+    // If no parts were created, parse the entire content for mentions
+    if (parts.length === 0) {
+      return parseTextWithMentions(content);
+    }
+    
+    return <>{parts}</>;
   };
 
   // Collapsed view
@@ -546,10 +680,10 @@ const TrollBox: React.FC = () => {
       <Box p={3} borderTop="1px solid #2a2a2a">
         {connected && authenticated ? (
           <HStack position="relative">
-            <Box flex="1">
+            <Box flex="1" position="relative">
               <Input
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={handleInputChange}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                 placeholder="Type message..."
                 bg="#2a2a2a"
@@ -561,6 +695,38 @@ const TrollBox: React.FC = () => {
                 _hover={{ bg: '#3a3a3a' }}
                 _focus={{ bg: '#3a3a3a', outline: 'none' }}
               />
+              {showUserSuggestions && userSuggestions.length > 0 && (
+                <Box
+                  className="user-suggestions"
+                  position="absolute"
+                  bottom="100%"
+                  left="0"
+                  right="0"
+                  mb={1}
+                  bg="#2a2a2a"
+                  borderRadius="md"
+                  border="1px solid #3a3a3a"
+                  maxH="150px"
+                  overflowY="auto"
+                  zIndex={1000}
+                  boxShadow="0 -4px 12px rgba(0, 0, 0, 0.3)"
+                >
+                  {userSuggestions.map((username) => (
+                    <Box
+                      key={username}
+                      px={3}
+                      py={2}
+                      cursor="pointer"
+                      _hover={{ bg: '#3a3a3a' }}
+                      onClick={() => handleSelectUserSuggestion(username)}
+                    >
+                      <Text color="white" fontSize="sm">
+                        @{username}
+                      </Text>
+                    </Box>
+                  ))}
+                </Box>
+              )}
             </Box>
             <Box position="relative">
               <Button
@@ -1032,10 +1198,10 @@ const TrollBox: React.FC = () => {
                   )}
                 </HStack>
                 <HStack position="relative">
-                  <Box flex="1">
+                  <Box flex="1" position="relative">
                     <Input
                       value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
+                      onChange={handleInputChange}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       placeholder="Type your message..."
                       bg="#2a2a2a"
@@ -1047,6 +1213,38 @@ const TrollBox: React.FC = () => {
                       _hover={{ bg: '#3a3a3a' }}
                       _focus={{ bg: '#3a3a3a', outline: 'none' }}
                     />
+                    {showUserSuggestions && userSuggestions.length > 0 && (
+                      <Box
+                        className="user-suggestions"
+                        position="absolute"
+                        bottom="100%"
+                        left="0"
+                        right="0"
+                        mb={1}
+                        bg="#2a2a2a"
+                        borderRadius="md"
+                        border="1px solid #3a3a3a"
+                        maxH="200px"
+                        overflowY="auto"
+                        zIndex={1000}
+                        boxShadow="0 -4px 12px rgba(0, 0, 0, 0.3)"
+                      >
+                        {userSuggestions.map((username) => (
+                          <Box
+                            key={username}
+                            px={4}
+                            py={2}
+                            cursor="pointer"
+                            _hover={{ bg: '#3a3a3a' }}
+                            onClick={() => handleSelectUserSuggestion(username)}
+                          >
+                            <Text color="white" fontSize="sm">
+                              @{username}
+                            </Text>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
                   </Box>
                   <Box position="relative">
                     <Button
