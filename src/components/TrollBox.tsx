@@ -55,6 +55,8 @@ const TrollBox: React.FC = () => {
   const [userSuggestions, setUserSuggestions] = useState<string[]>([]);
   const [mentionStartIndex, setMentionStartIndex] = useState(-1);
   const [showYouTubeVideos, setShowYouTubeVideos] = useState(true);
+  const [contentLoading, setContentLoading] = useState(false);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Use the WebSocket hook
   const { 
@@ -115,7 +117,7 @@ const TrollBox: React.FC = () => {
     setLastProcessedMessageId(lastMessage.id);
   }, [messages, serverUsername, lastProcessedMessageId]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = (behavior: 'smooth' | 'auto' = 'smooth') => {
     if (messagesEndRef.current) {
       const container = messagesEndRef.current.parentElement;
       if (container) {
@@ -123,17 +125,42 @@ const TrollBox: React.FC = () => {
         container.scrollTop = container.scrollHeight;
       }
       // Then use scrollIntoView as backup
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      messagesEndRef.current.scrollIntoView({ behavior, block: 'end' });
     }
   };
 
+  // Check if messages contain media that needs loading
+  const messagesContainMedia = (msgs: Message[]) => {
+    return msgs.some(msg => {
+      const content = msg.content;
+      // Check for images/GIFs
+      const hasImages = /!\[([^\]]*)\]\(([^)]+)\)/.test(content);
+      // Check for YouTube videos
+      const hasYouTube = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/.test(content);
+      return hasImages || hasYouTube;
+    });
+  };
+
+  // Smart scroll that waits for content to load
+  const smartScrollToBottom = (forceWait: boolean = false) => {
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
+
+    const hasMedia = messagesContainMedia(messages);
+    const waitTime = forceWait || hasMedia ? 500 : 100; // Wait longer for media
+    
+    setContentLoading(true);
+    loadingTimeoutRef.current = setTimeout(() => {
+      scrollToBottom();
+      setContentLoading(false);
+    }, waitTime);
+  };
+
   useEffect(() => {
-    // For expanded view, always scroll to bottom when new messages arrive or on initial load
+    // For expanded view, use smart scrolling when new messages arrive
     if (isExpanded && messages.length > 0) {
-      // Use setTimeout to ensure DOM has updated
-      setTimeout(() => {
-        scrollToBottom();
-      }, 50);
+      smartScrollToBottom();
     } else if (!isExpanded && messagesEndRef.current) {
       // For collapsed view, only scroll if user is already near the bottom
       const container = messagesEndRef.current.parentElement;
@@ -157,11 +184,16 @@ const TrollBox: React.FC = () => {
   useEffect(() => {
     if (isExpanded) {
       setUnreadCount(0);
-      // Scroll to bottom when expanded view opens
-      setTimeout(() => {
-        scrollToBottom();
-      }, 100);
+      // Smart scroll when expanded view opens
+      smartScrollToBottom(true); // Force wait for initial load
     }
+    
+    return () => {
+      // Cleanup timeout on unmount or when collapsing
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
   }, [isExpanded]);
 
   // Close emoji/gif pickers and user suggestions when clicking outside
@@ -359,6 +391,11 @@ const TrollBox: React.FC = () => {
                 borderRadius="md"
                 bg="#000"
                 border="1px solid #333"
+                onLoad={() => {
+                  if (isExpanded) {
+                    scrollToBottom('auto');
+                  }
+                }}
               />
               <Text 
                 fontSize="xs" 
@@ -500,6 +537,11 @@ const TrollBox: React.FC = () => {
               borderRadius="md"
               my={1}
               display="inline-block"
+              onLoad={() => {
+                if (isExpanded) {
+                  scrollToBottom('auto');
+                }
+              }}
             />
           );
         } else {
@@ -514,6 +556,11 @@ const TrollBox: React.FC = () => {
               borderRadius="md"
               my={1}
               display="inline-block"
+              onLoad={() => {
+                if (isExpanded) {
+                  scrollToBottom('auto');
+                }
+              }}
             />
           );
         }
