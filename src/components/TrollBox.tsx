@@ -11,10 +11,11 @@ import {
   Portal,
   Badge,
 } from '@chakra-ui/react';
-import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown } from 'react-icons/fi';
+import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown, FiSmile } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
 import { useTrollbox } from '../hooks/useTrollbox';
 import UserProfileModal from './UserProfileModal';
+import EmojiPicker from 'emoji-picker-react';
 
 interface Message {
   id: string;
@@ -40,6 +41,8 @@ const TrollBox: React.FC = () => {
   const [prevMessageCount, setPrevMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectedUser, setSelectedUser] = useState<{ username: string; address: string } | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showEmojiPickerExpanded, setShowEmojiPickerExpanded] = useState(false);
   
   // Use the WebSocket hook
   const { 
@@ -102,6 +105,22 @@ const TrollBox: React.FC = () => {
     }
   }, [isExpanded]);
 
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.emoji-picker-react') && !target.closest('[aria-label="Select emoji"]')) {
+        setShowEmojiPicker(false);
+        setShowEmojiPickerExpanded(false);
+      }
+    };
+
+    if (showEmojiPicker || showEmojiPickerExpanded) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showEmojiPicker, showEmojiPickerExpanded]);
+
   // Show connection status
   useEffect(() => {
     if (error) {
@@ -148,6 +167,12 @@ const TrollBox: React.FC = () => {
     if (address) {
       setSelectedUser({ username, address });
     }
+  };
+
+  const handleEmojiClick = (emojiObject: any) => {
+    setNewMessage(prev => prev + emojiObject.emoji);
+    setShowEmojiPicker(false);
+    setShowEmojiPickerExpanded(false);
   };
 
   // Collapsed view
@@ -394,7 +419,7 @@ const TrollBox: React.FC = () => {
       {/* Input */}
       <Box p={3} borderTop="1px solid #2a2a2a">
         {connected && authenticated ? (
-          <HStack>
+          <HStack position="relative">
             <Box flex="1">
               <Input
                 value={newMessage}
@@ -410,6 +435,39 @@ const TrollBox: React.FC = () => {
                 _hover={{ bg: '#3a3a3a' }}
                 _focus={{ bg: '#3a3a3a', outline: 'none' }}
               />
+            </Box>
+            <Box position="relative">
+              <IconButton
+                aria-label="Select emoji"
+                icon={<FiSmile />}
+                size="sm"
+                bg="#2a2a2a"
+                color="#4ade80"
+                _hover={{ bg: '#3a3a3a' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEmojiPicker(!showEmojiPicker);
+                }}
+              />
+              {showEmojiPicker && (
+                <Box
+                  position="absolute"
+                  bottom="100%"
+                  right="0"
+                  mb={2}
+                  zIndex={1000}
+                  boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
+                  borderRadius="md"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <EmojiPicker
+                    onEmojiClick={handleEmojiClick}
+                    theme="dark"
+                    height={350}
+                    width={300}
+                  />
+                </Box>
+              )}
             </Box>
             <Box>
               <Button
@@ -765,7 +823,7 @@ const TrollBox: React.FC = () => {
                     </Box>
                   )}
                 </HStack>
-                <HStack>
+                <HStack position="relative">
                   <Box flex="1">
                     <Input
                       value={newMessage}
@@ -781,6 +839,40 @@ const TrollBox: React.FC = () => {
                       _hover={{ bg: '#3a3a3a' }}
                       _focus={{ bg: '#3a3a3a', outline: 'none' }}
                     />
+                  </Box>
+                  <Box position="relative">
+                    <IconButton
+                      aria-label="Select emoji"
+                      icon={<FiSmile />}
+                      size="md"
+                      h="44px"
+                      bg="#2a2a2a"
+                      color="#4ade80"
+                      _hover={{ bg: '#3a3a3a' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowEmojiPickerExpanded(!showEmojiPickerExpanded);
+                      }}
+                    />
+                    {showEmojiPickerExpanded && (
+                      <Box
+                        position="absolute"
+                        bottom="100%"
+                        right="0"
+                        mb={2}
+                        zIndex={1000}
+                        boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
+                        borderRadius="md"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <EmojiPicker
+                          onEmojiClick={handleEmojiClick}
+                          theme="dark"
+                          height={400}
+                          width={350}
+                        />
+                      </Box>
+                    )}
                   </Box>
                   <Box>
                     <Button

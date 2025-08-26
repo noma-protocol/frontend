@@ -26,6 +26,7 @@
     "apexcharts": "^4.7.0",
     "axios": "^1.6.7",
     "chart.js": "^4.4.7",
+    "emoji-picker-react": "^4.13.2",
     "ethers": "^5.7.2",
     "faker": "^6.6.6",
     "faker-js": "^1.0.0",
