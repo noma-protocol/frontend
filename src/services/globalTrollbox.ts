@@ -151,10 +151,15 @@ const disconnect = () => {
   }
 };
 
+const isConnected = (): boolean => {
+  return window.__trollboxWs?.readyState === WebSocket.OPEN;
+};
+
 export const globalTrollbox = {
   connect,
   disconnect,
   sendMessage,
   addListener,
-  removeListener
+  removeListener,
+  isConnected
 };

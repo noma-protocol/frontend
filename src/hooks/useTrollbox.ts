@@ -41,6 +41,14 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     let mounted = true;
     let connectTimeout: NodeJS.Timeout;
 
+    // Check if already connected on mount
+    if (globalTrollbox.isConnected()) {
+      console.log('WebSocket already connected, updating state');
+      setConnected(true);
+      // Request current state from server
+      globalTrollbox.sendMessage({ type: 'requestState' });
+    }
+
     const handleMessage = (data: any) => {
       if (!mounted) return;
 
@@ -72,6 +80,22 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
           setCanChangeUsername(data.canChangeUsername);
           setCooldownRemaining(data.cooldownRemaining);
           setError(null);
+          break;
+          
+        case 'state':
+          // Handle state response when reconnecting
+          if (data.authenticated) {
+            setAuthenticated(true);
+            setUsername(data.username);
+            setCanChangeUsername(data.canChangeUsername);
+            setCooldownRemaining(data.cooldownRemaining);
+          }
+          if (data.messages) {
+            setMessages(data.messages);
+          }
+          if (data.userCount !== undefined) {
+            setUserCount(data.userCount);
+          }
           break;
           
         case 'usernameChanged':
