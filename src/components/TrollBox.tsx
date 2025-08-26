@@ -11,7 +11,7 @@ import {
   Portal,
   Badge,
 } from '@chakra-ui/react';
-import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown, FiImage } from 'react-icons/fi';
+import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown, FiImage, FiYoutube } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
 import { useTrollbox } from '../hooks/useTrollbox';
 import UserProfileModal from './UserProfileModal';
@@ -54,6 +54,7 @@ const TrollBox: React.FC = () => {
   const [showUserSuggestions, setShowUserSuggestions] = useState(false);
   const [userSuggestions, setUserSuggestions] = useState<string[]>([]);
   const [mentionStartIndex, setMentionStartIndex] = useState(-1);
+  const [showYouTubeVideos, setShowYouTubeVideos] = useState(true);
   
   // Use the WebSocket hook
   const { 
@@ -115,20 +116,33 @@ const TrollBox: React.FC = () => {
   }, [messages, serverUsername, lastProcessedMessageId]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (messagesEndRef.current) {
+      const container = messagesEndRef.current.parentElement;
+      if (container) {
+        // Try direct scroll first
+        container.scrollTop = container.scrollHeight;
+      }
+      // Then use scrollIntoView as backup
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
   };
 
   useEffect(() => {
-    // For expanded view, always scroll to bottom when new messages arrive
-    if (isExpanded && messagesEndRef.current && messages.length > prevMessageCount) {
-      scrollToBottom();
+    // For expanded view, always scroll to bottom when new messages arrive or on initial load
+    if (isExpanded && messages.length > 0) {
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        scrollToBottom();
+      }, 50);
     } else if (!isExpanded && messagesEndRef.current) {
       // For collapsed view, only scroll if user is already near the bottom
       const container = messagesEndRef.current.parentElement;
       if (container) {
         const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
         if (isNearBottom && messages.length > 2) {
-          scrollToBottom();
+          setTimeout(() => {
+            scrollToBottom();
+          }, 50);
         }
       }
     }
@@ -138,7 +152,7 @@ const TrollBox: React.FC = () => {
       setUnreadCount(prev => prev + (messages.length - prevMessageCount));
     }
     setPrevMessageCount(messages.length);
-  }, [messages, isExpanded, prevMessageCount]);
+  }, [messages, isExpanded]);
 
   useEffect(() => {
     if (isExpanded) {
@@ -276,47 +290,133 @@ const TrollBox: React.FC = () => {
     }
   };
 
-  // Function to parse text and highlight @mentions
-  const parseTextWithMentions = (text: string): React.ReactNode => {
+  // Function to extract YouTube video ID from various URL formats
+  const extractYouTubeVideoId = (url: string): string | null => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/,
+      /youtube\.com\/watch\?.*v=([A-Za-z0-9_-]{11})/,
+      /youtube\.com\/v\/([A-Za-z0-9_-]{11})/,
+      /youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    return null;
+  };
+
+  // Function to parse text and highlight @mentions and YouTube links
+  const parseTextWithMentions = (text: string, showVideos: boolean = true): React.ReactNode => {
+    // First check for YouTube URLs
+    const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})(?:[^\s]*)?/g;
     const mentionRegex = /@(\w+)/g;
+    
+    // Find all matches first
+    const allMatches: Array<{type: 'youtube' | 'mention', match: RegExpExecArray}> = [];
+    
+    let match;
+    youtubeRegex.lastIndex = 0;
+    while ((match = youtubeRegex.exec(text)) !== null) {
+      allMatches.push({ type: 'youtube', match: { ...match } as RegExpExecArray });
+    }
+    
+    mentionRegex.lastIndex = 0;
+    while ((match = mentionRegex.exec(text)) !== null) {
+      allMatches.push({ type: 'mention', match: { ...match } as RegExpExecArray });
+    }
+    
+    // Sort by index
+    allMatches.sort((a, b) => a.match.index! - b.match.index!);
+    
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
-    let match;
-
-    while ((match = mentionRegex.exec(text)) !== null) {
-      // Add text before the mention
-      if (match.index > lastIndex) {
-        parts.push(text.substring(lastIndex, match.index));
+    
+    for (const item of allMatches) {
+      const match = item.match;
+      
+      // Add text before the match
+      if (match.index! > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index!));
       }
       
-      // Add the mention as a highlighted span
-      const mentionedUser = match[1];
-      const isCurrentUser = mentionedUser.toLowerCase() === serverUsername?.toLowerCase();
+      if (item.type === 'youtube') {
+        const videoId = extractYouTubeVideoId(match[0]);
+        if (videoId && showVideos) {
+          parts.push(
+            <Box key={match.index} my={2} width="100%" maxW="300px">
+              <Box
+                as="iframe"
+                width="100%"
+                height="168px"
+                src={`https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                borderRadius="md"
+                bg="#000"
+                border="1px solid #333"
+              />
+              <Text 
+                fontSize="xs" 
+                color="#666" 
+                mt={1}
+                cursor="pointer"
+                _hover={{ color: "#888", textDecoration: "underline" }}
+                onClick={() => window.open(match[0], '_blank')}
+              >
+                {match[0]}
+              </Text>
+            </Box>
+          );
+        } else if (videoId && !showVideos) {
+          // Show indicator in collapsed view
+          parts.push(
+            <Text
+              key={match.index}
+              as="span"
+              color="#ff0000"
+              fontSize="xs"
+              fontStyle="italic"
+              mx={1}
+            >
+              [YouTube Video]
+            </Text>
+          );
+        } else {
+          parts.push(match[0]);
+        }
+      } else if (item.type === 'mention') {
+        const mentionedUser = match[1];
+        const isCurrentUser = mentionedUser.toLowerCase() === serverUsername?.toLowerCase();
+        
+        parts.push(
+          <Text
+            key={match.index}
+            as="span"
+            color={isCurrentUser ? "#fbbf24" : "#4ade80"}
+            fontWeight="bold"
+            bg={isCurrentUser ? "rgba(251, 191, 36, 0.1)" : "transparent"}
+            px={isCurrentUser ? 1 : 0}
+            borderRadius="sm"
+            cursor="pointer"
+            _hover={{ textDecoration: "underline" }}
+            onClick={() => {
+              const userMessage = messages.find(m => m.username.toLowerCase() === mentionedUser.toLowerCase());
+              if (userMessage?.address) {
+                handleUsernameClick(mentionedUser, userMessage.address);
+              }
+            }}
+          >
+            @{mentionedUser}
+          </Text>
+        );
+      }
       
-      parts.push(
-        <Text
-          key={match.index}
-          as="span"
-          color={isCurrentUser ? "#fbbf24" : "#4ade80"}
-          fontWeight="bold"
-          bg={isCurrentUser ? "rgba(251, 191, 36, 0.1)" : "transparent"}
-          px={isCurrentUser ? 1 : 0}
-          borderRadius="sm"
-          cursor="pointer"
-          _hover={{ textDecoration: "underline" }}
-          onClick={() => {
-            // Find if this user exists in messages and has an address
-            const userMessage = messages.find(m => m.username.toLowerCase() === mentionedUser.toLowerCase());
-            if (userMessage?.address) {
-              handleUsernameClick(mentionedUser, userMessage.address);
-            }
-          }}
-        >
-          @{mentionedUser}
-        </Text>
-      );
-      
-      lastIndex = match.index + match[0].length;
+      lastIndex = match.index! + match[0].length;
     }
     
     // Add remaining text
@@ -336,9 +436,9 @@ const TrollBox: React.FC = () => {
     let match;
 
     while ((match = imageRegex.exec(content)) !== null) {
-      // Add text before the image (with mention parsing)
+      // Add text before the image (with mention and YouTube parsing)
       if (match.index > lastIndex) {
-        parts.push(parseTextWithMentions(content.substring(lastIndex, match.index)));
+        parts.push(parseTextWithMentions(content.substring(lastIndex, match.index), showImages));
       }
       
       // Add the image or indicator based on showImages parameter
@@ -422,14 +522,14 @@ const TrollBox: React.FC = () => {
       lastIndex = match.index + match[0].length;
     }
     
-    // Add remaining text (with mention parsing)
+    // Add remaining text (with mention and YouTube parsing)
     if (lastIndex < content.length) {
-      parts.push(parseTextWithMentions(content.substring(lastIndex)));
+      parts.push(parseTextWithMentions(content.substring(lastIndex), showImages));
     }
     
-    // If no parts were created, parse the entire content for mentions
+    // If no parts were created, parse the entire content for mentions and YouTube
     if (parts.length === 0) {
-      return parseTextWithMentions(content);
+      return parseTextWithMentions(content, showImages);
     }
     
     return <>{parts}</>;
@@ -965,6 +1065,20 @@ const TrollBox: React.FC = () => {
                 </Box>
               </HStack>
               <HStack gap={2}>
+                <IconButton
+                  aria-label="Toggle YouTube videos"
+                  icon={<FiYoutube />}
+                  size="sm"
+                  variant={showYouTubeVideos ? "solid" : "ghost"}
+                  color={showYouTubeVideos ? "black" : "white"}
+                  bg={showYouTubeVideos ? "#ff0000" : "transparent"}
+                  onClick={() => setShowYouTubeVideos(!showYouTubeVideos)}
+                  _hover={{ 
+                    bg: showYouTubeVideos ? "#cc0000" : '#2a2a2a',
+                    color: showYouTubeVideos ? "black" : "white"
+                  }}
+                  title={showYouTubeVideos ? "Hide YouTube videos" : "Show YouTube videos"}
+                />
                 {connected ? (
                   <Button
                     size="sm"
@@ -1104,7 +1218,7 @@ const TrollBox: React.FC = () => {
                   </Box>
                   <Box flex="1">
                     <Box color="white" fontSize="sm">
-                      {renderMessageContent(msg.content, true)}
+                      {renderMessageContent(msg.content, showYouTubeVideos)}
                     </Box>
                   </Box>
                   <Box>

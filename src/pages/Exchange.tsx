@@ -30,7 +30,8 @@ import {
   } from "../components/ui/select";
 import { Checkbox } from "../components/ui/checkbox"
   
-import { useAccount, useBalance, useContractWrite, useContractRead } from "wagmi";
+import { useAccount, useBalance, useContractRead } from "wagmi";
+import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
 import { isMobile } from "react-device-detect";
 import { Slider } from "../components/ui/slider"
 import {
@@ -1770,7 +1771,7 @@ const Launchpad: React.FC = () => {
     // Contract write hooks for WMON wrap/unwrap
     const {
         write: deposit
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: WETH_ADDRESS,
         abi: IWETHAbi,
         functionName: "deposit",
@@ -1805,7 +1806,7 @@ const Launchpad: React.FC = () => {
 
     const {
         write: withdraw
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: WETH_ADDRESS,
         abi: IWETHAbi,
         functionName: "withdraw",
@@ -1841,7 +1842,7 @@ const Launchpad: React.FC = () => {
     // Contract write hooks for trading
     const {
         write: buyTokensETH
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: exchangeHelperAddress,
         abi: ExchangeHelperAbi,
         functionName: "buyTokens",
@@ -1930,7 +1931,7 @@ const Launchpad: React.FC = () => {
     
     const {
         write: buyTokensWETH
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: exchangeHelperAddress,
         abi: ExchangeHelperAbi,
         functionName: "buyTokensWETH",
@@ -2014,7 +2015,7 @@ const Launchpad: React.FC = () => {
 
     const {
         write: sellTokens
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: exchangeHelperAddress,
         abi: ExchangeHelperAbi,
         functionName: useWeth ? "sellTokens" : "sellTokensETH",
@@ -2100,7 +2101,7 @@ const Launchpad: React.FC = () => {
     const {
         write: approve,
         isLoading: isApproving
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: selectedToken?.token0 as `0x${string}` || zeroAddress,
         abi: ERC20Abi,
         functionName: "approve" as const,
@@ -2124,7 +2125,7 @@ const Launchpad: React.FC = () => {
     const {
         write: approveWeth,
         isLoading: isApprovingWeth
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: (selectedToken?.token1 || WETH_ADDRESS) as `0x${string}`,
         abi: ERC20Abi,
         functionName: "approve" as const,

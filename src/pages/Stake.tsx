@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Input, Image, Flex, Container, Heading, HStack, Box, Button, Spinner, Text, SimpleGrid, GridItem, VStack, Grid, Link, Badge, FormatNumber } from "@chakra-ui/react";
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { useAccount, useContractRead } from "wagmi";
+import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
 import useScreenOrientation from '../hooks/useScreenOrientation';
 import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import { Toaster, toaster } from "../components/ui/toaster";
@@ -181,7 +182,8 @@ const Stake = () => {
         watch: true
     });
 
-    // console.log(`Last Operation Timestamp: ${lastOperationTimestamp}`, typeof lastOperationTimestamp, lastOperationTimestamp && String(lastOperationTimestamp).length);
+    // Convert BigNumber to string if necessary
+    const lastOpTimestamp = lastOperationTimestamp ? lastOperationTimestamp.toString() : "0";
 
     let APR_30_DAYS = (((formatEther(`${sNomaTotalSupply || 0}`) ) - formatEther(`${sNomaBalance || 0}`)) / formatEther(`${totalStaked || 0}`) ) * (365 / 30) * 100;
     APR_30_DAYS = isNaN(APR_30_DAYS) ? 0 : APR_30_DAYS;
@@ -447,7 +449,7 @@ const Stake = () => {
 
     const {
         write: approve
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: token0,
         abi: ERC20Abi,
         functionName: "approve",
@@ -474,7 +476,7 @@ const Stake = () => {
 
     const {
         write: stake
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: vaultDescription.stakingContract,
         abi: StakingContractAbi,
         functionName: "stake",
@@ -507,7 +509,7 @@ const Stake = () => {
 
     const {
         write: unstake
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: vaultDescription.stakingContract,
         abi: StakingContractAbi,
         functionName: "unstake",
@@ -534,7 +536,7 @@ const Stake = () => {
 
     const {
         write: approveSnoma
-    } = useContractWrite({
+    } = useSafeContractWrite({
         address: sNomaToken,
         abi: ERC20Abi,
         functionName: "approve",
@@ -711,9 +713,9 @@ const Stake = () => {
                                             <Text color="#888" fontSize="sm">Cooldown</Text>
                                         </Box>
                                         <Box>
-                                            {lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0 ? (
+                                            {lastOpTimestamp !== "0" && getTimeLeft(lastOpTimestamp, 3) > 0 ? (
                                                 <CountdownTimer
-                                                    startTsMs={Number(lastOperationTimestamp) * 1000}
+                                                    startTsMs={Number(lastOpTimestamp) * 1000}
                                                     intervalDays={3}
                                                 />
                                             ) : (
@@ -788,10 +790,10 @@ const Stake = () => {
                                     fontWeight="600"
                                     onClick={handleStake}
                                     isLoading={isStaking}
-                                    isDisabled={!stakeAmount || Number(stakeAmount) <= 0 || (stakedBalance > 0 && lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0)}
+                                    isDisabled={!stakeAmount || Number(stakeAmount) <= 0 || (stakedBalance > 0 && lastOpTimestamp !== "0" && getTimeLeft(lastOpTimestamp, 3) > 0)}
                                     _hover={{ bg: "#22c55e" }}
                                 >
-                                    {stakedBalance > 0 && lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0 ? 
+                                    {stakedBalance > 0 && lastOpTimestamp !== "0" && getTimeLeft(lastOpTimestamp, 3) > 0 ? 
                                         "Cooldown Active" : "Stake"}
                                 </Button>
                                 
@@ -805,7 +807,7 @@ const Stake = () => {
                                         fontWeight="600"
                                         onClick={handleUnstake}
                                         isLoading={isUnstaking}
-                                        isDisabled={stakedBalance <= 0 || (lastOperationTimestamp && getTimeLeft(lastOperationTimestamp, 3) > 0)}
+                                        isDisabled={stakedBalance <= 0 || (lastOpTimestamp !== "0" && getTimeLeft(lastOpTimestamp, 3) > 0)}
                                         _hover={{ 
                                             bg: "rgba(74, 222, 128, 0.1)",
                                             borderColor: "#22c55e" 
