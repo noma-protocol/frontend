@@ -14,6 +14,7 @@ import { switchNetwork, watchNetwork } from "wagmi/actions";
 import "react-toastify/dist/ReactToastify.css";
 import { MenuProvider } from "./hooks/MenuContext"; // Import the MenuProvider
 import { TokenProvider } from "./contexts/TokenContext"; // Import the TokenProvider
+import { MonPriceProvider } from "./contexts/MonPriceContext"; // Import the MonPriceProvider
 
 import ReactGA from 'react-ga';
 import { Provider } from "./components/ui/provider"
@@ -56,15 +57,17 @@ function App() {
   return (
     <WagmiConfig config={wagmiConfig}>
       <LanguageProvider>
-        <TokenProvider>
-          <MenuProvider>
-            <Provider>
-              <Header />
-              <Outlet />
-              <Footer />
-            </Provider>
-          </MenuProvider>
-        </TokenProvider>
+        <MonPriceProvider>
+          <TokenProvider>
+            <MenuProvider>
+              <Provider>
+                <Header />
+                <Outlet />
+                <Footer />
+              </Provider>
+            </MenuProvider>
+          </TokenProvider>
+        </MonPriceProvider>
       </LanguageProvider>
     </WagmiConfig>
   );

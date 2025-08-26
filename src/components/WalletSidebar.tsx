@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Text, VStack, HStack, Flex, Image } from "@chakra-ui/react";
 import { formatEther } from 'viem';
 import { commify } from '../utils';
+import { useMonPrice } from '../contexts/MonPriceContext';
 import monadLogo from '../assets/images/monad.png';
 import wmonLogo from '../assets/images/monad.png';
 import placeholderLogoDark from '../assets/images/question_white.svg';
@@ -48,7 +49,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
 }) => {
     const [actionType, setActionType] = useState('');
     const ethBalanceValue = typeof ethBalance === 'string' ? BigInt(ethBalance) : ethBalance;
-    const monPrice = 50; // Hardcoded for now, could be passed as prop
+    const { monPrice } = useMonPrice();
 
     const handleAction = () => {
         if (wrapAmount === '' || wrapAmount === '0') return;
@@ -60,6 +61,28 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
             setIsUnwrapping(true);
             withdraw();
         }
+    };
+
+    // Intelligent USD formatting function
+    const formatUsdValue = (value: number): string => {
+        if (value === 0) return '0.00';
+        
+        // For values >= 0.01, show 2 decimal places
+        if (value >= 0.01) {
+            return commify(value, 2);
+        }
+        
+        // For very small values (< 0.000001), show as < $0.000001
+        if (value < 0.000001) {
+            return '0.00';
+        }
+        
+        // For values between 0.000001 and 0.01, show up to 6 decimal places
+        // Find first non-zero digit position
+        const log = Math.floor(Math.log10(value));
+        const decimals = Math.min(6, Math.abs(log) + 1);
+        
+        return value.toFixed(decimals).replace(/\.?0+$/, '');
     };
 
     const TokenBalanceCard = ({ 
@@ -78,7 +101,18 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
         showUnwrapButton?: boolean;
     }) => {
         const balanceValue = balance ? parseFloat(formatEther(balance)) : 0;
-        const usdValue = symbol === 'MON' || symbol === 'WMON' ? balanceValue * monPrice : 0;
+        
+        // Calculate USD value based on token
+        let usdValue = 0;
+        if (monPrice) {
+            if (symbol === 'MON' || symbol === 'WMON') {
+                usdValue = balanceValue * monPrice;
+            } else if (symbol === 'NOMA') {
+                // Hardcoded NOMA price - in production, fetch from price oracle
+                usdValue = balanceValue * 0.06;
+            }
+            // Add other token prices here as needed
+        }
 
         return (
             <Box 
@@ -162,8 +196,8 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                     <Text color="white" fontWeight="bold" fontSize="sm" lineHeight="1.2">
                         {commify(balanceValue, 4)}
                     </Text>
-                    <Text color="#4ade80" fontSize="xs" lineHeight="1.2">
-                        ≈ ${commify(usdValue, 2)}
+                    <Text color="#4ade80" fontSize="xs" lineHeight="1.2" whiteSpace="nowrap">
+                        ≈ ${formatUsdValue(usdValue)}
                     </Text>
                 </Box>
                 
@@ -171,7 +205,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
         );
     };
 
-    const totalValue = address ? (
+    const totalValue = address && monPrice ? (
         parseFloat(formatEther(ethBalanceValue)) * monPrice + 
         (token1Info?.tokenSymbol === "WMON" ? parseFloat(formatEther(token1Info.balance || BigInt(0))) * monPrice : 0)
     ) : 0;
@@ -248,7 +282,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                             <Box><Text color="#888" fontSize="sm" fontWeight="600">Total Value</Text></Box>
                             <Box ml={5}>
                             <Text color="#4ade80" fontWeight="bold" fontSize="lg">
-                                ${commify(totalValue, 2)}
+                                ${formatUsdValue(totalValue)}
                             </Text>                                
                             </Box>
                         </HStack>

@@ -18,6 +18,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import config from '../config';
 import { useToken } from '../contexts/TokenContext';
+import { useMonPrice } from '../contexts/MonPriceContext';
 import { ethers } from "ethers";
 import { getContractAddress } from "../utils";
 import addressesLocal from "../assets/deployment.json";
@@ -41,6 +42,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedToken } = useToken();
+  const { monPrice, monPriceChange } = useMonPrice();
 
   // Vault selection state
   const [vaultDescriptions, setVaultDescriptions] = useState([]);
@@ -254,6 +256,41 @@ const Header: React.FC = () => {
             </Link>
           </Box>
         )} */}
+        
+        {/* MON Price Display */}
+        {monPrice && (
+          <Box 
+            display={{ base: "none", md: "flex" }} 
+            alignItems="center" 
+            gap={2}
+            px={3}
+            py={1}
+            bg="#1a1a1a"
+            borderRadius="lg"
+            border="1px solid #2a2a2a"
+            ml={window.location.href.indexOf("/liquidity") > -1 ? "50%" : "60%"}
+          >
+            <HStack>
+              <Box>
+                <Text color="#888" fontSize="sm" fontWeight="500">MON</Text>
+              </Box>
+              <Box>
+                <Text color="white" fontSize="sm" fontWeight="600">${monPrice.toFixed(4)}</Text>
+              </Box>
+              <Box>
+                {monPriceChange !== 0 && (
+                  <Text 
+                    color={monPriceChange > 0 ? "#4ade80" : "#ef4444"} 
+                    fontSize="xs" 
+                    fontWeight="500"
+                  >
+                    {monPriceChange > 0 ? "+" : ""}{monPriceChange.toFixed(2)}%
+                  </Text>
+                )}              
+              </Box>
+            </HStack>
+          </Box>
+        )}
         
         {/* Navigation and Wallet */}
         <Box display="flex" alignItems="center" gap={3}>
