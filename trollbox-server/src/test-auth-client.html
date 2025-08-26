@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Trollbox Auth Test</title>
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -113,10 +113,17 @@
     </div>
 
     <script>
+        // Check if ethers is loaded
+        if (typeof ethers === 'undefined') {
+            alert('Error: ethers.js library failed to load. Please refresh the page.');
+        }
+        
         let ws = null;
         let connected = false;
         let authenticated = false;
-        const AUTH_MESSAGE_PREFIX = 'Sign this message to authenticate with Oikos Trollbox\n\nTimestamp: ';
+        const AUTH_MESSAGE_PREFIX = `Sign this message to authenticate with the Noma Trollbox
+
+Timestamp: `;
 
         function log(message, type = 'info') {
             const logDiv = document.getElementById('log');
@@ -327,6 +334,9 @@
                 document.getElementById('sendBtn').click();
             }
         };
+        
+        // Show ethers version
+        log(`Loaded ethers.js version: ${ethers.version || 'unknown'}`);
     </script>
 </body>
 </html>

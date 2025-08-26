@@ -228,6 +228,9 @@ class AuthStore {
   isValidAuthMessage(message) {
     // Check if the message starts with our auth message prefix
     if (!message.startsWith(AUTH_MESSAGE)) {
+      console.log('Auth message does not start with expected prefix');
+      console.log('Expected:', AUTH_MESSAGE);
+      console.log('Got:', message.substring(0, AUTH_MESSAGE.length));
       return false;
     }
     
@@ -235,11 +238,19 @@ class AuthStore {
     const timestamp = message.substring(AUTH_MESSAGE.length);
     const authTime = parseInt(timestamp);
     
-    // Check if timestamp is valid and within 5 minutes
+    // Check if timestamp is valid and within 10 minutes
     const now = Date.now();
-    const fiveMinutes = 5 * 60 * 1000;
+    const tenMinutes = 10 * 60 * 1000;
     
-    return !isNaN(authTime) && Math.abs(now - authTime) < fiveMinutes;
+    console.log('Auth validation:', {
+      authTime,
+      now,
+      difference: Math.abs(now - authTime),
+      maxAllowed: tenMinutes,
+      isValid: !isNaN(authTime) && Math.abs(now - authTime) < tenMinutes
+    });
+    
+    return !isNaN(authTime) && Math.abs(now - authTime) < tenMinutes;
   }
 
   authenticate(address, signature, message) {
