@@ -880,11 +880,11 @@ const Stake = () => {
                                                         }   
                                                     </Text>    
                                                         </Box>
-                                                        <Box>
-                                                        {item.type === 'stake' || item.type == 'unstake' ? 
-                                                          `${item.token}` : <></>
-                                                        }  
-                                                        </Box>
+                                                        {(item.type === 'stake' || item.type == 'unstake') && (
+                                                            <Box>
+                                                                {item.token}
+                                                            </Box>
+                                                        )}
                                                     </HStack>
                                                  
                                                 </Box>

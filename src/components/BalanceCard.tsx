@@ -223,8 +223,8 @@ const BalanceCard = ({
                 <Box ml={-2} bgColor={"#18181b"} w={isMobile ? "100px" : "160px"}  color="gray.800" px={2} borderRadius={5} mt={2} fontSize={fontSize} textAlign="left" height="20px" display="flex" alignItems="left" justifyContent="left">
                     <Text fontSize={isMobile ? "xs" : "sm"} color="white">{commify(formatEther(`${token0Balance || 0}`))}</Text>
                 </Box>
-                <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center"  mt={2}>
-                    {page == "exchange" ?
+                {page == "exchange" ? (
+                    <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center" mt={2}>
                         <VStack spacing={2} align="center">
                             <Button 
                                 variant="outline" 
@@ -290,8 +290,12 @@ const BalanceCard = ({
                                 </Box>
                             </Button>
                         </VStack>
-                    : <></>}
-                </Box>                
+                    </Box>
+                ) : (
+                    <Box p={2} textAlign="center" height="70px" display="flex" alignItems="center" justifyContent="center" mt={2}>
+                        {/* Empty Box to maintain grid structure */}
+                    </Box>
+                )}                
             </SimpleGrid>
         </Box>
     );

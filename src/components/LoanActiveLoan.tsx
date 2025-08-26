@@ -117,8 +117,8 @@ const LoanActiveLoan = ({}) => {
                             <DrawerTitle>
                                 <Text as="h3" color="#4ade80">Roll Loan</Text>
                             </DrawerTitle>
-                            <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={setIsRolling}>
-                                <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt={2} ml={-2}>×</Button>
+                            <DrawerCloseTrigger asChild>
+                                <Button variant="ghost" size="sm" onClick={() => setIsRolling(false)} mt="82%" mr={5} ml={-2}>×</Button>
                             </DrawerCloseTrigger>
                         </DrawerHeader>
                         <DrawerBody>

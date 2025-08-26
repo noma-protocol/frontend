@@ -313,8 +313,8 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                         </GridItem>
                         </Grid>
                     </DrawerTitle>
-                    <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={() => null}>
-                        <Button variant="ghost" size="sm" onClick={() => null}>×</Button>
+                    <DrawerCloseTrigger asChild>
+                        <Button variant="ghost" size="sm" onClick={() => null} mt="82%" mr={5}>×</Button>
                     </DrawerCloseTrigger>
                 </DrawerHeader>
                 <DrawerBody>
@@ -384,8 +384,8 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
                         </GridItem>
                         </Grid>
                     </DrawerTitle>
-                    <DrawerCloseTrigger asChild mt="82%" mr={5} setIsRolling={() => null}>
-                        <Button variant="ghost" size="sm" onClick={() => null}>×</Button>
+                    <DrawerCloseTrigger asChild>
+                        <Button variant="ghost" size="sm" onClick={() => null} mt="82%" mr={5}>×</Button>
                     </DrawerCloseTrigger>
                 </DrawerHeader>
                 <DrawerBody>
