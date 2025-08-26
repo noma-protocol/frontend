@@ -11,11 +11,13 @@ import {
   Portal,
   Badge,
 } from '@chakra-ui/react';
-import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown } from 'react-icons/fi';
+import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown, FiImage } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
 import { useTrollbox } from '../hooks/useTrollbox';
 import UserProfileModal from './UserProfileModal';
 import EmojiPicker from 'emoji-picker-react';
+import GifPicker from './GifPicker';
+import { Image } from '@chakra-ui/react';
 
 interface Message {
   id: string;
@@ -43,7 +45,10 @@ const TrollBox: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<{ username: string; address: string } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showEmojiPickerExpanded, setShowEmojiPickerExpanded] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [showGifPickerExpanded, setShowGifPickerExpanded] = useState(false);
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
+  const gifButtonRef = useRef<HTMLButtonElement>(null);
   
   // Use the WebSocket hook
   const { 
@@ -106,7 +111,7 @@ const TrollBox: React.FC = () => {
     }
   }, [isExpanded]);
 
-  // Close emoji picker when clicking outside
+  // Close emoji/gif pickers when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -114,13 +119,17 @@ const TrollBox: React.FC = () => {
         setShowEmojiPicker(false);
         setShowEmojiPickerExpanded(false);
       }
+      if (!target.closest('[aria-label="Select GIF"]') && !target.closest('.gif-picker-container')) {
+        setShowGifPicker(false);
+        setShowGifPickerExpanded(false);
+      }
     };
 
-    if (showEmojiPicker || showEmojiPickerExpanded) {
+    if (showEmojiPicker || showEmojiPickerExpanded || showGifPicker || showGifPickerExpanded) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [showEmojiPicker, showEmojiPickerExpanded]);
+  }, [showEmojiPicker, showEmojiPickerExpanded, showGifPicker, showGifPickerExpanded]);
 
   // Show connection status
   useEffect(() => {
@@ -174,6 +183,115 @@ const TrollBox: React.FC = () => {
     setNewMessage(prev => prev + emojiObject.emoji);
     setShowEmojiPicker(false);
     setShowEmojiPickerExpanded(false);
+  };
+
+  const handleGifSelect = (gifUrl: string) => {
+    setNewMessage(prev => prev + ' ' + gifUrl + ' ');
+    setShowGifPicker(false);
+    setShowGifPickerExpanded(false);
+  };
+
+  // Function to render message content with GIFs and images
+  const renderMessageContent = (content: string, showImages: boolean = true) => {
+    // Check if content contains markdown image syntax ![alt](url)
+    const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = imageRegex.exec(content)) !== null) {
+      // Add text before the image
+      if (match.index > lastIndex) {
+        parts.push(content.substring(lastIndex, match.index));
+      }
+      
+      // Add the image or indicator based on showImages parameter
+      const altText = match[1];
+      const imageUrl = match[2];
+      
+      if (!showImages) {
+        // Show indicator instead of actual image in collapsed view
+        if (altText === 'gif') {
+          parts.push(
+            <Text 
+              key={match.index}
+              as="span"
+              color="#4ade80"
+              fontSize="xs"
+              fontStyle="italic"
+              mx={1}
+            >
+              [GIF]
+            </Text>
+          );
+        } else if (altText === 'sticker') {
+          parts.push(
+            <Text 
+              key={match.index}
+              as="span"
+              color="#4ade80"
+              fontSize="xs"
+              fontStyle="italic"
+              mx={1}
+            >
+              [Sticker]
+            </Text>
+          );
+        } else {
+          parts.push(
+            <Text 
+              key={match.index}
+              as="span"
+              color="#4ade80"
+              fontSize="xs"
+              fontStyle="italic"
+              mx={1}
+            >
+              [Image]
+            </Text>
+          );
+        }
+      } else {
+        // Show actual images in expanded view
+        if (altText === 'gif' || altText === 'sticker') {
+          parts.push(
+            <Image 
+              key={match.index}
+              src={imageUrl} 
+              alt={altText}
+              maxW="200px"
+              maxH="200px"
+              borderRadius="md"
+              my={1}
+              display="inline-block"
+            />
+          );
+        } else {
+          // For regular images
+          parts.push(
+            <Image 
+              key={match.index}
+              src={imageUrl} 
+              alt={altText}
+              maxW="300px"
+              maxH="300px"
+              borderRadius="md"
+              my={1}
+              display="inline-block"
+            />
+          );
+        }
+      }
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add remaining text
+    if (lastIndex < content.length) {
+      parts.push(content.substring(lastIndex));
+    }
+    
+    return parts.length > 0 ? <>{parts}</> : content;
   };
 
   // Collapsed view
@@ -401,9 +519,9 @@ const TrollBox: React.FC = () => {
                 </Text>
               </Box>
               <Box flex="1">
-                <Text color="white" fontSize="xs">
-                  {msg.content}
-                </Text>
+                <Box color="white" fontSize="xs">
+                  {renderMessageContent(msg.content, false)}
+                </Box>
               </Box>
               <Box>
                 <Text color="#666" fontSize="xs" flexShrink={0}>
@@ -498,6 +616,57 @@ const TrollBox: React.FC = () => {
                     height={350}
                     width={300}
                   />
+                </Box>
+              )}
+            </Box>
+            <Box position="relative">
+              <Button
+                ref={gifButtonRef}
+                aria-label="Select GIF"
+                size="sm"
+                bg="#2a2a2a"
+                _hover={{ bg: '#3a3a3a' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowGifPicker(!showGifPicker);
+                }}
+                px={2}
+                minW="auto"
+              >
+                <FiImage />
+              </Button>
+              {showGifPicker && (
+                <Box
+                  position="fixed"
+                  bottom="auto"
+                  left="auto"
+                  zIndex={10000}
+                  boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
+                  borderRadius="md"
+                  onClick={(e) => e.stopPropagation()}
+                  ref={(el) => {
+                    if (el && gifButtonRef.current) {
+                      const buttonRect = gifButtonRef.current.getBoundingClientRect();
+                      const pickerWidth = 400;
+                      const pickerHeight = 500;
+                      
+                      let left = buttonRect.left + (buttonRect.width / 2) - (pickerWidth / 2);
+                      let top = buttonRect.top - pickerHeight - 8;
+                      
+                      if (left < 10) left = 10;
+                      if (left + pickerWidth > window.innerWidth - 10) {
+                        left = window.innerWidth - pickerWidth - 10;
+                      }
+                      if (top < 10) {
+                        top = buttonRect.bottom + 8;
+                      }
+                      
+                      el.style.left = `${left}px`;
+                      el.style.top = `${top}px`;
+                    }
+                  }}
+                >
+                  <GifPicker onSelectGif={handleGifSelect} onClose={() => setShowGifPicker(false)} />
                 </Box>
               )}
             </Box>
@@ -761,9 +930,9 @@ const TrollBox: React.FC = () => {
                     </Text>
                   </Box>
                   <Box flex="1">
-                    <Text color="white" fontSize="sm">
-                      {msg.content}
-                    </Text>
+                    <Box color="white" fontSize="sm">
+                      {renderMessageContent(msg.content, true)}
+                    </Box>
                   </Box>
                   <Box>
                     <Text color="#666" fontSize="xs" flexShrink={0}>
@@ -906,6 +1075,37 @@ const TrollBox: React.FC = () => {
                           height={400}
                           width={350}
                         />
+                      </Box>
+                    )}
+                  </Box>
+                  <Box position="relative">
+                    <Button
+                      aria-label="Select GIF"
+                      size="md"
+                      h="44px"
+                      bg="#2a2a2a"
+                      _hover={{ bg: '#3a3a3a' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowGifPickerExpanded(!showGifPickerExpanded);
+                      }}
+                      px={3}
+                      minW="auto"
+                    >
+                      <FiImage size={20} />
+                    </Button>
+                    {showGifPickerExpanded && (
+                      <Box
+                        position="absolute"
+                        bottom="100%"
+                        right="0"
+                        mb={2}
+                        zIndex={1000}
+                        boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
+                        borderRadius="md"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <GifPicker onSelectGif={handleGifSelect} onClose={() => setShowGifPickerExpanded(false)} />
                       </Box>
                     )}
                   </Box>
