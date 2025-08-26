@@ -1367,7 +1367,7 @@ const Borrow = () => {
                                                     letterSpacing="-0.02em"
                                                     lineHeight="1"
                                                 >
-                                                    {commifyDecimals(ltv, 2)}%
+                                                    {commifyDecimals(ltv, 2)}
                                                 </Text>
                                                 {/* <Box 
                                                     w="8px" 
