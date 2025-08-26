@@ -1056,7 +1056,7 @@ const Borrow = () => {
                         <Box flex={isMobile ? "1" : "2"} w={isMobile ? "100%" : "auto"}>
                             {/* New Loan Form */}
                             <Box bg="#1a1a1a" borderRadius="lg" p={{ base: 4, md: 6 }}>
-                                <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="white" mb={4}>
+                                <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color="white" mb={4}>
                                     New Loan
                                 </Text>
                                 
@@ -1181,7 +1181,7 @@ const Borrow = () => {
                                                     ) : (
                                                         <HStack>
                                                             <Box>
-                                                                <Text fontSize="lg" color="white" fontWeight="bold">
+                                                                <Text fontSize="md" color="white" fontWeight="bold">
                                                                     {formatNumberPrecise(collateral || 0, 4)}
                                                                 </Text>
                                                             </Box>
@@ -1195,7 +1195,7 @@ const Borrow = () => {
                                                     <Text fontSize="xs" color="#888" mb={1}>Loan Fees</Text>
                                                     <HStack>
                                                         <Box>
-                                                            <Text fontSize="lg" color="white" fontWeight="bold">
+                                                            <Text fontSize="md" color="white" fontWeight="bold">
                                                                 {commifyDecimals(`${loanFees || 0}`, 4)}
                                                             </Text>
                                                         </Box>
@@ -1265,7 +1265,7 @@ const Borrow = () => {
                                     />
                                     
                                     <HStack justify="space-between" align="center" mb={6}>
-                                        <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="white" letterSpacing="-0.02em">
+                                        <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color="white" letterSpacing="-0.02em">
                                             Active Loan
                                         </Text>
                                         <Badge 
@@ -1298,7 +1298,7 @@ const Borrow = () => {
                                             <HStack align="baseline" spacing={3}>
                                                 <Text 
                                                     color="white" 
-                                                    fontSize="2xl" 
+                                                    fontSize={{ base: "lg", md: "xl" }} 
                                                     fontWeight="700"
                                                     letterSpacing="-0.02em"
                                                     lineHeight="1"
@@ -1330,7 +1330,7 @@ const Borrow = () => {
                                             <HStack align="baseline" spacing={3}>
                                                 <Text 
                                                     color="white" 
-                                                    fontSize="2xl" 
+                                                    fontSize={{ base: "lg", md: "xl" }} 
                                                     fontWeight="700"
                                                     letterSpacing="-0.02em"
                                                     lineHeight="1"
@@ -1362,12 +1362,12 @@ const Borrow = () => {
                                             <HStack align="center" spacing={2}>
                                                 <Text 
                                                     color={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"} 
-                                                    fontSize="2xl" 
+                                                    fontSize={{ base: "lg", md: "xl" }} 
                                                     fontWeight="700"
                                                     letterSpacing="-0.02em"
                                                     lineHeight="1"
                                                 >
-                                                    {commifyDecimals(ltv, 2)}
+                                                    {commifyDecimals(ltv, 2)}%
                                                 </Text>
                                                 {/* <Box 
                                                     w="8px" 
@@ -1398,7 +1398,7 @@ const Borrow = () => {
                                             <HStack align="baseline" spacing={2}>
                                                 <Text 
                                                     color="white" 
-                                                    fontSize="2xl" 
+                                                    fontSize={{ base: "lg", md: "xl" }} 
                                                     fontWeight="700"
                                                     letterSpacing="-0.02em"
                                                     lineHeight="1"

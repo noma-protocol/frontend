@@ -83,8 +83,8 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
         return (
             <Box 
                 display="grid"
-                gridTemplateColumns={showWrapButton || showUnwrapButton ? "24px 50px 1fr 80px 60px" : "24px 50px 1fr 120px"}
-                gap="8px"
+                gridTemplateColumns={showWrapButton || showUnwrapButton ? "24px 40px 1fr 5px 70px" : "24px 50px 1fr 120px"}
+                gap="2px"
                 alignItems="start"
                 bg="rgba(255, 255, 255, 0.03)"
                 borderRadius="md"
@@ -121,23 +121,9 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 <Box mt={1}>
                     <Text color="white" fontSize="sm" fontWeight="600">{symbol}</Text>
                 </Box>
-                
-                {/* Spacer */}
-                <Box />
-                
-                {/* Amounts */}
-                <Box textAlign="right" mt={1}>
-                    <Text color="white" fontWeight="bold" fontSize="sm" lineHeight="1.2">
-                        {commify(balanceValue, 4)}
-                    </Text>
-                    <Text color="#4ade80" fontSize="xs" lineHeight="1.2">
-                        ≈ ${commify(usdValue, 2)}
-                    </Text>
-                </Box>
-                
                 {/* Wrap/Unwrap Button */}
                 {(showWrapButton || showUnwrapButton) && (
-                    <Box display="flex" alignItems="center" justifyContent="flex-end" mt={-2}>
+                    <Box display="flex" alignItems="left" justifyContent="flex-start" mt={-2}>
                         {showWrapButton && deposit && setWrapAmount && (
                             <Wrap
                                 wrapAmount={String(wrapAmount)}
@@ -167,7 +153,20 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                             />
                         )}
                     </Box>
-                )}
+                )}                
+                {/* Spacer */}
+                <Box />
+                
+                {/* Amounts */}
+                <Box textAlign="right" mt={1}>
+                    <Text color="white" fontWeight="bold" fontSize="sm" lineHeight="1.2">
+                        {commify(balanceValue, 4)}
+                    </Text>
+                    <Text color="#4ade80" fontSize="xs" lineHeight="1.2">
+                        ≈ ${commify(usdValue, 2)}
+                    </Text>
+                </Box>
+                
             </Box>
         );
     };

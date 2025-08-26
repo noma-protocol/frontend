@@ -73,7 +73,7 @@ const Wrap = ({
                         border="1px solid"
                         borderColor={actionType === 'wrap' ? "#4ade80" : "gray"}
                         variant={"outline"}
-                        h={size == "lg" ? 8 : 6}
+                        h={size == "lg" ? 6 : 4}
                         ml={size == "lg" ? 0 : 2}
                         mt={size == "lg" ? 0 : 2}
                         w={buttonSize}
