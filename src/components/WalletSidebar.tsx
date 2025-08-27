@@ -78,6 +78,12 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 const formattedPrice = formatEther(spotPriceFromContract);
                 const numericPrice = parseFloat(formattedPrice);
                 
+                console.log('NOMA spot price debug:', {
+                    spotPriceFromContract: spotPriceFromContract.toString(),
+                    formattedPrice,
+                    numericPrice
+                });
+                
                 if (!isNaN(numericPrice) && isFinite(numericPrice) && numericPrice > 0) {
                     setNomaSpotPrice(numericPrice);
                 }
@@ -155,6 +161,14 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 // NOMA price calculation using spot price from vault
                 const nomaPrice = nomaSpotPrice * monPrice;
                 usdValue = balanceValue * nomaPrice;
+                
+                console.log('NOMA USD calculation:', {
+                    balanceValue,
+                    nomaSpotPrice,
+                    monPrice,
+                    nomaPrice,
+                    usdValue
+                });
             }
             // Add other token prices here as needed
         }
