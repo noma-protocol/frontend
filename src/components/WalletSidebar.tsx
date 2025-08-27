@@ -55,42 +55,59 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
     const { monPrice } = useMonPrice();
     const publicClient = usePublicClient();
     
-    // Fetch NOMA spot price from vault
+    // Fetch NOMA spot price from Uniswap V3 pool
     useEffect(() => {
         const fetchNomaSpotPrice = async () => {
             try {
-                const nomaVault = "0x0b3507D715DCd7ee876626013b8BC7Fa1B069232";
+                // NOMA/WMON pool address from the logs
+                const poolAddress = "0xBb7EfF3E685c6564F2F09DD90b6C05754E3BDAC0";
                 const provider = new ethers.providers.JsonRpcProvider(publicClient?.transport?.url || "https://devnet.monad.xyz");
                 
-                const VaultAbi = [
-                    "function getVaultInfo() view returns (uint256, uint256, uint256, uint256, uint256, uint256, address, address, uint256)"
+                const poolABI = [
+                    "function slot0() view returns (uint160 sqrtPriceX96, int24 tick, uint16 observationIndex, uint16 observationCardinality, uint16 observationCardinalityNext, uint8 feeProtocol, bool unlocked)",
+                    "function token0() view returns (address)",
+                    "function token1() view returns (address)"
                 ];
                 
-                const vaultContract = new ethers.Contract(
-                    nomaVault,
-                    VaultAbi,
-                    provider
-                );
+                const poolContract = new ethers.Contract(poolAddress, poolABI, provider);
                 
-                const vaultInfo = await vaultContract.getVaultInfo();
-                const spotPriceFromContract = vaultInfo[2]; // spotPrice is at index 2
+                // Get slot0 data
+                const slot0 = await poolContract.slot0();
+                const sqrtPriceX96 = slot0[0];
                 
-                const formattedPrice = formatEther(spotPriceFromContract);
-                const numericPrice = parseFloat(formattedPrice);
+                // Get token addresses to determine price direction
+                const token0 = await poolContract.token0();
+                const token1 = await poolContract.token1();
                 
-                console.log('NOMA spot price debug:', {
-                    spotPriceFromContract: spotPriceFromContract.toString(),
-                    formattedPrice,
-                    numericPrice
+                // Convert sqrtPriceX96 to price
+                const sqrtPrice = parseFloat(sqrtPriceX96.toString()) / Math.pow(2, 96);
+                const price = Math.pow(sqrtPrice, 2);
+                
+                // WMON address
+                const WMON = "0x0F9768EACC8e107dF5B8883Fd542A01411eFe2a3";
+                
+                // Determine if we need to invert the price
+                // If token0 is WMON, then price is NOMA/WMON
+                // If token1 is WMON, then price is WMON/NOMA and we need to invert
+                const isToken0Wmon = token0.toLowerCase() === WMON.toLowerCase();
+                const finalPrice = isToken0Wmon ? price : 1 / price;
+                
+                console.log('NOMA spot price from pool:', {
+                    token0,
+                    token1,
+                    sqrtPriceX96: sqrtPriceX96.toString(),
+                    price,
+                    isToken0Wmon,
+                    finalPrice
                 });
                 
-                if (!isNaN(numericPrice) && isFinite(numericPrice) && numericPrice > 0) {
-                    setNomaSpotPrice(numericPrice);
+                if (!isNaN(finalPrice) && isFinite(finalPrice) && finalPrice > 0) {
+                    setNomaSpotPrice(finalPrice);
                 }
             } catch (error) {
                 console.error("Error fetching NOMA spot price:", error);
-                // Fallback to a default if fetch fails
-                setNomaSpotPrice(0.033);
+                // Use a more accurate fallback based on the logs
+                setNomaSpotPrice(0.00012841);
             }
         };
         
