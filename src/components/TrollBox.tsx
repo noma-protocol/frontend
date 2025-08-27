@@ -72,6 +72,7 @@ const TrollBox: React.FC = () => {
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   // Admin addresses
   const ADMIN_ADDRESSES = ['0xcC91EB5D1AB2D577a64ACD71F0AA9C5cAf35D111'];
@@ -448,6 +449,72 @@ const TrollBox: React.FC = () => {
     setNewMessage(prev => prev + emojiObject.emoji);
     setShowEmojiPicker(false);
     setShowEmojiPickerExpanded(false);
+  };
+
+  // Handle paste event for images
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      
+      // Check if the pasted item is an image
+      if (item.type.indexOf('image') !== -1) {
+        e.preventDefault();
+        const blob = item.getAsFile();
+        if (!blob) continue;
+
+        setIsUploadingImage(true);
+        
+        try {
+          // Convert blob to base64
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            const base64data = reader.result as string;
+            
+            // Check if the image is too large for data URL (limit to 2MB)
+            const MAX_DATA_URL_SIZE = 2 * 1024 * 1024; // 2MB
+            
+            if (blob.size > MAX_DATA_URL_SIZE) {
+              toaster.create({
+                title: 'Image too large',
+                description: 'Please paste an image smaller than 2MB',
+                duration: 3000,
+              });
+              setIsUploadingImage(false);
+              return;
+            }
+            
+            // For demo purposes, we'll use data URLs
+            // In production, you should upload to a proper image hosting service
+            const imageMarkdown = `![image](${base64data})`;
+            setNewMessage(prev => {
+              const newMessage = prev + (prev ? ' ' : '') + imageMarkdown + ' ';
+              return newMessage;
+            });
+            
+            toaster.create({
+              title: 'Image added',
+              description: 'Image has been added to your message',
+              duration: 2000,
+            });
+          };
+          reader.readAsDataURL(blob);
+        } catch (error) {
+          console.error('Error processing image:', error);
+          toaster.create({
+            title: 'Failed to process image',
+            description: 'Please try again',
+            duration: 3000,
+          });
+        } finally {
+          setIsUploadingImage(false);
+        }
+        
+        break; // Only handle the first image
+      }
+    }
   };
 
   const handleGifSelect = (gifUrl: string) => {
@@ -1134,12 +1201,18 @@ const TrollBox: React.FC = () => {
             )}
             {/* Help moved to overlay */}
             <HStack position="relative">
+              {isUploadingImage && (
+                <Text fontSize="xs" color="#4ade80" position="absolute" top="-20px" left="0">
+                  Uploading image...
+                </Text>
+              )}
               <Box flex="1" position="relative">
               <Input
                 ref={collapsedInputRef}
                 value={newMessage}
                 onChange={handleInputChange}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                onPaste={handlePaste}
                 placeholder="Type message or /help for commands..."
                 bg="#2a2a2a"
                 border="none"
@@ -1149,6 +1222,7 @@ const TrollBox: React.FC = () => {
                 _placeholder={{ color: '#666' }}
                 _hover={{ bg: '#3a3a3a' }}
                 _focus={{ bg: '#3a3a3a', outline: 'none' }}
+                disabled={isUploadingImage}
               />
               {showUserSuggestions && userSuggestions.length > 0 && (
                 <Box
@@ -1795,12 +1869,18 @@ const TrollBox: React.FC = () => {
                   </Box>
                 )}
                 <HStack position="relative">
+                  {isUploadingImage && (
+                    <Text fontSize="sm" color="#4ade80" position="absolute" top="-24px" left="0">
+                      Uploading image...
+                    </Text>
+                  )}
                   <Box flex="1" position="relative">
                     <Input
                       ref={expandedInputRef}
                       value={newMessage}
                       onChange={handleInputChange}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      onPaste={handlePaste}
                       placeholder="Type your message or /help for commands..."
                       bg="#2a2a2a"
                       border="none"
@@ -1810,6 +1890,7 @@ const TrollBox: React.FC = () => {
                       _placeholder={{ color: '#666' }}
                       _hover={{ bg: '#3a3a3a' }}
                       _focus={{ bg: '#3a3a3a', outline: 'none' }}
+                      disabled={isUploadingImage}
                     />
                     {showUserSuggestions && userSuggestions.length > 0 && (
                       <Box

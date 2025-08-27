@@ -19,6 +19,9 @@ const PORT = process.env.PORT || 9090;
 // Authentication message that users will sign
 const AUTH_MESSAGE = 'Sign this message to authenticate with the Noma Trollbox\n\nTimestamp: ';
 
+// Admin addresses
+const ADMIN_ADDRESSES = ['0xcC91EB5D1AB2D577a64ACD71F0AA9C5cAf35D111'.toLowerCase()];
+
 // Ensure data directory exists
 if (!existsSync(DATA_DIR)) {
   mkdirSync(DATA_DIR, { recursive: true });
@@ -419,14 +422,20 @@ const profileStore = new ProfileStore();
 const authStore = new AuthStore();
 const rateLimiter = new RateLimiter();
 
+// Kicked users tracking (address -> kick timestamp)
+const kickedUsers = new Map();
+const KICK_DURATION = 60 * 60 * 1000; // 1 hour kick duration
+
 // Blockchain monitor for trade alerts
 let blockchainMonitor = null;
 
 // Create WebSocket server
 const wss = new WebSocketServer({ port: PORT });
 
-// Connected clients
+// Connected clients (clientId -> ws)
 const clients = new Map();
+// Address to clientId mapping for quick lookup
+const addressToClientId = new Map();
 
 // Get count of connected users
 function getUserCount() {
@@ -548,10 +557,31 @@ wss.on('connection', (ws, req) => {
             return;
           }
           
+          // Check if user is kicked
+          const kickedTimestamp = kickedUsers.get(message.address.toLowerCase());
+          if (kickedTimestamp) {
+            const timeSinceKick = Date.now() - kickedTimestamp;
+            if (timeSinceKick < KICK_DURATION) {
+              const minutesRemaining = Math.ceil((KICK_DURATION - timeSinceKick) / 60000);
+              ws.send(JSON.stringify({ 
+                type: 'error', 
+                message: `You have been kicked from the chat. Try again in ${minutesRemaining} minutes.` 
+              }));
+              ws.close();
+              return;
+            } else {
+              // Kick duration expired, remove from kicked list
+              kickedUsers.delete(message.address.toLowerCase());
+            }
+          }
+          
           ws.address = message.address.toLowerCase();
           ws.authenticated = true;
           ws.authTimestamp = Date.now();
           ws.sessionToken = authResult.sessionToken;
+          
+          // Update address to client mapping
+          addressToClientId.set(ws.address, clientId);
           
           // Create or update user profile
           profileStore.createOrUpdateProfile(ws.address);
@@ -596,10 +626,31 @@ wss.on('connection', (ws, req) => {
               return;
             }
             
+            // Check if user is kicked
+            const kickedTimestamp = kickedUsers.get(message.address.toLowerCase());
+            if (kickedTimestamp) {
+              const timeSinceKick = Date.now() - kickedTimestamp;
+              if (timeSinceKick < KICK_DURATION) {
+                const minutesRemaining = Math.ceil((KICK_DURATION - timeSinceKick) / 60000);
+                ws.send(JSON.stringify({ 
+                  type: 'error', 
+                  message: `You have been kicked from the chat. Try again in ${minutesRemaining} minutes.` 
+                }));
+                ws.close();
+                return;
+              } else {
+                // Kick duration expired, remove from kicked list
+                kickedUsers.delete(message.address.toLowerCase());
+              }
+            }
+            
             ws.address = message.address.toLowerCase();
             ws.authenticated = true;
             ws.authTimestamp = Date.now();
             ws.sessionToken = storedCreds.sessionToken;
+            
+            // Update address to client mapping
+            addressToClientId.set(ws.address, clientId);
             
             const username = usernameStore.getUsername(ws.address);
             
@@ -654,10 +705,17 @@ wss.on('connection', (ws, req) => {
           
           // Handle /help command
           if (processedContent === '/help' || processedContent === '/commands') {
+            const isAdmin = ADMIN_ADDRESSES.includes(ws.address);
+            let helpContent = 'Available commands:\n/slap <username> - Slap another user\n/help - Show this help message';
+            
+            if (isAdmin) {
+              helpContent += '\n/kick <username> - Kick a user from chat (Admin only)';
+            }
+            
             const helpMessage = {
               id: uuidv4(),
               type: 'message',
-              content: 'Available commands:\n/slap <username> - Slap another user\n/help - Show this help message',
+              content: helpContent,
               username: 'System',
               timestamp: new Date().toISOString(),
               clientId: 'system',
@@ -682,6 +740,72 @@ wss.on('connection', (ws, req) => {
             processedContent = `${username} has slapped ${targetUser}, what u gonna do about it?`;
             isCommand = true;
             commandType = 'slap';
+          }
+          
+          // Handle /kick command (Admin only)
+          if (processedContent.startsWith('/kick ')) {
+            // Check if user is admin
+            if (!ADMIN_ADDRESSES.includes(ws.address)) {
+              ws.send(JSON.stringify({ type: 'error', message: 'Only admins can use this command' }));
+              return;
+            }
+            
+            const targetUsername = processedContent.substring(6).trim();
+            if (!targetUsername) {
+              ws.send(JSON.stringify({ type: 'error', message: 'Usage: /kick <username>' }));
+              return;
+            }
+            
+            // Find the target user's address
+            let targetAddress = null;
+            let targetClientId = null;
+            
+            // First, try to find by exact username match
+            targetAddress = usernameStore.getAddressForUsername(targetUsername);
+            
+            if (targetAddress) {
+              targetClientId = addressToClientId.get(targetAddress.toLowerCase());
+            }
+            
+            if (!targetAddress || !targetClientId) {
+              ws.send(JSON.stringify({ 
+                type: 'error', 
+                message: `User '${targetUsername}' not found or not connected` 
+              }));
+              return;
+            }
+            
+            // Don't allow admins to kick themselves or other admins
+            if (ADMIN_ADDRESSES.includes(targetAddress.toLowerCase())) {
+              ws.send(JSON.stringify({ 
+                type: 'error', 
+                message: 'Cannot kick admin users' 
+              }));
+              return;
+            }
+            
+            // Add to kicked users list
+            kickedUsers.set(targetAddress.toLowerCase(), Date.now());
+            
+            // Find and disconnect the target user
+            const targetClient = clients.get(targetClientId);
+            if (targetClient && targetClient.readyState === targetClient.OPEN) {
+              targetClient.send(JSON.stringify({ 
+                type: 'error', 
+                message: 'You have been kicked from the chat by an admin' 
+              }));
+              targetClient.close();
+            }
+            
+            // Remove from address mapping
+            addressToClientId.delete(targetAddress.toLowerCase());
+            
+            // Create kick notification message
+            processedContent = `*** Admin ${username} has kicked ${targetUsername} from the chat ***`;
+            isCommand = true;
+            commandType = 'kick';
+            
+            console.log(`Admin ${username} kicked ${targetUsername} (${targetAddress})`);
           }
           
           // Create chat message with server-verified data only
@@ -756,6 +880,12 @@ wss.on('connection', (ws, req) => {
   // Handle client disconnect
   ws.on('close', () => {
     console.log(`Client disconnected: ${clientId}`);
+    
+    // Remove from address mapping if authenticated
+    if (ws.address) {
+      addressToClientId.delete(ws.address);
+    }
+    
     clients.delete(clientId);
     // Broadcast updated user count after disconnect
     broadcastUserCount();
@@ -764,6 +894,12 @@ wss.on('connection', (ws, req) => {
   // Handle errors
   ws.on('error', (error) => {
     console.error(`Client error ${clientId}:`, error);
+    
+    // Remove from address mapping if authenticated
+    if (ws.address) {
+      addressToClientId.delete(ws.address);
+    }
+    
     clients.delete(clientId);
     // Broadcast updated user count after error disconnect
     broadcastUserCount();
