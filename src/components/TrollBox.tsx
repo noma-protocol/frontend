@@ -574,7 +574,6 @@ const TrollBox: React.FC = () => {
   
   // Process image file helper
   const processImageFile = async (file: File | Blob) => {
-    console.log(`Processing image: size=${file.size}, type=${file.type}`);
     setIsUploadingImage(true);
     
     try {
@@ -592,7 +591,6 @@ const TrollBox: React.FC = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64data = reader.result as string;
-        console.log('Base64 conversion complete, length:', base64data.length);
         
         const imageMarkdown = `![image](${base64data})`;
         setNewMessage(prev => prev + (prev ? ' ' : '') + imageMarkdown + ' ');
@@ -1317,10 +1315,7 @@ const TrollBox: React.FC = () => {
               )}
               <Box flex="1" position="relative">
               <Box
-                onPaste={(e: any) => {
-                  console.log('Paste on wrapper div');
-                  handlePaste(e);
-                }}
+                onPaste={(e: any) => handlePaste(e)}
                 w="100%"
               >
                 <Input
@@ -1328,13 +1323,7 @@ const TrollBox: React.FC = () => {
                   value={newMessage}
                   onChange={handleInputChange}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  onPaste={(e) => {
-                    console.log('onPaste event fired in collapsed input');
-                    handlePaste(e);
-                  }}
-                  onPasteCapture={(e) => {
-                    console.log('onPasteCapture event fired in collapsed input');
-                  }}
+                  onPaste={handlePaste}
                   placeholder="Type message or /help for commands..."
                   bg="#2a2a2a"
                   border="none"
@@ -2042,10 +2031,7 @@ const TrollBox: React.FC = () => {
                   )}
                   <Box flex="1" position="relative">
                     <Box
-                      onPaste={(e: any) => {
-                        console.log('Paste on expanded wrapper div');
-                        handlePaste(e);
-                      }}
+                      onPaste={(e: any) => handlePaste(e)}
                       w="100%"
                     >
                       <Input
@@ -2053,13 +2039,7 @@ const TrollBox: React.FC = () => {
                         value={newMessage}
                         onChange={handleInputChange}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        onPaste={(e) => {
-                          console.log('onPaste event fired in expanded input');
-                          handlePaste(e);
-                        }}
-                        onPasteCapture={(e) => {
-                          console.log('onPasteCapture event fired in expanded input');
-                        }}
+                        onPaste={handlePaste}
                         placeholder="Type your message or /help for commands..."
                         bg="#2a2a2a"
                         border="none"

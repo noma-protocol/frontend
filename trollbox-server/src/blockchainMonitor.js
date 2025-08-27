@@ -30,6 +30,10 @@ class BlockchainMonitor {
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
     this.reconnectDelay = 5000; // 5 seconds
+    this.pollingInterval = 10000; // 10 seconds
+    this.lastProcessedBlock = null;
+    this.pollingTimer = null;
+    this.processedTxHashes = new Set(); // Track processed transactions
   }
 
   async initialize() {
@@ -68,21 +72,28 @@ class BlockchainMonitor {
     }
   }
 
-  startMonitoring() {
+  async startMonitoring() {
     if (this.monitoring) return;
     
     this.monitoring = true;
-    console.log('Starting blockchain monitoring...');
+    console.log('Starting blockchain monitoring with polling...');
     
-    // Monitor NOMA transfers
-    if (this.nomaContract) {
-      this.nomaContract.on('Transfer', this.handleNomaTransfer.bind(this));
+    // Get current block number
+    try {
+      const currentBlock = await this.provider.getBlockNumber();
+      if (!this.lastProcessedBlock) {
+        // Start monitoring from 10 blocks ago to catch recent events
+        this.lastProcessedBlock = Math.max(0, currentBlock - 10);
+      }
+      console.log(`Starting monitoring from block ${this.lastProcessedBlock}`);
+    } catch (error) {
+      console.error('Error getting current block:', error);
+      this.handleProviderError();
+      return;
     }
     
-    // Monitor DEX swaps
-    if (this.dexPool) {
-      this.dexPool.on('Swap', this.handleDexSwap.bind(this));
-    }
+    // Start polling for new events
+    this.pollForEvents();
     
     this.reconnectAttempts = 0;
   }
@@ -93,12 +104,159 @@ class BlockchainMonitor {
     this.monitoring = false;
     console.log('Stopping blockchain monitoring...');
     
-    // Remove all listeners
-    if (this.nomaContract) {
-      this.nomaContract.removeAllListeners();
+    // Clear polling timer
+    if (this.pollingTimer) {
+      clearTimeout(this.pollingTimer);
+      this.pollingTimer = null;
     }
+  }
+
+  async pollForEvents() {
+    if (!this.monitoring) return;
+    
+    try {
+      const currentBlock = await this.provider.getBlockNumber();
+      
+      if (currentBlock > this.lastProcessedBlock) {
+        // Process events from lastProcessedBlock + 1 to currentBlock
+        await this.processBlockRange(this.lastProcessedBlock + 1, currentBlock);
+        this.lastProcessedBlock = currentBlock;
+      }
+      
+      // Schedule next poll
+      this.pollingTimer = setTimeout(() => {
+        this.pollForEvents();
+      }, this.pollingInterval);
+      
+    } catch (error) {
+      console.error('Error in polling cycle:', error);
+      
+      // Retry after a delay
+      this.pollingTimer = setTimeout(() => {
+        this.pollForEvents();
+      }, this.pollingInterval * 2);
+    }
+  }
+
+  async processBlockRange(fromBlock, toBlock) {
+    console.log(`Processing blocks ${fromBlock} to ${toBlock}`);
+    
+    // Process NOMA transfers
+    if (this.nomaContract) {
+      await this.processNomaTransfers(fromBlock, toBlock);
+    }
+    
+    // Process DEX swaps
     if (this.dexPool) {
-      this.dexPool.removeAllListeners();
+      await this.processDexSwaps(fromBlock, toBlock);
+    }
+  }
+
+  async processNomaTransfers(fromBlock, toBlock) {
+    try {
+      // Create filter for Transfer events
+      const transferFilter = {
+        address: NOMA_TOKEN_ADDRESS,
+        topics: [ethers.id('Transfer(address,address,uint256)')],
+        fromBlock: '0x' + fromBlock.toString(16),
+        toBlock: '0x' + toBlock.toString(16)
+      };
+      
+      const logs = await this.provider.getLogs(transferFilter);
+      console.log(`Found ${logs.length} NOMA transfer events in blocks ${fromBlock}-${toBlock}`);
+      
+      for (const log of logs) {
+        // Skip if already processed
+        if (this.processedTxHashes.has(log.transactionHash)) continue;
+        
+        try {
+          // Parse the log
+          const parsedLog = this.nomaContract.interface.parseLog({
+            topics: log.topics,
+            data: log.data
+          });
+          
+          if (!parsedLog || parsedLog.name !== 'Transfer') continue;
+          
+          // Process the transfer
+          await this.handleNomaTransfer(
+            parsedLog.args.from || parsedLog.args[0],
+            parsedLog.args.to || parsedLog.args[1],
+            parsedLog.args.value || parsedLog.args[2],
+            {
+              transactionHash: log.transactionHash,
+              blockNumber: log.blockNumber,
+              logIndex: log.logIndex
+            }
+          );
+          
+          // Mark as processed
+          this.processedTxHashes.add(log.transactionHash);
+          
+          // Clean up old tx hashes (keep last 1000)
+          if (this.processedTxHashes.size > 1000) {
+            const hashes = Array.from(this.processedTxHashes);
+            this.processedTxHashes = new Set(hashes.slice(-1000));
+          }
+        } catch (logError) {
+          console.error('Error parsing transfer log:', logError, log);
+        }
+      }
+    } catch (error) {
+      console.error('Error processing NOMA transfers:', error);
+    }
+  }
+
+  async processDexSwaps(fromBlock, toBlock) {
+    try {
+      // Create filter for Swap events (Uniswap V3)
+      const swapFilter = {
+        address: DEX_POOL_ADDRESS,
+        topics: [ethers.id('Swap(address,address,int256,int256,uint160,uint128,int24)')],
+        fromBlock: '0x' + fromBlock.toString(16),
+        toBlock: '0x' + toBlock.toString(16)
+      };
+      
+      const logs = await this.provider.getLogs(swapFilter);
+      console.log(`Found ${logs.length} DEX swap events in blocks ${fromBlock}-${toBlock}`);
+      
+      for (const log of logs) {
+        // Skip if already processed
+        if (this.processedTxHashes.has(log.transactionHash)) continue;
+        
+        try {
+          // Parse the log
+          const parsedLog = this.dexPool.interface.parseLog({
+            topics: log.topics,
+            data: log.data
+          });
+          
+          if (!parsedLog || parsedLog.name !== 'Swap') continue;
+          
+          // Process the swap
+          await this.handleDexSwap(
+            parsedLog.args.sender || parsedLog.args[0],
+            parsedLog.args.recipient || parsedLog.args[1],
+            parsedLog.args.amount0 || parsedLog.args[2],
+            parsedLog.args.amount1 || parsedLog.args[3],
+            parsedLog.args.sqrtPriceX96 || parsedLog.args[4],
+            parsedLog.args.liquidity || parsedLog.args[5],
+            parsedLog.args.tick || parsedLog.args[6],
+            {
+              transactionHash: log.transactionHash,
+              blockNumber: log.blockNumber,
+              logIndex: log.logIndex
+            }
+          );
+          
+          // Mark as processed
+          this.processedTxHashes.add(log.transactionHash);
+        } catch (logError) {
+          console.error('Error parsing swap log:', logError, log);
+        }
+      }
+    } catch (error) {
+      console.error('Error processing DEX swaps:', error);
     }
   }
 
