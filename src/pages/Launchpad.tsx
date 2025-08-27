@@ -29,7 +29,7 @@ import { Checkbox } from "../components/ui/checkbox"
 import { useAccount, useBalance, useContractWrite } from "wagmi";
 import { isMobile } from "react-device-detect";
 import { Slider } from "../components/ui/slider"
-import { FaInfoCircle, FaCoins, FaChartLine, FaRocket, FaCheckCircle, FaTag, FaLayerGroup, FaClock, FaWallet, FaUpload, FaImage, FaFileAlt } from "react-icons/fa";
+import { FaInfoCircle, FaCoins, FaChartLine, FaRocket, FaCheckCircle, FaTag, FaLayerGroup, FaClock, FaWallet, FaUpload, FaImage, FaFileAlt, FaUserTie } from "react-icons/fa";
 import { MdToken } from "react-icons/md";
 import {
   StatRoot,
@@ -1468,6 +1468,7 @@ const Launchpad: React.FC = () => {
                 </Box>
                 ) : (
                     <Box h="100%" display="flex" flexDirection="column">
+                    {/* Step 3: Review & Deploy - deployStep should be 3 here */}
                     <Box 
                         bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
                         p={isMobile ? 8 : 10} 
@@ -1498,7 +1499,7 @@ const Launchpad: React.FC = () => {
                                 <Heading as="h3" size="md" color="white">
                                     Review & Launch
                                 </Heading>
-                                <Text color="#888" fontSize="xs">Confirm your token details before deployment</Text>
+                                <Text color="#888" fontSize="xs">Confirm your token details before deployment (Step {deployStep})</Text>
                             </Box>
                         </HStack>
 
@@ -1612,8 +1613,78 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </SimpleGrid>
                             </Box>
+                            {/* Project Founder Info */}
+                            <Box 
+                                bg="#0a0a0a" 
+                                p={4} 
+                                borderRadius="xl" 
+                                border="1px solid #2a2a2a"
+                                transition="all 0.2s"
+                                _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
+                            >
+                                <HStack mb={2} spacing={2}>
+                                    <Box>
+                                        <FaUserTie size={18} color="#ff9500" />
+                                    </Box>
+                                    <Box>
+                                        <Text color="#ff9500" fontSize="sm" fontWeight="bold">Project Founder</Text>
+                                    </Box>
+                                </HStack>
+                                <SimpleGrid columns={2} gap={2}>
+                                    <Box>
+                                        <Text color="#888" fontSize="xs">Your Allocation</Text>
+                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
+                                            {presale == "1" 
+                                                ? commify(Number(tokenSupply) * 0.0) + " " + (symbol || 'TOKEN') + " (0%)"
+                                                : commify(Number(tokenSupply) * 0.1) + " " + (symbol || 'TOKEN') + " (10%)"}
+                                        </Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="#888" fontSize="xs">Liquidity Pool</Text>
+                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
+                                            {presale == "1" 
+                                                ? commify(Number(tokenSupply) * 0.9) + " " + (symbol || 'TOKEN') + " (90%)"
+                                                : commify(Number(tokenSupply) * 0.9) + " " + (symbol || 'TOKEN') + " (90%)"}
+                                        </Text>
+                                    </Box>
+                                </SimpleGrid>
+                            </Box>
+                            
+                            {/* Presale Participants Box */}
+                            {presale == "1" && (
+                                <Box 
+                                    bg="#0a0a0a" 
+                                    p={4} 
+                                    borderRadius="xl" 
+                                    border="1px solid #2a2a2a"
+                                    transition="all 0.2s"
+                                    _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
+                                >
+                                    <HStack mb={2} spacing={2}>
+                                        <Box>
+                                            <FaWallet size={18} color="#22c55e" />
+                                        </Box>
+                                        <Box>
+                                            <Text color="#22c55e" fontSize="sm" fontWeight="bold">Presale Participants</Text>
+                                        </Box>
+                                    </HStack>
+                                    <SimpleGrid columns={2} gap={2}>
+                                        <Box>
+                                            <Text color="#888" fontSize="xs">Token Allocation</Text>
+                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
+                                                {commify(Number(tokenSupply) * 0.1)} {symbol || 'TOKEN'}
+                                            </Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="xs">Percentage</Text>
+                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">10%</Text>
+                                        </Box>
+                                    </SimpleGrid>
+                                </Box>
+                            )}
+                            
                             {/* Presale Configuration Card */}
-                            {presale == 1 && (
+                            {presale == "1" && (
                                 <Box 
                                     bg="#0a0a0a" 
                                     p={4} 
@@ -1643,7 +1714,22 @@ const Launchpad: React.FC = () => {
                                             <Text color="#888" fontSize="xs">Duration</Text>
                                             <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{getDaysFromDuration(duration)} days</Text>
                                         </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="xs">Tokens for Sale</Text>
+                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(Number(tokenSupply) * 0.1 || 0)} {symbol || 'TOKEN'}</Text>
+                                        </Box>
                                     </SimpleGrid>
+                                    <Box mt={3} pt={3} borderTop="1px solid #2a2a2a">
+                                        <Text color="#888" fontSize="xs" mb={1}>Expected to Raise</Text>
+                                        <HStack gap={2} align="baseline">
+                                            <Text color="#4ade80" fontSize="lg" fontWeight="bold">
+                                                {commify((Number(tokenSupply) * 0.1 || 0) * (Number(presalePrice) || 0))} MON
+                                            </Text>
+                                            <Text color="#666" fontSize="xs">
+                                                (${commify((Number(tokenSupply) * 0.1 || 0) * (Number(presalePrice) || 0) * 3.5, 0)} at $3.5/MON)
+                                            </Text>
+                                        </HStack>
+                                    </Box>
                                 </Box>
                             )}
                         </VStack>

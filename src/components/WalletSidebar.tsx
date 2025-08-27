@@ -179,13 +179,13 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 const nomaPrice = nomaSpotPrice * monPrice;
                 usdValue = balanceValue * nomaPrice;
                 
-                console.log('NOMA USD calculation:', {
-                    balanceValue,
-                    nomaSpotPrice,
-                    monPrice,
-                    nomaPrice,
-                    usdValue
-                });
+                // console.log('NOMA USD calculation:', {
+                //     balanceValue,
+                //     nomaSpotPrice,
+                //     monPrice,
+                //     nomaPrice,
+                //     usdValue
+                // });
             }
             // Add other token prices here as needed
         }

@@ -285,8 +285,38 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
       const timestamp = Date.now();
       const message = AUTH_MESSAGE_PREFIX + timestamp;
       
-      // Request signature from wallet
-      const signature = await signMessageAsync({ message });
+      // Request signature from wallet with retry for mobile
+      let signature;
+      try {
+        signature = await signMessageAsync({ message });
+      } catch (signError: any) {
+        console.error('Sign message error:', signError);
+        
+        // Mobile wallet specific error handling
+        if (signError?.message?.includes('User rejected') || 
+            signError?.message?.includes('User denied') ||
+            signError?.code === 4001) {
+          setError('Signature request was rejected');
+          return;
+        }
+        
+        // Some mobile wallets might need a second attempt
+        if (signError?.message?.includes('timeout') || 
+            signError?.message?.includes('pending')) {
+          setError('Wallet request timed out. Please try again.');
+          return;
+        }
+        
+        // Generic error
+        setError(`Failed to sign message: ${signError?.message || 'Unknown error'}`);
+        return;
+      }
+      
+      // Validate signature
+      if (!signature) {
+        setError('No signature received from wallet');
+        return;
+      }
       
       // Send authentication with signature
       const success = globalTrollbox.sendMessage({
@@ -298,7 +328,7 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
       });
       
       if (!success) {
-        setError('Failed to authenticate');
+        setError('Failed to authenticate with server');
       }
     } catch (error) {
       console.error('Authentication error:', error);

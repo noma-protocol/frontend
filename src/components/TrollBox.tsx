@@ -468,6 +468,7 @@ const TrollBox: React.FC = () => {
   };
   
   const handleReply = (message: Message) => {
+    console.log('Reply clicked for message:', message);
     setReplyingTo(message);
     // Add @username to input
     setNewMessage(`@${message.username} `);
@@ -902,7 +903,7 @@ const TrollBox: React.FC = () => {
         const maxSize = isGifOrSticker ? '200px' : '300px';
         
         // Log for debugging
-        console.log('Rendering image:', { altText, urlLength: imageUrl.length, urlStart: imageUrl.substring(0, 50) });
+        // console.log('Rendering image:', { altText, urlLength: imageUrl.length, urlStart: imageUrl.substring(0, 50) });
         
         // Check if it's a data URL and potentially very long
         const isDataUrl = imageUrl.startsWith('data:');
@@ -986,7 +987,7 @@ const TrollBox: React.FC = () => {
             border="2px solid #ff9500"
             borderRadius="md"
             p={5}
-            maxW="280px"
+            maxW="350px"
             onClick={(e) => e.stopPropagation()}
             boxShadow="0 8px 32px rgba(255, 149, 0, 0.2)"
           >
@@ -996,21 +997,21 @@ const TrollBox: React.FC = () => {
               </Text>
               <VStack align="start" gap={2} pl={2}>
                 <HStack>
-                  <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/slap</Text></Box>
+                  <Box w="100px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/slap</Text></Box>
                   <Box><Text fontSize="sm" color="white">&lt;user&gt; - Slap someone!</Text></Box>
                 </HStack>
                 <HStack>
-                  <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/help</Text></Box>
+                  <Box w="100px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/help</Text></Box>
                   <Box><Text fontSize="sm" color="white">- Show this help</Text></Box>
                 </HStack>
                 {isAdmin && (
                   <>
                     <HStack>
-                      <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text></Box>
+                      <Box w="100px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text></Box>
                       <Box><Text fontSize="sm" color="white">&lt;user&gt; - Kick a user (Admin)</Text></Box>
                     </HStack>
                     <HStack>
-                      <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/clearauth</Text></Box>
+                      <Box w="100px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/clearauth</Text></Box>
                       <Box><Text fontSize="sm" color="white">[user] - Clear auth (Admin)</Text></Box>
                     </HStack>
                   </>
@@ -1275,17 +1276,29 @@ const TrollBox: React.FC = () => {
                 </Box>
               </Box>
               <HStack gap={1} flexShrink={0} alignSelf="flex-start">
-                {!msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) && (
+                {/* Reply button - show for all regular messages */}
+                {!msg.isTradeAlert && (
                   <IconButton
                     aria-label="Reply"
                     icon={<FiCornerUpRight />}
                     size="xs"
                     variant="ghost"
-                    color="#666"
+                    color="#888"
                     h="20px"
                     minW="20px"
-                    _hover={{ color: '#4ade80', bg: 'rgba(74, 222, 128, 0.1)' }}
-                    onClick={() => handleReply(msg)}
+                    opacity={0.7}
+                    transition="all 0.2s"
+                    cursor="pointer"
+                    _hover={{ 
+                      color: '#4ade80', 
+                      bg: 'rgba(74, 222, 128, 0.2)',
+                      opacity: 1,
+                      transform: 'scale(1.1)' 
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReply(msg);
+                    }}
                   />
                 )}
                 <Text color="#666" fontSize="xs" flexShrink={0} minW="35px" textAlign="right">
@@ -1305,11 +1318,13 @@ const TrollBox: React.FC = () => {
           <VStack align="stretch" gap={2}>
             {replyingTo && (
               <Box 
-                p={1.5} 
-                bg="rgba(74, 222, 128, 0.05)" 
+                p={2} 
+                bg="rgba(74, 222, 128, 0.1)" 
                 borderRadius="md" 
-                borderLeft="2px solid #4ade80"
+                borderLeft="3px solid #4ade80"
                 fontSize="xs"
+                mb={2}
+                boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
               >
                 <HStack justify="space-between">
                   <HStack gap={1}>
@@ -1592,10 +1607,48 @@ const TrollBox: React.FC = () => {
             </VStack>
           </VStack>
         ) : (
-          <VStack>
+          <VStack gap={2}>
             <Text color="#888" textAlign="center" fontSize="xs">
               {error || (!connected ? 'Not connected to chat' : isAuthenticating ? 'Authenticating...' : authAttempts > 0 ? 'Authentication failed. Retrying...' : 'Waiting for authentication...')}
             </Text>
+            {connected && !authenticated && !isAuthenticating && address && (
+              <Button
+                size="sm"
+                bg="linear-gradient(135deg, #ff9500 0%, #ff7700 100%)"
+                color="white"
+                fontWeight="600"
+                onClick={() => {
+                  setIsAuthenticating(true);
+                  authenticate(address)
+                    .then(() => {
+                      setAuthAttempts(0);
+                    })
+                    .catch(err => {
+                      console.error('Manual auth failed:', err);
+                      setAuthAttempts(prev => prev + 1);
+                    })
+                    .finally(() => {
+                      setIsAuthenticating(false);
+                    });
+                }}
+                _hover={{ 
+                  bg: "linear-gradient(135deg, #ff8400 0%, #ff6600 100%)",
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 2px 8px rgba(255, 149, 0, 0.3)'
+                }}
+                _active={{
+                  transform: 'translateY(0)',
+                  boxShadow: '0 1px 4px rgba(255, 149, 0, 0.2)'
+                }}
+                px={4}
+                h="32px"
+                borderRadius="md"
+                transition="all 0.2s"
+                leftIcon={<FiMessageSquare />}
+              >
+                Tap to Authenticate
+              </Button>
+            )}
             {!connected && (
               <Button
                 size="sm"
@@ -1666,21 +1719,21 @@ const TrollBox: React.FC = () => {
               </Text>
               <VStack align="start" gap={2} pl={0} w="100%">
                 <HStack>
-                  <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/slap</Text></Box>
+                  <Box w="100px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/slap</Text></Box>
                   <Box><Text fontSize="sm" color="white">&lt;user&gt; - Slap someone!</Text></Box>
                 </HStack>
                 <HStack>
-                  <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/help</Text></Box>
+                  <Box w="100px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/help</Text></Box>
                   <Box><Text fontSize="sm" color="white">- Show this help</Text></Box>
                 </HStack>
                 {isAdmin && (
                   <>
                     <HStack>
-                      <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text></Box>
+                      <Box w="100px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text></Box>
                       <Box><Text fontSize="sm" color="white">&lt;user&gt; - Kick a user (Admin)</Text></Box>
                     </HStack>
                     <HStack>
-                      <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/clearauth</Text></Box>
+                      <Box w="100px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/clearauth</Text></Box>
                       <Box><Text fontSize="sm" color="white">[user] - Clear auth (Admin)</Text></Box>
                     </HStack>
                   </>
@@ -1925,15 +1978,27 @@ const TrollBox: React.FC = () => {
                     </Box>
                   </Box>
                   <HStack gap={1} flexShrink={0} alignSelf="flex-start">
-                    {!msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) && (
+                    {/* Reply button - show for all regular messages */}
+                    {!msg.isTradeAlert && (
                       <IconButton
                         aria-label="Reply"
                         icon={<FiCornerUpRight />}
                         size="xs"
                         variant="ghost"
-                        color="#666"
-                        _hover={{ color: '#4ade80', bg: 'rgba(74, 222, 128, 0.1)' }}
-                        onClick={() => handleReply(msg)}
+                        color="#888"
+                        opacity={0.7}
+                        transition="all 0.2s"
+                        cursor="pointer"
+                        _hover={{ 
+                          color: '#4ade80', 
+                          bg: 'rgba(74, 222, 128, 0.2)',
+                          opacity: 1,
+                          transform: 'scale(1.1)' 
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReply(msg);
+                        }}
                       />
                     )}
                     <Text color="#666" fontSize="xs" flexShrink={0} minW="45px" textAlign="right">
@@ -2028,10 +2093,12 @@ const TrollBox: React.FC = () => {
                 {/* Help moved to overlay */}
                 {replyingTo && (
                   <Box 
-                    p={2} 
-                    bg="rgba(74, 222, 128, 0.05)" 
+                    p={3} 
+                    bg="rgba(74, 222, 128, 0.1)" 
                     borderRadius="md" 
-                    borderLeft="2px solid #4ade80"
+                    borderLeft="3px solid #4ade80"
+                    mb={3}
+                    boxShadow="0 2px 8px rgba(74, 222, 128, 0.1)"
                   >
                     <HStack justify="space-between">
                       <HStack gap={1}>
@@ -2226,6 +2293,42 @@ const TrollBox: React.FC = () => {
                 <Text color="#888" textAlign="center" fontSize="sm">
                   {error || (!connected ? 'Not connected to chat server' : isAuthenticating ? 'Authenticating...' : authAttempts > 0 ? 'Authentication failed. Retrying...' : 'Waiting for authentication...')}
                 </Text>
+                {connected && !authenticated && !isAuthenticating && address && (
+                  <Button
+                    bg="linear-gradient(135deg, #ff9500 0%, #ff7700 100%)"
+                    color="white"
+                    fontWeight="600"
+                    onClick={() => {
+                      setIsAuthenticating(true);
+                      authenticate(address)
+                        .then(() => {
+                          setAuthAttempts(0);
+                        })
+                        .catch(err => {
+                          console.error('Manual auth failed:', err);
+                          setAuthAttempts(prev => prev + 1);
+                        })
+                        .finally(() => {
+                          setIsAuthenticating(false);
+                        });
+                    }}
+                    _hover={{ 
+                      bg: "linear-gradient(135deg, #ff8400 0%, #ff6600 100%)",
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 2px 8px rgba(255, 149, 0, 0.3)'
+                    }}
+                    _active={{
+                      transform: 'translateY(0)',
+                      boxShadow: '0 1px 4px rgba(255, 149, 0, 0.2)'
+                    }}
+                    px={6}
+                    borderRadius="md"
+                    transition="all 0.2s"
+                    leftIcon={<FiMessageSquare />}
+                  >
+                    Tap to Authenticate
+                  </Button>
+                )}
                 {!connected && (
                   <Button
                     bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
