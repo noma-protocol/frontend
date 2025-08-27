@@ -179,6 +179,34 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
             if (mounted) setError(null);
           }, 5000);
           break;
+          
+        case 'clearAuth':
+          // Server has requested to clear authentication
+          console.log('Server requested auth clear:', data.message);
+          
+          // Clear local storage auth
+          const authData = localStorage.getItem(AUTH_STORAGE_KEY);
+          if (authData) {
+            try {
+              const authMap = JSON.parse(authData);
+              // Clear all auth entries or specific ones based on context
+              localStorage.removeItem(AUTH_STORAGE_KEY);
+            } catch (e) {
+              console.error('Error clearing auth:', e);
+            }
+          }
+          
+          // Reset authentication state
+          setAuthenticated(false);
+          setUsername(null);
+          setCanChangeUsername(true);
+          setCooldownRemaining(0);
+          
+          // Show error message if provided
+          if (data.message) {
+            setError(data.message);
+          }
+          break;
       }
     };
 

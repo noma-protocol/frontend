@@ -481,6 +481,47 @@ function broadcastUserCount() {
   });
 }
 
+// Broadcast auth clear command to specific address or all clients
+function broadcastClearAuth(targetAddress = null) {
+  if (targetAddress) {
+    // Clear auth for specific address
+    const clientId = addressToClientId.get(targetAddress.toLowerCase());
+    if (clientId) {
+      const client = clients.get(clientId);
+      if (client && client.readyState === client.OPEN) {
+        client.send(JSON.stringify({
+          type: 'clearAuth',
+          message: 'Your authentication has been revoked. Please sign in again.'
+        }));
+        
+        // Also disconnect the client
+        client.close();
+      }
+    }
+    
+    // Remove from auth store
+    delete authStore.credentials[targetAddress.toLowerCase()];
+    authStore.saveCredentials();
+  } else {
+    // Clear auth for all clients
+    broadcast({
+      type: 'clearAuth',
+      message: 'Authentication has been reset. Please sign in again.'
+    });
+    
+    // Clear all stored credentials
+    authStore.credentials = {};
+    authStore.saveCredentials();
+    
+    // Disconnect all authenticated clients
+    for (const [clientId, client] of clients.entries()) {
+      if (client.authenticated) {
+        client.close();
+      }
+    }
+  }
+}
+
 // Handle new connections
 wss.on('connection', (ws, req) => {
   const clientId = uuidv4();
@@ -710,6 +751,7 @@ wss.on('connection', (ws, req) => {
             
             if (isAdmin) {
               helpContent += '\n/kick <username> - Kick a user from chat (Admin only)';
+              helpContent += '\n/clearauth [username] - Clear authentication (Admin only)';
             }
             
             const helpMessage = {
@@ -806,6 +848,75 @@ wss.on('connection', (ws, req) => {
             commandType = 'kick';
             
             console.log(`Admin ${username} kicked ${targetUsername} (${targetAddress})`);
+          }
+          
+          // Handle /clearauth command (Admin only)
+          if (processedContent.startsWith('/clearauth')) {
+            // Check if user is admin
+            if (!ADMIN_ADDRESSES.includes(ws.address)) {
+              ws.send(JSON.stringify({ type: 'error', message: 'Only admins can use this command' }));
+              return;
+            }
+            
+            const parts = processedContent.split(' ');
+            const targetUsername = parts[1]?.trim();
+            
+            if (targetUsername) {
+              // Clear auth for specific user
+              const targetAddress = usernameStore.getAddressForUsername(targetUsername);
+              
+              if (!targetAddress) {
+                ws.send(JSON.stringify({ 
+                  type: 'error', 
+                  message: `User '${targetUsername}' not found` 
+                }));
+                return;
+              }
+              
+              // Clear auth for specific address
+              broadcastClearAuth(targetAddress);
+              
+              // Send success message
+              const successMessage = {
+                id: uuidv4(),
+                type: 'message',
+                content: `*** Admin ${username} cleared authentication for ${targetUsername} ***`,
+                username: 'System',
+                timestamp: new Date().toISOString(),
+                clientId: 'system',
+                address: 'system',
+                isCommand: true,
+                commandType: 'clearauth'
+              };
+              
+              messageStore.addMessage(successMessage);
+              broadcast(successMessage);
+              
+              console.log(`Admin ${username} cleared auth for ${targetUsername} (${targetAddress})`);
+              return;
+            } else {
+              // Clear auth for all users
+              broadcastClearAuth();
+              
+              // Send success message
+              const successMessage = {
+                id: uuidv4(),
+                type: 'message',
+                content: `*** Admin ${username} cleared authentication for all users ***`,
+                username: 'System',
+                timestamp: new Date().toISOString(),
+                clientId: 'system',
+                address: 'system',
+                isCommand: true,
+                commandType: 'clearauth'
+              };
+              
+              messageStore.addMessage(successMessage);
+              broadcast(successMessage);
+              
+              console.log(`Admin ${username} cleared auth for all users`);
+              return;
+            }
           }
           
           // Create chat message with server-verified data only

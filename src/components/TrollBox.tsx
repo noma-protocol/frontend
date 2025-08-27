@@ -625,7 +625,8 @@ const TrollBox: React.FC = () => {
   };
 
   const handleGifSelect = (gifUrl: string) => {
-    setNewMessage(prev => prev + ' ' + gifUrl + ' ');
+    // Add GIF as markdown image syntax
+    setNewMessage(prev => prev + (prev ? ' ' : '') + `![gif](${gifUrl})` + ' ');
     setShowGifPicker(false);
     setShowGifPickerExpanded(false);
   };
@@ -1201,26 +1202,25 @@ const TrollBox: React.FC = () => {
             p={msg.isTradeAlert ? 1 : 0}
             borderLeft={msg.isTradeAlert ? '2px solid #4ade80' : 'none'}
           >
-            <HStack gap={2} align="flex-start">
-              <Box>
-                <Text 
-                  color={msg.isTradeAlert ? '#ffcc00' : ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? '#ff9500' : '#4ade80'}
-                  fontSize="xs" 
-                  fontWeight="bold" 
-                  minW="60px"
-                  maxW="60px"
-                  overflow="hidden"
-                  textOverflow="ellipsis"
-                  whiteSpace="nowrap"
-                  title={msg.username}
-                  cursor={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? 'default' : 'pointer'}
-                  _hover={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? {} : { textDecoration: "underline" }}
-                  onClick={() => !msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && handleUsernameClick(msg.username, msg.address)}
-                >
-                  {msg.isTradeAlert ? 'System' : (msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked'))) ? 'System' : msg.username}
-                </Text>
-              </Box>
-              <Box flex="1">
+            <HStack gap={2} align="flex-start" w="100%">
+              <Text 
+                color={msg.isTradeAlert ? '#ffcc00' : ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? '#ff9500' : '#4ade80'}
+                fontSize="xs" 
+                fontWeight="bold" 
+                minW="60px"
+                maxW="60px"
+                overflow="hidden"
+                textOverflow="ellipsis"
+                whiteSpace="nowrap"
+                title={msg.username}
+                cursor={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? 'default' : 'pointer'}
+                _hover={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? {} : { textDecoration: "underline" }}
+                onClick={() => !msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && handleUsernameClick(msg.username, msg.address)}
+                flexShrink={0}
+              >
+                {msg.isTradeAlert ? 'System' : (msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked'))) ? 'System' : msg.username}
+              </Text>
+              <Box flex="1" minW="0">
                 {msg.replyTo && (
                   <Box 
                     mb={0.5} 
@@ -1251,7 +1251,7 @@ const TrollBox: React.FC = () => {
                   {renderMessageContent(msg.content, false)}
                 </Box>
               </Box>
-              <HStack gap={1}>
+              <HStack gap={1} flexShrink={0} alignSelf="flex-start">
                 {!msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && (
                   <IconButton
                     aria-label="Reply"
@@ -1265,7 +1265,7 @@ const TrollBox: React.FC = () => {
                     onClick={() => handleReply(msg)}
                   />
                 )}
-                <Text color="#666" fontSize="xs" flexShrink={0}>
+                <Text color="#666" fontSize="xs" flexShrink={0} minW="35px" textAlign="right">
                   {formatTime(msg.timestamp)}
                 </Text>
               </HStack>
@@ -1841,26 +1841,25 @@ const TrollBox: React.FC = () => {
                 p={msg.isTradeAlert ? 2 : 0}
                 borderLeft={msg.isTradeAlert ? '3px solid #4ade80' : 'none'}
               >
-                <HStack gap={3} align="flex-start">
-                  <Box>
-                    <Text 
-                      color={msg.isTradeAlert ? '#ffcc00' : ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? '#ff9500' : '#4ade80'}
-                      fontSize="sm" 
-                      fontWeight="bold" 
-                      minW="80px"
-                      maxW="80px"
-                      overflow="hidden"
-                      textOverflow="ellipsis"
-                      whiteSpace="nowrap"
-                      title={msg.username}
-                      cursor={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? 'default' : 'pointer'}
-                      _hover={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? {} : { textDecoration: "underline" }}
-                      onClick={() => !msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && handleUsernameClick(msg.username, msg.address)}
-                    >
-                      {msg.isTradeAlert ? 'System' : (msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked'))) ? 'System' : msg.username}
-                    </Text>
-                  </Box>
-                  <Box flex="1">
+                <HStack gap={3} align="flex-start" w="100%">
+                  <Text 
+                    color={msg.isTradeAlert ? '#ffcc00' : ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? '#ff9500' : '#4ade80'}
+                    fontSize="sm" 
+                    fontWeight="bold" 
+                    minW="80px"
+                    maxW="80px"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                    whiteSpace="nowrap"
+                    title={msg.username}
+                    cursor={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? 'default' : 'pointer'}
+                    _hover={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? {} : { textDecoration: "underline" }}
+                    onClick={() => !msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && handleUsernameClick(msg.username, msg.address)}
+                    flexShrink={0}
+                  >
+                    {msg.isTradeAlert ? 'System' : (msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked'))) ? 'System' : msg.username}
+                  </Text>
+                  <Box flex="1" minW="0">
                     {msg.replyTo && (
                       <Box 
                         mb={1} 
@@ -1890,7 +1889,7 @@ const TrollBox: React.FC = () => {
                       {renderMessageContent(msg.content, true)}
                     </Box>
                   </Box>
-                  <HStack>
+                  <HStack gap={1} flexShrink={0} alignSelf="flex-start">
                     {!msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && (
                       <IconButton
                         aria-label="Reply"
@@ -1902,7 +1901,7 @@ const TrollBox: React.FC = () => {
                         onClick={() => handleReply(msg)}
                       />
                     )}
-                    <Text color="#666" fontSize="xs" flexShrink={0}>
+                    <Text color="#666" fontSize="xs" flexShrink={0} minW="45px" textAlign="right">
                       {formatTime(msg.timestamp)}
                     </Text>
                   </HStack>
