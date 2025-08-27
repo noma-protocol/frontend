@@ -987,10 +987,16 @@ const TrollBox: React.FC = () => {
                   <Text fontSize="sm" color="white">- Show this help</Text>
                 </HStack>
                 {isAdmin && (
-                  <HStack>
-                    <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text>
-                    <Text fontSize="sm" color="white">&lt;user&gt; - Kick a user (Admin)</Text>
-                  </HStack>
+                  <>
+                    <HStack>
+                      <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text>
+                      <Text fontSize="sm" color="white">&lt;user&gt; - Kick a user (Admin)</Text>
+                    </HStack>
+                    <HStack>
+                      <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/clearauth</Text>
+                      <Text fontSize="sm" color="white">[user] - Clear auth (Admin)</Text>
+                    </HStack>
+                  </>
                 )}
               </VStack>
               <Text fontSize="xs" color="#666" fontStyle="italic" pt={1}>
@@ -1645,10 +1651,16 @@ const TrollBox: React.FC = () => {
                   <Text fontSize="md" color="white">- Show this help</Text>
                 </HStack>
                 {isAdmin && (
-                  <HStack>
-                    <Text fontSize="md" color="#ff9500" fontFamily="monospace">/kick</Text>
-                    <Text fontSize="md" color="white">&lt;user&gt; - Kick a user (Admin)</Text>
-                  </HStack>
+                  <>
+                    <HStack>
+                      <Text fontSize="md" color="#ff9500" fontFamily="monospace">/kick</Text>
+                      <Text fontSize="md" color="white">&lt;user&gt; - Kick a user (Admin)</Text>
+                    </HStack>
+                    <HStack>
+                      <Text fontSize="md" color="#ff9500" fontFamily="monospace">/clearauth</Text>
+                      <Text fontSize="md" color="white">[user] - Clear auth (Admin)</Text>
+                    </HStack>
+                  </>
                 )}
               </VStack>
               <Text fontSize="sm" color="#666" fontStyle="italic" pt={1}>
