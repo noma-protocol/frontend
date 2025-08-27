@@ -108,16 +108,12 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
             if (symbol === 'MON' || symbol === 'WMON') {
                 usdValue = balanceValue * monPrice;
             } else if (symbol === 'NOMA') {
-                // Calculate NOMA price relative to MON
-                // TODO: This should be fetched from the liquidity pool
-                // IMPORTANT: Update this ratio based on your actual NOMA/MON pool reserves
-                // Example: If 1 MON = 10 NOMA in the pool, then ratio = 1/10 = 0.1
-                const nomaToMonRatio = 1 / 30; // Adjust this based on actual pool ratio
-                const nomaPrice = monPrice * nomaToMonRatio;
+                // NOMA price calculation
+                // The spotPrice from Exchange.tsx shows NOMA price in MON terms
+                // For now using a placeholder - this should be fetched from the vault
+                const nomaSpotPriceInMON = 0.033; // TODO: Fetch this from vault contract like in Exchange.tsx
+                const nomaPrice = nomaSpotPriceInMON * monPrice;
                 usdValue = balanceValue * nomaPrice;
-                
-                // Debug log to help calibrate the price
-                console.log(`NOMA price calculation: MON=$${monPrice}, ratio=${nomaToMonRatio}, NOMA=$${nomaPrice}`);
             }
             // Add other token prices here as needed
         }
