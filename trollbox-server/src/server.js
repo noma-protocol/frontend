@@ -923,10 +923,27 @@ setInterval(() => {
           type: 'error', 
           message: 'Session expired. Please re-authenticate.' 
         }));
+        
+        // Remove from address mapping
+        if (ws.address) {
+          addressToClientId.delete(ws.address);
+        }
+        
         ws.authenticated = false;
         ws.address = null;
         ws.sessionToken = null;
       }
+    }
+  }
+}, 60000); // Check every minute
+
+// Clean up expired kicks
+setInterval(() => {
+  const now = Date.now();
+  for (const [address, kickTimestamp] of kickedUsers.entries()) {
+    if (now - kickTimestamp >= KICK_DURATION) {
+      kickedUsers.delete(address);
+      console.log(`Kick expired for address: ${address}`);
     }
   }
 }, 60000); // Check every minute

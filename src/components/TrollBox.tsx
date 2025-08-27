@@ -17,7 +17,6 @@ import { useTrollbox } from '../hooks/useTrollbox';
 import UserProfileModal from './UserProfileModal';
 import EmojiPicker from 'emoji-picker-react';
 import GifPicker from './GifPicker';
-import { Image } from '@chakra-ui/react';
 import { toaster } from '../components/ui/toaster';
 
 interface Message {
@@ -499,6 +498,8 @@ const TrollBox: React.FC = () => {
               description: 'Image has been added to your message',
               duration: 2000,
             });
+            
+            setIsUploadingImage(false);
           };
           reader.readAsDataURL(blob);
         } catch (error) {
@@ -508,7 +509,6 @@ const TrollBox: React.FC = () => {
             description: 'Please try again',
             duration: 3000,
           });
-        } finally {
           setIsUploadingImage(false);
         }
         
@@ -772,8 +772,9 @@ const TrollBox: React.FC = () => {
         // Show actual images in expanded view
         if (altText === 'gif' || altText === 'sticker') {
           parts.push(
-            <Image 
+            <Box
               key={match.index}
+              as="img"
               src={imageUrl} 
               alt={altText}
               maxW="200px"
@@ -791,8 +792,9 @@ const TrollBox: React.FC = () => {
         } else {
           // For regular images
           parts.push(
-            <Image 
+            <Box
               key={match.index}
+              as="img"
               src={imageUrl} 
               alt={altText}
               maxW="300px"
@@ -804,6 +806,9 @@ const TrollBox: React.FC = () => {
                 if (isExpanded) {
                   scrollToBottom('auto');
                 }
+              }}
+              onError={(e) => {
+                console.error('Image failed to load:', e);
               }}
             />
           );
