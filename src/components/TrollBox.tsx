@@ -115,6 +115,7 @@ const TrollBox: React.FC = () => {
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [authStatus, setAuthStatus] = useState('');
   
   // Admin addresses
   const ADMIN_ADDRESSES = ['0xcC91EB5D1AB2D577a64ACD71F0AA9C5cAf35D111'];
@@ -1609,7 +1610,7 @@ const TrollBox: React.FC = () => {
         ) : (
           <VStack gap={2}>
             <Text color="#888" textAlign="center" fontSize="xs">
-              {error || (!connected ? 'Not connected to chat' : isAuthenticating ? 'Authenticating...' : authAttempts > 0 ? 'Authentication failed. Retrying...' : 'Waiting for authentication...')}
+              {authStatus || error || (!connected ? 'Not connected to chat' : isAuthenticating ? 'Authenticating...' : authAttempts > 0 ? 'Authentication failed. Retrying...' : 'Waiting for authentication...')}
             </Text>
             {connected && !authenticated && !isAuthenticating && address && (
               <Button
@@ -1617,15 +1618,22 @@ const TrollBox: React.FC = () => {
                 bg="linear-gradient(135deg, #ff9500 0%, #ff7700 100%)"
                 color="white"
                 fontWeight="600"
+                isLoading={isAuthenticating}
+                loadingText="Authenticating..."
                 onClick={() => {
+                  setAuthStatus('Starting authentication...');
                   setIsAuthenticating(true);
                   authenticate(address)
                     .then(() => {
+                      setAuthStatus('Authentication successful!');
                       setAuthAttempts(0);
+                      setTimeout(() => setAuthStatus(''), 3000);
                     })
                     .catch(err => {
-                      console.error('Manual auth failed:', err);
+                      const errorMsg = err?.message || 'Authentication failed';
+                      setAuthStatus(`Error: ${errorMsg}`);
                       setAuthAttempts(prev => prev + 1);
+                      setTimeout(() => setAuthStatus(''), 5000);
                     })
                     .finally(() => {
                       setIsAuthenticating(false);
