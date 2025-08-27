@@ -19,6 +19,45 @@ import EmojiPicker from 'emoji-picker-react';
 import GifPicker from './GifPicker';
 import { toaster } from '../components/ui/toaster';
 
+// Image component with fallback
+const ImageWithFallback: React.FC<{
+  src: string;
+  alt: string;
+  maxSize: string;
+  onLoad?: () => void;
+}> = ({ src, alt, maxSize, onLoad }) => {
+  const [hasError, setHasError] = useState(false);
+  
+  if (hasError) {
+    return (
+      <Text color="#ff6b6b" fontSize="xs" fontStyle="italic">
+        [Failed to load image]
+      </Text>
+    );
+  }
+  
+  return (
+    <Box display="inline-block" my={1}>
+      <img
+        src={src}
+        alt={alt}
+        style={{
+          maxWidth: maxSize,
+          maxHeight: maxSize,
+          borderRadius: '8px',
+          display: 'inline-block',
+          verticalAlign: 'middle'
+        }}
+        onLoad={onLoad}
+        onError={() => {
+          console.error('Image failed to load:', src.substring(0, 100));
+          setHasError(true);
+        }}
+      />
+    </Box>
+  );
+};
+
 interface Message {
   id: string;
   username: string;
@@ -189,6 +228,32 @@ const TrollBox: React.FC = () => {
     
     setLastProcessedMessageId(lastMessage.id);
   }, [messages, serverUsername, lastProcessedMessageId]);
+  
+  // Add global paste event listener for better paste support
+  useEffect(() => {
+    const handleGlobalPaste = (e: ClipboardEvent) => {
+      // Check if the paste event is happening in one of our input fields
+      const activeElement = document.activeElement;
+      if (!activeElement) return;
+      
+      // Check if it's one of our input elements
+      const isOurInput = 
+        (collapsedInputRef.current && activeElement === collapsedInputRef.current) ||
+        (expandedInputRef.current && activeElement === expandedInputRef.current);
+      
+      if (isOurInput) {
+        console.log('Global paste event detected in our input');
+        // The handlePaste function should already be called by the onPaste prop
+        // This is just for debugging
+      }
+    };
+    
+    document.addEventListener('paste', handleGlobalPaste);
+    
+    return () => {
+      document.removeEventListener('paste', handleGlobalPaste);
+    };
+  }, []);
 
   const scrollToBottom = (behavior: 'smooth' | 'auto' = 'smooth') => {
     if (messagesEndRef.current) {
@@ -452,68 +517,112 @@ const TrollBox: React.FC = () => {
 
   // Handle paste event for images
   const handlePaste = async (e: React.ClipboardEvent) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      
-      // Check if the pasted item is an image
-      if (item.type.indexOf('image') !== -1) {
-        e.preventDefault();
-        const blob = item.getAsFile();
-        if (!blob) continue;
-
-        setIsUploadingImage(true);
+    console.log('=== Paste event triggered ===');
+    console.log('Event type:', e.type);
+    console.log('Target:', e.target);
+    console.log('CurrentTarget:', e.currentTarget);
+    
+    if (!e.clipboardData) {
+      console.log('No clipboard data available');
+      return;
+    }
+    
+    console.log('ClipboardData types:', Array.from(e.clipboardData.types));
+    console.log('ClipboardData files:', e.clipboardData.files.length);
+    console.log('ClipboardData items:', e.clipboardData.items?.length || 0);
+    
+    // Method 1: Check files (most reliable for images)
+    if (e.clipboardData.files.length > 0) {
+      console.log('Checking files...');
+      for (let i = 0; i < e.clipboardData.files.length; i++) {
+        const file = e.clipboardData.files[i];
+        console.log(`File ${i}: type=${file.type}, name=${file.name}, size=${file.size}`);
         
-        try {
-          // Convert blob to base64
-          const reader = new FileReader();
-          reader.onloadend = async () => {
-            const base64data = reader.result as string;
-            
-            // Check if the image is too large for data URL (limit to 2MB)
-            const MAX_DATA_URL_SIZE = 2 * 1024 * 1024; // 2MB
-            
-            if (blob.size > MAX_DATA_URL_SIZE) {
-              toaster.create({
-                title: 'Image too large',
-                description: 'Please paste an image smaller than 2MB',
-                duration: 3000,
-              });
-              setIsUploadingImage(false);
-              return;
-            }
-            
-            // For demo purposes, we'll use data URLs
-            // In production, you should upload to a proper image hosting service
-            const imageMarkdown = `![image](${base64data})`;
-            setNewMessage(prev => {
-              const newMessage = prev + (prev ? ' ' : '') + imageMarkdown + ' ';
-              return newMessage;
-            });
-            
-            toaster.create({
-              title: 'Image added',
-              description: 'Image has been added to your message',
-              duration: 2000,
-            });
-            
-            setIsUploadingImage(false);
-          };
-          reader.readAsDataURL(blob);
-        } catch (error) {
-          console.error('Error processing image:', error);
-          toaster.create({
-            title: 'Failed to process image',
-            description: 'Please try again',
-            duration: 3000,
-          });
-          setIsUploadingImage(false);
+        if (file.type.startsWith('image/')) {
+          console.log('Image file found!');
+          e.preventDefault();
+          await processImageFile(file);
+          return;
         }
-        
-        break; // Only handle the first image
       }
+    }
+    
+    // Method 2: Check items
+    const items = e.clipboardData.items;
+    if (items) {
+      console.log('Checking items...');
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        console.log(`Item ${i}: type=${item.type}, kind=${item.kind}`);
+        
+        if (item.type.indexOf('image') !== -1) {
+          console.log('Image item found!');
+          e.preventDefault();
+          const blob = item.getAsFile();
+          if (!blob) {
+            console.log('Failed to get file from item');
+            continue;
+          }
+          await processImageFile(blob);
+          return;
+        }
+      }
+    }
+    
+    console.log('No images found in clipboard');
+  };
+  
+  // Process image file helper
+  const processImageFile = async (file: File | Blob) => {
+    console.log(`Processing image: size=${file.size}, type=${file.type}`);
+    setIsUploadingImage(true);
+    
+    try {
+      const MAX_DATA_URL_SIZE = 2 * 1024 * 1024; // 2MB
+      if (file.size > MAX_DATA_URL_SIZE) {
+        toaster.create({
+          title: 'Image too large',
+          description: 'Please paste an image smaller than 2MB',
+          duration: 3000,
+        });
+        setIsUploadingImage(false);
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        console.log('Base64 conversion complete, length:', base64data.length);
+        
+        const imageMarkdown = `![image](${base64data})`;
+        setNewMessage(prev => prev + (prev ? ' ' : '') + imageMarkdown + ' ');
+        
+        toaster.create({
+          title: 'Image added',
+          description: 'Image has been added to your message',
+          duration: 2000,
+        });
+        
+        setIsUploadingImage(false);
+      };
+      
+      reader.onerror = () => {
+        console.error('FileReader error:', reader.error);
+        toaster.create({
+          title: 'Failed to read image',
+          duration: 3000,
+        });
+        setIsUploadingImage(false);
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      toaster.create({
+        title: 'Failed to process image',
+        duration: 3000,
+      });
+      setIsUploadingImage(false);
     }
   };
 
@@ -719,7 +828,10 @@ const TrollBox: React.FC = () => {
     while ((match = imageRegex.exec(content)) !== null) {
       // Add text before the image (with mention and YouTube parsing)
       if (match.index > lastIndex) {
-        parts.push(parseTextWithMentions(content.substring(lastIndex, match.index), showImages, showYouTubeVideos));
+        const textBefore = content.substring(lastIndex, match.index);
+        if (textBefore) {
+          parts.push(<span key={`text-${lastIndex}`}>{parseTextWithMentions(textBefore, showImages, showYouTubeVideos)}</span>);
+        }
       }
       
       // Add the image or indicator based on showImages parameter
@@ -770,45 +882,34 @@ const TrollBox: React.FC = () => {
         }
       } else {
         // Show actual images in expanded view
-        if (altText === 'gif' || altText === 'sticker') {
+        const isGifOrSticker = altText === 'gif' || altText === 'sticker';
+        const maxSize = isGifOrSticker ? '200px' : '300px';
+        
+        // Log for debugging
+        console.log('Rendering image:', { altText, urlLength: imageUrl.length, urlStart: imageUrl.substring(0, 50) });
+        
+        // Check if it's a data URL and potentially very long
+        const isDataUrl = imageUrl.startsWith('data:');
+        if (isDataUrl && imageUrl.length > 1000000) { // 1MB limit for data URLs in chat
           parts.push(
-            <Box
-              key={match.index}
-              as="img"
-              src={imageUrl} 
-              alt={altText}
-              maxW="200px"
-              maxH="200px"
-              borderRadius="md"
-              my={1}
-              display="inline-block"
-              onLoad={() => {
-                if (isExpanded) {
-                  scrollToBottom('auto');
-                }
-              }}
-            />
+            <Text key={`img-${match.index}`} color="#ff6b6b" fontSize="xs" fontStyle="italic">
+              [Image too large to display]
+            </Text>
           );
         } else {
-          // For regular images
+          // Create a unique key for the image
+          const imgKey = `img-${match.index}`;
+          
           parts.push(
-            <Box
-              key={match.index}
-              as="img"
-              src={imageUrl} 
-              alt={altText}
-              maxW="300px"
-              maxH="300px"
-              borderRadius="md"
-              my={1}
-              display="inline-block"
+            <ImageWithFallback
+              key={imgKey}
+              src={imageUrl}
+              alt={altText || 'image'}
+              maxSize={maxSize}
               onLoad={() => {
                 if (isExpanded) {
                   scrollToBottom('auto');
                 }
-              }}
-              onError={(e) => {
-                console.error('Image failed to load:', e);
               }}
             />
           );
@@ -820,7 +921,10 @@ const TrollBox: React.FC = () => {
     
     // Add remaining text (with mention and YouTube parsing)
     if (lastIndex < content.length) {
-      parts.push(parseTextWithMentions(content.substring(lastIndex), showImages, showYouTubeVideos));
+      const remainingText = content.substring(lastIndex);
+      if (remainingText) {
+        parts.push(<span key={`text-end`}>{parseTextWithMentions(remainingText, showImages, showYouTubeVideos)}</span>);
+      }
     }
     
     // If no parts were created, parse the entire content for mentions and YouTube
@@ -1212,23 +1316,37 @@ const TrollBox: React.FC = () => {
                 </Text>
               )}
               <Box flex="1" position="relative">
-              <Input
-                ref={collapsedInputRef}
-                value={newMessage}
-                onChange={handleInputChange}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                onPaste={handlePaste}
-                placeholder="Type message or /help for commands..."
-                bg="#2a2a2a"
-                border="none"
-                color="white"
-                h="36px"
+              <Box
+                onPaste={(e: any) => {
+                  console.log('Paste on wrapper div');
+                  handlePaste(e);
+                }}
                 w="100%"
-                _placeholder={{ color: '#666' }}
-                _hover={{ bg: '#3a3a3a' }}
-                _focus={{ bg: '#3a3a3a', outline: 'none' }}
-                disabled={isUploadingImage}
-              />
+              >
+                <Input
+                  ref={collapsedInputRef}
+                  value={newMessage}
+                  onChange={handleInputChange}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onPaste={(e) => {
+                    console.log('onPaste event fired in collapsed input');
+                    handlePaste(e);
+                  }}
+                  onPasteCapture={(e) => {
+                    console.log('onPasteCapture event fired in collapsed input');
+                  }}
+                  placeholder="Type message or /help for commands..."
+                  bg="#2a2a2a"
+                  border="none"
+                  color="white"
+                  h="36px"
+                  w="100%"
+                  _placeholder={{ color: '#666' }}
+                  _hover={{ bg: '#3a3a3a' }}
+                  _focus={{ bg: '#3a3a3a', outline: 'none' }}
+                  disabled={isUploadingImage}
+                />
+              </Box>
               {showUserSuggestions && userSuggestions.length > 0 && (
                 <Box
                   className="user-suggestions"
@@ -1262,6 +1380,49 @@ const TrollBox: React.FC = () => {
                 </Box>
               )}
             </Box>
+            {/* Manual paste button for testing */}
+            <Button
+              aria-label="Paste image"
+              size="sm"
+              bg="#2a2a2a"
+              _hover={{ bg: '#3a3a3a' }}
+              onClick={async () => {
+                try {
+                  console.log('Manual paste button clicked');
+                  const text = await navigator.clipboard.readText();
+                  console.log('Text from clipboard:', text.substring(0, 100));
+                  
+                  // Try to read clipboard items
+                  if (navigator.clipboard.read) {
+                    const items = await navigator.clipboard.read();
+                    console.log('Clipboard items:', items.length);
+                    
+                    for (const item of items) {
+                      console.log('Item types:', item.types);
+                      for (const type of item.types) {
+                        if (type.startsWith('image/')) {
+                          const blob = await item.getType(type);
+                          await processImageFile(blob);
+                          return;
+                        }
+                      }
+                    }
+                  }
+                } catch (err) {
+                  console.error('Clipboard access error:', err);
+                  toaster.create({
+                    title: 'Clipboard access denied',
+                    description: 'Please use Ctrl+V to paste images',
+                    duration: 3000,
+                  });
+                }
+              }}
+              px={2}
+              minW="auto"
+              title="Click to paste image from clipboard"
+            >
+              📋
+            </Button>
             <Box position="relative">
               <Button
                 ref={emojiButtonRef}
@@ -1880,23 +2041,37 @@ const TrollBox: React.FC = () => {
                     </Text>
                   )}
                   <Box flex="1" position="relative">
-                    <Input
-                      ref={expandedInputRef}
-                      value={newMessage}
-                      onChange={handleInputChange}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      onPaste={handlePaste}
-                      placeholder="Type your message or /help for commands..."
-                      bg="#2a2a2a"
-                      border="none"
-                      color="white"
-                      h="44px"
+                    <Box
+                      onPaste={(e: any) => {
+                        console.log('Paste on expanded wrapper div');
+                        handlePaste(e);
+                      }}
                       w="100%"
-                      _placeholder={{ color: '#666' }}
-                      _hover={{ bg: '#3a3a3a' }}
-                      _focus={{ bg: '#3a3a3a', outline: 'none' }}
-                      disabled={isUploadingImage}
-                    />
+                    >
+                      <Input
+                        ref={expandedInputRef}
+                        value={newMessage}
+                        onChange={handleInputChange}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                        onPaste={(e) => {
+                          console.log('onPaste event fired in expanded input');
+                          handlePaste(e);
+                        }}
+                        onPasteCapture={(e) => {
+                          console.log('onPasteCapture event fired in expanded input');
+                        }}
+                        placeholder="Type your message or /help for commands..."
+                        bg="#2a2a2a"
+                        border="none"
+                        color="white"
+                        h="44px"
+                        w="100%"
+                        _placeholder={{ color: '#666' }}
+                        _hover={{ bg: '#3a3a3a' }}
+                        _focus={{ bg: '#3a3a3a', outline: 'none' }}
+                        disabled={isUploadingImage}
+                      />
+                    </Box>
                     {showUserSuggestions && userSuggestions.length > 0 && (
                       <Box
                         className="user-suggestions"

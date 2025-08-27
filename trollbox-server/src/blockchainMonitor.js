@@ -1,9 +1,9 @@
 import { ethers } from 'ethers';
 
 // Configuration
-const MONAD_RPC_URL = process.env.MONAD_RPC_URL || 'https://testnet.monad.network';
+const MONAD_RPC_URL = process.env.MONAD_RPC_URL || 'https://rpc.ankr.com/monad_testnet';
 const NOMA_TOKEN_ADDRESS = process.env.NOMA_TOKEN_ADDRESS || '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701'; // Replace with actual NOMA token address
-const DEX_POOL_ADDRESS = process.env.DEX_POOL_ADDRESS || '0x0000000000000000000000000000000000000000'; // Replace with actual DEX pool address
+const DEX_POOL_ADDRESS = process.env.DEX_POOL_ADDRESS || '0xBb7EfF3E685c6564F2F09DD90b6C05754E3BDAC0'; // Replace with actual DEX pool address
 
 // ERC20 ABI for Transfer events
 const ERC20_ABI = [
