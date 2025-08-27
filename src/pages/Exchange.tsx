@@ -399,6 +399,7 @@ const Exchange: React.FC = () => {
         chart: {
             type: 'candlestick',
             background: '#1a1a1a',
+            width: '100%',
             toolbar: {
                 show: true,
                 tools: {
@@ -2332,7 +2333,7 @@ const Exchange: React.FC = () => {
                     <Text color="white" fontSize="xl">Please connect your wallet</Text>
                 </Box>
             ) : (
-            <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4} minH="calc(100vh - 80px)">
+            <Flex direction={isMobile ? "column" : "row"} gap={4} p={isMobile ? 2 : 4} minH="calc(100vh - 80px)" alignItems="stretch">
                 {/* Left side - Token List */}
                 <Box 
                     flex={isMobile ? "1" : "0 0 350px"} 
@@ -2341,10 +2342,9 @@ const Exchange: React.FC = () => {
                     display={isMobile && isTokenListCollapsed ? "none" : "flex"}
                     flexDirection="column"
                     gap={4}
-                    overflowY="auto"
-                    maxH="calc(100vh - 120px)"
+                    h="100%"
                 >
-                    <Box bg="#1a1a1a" borderRadius="lg" pr={3} pl={3} py={3} overflowX="hidden">
+                    <Box bg="#1a1a1a" borderRadius="lg" pr={3} pl={3} py={3} overflowX="hidden" flex="1" display="flex" flexDirection="column">
                         <Flex alignItems="center" mb={3}>
                             <Input
                                 placeholder="Search tokens..."
@@ -2366,7 +2366,7 @@ const Exchange: React.FC = () => {
                             </IconButton>
                         </Flex>
                         
-                        <Box overflowY="auto" overflowX="hidden" h="300px" mx={isMobile ? -2 : 0}>
+                        <Box overflowY="auto" overflowX="hidden" flex="1" mx={isMobile ? -2 : 0}>
                             {isTokensLoading ? (
                                 <VStack spacing={0} w="100%">
                                     {/* Show skeleton rows while loading */}
@@ -2555,7 +2555,7 @@ const Exchange: React.FC = () => {
                 </Box>
                 
                 {/* Middle - Chart and Token Info */}
-                <Box flex={isMobile ? "1" : "2"} w={isMobile ? "100%" : "auto"}>
+                <Box flex="1" overflowY="auto" h="100%">
                     {/* Show selected token info bar on mobile when list is collapsed */}
                     {isMobile && isTokenListCollapsed && selectedToken && (
                         <Box 
@@ -2665,8 +2665,10 @@ const Exchange: React.FC = () => {
                                 </Box>
                             </SimpleGrid>
                             
-                            {/* Chart */}
-                            <Box bg="#1a1a1a" p={isMobile ? 2 : 4} borderRadius="lg" w="100%" h={isMobile ? "350px" : "450px"}>
+                            {/* Chart and History Container */}
+                            <Box display="flex" flexDirection="column" gap={4} w="100%">
+                                {/* Chart */}
+                                <Box bg="#1a1a1a" p={isMobile ? 2 : 4} borderRadius="lg" w="100%" h={isMobile ? "350px" : "450px"} position="relative" overflow="hidden">
                                 <HStack justifyContent="space-between" w="100%" mb={4}>
                                     <Box>
                                         <HStack spacing={2} alignItems="center">
@@ -2766,12 +2768,13 @@ const Exchange: React.FC = () => {
                                         </VStack>
                                     </Center>
                                 ) : chartSeries.length > 0 && chartSeries[0].data.length > 0 ? (
-                                    <Box h="calc(100% - 60px)" minH="300px">
+                                    <Box h="calc(100% - 60px)" minH="300px" w="100%">
                                         <ReactApexChart
                                             options={chartOptions}
                                             series={chartSeries}
                                             type="candlestick"
                                             height="100%"
+                                            width="100%"
                                         />
                                     </Box>
                                 ) : (
@@ -2853,7 +2856,7 @@ const Exchange: React.FC = () => {
                                                             </Box>
                                                             <Box>
                                                                 <Text color="#888" fontSize="sm">
-                                                                    {trade.amount.toLocaleString()} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
+                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
                                                                 </Text>
                                                             </Box>
                                                         </HStack>
@@ -2975,7 +2978,7 @@ const Exchange: React.FC = () => {
                                                                 </Box>
                                                                 <Box>
                                                                     <Text color="#888" fontSize="sm">
-                                                                        {trade.amount.toLocaleString()} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
+                                                                        {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
                                                                     </Text>
                                                                 </Box>
                                                             </HStack>
@@ -3072,13 +3075,14 @@ const Exchange: React.FC = () => {
                                             )}
                                     </Tabs.Content>
                                 </Tabs.Root>
+                                </Box>
+                                )}
                             </Box>
-                            )}
                         </VStack>
                     ) : (
                         <Box
                             bg="#1a1a1a"
-                            h="600px"
+                            h="400px"
                             borderRadius="lg"
                             display="flex"
                             alignItems="center"
@@ -3091,8 +3095,8 @@ const Exchange: React.FC = () => {
                 
                 {/* Right side - Trading Panel and History */}
                 {!isMobile ? (
-                    <Box w="300px">
-                        <VStack gap={4}>
+                    <Box w="300px" h="100%" display="flex">
+                        <VStack gap={4} h="100%" flex="1">
                         {/* Wallet Balance Box */}
                         <WalletSidebar 
                             ethBalance={BigInt(Math.floor(parseFloat(ethBalance) * 1e18))}
@@ -3754,7 +3758,7 @@ const Exchange: React.FC = () => {
                                                         <Flex justifyContent="space-between" alignItems="center">
                                                             <Box>
                                                                 <Text color="#888" fontSize="xs">
-                                                                    {trade.amount.toLocaleString()} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
+                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
                                                                 </Text>
                                                             </Box>
                                                             <HStack gap={3}>
@@ -3878,7 +3882,7 @@ const Exchange: React.FC = () => {
                                                                         <Flex justifyContent="space-between" alignItems="center">
                                                                             <Box>
                                                                                 <Text color="#888" fontSize="xs">
-                                                                                    {trade.amount.toLocaleString()} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
+                                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
                                                                                 </Text>
                                                                             </Box>
                                                                             <HStack gap={3}>
