@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 9090;
 // Authentication message that users will sign
 const AUTH_MESSAGE = 'Sign this message to authenticate with the Noma Trollbox\n\nTimestamp: ';
 
-// Admin addresses
+// Admin addresses (stored in lowercase for comparison)
 const ADMIN_ADDRESSES = ['0xcC91EB5D1AB2D577a64ACD71F0AA9C5cAf35D111'.toLowerCase()];
 
 // Ensure data directory exists
@@ -852,6 +852,10 @@ wss.on('connection', (ws, req) => {
           
           // Handle /clearauth command (Admin only)
           if (processedContent.startsWith('/clearauth')) {
+            console.log(`/clearauth command attempted by address: ${ws.address}`);
+            console.log(`Admin addresses: ${ADMIN_ADDRESSES.join(', ')}`);
+            console.log(`Is admin: ${ADMIN_ADDRESSES.includes(ws.address)}`);
+            
             // Check if user is admin
             if (!ADMIN_ADDRESSES.includes(ws.address)) {
               ws.send(JSON.stringify({ type: 'error', message: 'Only admins can use this command' }));
