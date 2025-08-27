@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, VStack, HStack, Flex, Image } from "@chakra-ui/react";
 import { formatEther } from 'viem';
 import { commify } from '../utils';
@@ -8,6 +8,8 @@ import wmonLogo from '../assets/images/monad.png';
 import placeholderLogoDark from '../assets/images/question_white.svg';
 import Wrap from './Wrap';
 import Unwrap from './Unwrap';
+import { ethers } from 'ethers';
+import { usePublicClient } from 'wagmi';
 
 interface TokenInfo {
     tokenSymbol?: string;
@@ -48,8 +50,50 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
     setWrapAmount
 }) => {
     const [actionType, setActionType] = useState('');
+    const [nomaSpotPrice, setNomaSpotPrice] = useState<number>(0);
     const ethBalanceValue = typeof ethBalance === 'string' ? BigInt(ethBalance) : ethBalance;
     const { monPrice } = useMonPrice();
+    const publicClient = usePublicClient();
+    
+    // Fetch NOMA spot price from vault
+    useEffect(() => {
+        const fetchNomaSpotPrice = async () => {
+            try {
+                const nomaVault = "0x0b3507D715DCd7ee876626013b8BC7Fa1B069232";
+                const provider = new ethers.providers.JsonRpcProvider(publicClient?.transport?.url || "https://devnet.monad.xyz");
+                
+                const VaultAbi = [
+                    "function getVaultInfo() view returns (uint256, uint256, uint256, uint256, uint256, uint256, address, address, uint256)"
+                ];
+                
+                const vaultContract = new ethers.Contract(
+                    nomaVault,
+                    VaultAbi,
+                    provider
+                );
+                
+                const vaultInfo = await vaultContract.getVaultInfo();
+                const spotPriceFromContract = vaultInfo[2]; // spotPrice is at index 2
+                
+                const formattedPrice = formatEther(spotPriceFromContract);
+                const numericPrice = parseFloat(formattedPrice);
+                
+                if (!isNaN(numericPrice) && isFinite(numericPrice) && numericPrice > 0) {
+                    setNomaSpotPrice(numericPrice);
+                }
+            } catch (error) {
+                console.error("Error fetching NOMA spot price:", error);
+                // Fallback to a default if fetch fails
+                setNomaSpotPrice(0.033);
+            }
+        };
+        
+        fetchNomaSpotPrice();
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchNomaSpotPrice, 30000);
+        
+        return () => clearInterval(interval);
+    }, [publicClient]);
 
     const handleAction = () => {
         if (wrapAmount === '' || wrapAmount === '0') return;
@@ -108,11 +152,8 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
             if (symbol === 'MON' || symbol === 'WMON') {
                 usdValue = balanceValue * monPrice;
             } else if (symbol === 'NOMA') {
-                // NOMA price calculation
-                // The spotPrice from Exchange.tsx shows NOMA price in MON terms
-                // For now using a placeholder - this should be fetched from the vault
-                const nomaSpotPriceInMON = 0.033; // TODO: Fetch this from vault contract like in Exchange.tsx
-                const nomaPrice = nomaSpotPriceInMON * monPrice;
+                // NOMA price calculation using spot price from vault
+                const nomaPrice = nomaSpotPrice * monPrice;
                 usdValue = balanceValue * nomaPrice;
             }
             // Add other token prices here as needed
