@@ -49,8 +49,12 @@ const ImageWithFallback: React.FC<{
           verticalAlign: 'middle'
         }}
         onLoad={onLoad}
-        onError={() => {
-          console.error('Image failed to load:', src.substring(0, 100));
+        onError={(e) => {
+          console.error('Image failed to load:', {
+            url: src.substring(0, 200),
+            error: e,
+            fullUrl: src
+          });
           setHasError(true);
         }}
       />
@@ -371,10 +375,15 @@ const TrollBox: React.FC = () => {
     
     switch (cmd) {
       case '/help':
-        setShowHelp(true);
-        // Hide help after 5 seconds
-        setTimeout(() => setShowHelp(false), 5000);
-        return true;
+        // Only show help in expanded view
+        if (isExpanded) {
+          setShowHelp(true);
+          // Hide help after 5 seconds
+          setTimeout(() => setShowHelp(false), 5000);
+          return true;
+        }
+        // In collapsed view, don't process the command
+        return false;
         
       case '/slap':
         if (parts.length < 2) {
@@ -624,9 +633,17 @@ const TrollBox: React.FC = () => {
     }
   };
 
-  const handleGifSelect = (gifUrl: string) => {
-    // Add GIF as markdown image syntax
-    setNewMessage(prev => prev + (prev ? ' ' : '') + `![gif](${gifUrl})` + ' ');
+  const handleGifSelect = (gifUrlOrEmoji: string) => {
+    // Check if it's an emoji (single character or emoji sequence)
+    const isEmoji = /^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}₿Ξ]+$/u.test(gifUrlOrEmoji);
+    
+    if (isEmoji) {
+      // For emojis, add them directly
+      setNewMessage(prev => prev + (prev ? ' ' : '') + gifUrlOrEmoji + ' ');
+    } else {
+      // For GIF URLs, wrap in markdown syntax
+      setNewMessage(prev => prev + (prev ? ' ' : '') + `![gif](${gifUrlOrEmoji})` + ' ');
+    }
     setShowGifPicker(false);
     setShowGifPickerExpanded(false);
   };
@@ -979,22 +996,22 @@ const TrollBox: React.FC = () => {
               </Text>
               <VStack align="start" gap={2} pl={2}>
                 <HStack>
-                  <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/slap</Text>
-                  <Text fontSize="sm" color="white">&lt;user&gt; - Slap someone!</Text>
+                  <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/slap</Text></Box>
+                  <Box><Text fontSize="sm" color="white">&lt;user&gt; - Slap someone!</Text></Box>
                 </HStack>
                 <HStack>
-                  <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/help</Text>
-                  <Text fontSize="sm" color="white">- Show this help</Text>
+                  <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/help</Text></Box>
+                  <Box><Text fontSize="sm" color="white">- Show this help</Text></Box>
                 </HStack>
                 {isAdmin && (
                   <>
                     <HStack>
-                      <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text>
-                      <Text fontSize="sm" color="white">&lt;user&gt; - Kick a user (Admin)</Text>
+                      <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text></Box>
+                      <Box><Text fontSize="sm" color="white">&lt;user&gt; - Kick a user (Admin)</Text></Box>
                     </HStack>
                     <HStack>
-                      <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/clearauth</Text>
-                      <Text fontSize="sm" color="white">[user] - Clear auth (Admin)</Text>
+                      <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/clearauth</Text></Box>
+                      <Box><Text fontSize="sm" color="white">[user] - Clear auth (Admin)</Text></Box>
                     </HStack>
                   </>
                 )}
@@ -1313,260 +1330,266 @@ const TrollBox: React.FC = () => {
               </Box>
             )}
             {/* Help moved to overlay */}
-            <HStack position="relative">
+            <VStack spacing={2} align="stretch">
               {isUploadingImage && (
                 <Text fontSize="xs" color="#4ade80" position="absolute" top="-20px" left="0">
                   Uploading image...
                 </Text>
               )}
-              <Box flex="1" position="relative">
-              <Box
-                onPaste={(e: any) => handlePaste(e)}
-                w="100%"
-              >
-                <Input
-                  ref={collapsedInputRef}
-                  value={newMessage}
-                  onChange={handleInputChange}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  onPaste={handlePaste}
-                  placeholder="Type message or /help for commands..."
+              {/* Top row: emoji, gif, clipboard buttons */}
+              <HStack justify="flex-start" spacing={2}>
+                {/* Manual paste button for testing */}
+                <Button
+                  aria-label="Paste image"
+                  size="sm"
                   bg="#2a2a2a"
-                  border="none"
-                  color="white"
-                  h="36px"
-                  w="100%"
-                  _placeholder={{ color: '#666' }}
                   _hover={{ bg: '#3a3a3a' }}
-                  _focus={{ bg: '#3a3a3a', outline: 'none' }}
-                  disabled={isUploadingImage}
-                />
-              </Box>
-              {showUserSuggestions && userSuggestions.length > 0 && (
-                <Box
-                  className="user-suggestions"
-                  position="absolute"
-                  bottom="100%"
-                  left="0"
-                  right="0"
-                  mb={1}
-                  bg="#2a2a2a"
-                  borderRadius="md"
-                  border="1px solid #3a3a3a"
-                  maxH="150px"
-                  overflowY="auto"
-                  zIndex={1000}
-                  boxShadow="0 -4px 12px rgba(0, 0, 0, 0.3)"
-                >
-                  {userSuggestions.map((username) => (
-                    <Box
-                      key={username}
-                      px={3}
-                      py={2}
-                      cursor="pointer"
-                      _hover={{ bg: '#3a3a3a' }}
-                      onClick={() => handleSelectUserSuggestion(username)}
-                    >
-                      <Text color="white" fontSize="sm">
-                        @{username}
-                      </Text>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </Box>
-            {/* Manual paste button for testing */}
-            <Button
-              aria-label="Paste image"
-              size="sm"
-              bg="#2a2a2a"
-              _hover={{ bg: '#3a3a3a' }}
-              onClick={async () => {
-                try {
-                  console.log('Manual paste button clicked');
-                  const text = await navigator.clipboard.readText();
-                  console.log('Text from clipboard:', text.substring(0, 100));
-                  
-                  // Try to read clipboard items
-                  if (navigator.clipboard.read) {
-                    const items = await navigator.clipboard.read();
-                    console.log('Clipboard items:', items.length);
-                    
-                    for (const item of items) {
-                      console.log('Item types:', item.types);
-                      for (const type of item.types) {
-                        if (type.startsWith('image/')) {
-                          const blob = await item.getType(type);
-                          await processImageFile(blob);
-                          return;
+                  onClick={async () => {
+                    try {
+                      console.log('Manual paste button clicked');
+                      const text = await navigator.clipboard.readText();
+                      console.log('Text from clipboard:', text.substring(0, 100));
+                      
+                      // Try to read clipboard items
+                      if (navigator.clipboard.read) {
+                        const items = await navigator.clipboard.read();
+                        console.log('Clipboard items:', items.length);
+                        
+                        for (const item of items) {
+                          console.log('Item types:', item.types);
+                          for (const type of item.types) {
+                            if (type.startsWith('image/')) {
+                              const blob = await item.getType(type);
+                              await processImageFile(blob);
+                              return;
+                            }
+                          }
                         }
                       }
-                    }
-                  }
-                } catch (err) {
-                  console.error('Clipboard access error:', err);
-                  toaster.create({
-                    title: 'Clipboard access denied',
-                    description: 'Please use Ctrl+V to paste images',
-                    duration: 3000,
-                  });
-                }
-              }}
-              px={2}
-              minW="auto"
-              title="Click to paste image from clipboard"
-            >
-              📋
-            </Button>
-            <Box position="relative">
-              <Button
-                ref={emojiButtonRef}
-                aria-label="Select emoji"
-                size="sm"
-                bg="#2a2a2a"
-                _hover={{ bg: '#3a3a3a' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowEmojiPicker(!showEmojiPicker);
-                }}
-                px={2}
-                minW="auto"
-              >
-                😊
-              </Button>
-              {showEmojiPicker && (
-                <Box
-                  position="fixed"
-                  bottom="auto"
-                  left="auto"
-                  zIndex={10000}
-                  boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
-                  borderRadius="md"
-                  onClick={(e) => e.stopPropagation()}
-                  sx={{
-                    transform: 'translateY(-100%) translateY(-8px)',
-                    maxHeight: 'calc(100vh - 100px)',
-                    overflow: 'auto'
-                  }}
-                  ref={(el) => {
-                    if (el && emojiButtonRef.current) {
-                      const buttonRect = emojiButtonRef.current.getBoundingClientRect();
-                      const pickerWidth = 300;
-                      const pickerHeight = 350;
-                      
-                      // Calculate position
-                      let left = buttonRect.left + (buttonRect.width / 2) - (pickerWidth / 2);
-                      let top = buttonRect.top - pickerHeight - 8;
-                      
-                      // Adjust if going off screen
-                      if (left < 10) left = 10;
-                      if (left + pickerWidth > window.innerWidth - 10) {
-                        left = window.innerWidth - pickerWidth - 10;
-                      }
-                      if (top < 10) {
-                        // Show below if not enough space above
-                        top = buttonRect.bottom + 8;
-                      }
-                      
-                      el.style.left = `${left}px`;
-                      el.style.top = `${top}px`;
+                    } catch (err) {
+                      console.error('Clipboard access error:', err);
+                      toaster.create({
+                        title: 'Clipboard access denied',
+                        description: 'Please use Ctrl+V to paste images',
+                        duration: 3000,
+                      });
                     }
                   }}
+                  px={2}
+                  minW="auto"
+                  title="Click to paste image from clipboard"
                 >
-                  <EmojiPicker
-                    onEmojiClick={handleEmojiClick}
-                    theme="dark"
-                    height={350}
-                    width={300}
-                  />
+                  📋
+                </Button>
+                <Box position="relative">
+                  <Button
+                    ref={emojiButtonRef}
+                    aria-label="Select emoji"
+                    size="sm"
+                    bg="#2a2a2a"
+                    _hover={{ bg: '#3a3a3a' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowEmojiPicker(!showEmojiPicker);
+                    }}
+                    px={2}
+                    minW="auto"
+                  >
+                    😊
+                  </Button>
+                  {showEmojiPicker && (
+                    <Box
+                      position="fixed"
+                      bottom="auto"
+                      left="auto"
+                      zIndex={10000}
+                      boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
+                      borderRadius="md"
+                      onClick={(e) => e.stopPropagation()}
+                      sx={{
+                        transform: 'translateY(-100%) translateY(-8px)',
+                        maxHeight: 'calc(100vh - 100px)',
+                        overflow: 'auto'
+                      }}
+                      ref={(el) => {
+                        if (el && emojiButtonRef.current) {
+                          const buttonRect = emojiButtonRef.current.getBoundingClientRect();
+                          const pickerWidth = 300;
+                          const pickerHeight = 350;
+                          
+                          // Calculate position
+                          let left = buttonRect.left + (buttonRect.width / 2) - (pickerWidth / 2);
+                          let top = buttonRect.top - pickerHeight - 8;
+                          
+                          // Adjust if going off screen
+                          if (left < 10) left = 10;
+                          if (left + pickerWidth > window.innerWidth - 10) {
+                            left = window.innerWidth - pickerWidth - 10;
+                          }
+                          if (top < 10) {
+                            // Show below if not enough space above
+                            top = buttonRect.bottom + 8;
+                          }
+                          
+                          el.style.left = `${left}px`;
+                          el.style.top = `${top}px`;
+                        }
+                      }}
+                    >
+                      <EmojiPicker
+                        onEmojiClick={handleEmojiClick}
+                        theme="dark"
+                        height={350}
+                        width={300}
+                      />
+                    </Box>
+                  )}
                 </Box>
-              )}
-            </Box>
-            <Box position="relative">
-              <Button
-                ref={gifButtonRef}
-                aria-label="Select GIF"
-                size="sm"
-                bg="#2a2a2a"
-                _hover={{ bg: '#3a3a3a' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowGifPicker(!showGifPicker);
-                }}
-                px={2}
-                minW="auto"
-              >
-                <FiImage />
-              </Button>
-              {showGifPicker && (
-                <Box
-                  position="fixed"
-                  bottom="auto"
-                  left="auto"
-                  zIndex={10000}
-                  boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
-                  borderRadius="md"
-                  onClick={(e) => e.stopPropagation()}
-                  ref={(el) => {
-                    if (el && gifButtonRef.current) {
-                      const buttonRect = gifButtonRef.current.getBoundingClientRect();
-                      const pickerWidth = 400;
-                      const pickerHeight = 500;
-                      
-                      let left = buttonRect.left + (buttonRect.width / 2) - (pickerWidth / 2);
-                      let top = buttonRect.top - pickerHeight - 8;
-                      
-                      if (left < 10) left = 10;
-                      if (left + pickerWidth > window.innerWidth - 10) {
-                        left = window.innerWidth - pickerWidth - 10;
-                      }
-                      if (top < 10) {
-                        top = buttonRect.bottom + 8;
-                      }
-                      
-                      el.style.left = `${left}px`;
-                      el.style.top = `${top}px`;
-                    }
-                  }}
-                >
-                  <GifPicker onSelectGif={handleGifSelect} onClose={() => setShowGifPicker(false)} />
+                <Box position="relative">
+                  <Button
+                    ref={gifButtonRef}
+                    aria-label="Select GIF"
+                    size="sm"
+                    bg="#2a2a2a"
+                    _hover={{ bg: '#3a3a3a' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowGifPicker(!showGifPicker);
+                    }}
+                    px={2}
+                    minW="auto"
+                  >
+                    <FiImage />
+                  </Button>
+                  {showGifPicker && (
+                    <Box
+                      position="fixed"
+                      bottom="auto"
+                      left="auto"
+                      zIndex={10000}
+                      boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
+                      borderRadius="md"
+                      onClick={(e) => e.stopPropagation()}
+                      ref={(el) => {
+                        if (el && gifButtonRef.current) {
+                          const buttonRect = gifButtonRef.current.getBoundingClientRect();
+                          const pickerWidth = 400;
+                          const pickerHeight = 500;
+                          
+                          let left = buttonRect.left + (buttonRect.width / 2) - (pickerWidth / 2);
+                          let top = buttonRect.top - pickerHeight - 8;
+                          
+                          if (left < 10) left = 10;
+                          if (left + pickerWidth > window.innerWidth - 10) {
+                            left = window.innerWidth - pickerWidth - 10;
+                          }
+                          if (top < 10) {
+                            top = buttonRect.bottom + 8;
+                          }
+                          
+                          el.style.left = `${left}px`;
+                          el.style.top = `${top}px`;
+                        }
+                      }}
+                    >
+                      <GifPicker onSelectGif={handleGifSelect} onClose={() => setShowGifPicker(false)} />
+                    </Box>
+                  )}
                 </Box>
-              )}
-            </Box>
-            <Box>
-              <Button
-                size="sm"
-                bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
-                color="black"
-                fontWeight="600"
-                onClick={handleSendMessage}
-                isDisabled={!newMessage.trim()}
-                _hover={{ 
-                  bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 2px 8px rgba(74, 222, 128, 0.3)'
-                }}
-                _active={{
-                  transform: 'translateY(0)',
-                  boxShadow: '0 1px 4px rgba(74, 222, 128, 0.2)'
-                }}
-                _disabled={{ 
-                  bg: "#2a2a2a", 
-                  color: "#666",
-                  cursor: "not-allowed",
-                  transform: 'none',
-                  boxShadow: 'none'
-                }}
-                leftIcon={<FiSend />}
-                px={4}
-                borderRadius="md"
-                transition="all 0.2s"
-                boxShadow="0 1px 4px rgba(74, 222, 128, 0.2)"
-              >
-                Send
-              </Button>
-            </Box>
-          </HStack>
+              </HStack>
+              {/* Bottom row: input and send button */}
+              <HStack spacing={2} position="relative">
+                <Box flex="1" position="relative">
+                  <Box
+                    onPaste={(e: any) => handlePaste(e)}
+                    w="100%"
+                  >
+                    <Input
+                      ref={collapsedInputRef}
+                      value={newMessage}
+                      onChange={handleInputChange}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      onPaste={handlePaste}
+                      placeholder="Type a message..."
+                      bg="#2a2a2a"
+                      border="none"
+                      color="white"
+                      h="36px"
+                      w="100%"
+                      _placeholder={{ color: '#666' }}
+                      _hover={{ bg: '#3a3a3a' }}
+                      _focus={{ bg: '#3a3a3a', outline: 'none' }}
+                      disabled={isUploadingImage}
+                    />
+                  </Box>
+                  {showUserSuggestions && userSuggestions.length > 0 && (
+                    <Box
+                      className="user-suggestions"
+                      position="absolute"
+                      bottom="100%"
+                      left="0"
+                      right="0"
+                      mb={1}
+                      bg="#2a2a2a"
+                      borderRadius="md"
+                      border="1px solid #3a3a3a"
+                      maxH="150px"
+                      overflowY="auto"
+                      zIndex={1000}
+                      boxShadow="0 -4px 12px rgba(0, 0, 0, 0.3)"
+                    >
+                      {userSuggestions.map((username) => (
+                        <Box
+                          key={username}
+                          px={3}
+                          py={2}
+                          cursor="pointer"
+                          _hover={{ bg: '#3a3a3a' }}
+                          onClick={() => handleSelectUserSuggestion(username)}
+                        >
+                          <Text color="white" fontSize="sm">
+                            @{username}
+                          </Text>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+                <Box>
+                  <Button
+                    size="sm"
+                    bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
+                    color="black"
+                    fontWeight="600"
+                    onClick={handleSendMessage}
+                    isDisabled={!newMessage.trim()}
+                    _hover={{ 
+                      bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 2px 8px rgba(74, 222, 128, 0.3)'
+                    }}
+                    _active={{
+                      transform: 'translateY(0)',
+                      boxShadow: '0 1px 4px rgba(74, 222, 128, 0.2)'
+                    }}
+                    _disabled={{ 
+                      bg: "#2a2a2a", 
+                      color: "#666",
+                      cursor: "not-allowed",
+                      transform: 'none',
+                      boxShadow: 'none'
+                    }}
+                    leftIcon={<FiSend />}
+                    px={4}
+                    borderRadius="md"
+                    transition="all 0.2s"
+                    boxShadow="0 1px 4px rgba(74, 222, 128, 0.2)"
+                  >
+                    Send
+                  </Button>
+                </Box>
+              </HStack>
+            </VStack>
           </VStack>
         ) : (
           <VStack>
@@ -1629,7 +1652,7 @@ const TrollBox: React.FC = () => {
             border="2px solid #ff9500"
             borderRadius="md"
             p={6}
-            maxW="320px"
+            w="600px"
             zIndex={2000}
             onClick={(e) => {
               e.stopPropagation();
@@ -1637,28 +1660,28 @@ const TrollBox: React.FC = () => {
             }}
             boxShadow="0 8px 32px rgba(255, 149, 0, 0.3)"
           >
-            <VStack align="start" gap={3}>
+            <VStack align="start" gap={3} w="100%">
               <Text fontSize="lg" color="#ff9500" fontWeight="bold">
                 ⚡ Available Commands
               </Text>
-              <VStack align="start" gap={2} pl={2}>
+              <VStack align="start" gap={2} pl={0} w="100%">
                 <HStack>
-                  <Text fontSize="md" color="#ff9500" fontFamily="monospace">/slap</Text>
-                  <Text fontSize="md" color="white">&lt;user&gt; - Slap someone!</Text>
+                  <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/slap</Text></Box>
+                  <Box><Text fontSize="sm" color="white">&lt;user&gt; - Slap someone!</Text></Box>
                 </HStack>
                 <HStack>
-                  <Text fontSize="md" color="#ff9500" fontFamily="monospace">/help</Text>
-                  <Text fontSize="md" color="white">- Show this help</Text>
+                  <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/help</Text></Box>
+                  <Box><Text fontSize="sm" color="white">- Show this help</Text></Box>
                 </HStack>
                 {isAdmin && (
                   <>
                     <HStack>
-                      <Text fontSize="md" color="#ff9500" fontFamily="monospace">/kick</Text>
-                      <Text fontSize="md" color="white">&lt;user&gt; - Kick a user (Admin)</Text>
+                      <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text></Box>
+                      <Box><Text fontSize="sm" color="white">&lt;user&gt; - Kick a user (Admin)</Text></Box>
                     </HStack>
                     <HStack>
-                      <Text fontSize="md" color="#ff9500" fontFamily="monospace">/clearauth</Text>
-                      <Text fontSize="md" color="white">[user] - Clear auth (Admin)</Text>
+                      <Box w="80px"><Text fontSize="sm" color="#ff9500" fontFamily="monospace">/clearauth</Text></Box>
+                      <Box><Text fontSize="sm" color="white">[user] - Clear auth (Admin)</Text></Box>
                     </HStack>
                   </>
                 )}

@@ -96,16 +96,18 @@ const GifPicker: React.FC<GifPickerProps> = ({ onSelectGif, onClose }) => {
 
   const handleStickerSelect = (sticker: any) => {
     if (sticker.emoji) {
+      // For emoji stickers, just pass the emoji directly without markdown
       onSelectGif(sticker.emoji);
     } else if (sticker.url) {
-      onSelectGif(`![sticker](${sticker.url})`);
+      // For image stickers, pass the URL to be wrapped in markdown by TrollBox
+      onSelectGif(sticker.url);
     }
   };
 
   const handleGifSelect = (gif: any) => {
     const gifUrl = gif.images?.fixed_height?.url || gif.images?.original?.url;
     if (gifUrl) {
-      onSelectGif(`![gif](${gifUrl})`);
+      onSelectGif(gifUrl);
     }
   };
 

@@ -21,6 +21,16 @@ import {
   Center
 } from "@chakra-ui/react";
 import {
+    DialogRoot,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogBody,
+    DialogFooter,
+    DialogActionTrigger,
+    DialogBackdrop,
+} from '../components/ui/dialog';
+import {
     SelectContent,
     SelectItem,
     SelectLabel,
@@ -153,7 +163,7 @@ const localProvider = new providers.JsonRpcProvider(
     config.chain == "local" ? "http://localhost:8545" : config.RPC_URL
 );
 
-const Launchpad: React.FC = () => {
+const Exchange: React.FC = () => {
     const { address, isConnected } = useAccount();
     const { selectedToken, setSelectedToken } = useToken();
     const { monPrice } = useMonPrice();
@@ -305,6 +315,7 @@ const Launchpad: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
     const [myTxCurrentPage, setMyTxCurrentPage] = useState(1);
+    const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false);
     
     // Load trade history from local storage on mount
     useEffect(() => {
@@ -2765,26 +2776,40 @@ const Launchpad: React.FC = () => {
                             {!isMobile && (
                             <Box bg="#1a1a1a" borderRadius="lg" p={isMobile ? 3 : 4} w="100%">
                                 <Tabs.Root value={tradeHistoryTab} onValueChange={(e) => setTradeHistoryTab(e.value)}>
-                                    <Tabs.List mb={4}>
-                                        <Tabs.Trigger 
-                                            value="all" 
-                                            flex={1}
-                                            _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
-                                            color="#888"
-                                            fontWeight="600"
-                                        >
-                                            All Transactions
-                                        </Tabs.Trigger>
-                                        <Tabs.Trigger 
-                                            value="my" 
-                                            flex={1}
-                                            _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
-                                            color="#888"
-                                            fontWeight="600"
-                                        >
-                                            My Transactions
-                                        </Tabs.Trigger>
-                                    </Tabs.List>
+                                    <Flex justifyContent="space-between" alignItems="center" mb={4}>
+                                        <Tabs.List flex={1}>
+                                            <Tabs.Trigger 
+                                                value="all" 
+                                                flex={1}
+                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                                color="#888"
+                                                fontWeight="600"
+                                            >
+                                                All Transactions
+                                            </Tabs.Trigger>
+                                            <Tabs.Trigger 
+                                                value="my" 
+                                                flex={1}
+                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                                color="#888"
+                                                fontWeight="600"
+                                            >
+                                                My Transactions
+                                            </Tabs.Trigger>
+                                        </Tabs.List>
+                                        {tradeHistory.length > 0 && (
+                                            <Button
+                                                size="sm"
+                                                ml={3}
+                                                bg="#2a2a2a"
+                                                color="#888"
+                                                _hover={{ bg: "#3a3a3a", color: "white" }}
+                                                onClick={() => setShowClearHistoryDialog(true)}
+                                            >
+                                                Clear History
+                                            </Button>
+                                        )}
+                                    </Flex>
                                     
                                     <Tabs.Content value="all">
                                         <VStack gap={2} align="stretch">
@@ -2819,14 +2844,14 @@ const Launchpad: React.FC = () => {
                                                             </Box>
                                                             <Box>
                                                                 <Text color="#888" fontSize="sm">
-                                                                    {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
+                                                                    {trade.amount.toLocaleString()} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
                                                                 </Text>
                                                             </Box>
                                                         </HStack>
                                                         
                                                         <Box>
                                                             <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
-                                                                ${trade.total.toFixed(2)}
+                                                                {trade.total.toFixed(4)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${(trade.total * monPrice).toFixed(2)})</Text>}
                                                             </Text>
                                                         </Box>
                                                         
@@ -2836,7 +2861,7 @@ const Launchpad: React.FC = () => {
                                                                 fontSize="xs"
                                                                 cursor="pointer"
                                                                 _hover={{ textDecoration: "underline" }}
-                                                                onClick={() => window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank")}
+                                                                onClick={() => window.open(`https://monadexplorer.com/tx/${trade.fullTxHash}`, "_blank")}
                                                                 minW="100px"
                                                                 textAlign="right"
                                                             >
@@ -2941,14 +2966,14 @@ const Launchpad: React.FC = () => {
                                                                 </Box>
                                                                 <Box>
                                                                     <Text color="#888" fontSize="sm">
-                                                                        {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
+                                                                        {trade.amount.toLocaleString()} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
                                                                     </Text>
                                                                 </Box>
                                                             </HStack>
                                                             
                                                             <Box>
                                                                 <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
-                                                                    ${trade.total.toFixed(2)}
+                                                                    {trade.total.toFixed(4)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${(trade.total * monPrice).toFixed(2)})</Text>}
                                                                 </Text>
                                                             </Box>
                                                             
@@ -3646,11 +3671,12 @@ const Launchpad: React.FC = () => {
                         <Box w="100%">
                             <Box bg="#1a1a1a" borderRadius="lg" p={3} w="100%">
                                 <Tabs.Root value={tradeHistoryTab} onValueChange={(e) => setTradeHistoryTab(e.value)}>
-                                    <Tabs.List mb={4}>
-                                        <Tabs.Trigger 
-                                            value="all" 
-                                            flex={1}
-                                            _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                    <Flex justifyContent="space-between" alignItems="center" mb={4}>
+                                        <Tabs.List flex={1}>
+                                            <Tabs.Trigger 
+                                                value="all" 
+                                                flex={1}
+                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
                                             color="#888"
                                             fontWeight="600"
                                         >
@@ -3666,8 +3692,21 @@ const Launchpad: React.FC = () => {
                                             My Transactions
                                         </Tabs.Trigger>
                                     </Tabs.List>
+                                    {tradeHistory.length > 0 && (
+                                        <Button
+                                            size="sm"
+                                            ml={2}
+                                            bg="#2a2a2a"
+                                            color="#888"
+                                            _hover={{ bg: "#3a3a3a", color: "white" }}
+                                            onClick={clearTradeHistory}
+                                        >
+                                            Clear
+                                        </Button>
+                                    )}
+                                </Flex>
                                     
-                                    <Tabs.Content value="all">
+                                <Tabs.Content value="all">
                                         <VStack gap={2} align="stretch">
                                                 {getPaginatedData(tradeHistory, currentPage, itemsPerPage).map((trade) => (
                                                     <Box
@@ -3697,7 +3736,7 @@ const Launchpad: React.FC = () => {
                                                             </HStack>
                                                             <Box>
                                                                 <Text color="white" fontWeight="bold">
-                                                                    ${trade.total.toFixed(2)}
+                                                                    {trade.total.toFixed(4)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${(trade.total * monPrice).toFixed(2)})</Text>}
                                                                 </Text>
                                                             </Box>
                                                         </Flex>
@@ -3706,7 +3745,7 @@ const Launchpad: React.FC = () => {
                                                         <Flex justifyContent="space-between" alignItems="center">
                                                             <Box>
                                                                 <Text color="#888" fontSize="xs">
-                                                                    {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
+                                                                    {trade.amount.toLocaleString()} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
                                                                 </Text>
                                                             </Box>
                                                             <HStack gap={3}>
@@ -3718,7 +3757,7 @@ const Launchpad: React.FC = () => {
                                                                         _hover={{ textDecoration: "underline" }}
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
-                                                                            window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank");
+                                                                            window.open(`https://monadexplorer.com/tx/${trade.fullTxHash}`, "_blank");
                                                                         }}
                                                                     >
                                                                         {trade.txHash}
@@ -3821,7 +3860,7 @@ const Launchpad: React.FC = () => {
                                                                             </HStack>
                                                                             <Box>
                                                                                 <Text color="white" fontWeight="bold">
-                                                                                    ${trade.total.toFixed(2)}
+                                                                                    {trade.total.toFixed(4)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${(trade.total * monPrice).toFixed(2)})</Text>}
                                                                                 </Text>
                                                                             </Box>
                                                                         </Flex>
@@ -3830,7 +3869,7 @@ const Launchpad: React.FC = () => {
                                                                         <Flex justifyContent="space-between" alignItems="center">
                                                                             <Box>
                                                                                 <Text color="#888" fontSize="xs">
-                                                                                    {trade.amount.toLocaleString()} @ ${formatPrice(trade.price)}
+                                                                                    {trade.amount.toLocaleString()} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
                                                                                 </Text>
                                                                             </Box>
                                                                             <HStack gap={3}>
@@ -3842,7 +3881,7 @@ const Launchpad: React.FC = () => {
                                                                                         _hover={{ textDecoration: "underline" }}
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
-                                                                                            window.open(`https://monadexplorer.com/tx/${trade.txHash}`, "_blank");
+                                                                                            window.open(`https://monadexplorer.com/tx/${trade.fullTxHash}`, "_blank");
                                                                                         }}
                                                                                     >
                                                                                         {trade.txHash}
@@ -3924,9 +3963,114 @@ const Launchpad: React.FC = () => {
                 )}
             </Flex>
             )}
+            
+            {/* Clear History Confirmation Dialog */}
+            <DialogRoot 
+                open={showClearHistoryDialog} 
+                onOpenChange={(e) => setShowClearHistoryDialog(e.open)}
+                placement="center"
+                motionPreset="scale"
+            >
+                <DialogBackdrop />
+                <DialogContent
+                    position="fixed"
+                    top="50%"
+                    left="50%"
+                    transform="translate(-50%, -50%)"
+                    bg="#1a1a1a"
+                    borderRadius="xl"
+                    boxShadow="0 20px 40px rgba(0, 0, 0, 0.8)"
+                    border="1px solid rgba(255, 255, 255, 0.08)"
+                    _open={{
+                        animation: "fadeIn 0.2s ease-out"
+                    }}
+                >
+                    <DialogHeader 
+                        borderBottom="1px solid rgba(255, 255, 255, 0.08)" 
+                        p={6}
+                        pb={5}
+                    >
+                        <DialogTitle 
+                            fontSize="2xl" 
+                            fontWeight="bold" 
+                            color="white"
+                            letterSpacing="-0.02em"
+                        >
+                            Clear Trade History
+                        </DialogTitle>
+                    </DialogHeader>
+                    
+                    <DialogBody px={6} py={8}>
+                        <VStack align="start" spacing={4}>
+                            <Text 
+                                color="rgba(255, 255, 255, 0.85)" 
+                                fontSize="md"
+                                lineHeight="1.6"
+                            >
+                                Are you sure you want to clear all trade history?
+                            </Text>
+                            <Text 
+                                color="rgba(255, 255, 255, 0.5)" 
+                                fontSize="sm"
+                                fontStyle="italic"
+                            >
+                                This action cannot be undone. All transaction records will be permanently deleted.
+                            </Text>
+                        </VStack>
+                    </DialogBody>
+                    
+                    <DialogFooter 
+                        gap={3} 
+                        borderTop="1px solid rgba(255, 255, 255, 0.08)" 
+                        p={6}
+                        pt={5}
+                    >
+                        <DialogActionTrigger asChild>
+                            <Button 
+                                variant="outline"
+                                size="md"
+                                px={6}
+                                bg="transparent"
+                                borderColor="rgba(255, 255, 255, 0.15)"
+                                color="rgba(255, 255, 255, 0.8)"
+                                fontWeight="500"
+                                _hover={{ 
+                                    bg: "rgba(255, 255, 255, 0.05)",
+                                    borderColor: "rgba(255, 255, 255, 0.25)",
+                                    color: "white"
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                        </DialogActionTrigger>
+                        <Button 
+                            size="md"
+                            px={6}
+                            bg="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+                            color="white"
+                            fontWeight="600"
+                            boxShadow="0 4px 12px rgba(239, 68, 68, 0.3)"
+                            _hover={{ 
+                                bg: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
+                                boxShadow: "0 6px 16px rgba(239, 68, 68, 0.4)",
+                                transform: "translateY(-1px)"
+                            }}
+                            _active={{
+                                transform: "translateY(0)"
+                            }}
+                            onClick={() => {
+                                clearTradeHistory();
+                                setShowClearHistoryDialog(false);
+                            }}
+                        >
+                            Clear History
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </DialogRoot>
         </Container>
     );
 };
 
-export default Launchpad;
+export default Exchange;
  
