@@ -1625,9 +1625,9 @@ const TrollBox: React.FC = () => {
                   setIsAuthenticating(true);
                   authenticate(address)
                     .then(() => {
-                      setAuthStatus('Authentication successful!');
+                      // Don't show success here - auth hook will update when server confirms
+                      setAuthStatus('');
                       setAuthAttempts(0);
-                      setTimeout(() => setAuthStatus(''), 3000);
                     })
                     .catch(err => {
                       const errorMsg = err?.message || 'Authentication failed';

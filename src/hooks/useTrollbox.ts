@@ -94,7 +94,8 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
           setUsername(data.username);
           setCanChangeUsername(data.canChangeUsername);
           setCooldownRemaining(data.cooldownRemaining);
-          setError(null);
+          setError('Authentication successful!');
+          setTimeout(() => setError(null), 3000);
           
           // Store auth in localStorage if not from cache
           if (!data.fromCache && data.address) {
@@ -178,6 +179,24 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
           setTimeout(() => {
             if (mounted) setError(null);
           }, 5000);
+          break;
+          
+        case 'authFailed':
+          setAuthenticated(false);
+          setError(data.message || 'Authentication failed');
+          // Clear cached auth if it failed
+          if (data.address) {
+            const authData = localStorage.getItem(AUTH_STORAGE_KEY);
+            if (authData) {
+              try {
+                const authMap = JSON.parse(authData);
+                delete authMap[data.address.toLowerCase()];
+                localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authMap));
+              } catch (e) {
+                console.error('Error clearing failed auth:', e);
+              }
+            }
+          }
           break;
           
         case 'clearAuth':
@@ -338,8 +357,8 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
         throw new Error('Failed to authenticate with server');
       }
       
-      setError('Authentication successful!');
-      setTimeout(() => setError(null), 2000);
+      // Don't show success here - wait for server response
+      setError('Waiting for server confirmation...');
     } catch (error) {
       console.error('Authentication error:', error);
       setError('Failed to sign authentication message');
