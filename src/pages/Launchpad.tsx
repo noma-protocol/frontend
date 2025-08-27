@@ -28,6 +28,7 @@ import { Checkbox } from "../components/ui/checkbox"
   
 import { useAccount, useBalance, useContractWrite } from "wagmi";
 import { isMobile } from "react-device-detect";
+import { useMonPrice } from '../contexts/MonPriceContext';
 import { Slider } from "../components/ui/slider"
 import { FaInfoCircle, FaCoins, FaChartLine, FaRocket, FaCheckCircle, FaTag, FaLayerGroup, FaClock, FaWallet, FaUpload, FaImage, FaFileAlt, FaUserTie } from "react-icons/fa";
 import { MdToken } from "react-icons/md";
@@ -74,12 +75,13 @@ const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local"
 
 const Launchpad: React.FC = () => {
     const { address, isConnected } = useAccount();
+    const { monPrice } = useMonPrice();
     const [deployStep, setDeployStep] = useState(0);
     const [tokenName, setTokenName] = useState("");
     const [tokenSymbol, setTokenSymbol] = useState("");
     const [tokenDescription, setTokenDescription] = useState("");
     const [tokenDecimals, setTokenDecimals] = useState("18");
-    const [tokenSupply, setTokenSupply] = useState("100");
+    const [tokenSupply, setTokenSupply] = useState("1000000");
     const [tokenLogo, setTokenLogo] = useState(null);
     const [logoPreview, setLogoPreview] = useState("");
 
@@ -343,8 +345,10 @@ const Launchpad: React.FC = () => {
     }
     
     const calculateSoftCap = () => {
-        // console.log(`${tokenSupply} * 10 / 100 * ${presalePrice} * 25 / 100`);
-        const calculatedSoftCap = ((tokenSupply * 10 / 100) * presalePrice) * 20 / 100;
+        // Hard cap = floor price * total supply * 10%
+        const hardCap = floorPrice * tokenSupply * 0.1;
+        // Soft cap = hard cap * 40% (default)
+        const calculatedSoftCap = hardCap * 0.4;
         setSoftCap(calculatedSoftCap);
     }
 
@@ -399,7 +403,9 @@ const Launchpad: React.FC = () => {
         // Update state
         setPrice(`${formattedSalePrice}`);
         setFloorPrice(`${inputValueStr}`);
-        setPresalePrice(`${formattedSalePrice}`);
+        // Presale price is floor price * 1.25 (25% markup)
+        const presalePriceValue = parseFloat(inputValueStr) * 1.25;
+        setPresalePrice(`${presalePriceValue}`);
         calculateSoftCap();
       };
     
@@ -666,7 +672,7 @@ const Launchpad: React.FC = () => {
                     </Box>
                 </Box>
                 <Box flex="1">
-                <SimpleGrid columns={isMobile ? 1 : [1, 1, 2]} gap={4} h="100%" w="100%" minH="650px" sx={{ '& > div': { minHeight: '100%' } }}>
+                <SimpleGrid columns={isMobile ? 1 : [1, 1, 2]} gap={6} h="100%" w="100%" minH="650px" sx={{ '& > div': { minHeight: '100%' } }}>
                     {/* Main Form */}
                     <Box h="100%" display="flex" flexDirection="column">
                         {deployStep == 0 ? (
@@ -703,7 +709,7 @@ const Launchpad: React.FC = () => {
                                     <Text color="#888" fontSize="md" mt={1}>Define your token's basic properties</Text>
                                 </Box>
                             </HStack>
-                            <VStack align="stretch" spacing={3} flex="1">
+                            <VStack align="stretch" spacing={5} flex="1">
                                 <Box>
                                     <HStack mb={2}>
                                         <Box>
@@ -806,7 +812,7 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </Box>
 
-                                <SimpleGrid columns={2} gap={4}>
+                                <SimpleGrid columns={2} gap={6}>
                                     <Box>
                                         <HStack mb={2}>
                                             <Box>
@@ -1116,15 +1122,14 @@ const Launchpad: React.FC = () => {
                                 </HStack>
                                 <HStack>
                                     <NumberInputRoot
-                                        defaultValue="1000000"
                                         min={100}
                                         max={10e27}
-                                        type="supply"
-                                        setTokenSupply={setTokenSupply}
-                                        targetValue={tokenSupply}
-                                        customStep={1}
-                                        onChange={handleSetSupply}
-                                        value={commify(tokenSupply, 0)}
+                                        value={tokenSupply}
+                                        onValueChange={(details) => {
+                                            console.log("Token Supply: ", details.value);
+                                            setTokenSupply(details.value);
+                                            calculateSoftCap();
+                                        }}
                                     >
                                         <NumberInputField 
                                             h="50px" 
@@ -1156,6 +1161,8 @@ const Launchpad: React.FC = () => {
                                         <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Paired Asset</Text>
                                     </Box>
                                 </HStack>
+                                    <HStack>
+                                        <Box>
                                 <SelectRoot
                                     collection={assets}
                                     onChange={handleSelectAsset}
@@ -1165,6 +1172,7 @@ const Launchpad: React.FC = () => {
                                         border="1px solid #2a2a2a" 
                                         color="white" 
                                         h="50px"
+                                        w="240px"
                                         _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
                                         _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
                                         transition="all 0.2s"
@@ -1202,7 +1210,20 @@ const Launchpad: React.FC = () => {
                                         ))}
                                     </SelectContent>
                                 </SelectRoot>
-                            </Box>
+                                        </Box>
+                                        <Box>
+                                            <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
+                                                <Image
+                                                    w="24px"
+                                                    h="24px"
+                                                    src={logoPreview || placeholderLogo}
+                                                    alt="Token"
+                                                />
+                                            </Box>                                            
+                                        </Box>
+                                    </HStack>
+                             </Box>
+                           
                         </VStack>
                         
                         {/* Enhanced Info Box */}
@@ -1214,16 +1235,22 @@ const Launchpad: React.FC = () => {
                             border="1px solid #4ade8040"
                         >
                             <HStack spacing={4}>
-                                <Box>
+                                <Box w="50%">
                                     <Text color="#888" fontSize="xs" mb={1}>Initial Price</Text>
                                     <Text color="white" fontSize="lg" fontWeight="bold">
                                         {price || "0"} MON
                                     </Text>
+                                    <Text color="#4ade80" fontSize="sm">
+                                        ${commify(Number(price || 0) * (monPrice), 4)}
+                                    </Text>                                    
                                 </Box>
                                 <Box>
                                     <Text color="#888" fontSize="xs" mb={1}>Market Cap</Text>
                                     <Text color="white" fontSize="lg" fontWeight="bold">
-                                        ${commify(Number(tokenSupply) * Number(price || 0), 0)}
+                                        {commify(Number(tokenSupply) * Number(price || 0), 4)} MON
+                                    </Text>
+                                    <Text color="#4ade80" fontSize="sm">
+                                        ${commify(Number(tokenSupply) * Number(price || 0) * (monPrice), 4)}
                                     </Text>
                                 </Box>
                             </HStack>
@@ -1268,7 +1295,7 @@ const Launchpad: React.FC = () => {
                     </HStack>
                 </Box>
                 ) : deployStep == 2 ? (
-                <Box h="100%" display="flex" flexDirection="column">
+                    <>
                     <Box 
                         bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
                         p={isMobile ? 8 : 10} 
@@ -1280,6 +1307,7 @@ const Launchpad: React.FC = () => {
                         flex="1"
                         display="flex"
                         flexDirection="column"
+                        w="700px"
                     >
                         {/* Decorative Element */}
                         <Box
@@ -1291,7 +1319,7 @@ const Launchpad: React.FC = () => {
                             bgGradient="linear(to-r, #4ade80, #22c55e)"
                         />
                         
-                        <HStack mb={6} spacing={3}>
+                        <HStack mb={4} spacing={4} align="center">
                             <Box p={2} bg="#4ade8020" borderRadius="lg">
                                 <FaCoins size={24} color="#4ade80" />
                             </Box>
@@ -1305,7 +1333,7 @@ const Launchpad: React.FC = () => {
                             </HStack>
                         </HStack>
                         {presale == 1 ? (
-                            <VStack align="stretch" spacing={3} flex="1">
+                            <VStack align="stretch" spacing={5} flex="1">
                                 <Box>
                                     <HStack mb={2}>
                                         <Box>
@@ -1385,6 +1413,7 @@ const Launchpad: React.FC = () => {
                                         value={duration}
                                     >
                                         <SelectTrigger 
+                                            w="95%"
                                             bg="#0a0a0a" 
                                             border="1px solid #2a2a2a" 
                                             color="white" 
@@ -1417,6 +1446,72 @@ const Launchpad: React.FC = () => {
                                             ))}
                                         </SelectContent>
                                     </SelectRoot>
+                                </Box>
+                                
+                                {/* Presale Summary Box */}
+                                <Box 
+                                    mt={4}
+                                    p={4} 
+                                    bg="linear-gradient(135deg, #4ade8015 0%, #22c55e15 100%)" 
+                                    borderRadius="xl" 
+                                    border="1px solid #4ade8040"
+                                    position="relative"
+                                    overflow="hidden"
+                                >
+                                    <Box
+                                        position="absolute"
+                                        top={0}
+                                        left={0}
+                                        bottom={0}
+                                        w="4px"
+                                        bg="#4ade80"
+                                    />
+                                    <VStack align="stretch" gap={4} pl={2}>
+                                        <HStack justify="space-between">
+                                            <Box> <Text color="#4ade80" fontSize="sm" fontWeight="bold">Total Presale Raise</Text></Box>
+                                            <Box>
+                                            <HStack gap={2}>
+                                                <Box>
+                                                <Text color="white" fontSize="lg" fontWeight="bold">
+                                                    {commify(Number(softCap) || 0)} MON
+                                                </Text>                                                    
+                                                </Box>
+                                                <Box>
+                                                <Text color="#666" fontSize="sm">
+                                                    (${commify((Number(softCap) || 0) * 3.5, 0)})
+                                                </Text>                                                    
+                                                </Box>
+                                            </HStack>                                                
+                                            </Box>
+                                        </HStack>
+                                        <HStack justify="space-between">
+                                            <Box><Text color="#888" fontSize="sm">Floor Liquidity</Text></Box>
+                                            <Box>
+                                            <Text color="#ef4444" fontSize="sm" fontWeight="600">
+                                                -{commify((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
+                                            </Text>                                                
+                                            </Box>
+                                        </HStack>
+                                        <Box borderTop="1px solid #2a2a2a" pt={2}>
+                                            <HStack justify="space-between">
+                                               <Box> <Text color="#4ade80" fontSize="sm" fontWeight="bold">Founder Receives</Text></Box>
+                                               <Box>
+                                                <VStack align="end" gap={1}>
+                                                    <Box>
+                                                    <Text color="#4ade80" fontSize="lg" fontWeight="bold">
+                                                        {commify(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
+                                                    </Text>                                                        
+                                                    </Box>
+                                                    <Box>
+                                                    <Text color="#666" fontSize="xs">
+                                                        ({((1 - (Number(floorPrice) / Number(presalePrice))) * 100).toFixed(0)}% of raise)
+                                                    </Text>                                                        
+                                                    </Box>
+                                                </VStack>
+                                                </Box>
+                                            </HStack>
+                                        </Box>
+                                    </VStack>
                                 </Box>
                             </VStack>
                         ) : (
@@ -1465,7 +1560,7 @@ const Launchpad: React.FC = () => {
                             </Button>
                         </HStack>
                     </HStack>
-                </Box>
+                </>
                 ) : (
                     <Box h="100%" display="flex" flexDirection="column">
                     {/* Step 3: Review & Deploy - deployStep should be 3 here */}
@@ -1499,22 +1594,29 @@ const Launchpad: React.FC = () => {
                                 <Heading as="h3" size="md" color="white">
                                     Review & Launch
                                 </Heading>
-                                <Text color="#888" fontSize="xs">Confirm your token details before deployment (Step {deployStep})</Text>
+                                <Text color="#888" fontSize="xs">Confirm your token details before deployment</Text>
                             </Box>
                         </HStack>
 
+                        {/* Debug Info - Remove this in production */}
+                        <Box mb={2} p={2} bg="orange.900" borderRadius="md">
+                            <Text fontSize="xs" color="white">DEBUG: Presale = "{presale}" (should be "1" for presale enabled)</Text>
+                            <Text fontSize="xs" color="white">Hard Cap Formula: {floorPrice} × {tokenSupply} × 0.1 = {commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON</Text>
+                            <Text fontSize="xs" color="white">Token Symbol: {tokenSymbol || 'TOKEN'}</Text>
+                        </Box>
+
                         {/* Summary Cards */}
-                        <VStack align="stretch" spacing={2} mb={2} flex="1">
+                        <VStack align="stretch" spacing={4} mb={2} flex="1">
                             {/* Token Details Card */}
                             <Box 
                                 bg="#0a0a0a" 
-                                p={3} 
+                                p={5} 
                                 borderRadius="xl" 
                                 border="1px solid #2a2a2a"
                                 transition="all 0.2s"
                                 _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                             >
-                                <HStack mb={2} spacing={2} align="center">
+                                <HStack mb={3} spacing={2} align="center">
                                     <Box>
                                         {logoPreview ? (
                                             <Box
@@ -1540,7 +1642,7 @@ const Launchpad: React.FC = () => {
                                         <Text color="#4ade80" fontSize="sm" fontWeight="bold">Token Details</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={2} gap={2}>
+                                <SimpleGrid columns={2} gap={4}>
                                     <Box>
                                         <Text color="#888" fontSize="xs">Name</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenName}</Text>
@@ -1571,13 +1673,13 @@ const Launchpad: React.FC = () => {
                             {/* Pool Configuration Card */}
                             <Box 
                                 bg="#0a0a0a" 
-                                p={3} 
+                                p={5} 
                                 borderRadius="xl" 
                                 border="1px solid #2a2a2a"
                                 transition="all 0.2s"
                                 _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                             >
-                                <HStack mb={2} spacing={2}>
+                                <HStack mb={3} spacing={2}>
                                     <Box>
                                         <FaChartLine size={18} color="#4ade80" />
                                     </Box>
@@ -1585,7 +1687,7 @@ const Launchpad: React.FC = () => {
                                         <Text color="#4ade80" fontSize="sm" fontWeight="bold">Pool Configuration</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={2} gap={2}>
+                                <SimpleGrid columns={2} gap={4}>
                                     <Box>
                                         <Text color="#888" fontSize="xs">Floor Price</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{floorPrice} MON</Text>
@@ -1608,7 +1710,10 @@ const Launchpad: React.FC = () => {
                                     <Box>
                                         <Text color="#888" fontSize="xs">Market Cap</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
-                                            ${commify(Number(tokenSupply) * Number(price || 0), 0)}
+                                            {commify(Number(tokenSupply) * Number(price || 0), 0)} MON
+                                        </Text>
+                                        <Text color="#4ade80" fontSize="xs">
+                                            ${commify(Number(tokenSupply) * Number(price || 0) * (monPrice || 3.5), 0)}
                                         </Text>
                                     </Box>
                                 </SimpleGrid>
@@ -1616,13 +1721,13 @@ const Launchpad: React.FC = () => {
                             {/* Project Founder Info */}
                             <Box 
                                 bg="#0a0a0a" 
-                                p={4} 
+                                p={5} 
                                 borderRadius="xl" 
                                 border="1px solid #2a2a2a"
                                 transition="all 0.2s"
                                 _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                             >
-                                <HStack mb={2} spacing={2}>
+                                <HStack mb={3} spacing={2}>
                                     <Box>
                                         <FaUserTie size={18} color="#ff9500" />
                                     </Box>
@@ -1630,21 +1735,21 @@ const Launchpad: React.FC = () => {
                                         <Text color="#ff9500" fontSize="sm" fontWeight="bold">Project Founder</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={2} gap={2}>
+                                <SimpleGrid columns={2} gap={4}>
                                     <Box>
                                         <Text color="#888" fontSize="xs">Your Allocation</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
                                             {presale == "1" 
-                                                ? commify(Number(tokenSupply) * 0.0) + " " + (symbol || 'TOKEN') + " (0%)"
-                                                : commify(Number(tokenSupply) * 0.1) + " " + (symbol || 'TOKEN') + " (10%)"}
+                                                ? commify(Number(tokenSupply) * 0.0) + " " + (tokenSymbol || 'TOKEN') + " (0%)"
+                                                : commify(Number(tokenSupply) * 0.1) + " " + (tokenSymbol || 'TOKEN') + " (10%)"}
                                         </Text>
                                     </Box>
                                     <Box>
                                         <Text color="#888" fontSize="xs">Liquidity Pool</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
                                             {presale == "1" 
-                                                ? commify(Number(tokenSupply) * 0.9) + " " + (symbol || 'TOKEN') + " (90%)"
-                                                : commify(Number(tokenSupply) * 0.9) + " " + (symbol || 'TOKEN') + " (90%)"}
+                                                ? commify(Number(tokenSupply) * 0.9) + " " + (tokenSymbol || 'TOKEN') + " (90%)"
+                                                : commify(Number(tokenSupply) * 0.9) + " " + (tokenSymbol || 'TOKEN') + " (90%)"}
                                         </Text>
                                     </Box>
                                 </SimpleGrid>
@@ -1660,7 +1765,7 @@ const Launchpad: React.FC = () => {
                                     transition="all 0.2s"
                                     _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                                 >
-                                    <HStack mb={2} spacing={2}>
+                                    <HStack mb={3} spacing={2}>
                                         <Box>
                                             <FaWallet size={18} color="#22c55e" />
                                         </Box>
@@ -1668,11 +1773,11 @@ const Launchpad: React.FC = () => {
                                             <Text color="#22c55e" fontSize="sm" fontWeight="bold">Presale Participants</Text>
                                         </Box>
                                     </HStack>
-                                    <SimpleGrid columns={2} gap={2}>
+                                    <SimpleGrid columns={2} gap={4}>
                                         <Box>
                                             <Text color="#888" fontSize="xs">Token Allocation</Text>
                                             <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
-                                                {commify(Number(tokenSupply) * 0.1)} {symbol || 'TOKEN'}
+                                                {commify(Number(tokenSupply) * 0.1)} {tokenSymbol || 'TOKEN'}
                                             </Text>
                                         </Box>
                                         <Box>
@@ -1683,8 +1788,8 @@ const Launchpad: React.FC = () => {
                                 </Box>
                             )}
                             
-                            {/* Presale Configuration Card */}
-                            {presale == "1" && (
+                            {/* Presale Configuration Card - Always show for debugging */}
+                            {true && (
                                 <Box 
                                     bg="#0a0a0a" 
                                     p={4} 
@@ -1693,7 +1798,7 @@ const Launchpad: React.FC = () => {
                                     transition="all 0.2s"
                                     _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                                 >
-                                    <HStack mb={2} spacing={2}>
+                                    <HStack mb={3} spacing={2}>
                                         <Box>
                                             <FaCoins size={18} color="#4ade80" />
                                         </Box>
@@ -1701,14 +1806,23 @@ const Launchpad: React.FC = () => {
                                             <Text color="#4ade80" fontSize="sm" fontWeight="bold">Presale Configuration</Text>
                                         </Box>
                                     </HStack>
-                                    <SimpleGrid columns={2} gap={2}>
+                                    <SimpleGrid columns={2} gap={4}>
                                         <Box>
                                             <Text color="#888" fontSize="xs">Presale Price</Text>
                                             <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(price)} MON</Text>
                                         </Box>
                                         <Box>
                                             <Text color="#888" fontSize="xs">Soft Cap</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(softCap, 0)} MON</Text>
+                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
+                                                {commify(softCap, 0)} MON
+                                            </Text>
+                                            <Text color="#666" fontSize="xs">
+                                                ({((Number(softCap) / (Number(floorPrice) * Number(tokenSupply) * 0.1)) * 100).toFixed(0)}% of hard cap)
+                                            </Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="xs">Hard Cap</Text>
+                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON</Text>
                                         </Box>
                                         <Box>
                                             <Text color="#888" fontSize="xs">Duration</Text>
@@ -1716,20 +1830,85 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                         <Box>
                                             <Text color="#888" fontSize="xs">Tokens for Sale</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(Number(tokenSupply) * 0.1 || 0)} {symbol || 'TOKEN'}</Text>
+                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(Number(tokenSupply) * 0.1 || 0)} {tokenSymbol || 'TOKEN'}</Text>
                                         </Box>
                                     </SimpleGrid>
                                     <Box mt={3} pt={3} borderTop="1px solid #2a2a2a">
                                         <Text color="#888" fontSize="xs" mb={1}>Expected to Raise</Text>
                                         <HStack gap={2} align="baseline">
                                             <Text color="#4ade80" fontSize="lg" fontWeight="bold">
-                                                {commify((Number(tokenSupply) * 0.1 || 0) * (Number(presalePrice) || 0))} MON
+                                                {commify(Number(softCap) || 0)} MON
                                             </Text>
                                             <Text color="#666" fontSize="xs">
-                                                (${commify((Number(tokenSupply) * 0.1 || 0) * (Number(presalePrice) || 0) * 3.5, 0)} at $3.5/MON)
+                                                (${commify((Number(softCap) || 0) * (monPrice || 3.5), 0)})
                                             </Text>
                                         </HStack>
                                     </Box>
+                                </Box>
+                            )}
+                            
+                            {/* Presale Summary Box - Green - Always show for debugging */}
+                            {true && (
+                                <Box 
+                                    mt={4}
+                                    p={4} 
+                                    bg="linear-gradient(135deg, #4ade8015 0%, #22c55e15 100%)" 
+                                    borderRadius="xl" 
+                                    border="1px solid #4ade8040"
+                                    position="relative"
+                                    overflow="hidden"
+                                >
+                                    <Box
+                                        position="absolute"
+                                        top={0}
+                                        left={0}
+                                        bottom={0}
+                                        w="4px"
+                                        bg="#4ade80"
+                                    />
+                                    <VStack align="stretch" gap={3} pl={2}>
+                                        <HStack justify="space-between">
+                                            <Text color="#4ade80" fontSize="sm" fontWeight="bold">Hard Cap (Maximum)</Text>
+                                            <HStack gap={2}>
+                                                <Text color="white" fontSize="lg" fontWeight="bold">
+                                                    {commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON
+                                                </Text>
+                                                <Text color="#666" fontSize="sm">
+                                                    (${commify((Number(floorPrice) * Number(tokenSupply) * 0.1 || 0) * (monPrice || 3.5), 0)})
+                                                </Text>
+                                            </HStack>
+                                        </HStack>
+                                        <HStack justify="space-between">
+                                            <Text color="#4ade80" fontSize="sm" fontWeight="bold">Expected Raise (Soft Cap)</Text>
+                                            <HStack gap={2}>
+                                                <Text color="white" fontSize="lg" fontWeight="bold">
+                                                    {commify(Number(softCap) || 0)} MON
+                                                </Text>
+                                                <Text color="#666" fontSize="sm">
+                                                    (${commify((Number(softCap) || 0) * (monPrice || 3.5), 0)})
+                                                </Text>
+                                            </HStack>
+                                        </HStack>
+                                        <HStack justify="space-between">
+                                            <Text color="#888" fontSize="sm">Floor Liquidity</Text>
+                                            <Text color="#ef4444" fontSize="sm" fontWeight="600">
+                                                -{commify((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
+                                            </Text>
+                                        </HStack>
+                                        <Box borderTop="1px solid #2a2a2a" pt={2}>
+                                            <HStack justify="space-between">
+                                                <Text color="#4ade80" fontSize="sm" fontWeight="bold">Founder Receives</Text>
+                                                <VStack align="end" gap={1}>
+                                                    <Text color="#4ade80" fontSize="lg" fontWeight="bold">
+                                                        {commify(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
+                                                    </Text>
+                                                    <Text color="#666" fontSize="xs">
+                                                        ({((1 - (Number(floorPrice) / Number(presalePrice))) * 100).toFixed(0)}% of raise)
+                                                    </Text>
+                                                </VStack>
+                                            </HStack>
+                                        </Box>
+                                    </VStack>
                                 </Box>
                             )}
                         </VStack>
@@ -1897,7 +2076,7 @@ const Launchpad: React.FC = () => {
                             </VStack>
                             
                             {/* Stats Grid */}
-                            <SimpleGrid columns={2} gap={4} w="100%">
+                            <SimpleGrid columns={2} gap={6} w="100%">
                                 <Box bg="#0a0a0a" p={4} borderRadius="lg" border="1px solid #2a2a2a">
                                     <Text color="#888" fontSize="xs" mb={1}>Supply</Text>
                                     <Text color="white" fontSize="sm" fontWeight="600">
@@ -1913,7 +2092,10 @@ const Launchpad: React.FC = () => {
                                 <Box bg="#0a0a0a" p={4} borderRadius="lg" border="1px solid #2a2a2a">
                                     <Text color="#888" fontSize="xs" mb={1}>Market Cap</Text>
                                     <Text color="white" fontSize="sm" fontWeight="600">
-                                        ${commify(Number(tokenSupply || 0) * Number(price || 0), 0)}
+                                        {commify(Number(tokenSupply || 0) * Number(price || 0), 0)} MON
+                                    </Text>
+                                    <Text color="#4ade80" fontSize="xs">
+                                        ${commify(Number(tokenSupply || 0) * Number(price || 0) * (monPrice || 3.5), 0)}
                                     </Text>
                                 </Box>
                                 <Box bg="#0a0a0a" p={4} borderRadius="lg" border="1px solid #2a2a2a">
