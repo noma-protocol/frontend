@@ -646,6 +646,25 @@ const Stake = () => {
                             </VStack>
                         </Box>
                         
+                        {/* Cooldown Information Box */}
+                        {lastOpTimestamp !== "0" && (
+                            <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
+                                <HStack justify="space-between">
+                                    <Text fontSize="lg" fontWeight="bold" color="white">Cooldown Status</Text>
+                                    <Box>
+                                        {getTimeLeft(lastOpTimestamp, 3) > 0 ? (
+                                            <CountdownTimer
+                                                startTsMs={Number(lastOpTimestamp) * 1000}
+                                                intervalDays={3}
+                                            />
+                                        ) : (
+                                            <Text fontSize="sm" color="#4ade80" fontWeight="500">Ready</Text>
+                                        )}
+                                    </Box>
+                                </HStack>
+                            </Box>
+                        )}
+                        
                         {/* Active Position Box */}
                         {stakedBalance > 0 && (
                             <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>

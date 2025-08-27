@@ -938,12 +938,21 @@ const Exchange: React.FC = () => {
                 const block = await event.getBlock();
                 const timestamp = new Date(block.timestamp * 1000);
                 
-                // Determine if it's a buy or sell based on amounts
-                // If amount0 is negative, token0 is being sold (and token1 bought)
-                // If amount0 is positive, token0 is being bought (and token1 sold)
-                const isBuy = amount0.gt(0);
-                const tokenAmount = isBuy ? amount0.abs() : amount1.abs();
-                const ethAmount = isBuy ? amount1.abs() : amount0.abs();
+                // Determine if it's a buy or sell based on amounts and token positions
+                // Check if our selected token is token0 or token1
+                const isSelectedTokenToken0 = selectedToken?.token0?.toLowerCase() === poolInfo?.token0?.toLowerCase();
+                
+                // If selected token is token0:
+                //   - amount0 > 0 means token0 is flowing IN (we're buying the token)
+                //   - amount0 < 0 means token0 is flowing OUT (we're selling the token)
+                // If selected token is token1:
+                //   - amount1 > 0 means token1 is flowing IN (we're buying the token)
+                //   - amount1 < 0 means token1 is flowing OUT (we're selling the token)
+                const isBuy = isSelectedTokenToken0 ? amount0.gt(0) : amount1.gt(0);
+                
+                // Get the correct amounts based on which token is which
+                const tokenAmount = isSelectedTokenToken0 ? amount0.abs() : amount1.abs();
+                const ethAmount = isSelectedTokenToken0 ? amount1.abs() : amount0.abs();
                 
                 // Calculate price
                 const tokenAmountFormatted = parseFloat(formatEther(tokenAmount));
