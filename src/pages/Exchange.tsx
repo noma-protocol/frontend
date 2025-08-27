@@ -1315,8 +1315,10 @@ const Launchpad: React.FC = () => {
     }, [deployersData]);
     
     const formatPrice = (price) => {
-        if (price < 0.00001) return price.toExponential(2);
-        if (price < 1) return price.toFixed(6);
+        if (price === 0) return '0.00';
+        if (price < 0.000001) return price.toExponential(2);
+        if (price < 0.01) return price.toFixed(6);
+        if (price < 1) return price.toFixed(4);
         return commify(price, 2);
     };
     
@@ -2483,7 +2485,7 @@ const Launchpad: React.FC = () => {
                                                 transition="all 0.2s"
                                             >
                                                 <Text color="white" fontSize="xs" whiteSpace="nowrap">
-                                                    ${formatPrice(token.price)}
+                                                    ${formatPrice(token.price * (monPrice || 0))}
                                                 </Text>
                                             </Table.Cell>
                                             <Table.Cell 
@@ -2555,7 +2557,7 @@ const Launchpad: React.FC = () => {
                                     <Text color="white" fontWeight="bold">{selectedToken.symbol}</Text>
                                 </Box>
                                 <Box>
-                                    <Text color="#888">${formatPrice(selectedToken.price)}</Text>
+                                    <Text color="#888">${formatPrice(selectedToken.price * (monPrice || 0))}</Text>
                                 </Box>
                                 <Box>
                                     <Text color={percentChange > 0 ? "#4ade80" : "#ef4444"} fontSize="sm">
@@ -2579,7 +2581,7 @@ const Launchpad: React.FC = () => {
                                             </Box>
                                             <Box>
                                                 <Text color="white" fontSize={isMobile ? "lg" : "xl"} fontWeight="bold">
-                                                    {spotPrice > 0 ? commifyDecimals(spotPrice, 8) : commifyDecimals(selectedToken.price || 0, 8)}
+                                                    ${commifyDecimals((spotPrice > 0 ? spotPrice : (selectedToken.price || 0)) * (priceUSD || 0), 6)}
                                                 </Text>
                                             </Box>
                                         </HStack>
@@ -2587,13 +2589,8 @@ const Launchpad: React.FC = () => {
                                             <HStack spacing={2} flexWrap="wrap">
                                                 <Box>
                                                     <Text color="#888" fontSize="xs">
-                                                        {selectedToken.symbol}/{token1Symbol}
+                                                        {spotPrice > 0 ? commifyDecimals(spotPrice, 8) : commifyDecimals(selectedToken.price || 0, 8)} {selectedToken.symbol}/{token1Symbol}
                                                     </Text> 
-                                                </Box>
-                                                <Box>
-                                                    <Text color="#888" fontSize="xs">
-                                                        (${commifyDecimals((spotPrice > 0 ? spotPrice : (selectedToken.price || 0)) * (priceUSD || 0), 6)})
-                                                    </Text>
                                                 </Box>
                                                 <Box>
                                                     <HStack spacing={1}>
@@ -3619,7 +3616,7 @@ const Launchpad: React.FC = () => {
                                                 </Box>
                                             </Flex>
                                             <Text color="#666" fontSize="xs" textAlign="right">
-                                                ≈ ${address && selectedToken ? (parseFloat(tokenBalance) * selectedToken.price).toFixed(2) : "0.00"}
+                                                ≈ ${address && selectedToken ? (parseFloat(tokenBalance) * selectedToken.price * (monPrice || 0)).toFixed(2) : "0.00"}
                                             </Text>
                                         </Box>
                                     )}
