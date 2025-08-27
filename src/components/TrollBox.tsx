@@ -32,6 +32,9 @@ interface Message {
     username: string;
     content: string;
   };
+  isTradeAlert?: boolean;
+  isCommand?: boolean;
+  commandType?: string;
 }
 
 let instanceCounter = 0;
@@ -42,6 +45,8 @@ const TrollBox: React.FC = () => {
   
   const { address, isConnected } = useAccount();
   const [prevAddress, setPrevAddress] = useState<string | undefined>(undefined);
+  const [authAttempts, setAuthAttempts] = useState(0);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -66,6 +71,11 @@ const TrollBox: React.FC = () => {
   const [contentLoading, setContentLoading] = useState(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
+  
+  // Admin addresses
+  const ADMIN_ADDRESSES = ['0xcC91EB5D1AB2D577a64ACD71F0AA9C5cAf35D111'];
+  const isAdmin = address && ADMIN_ADDRESSES.includes(address);
   
   // Use the WebSocket hook
   const { 
@@ -81,9 +91,27 @@ const TrollBox: React.FC = () => {
     changeUsername,
     disconnect,
     reconnect,
+    clearAuth,
     error 
   } = useTrollbox();
   
+  // Add authentication timeout
+  useEffect(() => {
+    let authTimeout: NodeJS.Timeout;
+    
+    if (isAuthenticating) {
+      authTimeout = setTimeout(() => {
+        setIsAuthenticating(false);
+        setAuthAttempts(prev => prev + 1);
+        setError('Authentication timed out. Please try again.');
+      }, 30000); // 30 second timeout
+    }
+    
+    return () => {
+      if (authTimeout) clearTimeout(authTimeout);
+    };
+  }, [isAuthenticating]);
+
   // Authenticate when connected and have address
   useEffect(() => {
     // Check if wallet address changed or disconnected
@@ -104,13 +132,29 @@ const TrollBox: React.FC = () => {
     
     setPrevAddress(address);
     
-    if (connected && address && !authenticated) {
+    if (connected && address && !authenticated && !isAuthenticating) {
       // Don't send username on initial auth - let user set it
-      authenticate(address).catch(err => {
-        console.error('Authentication failed:', err);
-      });
+      setIsAuthenticating(true);
+      authenticate(address)
+        .then(() => {
+          setAuthAttempts(0); // Reset attempts on success
+        })
+        .catch(err => {
+          console.error('Authentication failed:', err);
+          setAuthAttempts(prev => {
+            const newAttempts = prev + 1;
+            // Clear auth cache after 3 failed attempts
+            if (newAttempts >= 3 && address) {
+              clearAuth(address);
+            }
+            return newAttempts;
+          });
+        })
+        .finally(() => {
+          setIsAuthenticating(false);
+        });
     }
-  }, [connected, address, authenticated, authenticate, disconnect, prevAddress]);
+  }, [connected, address, authenticated, authenticate, disconnect, prevAddress, isAuthenticating]);
   
   // Update local username when server username changes
   useEffect(() => {
@@ -255,10 +299,84 @@ const TrollBox: React.FC = () => {
     }
   }, [error]);
 
+  // Process slash commands
+  const processSlashCommand = (command: string): boolean => {
+    const parts = command.split(' ');
+    const cmd = parts[0].toLowerCase();
+    
+    switch (cmd) {
+      case '/help':
+        setShowHelp(true);
+        // Hide help after 5 seconds
+        setTimeout(() => setShowHelp(false), 5000);
+        return true;
+        
+      case '/slap':
+        if (parts.length < 2) {
+          setError('Usage: /slap <username>');
+          return true;
+        }
+        const targetUser = parts.slice(1).join(' ');
+        const slapMessage = `*** ${username || 'Anonymous'} slapped ${targetUser} with a large trout ***`;
+        
+        // Send the command to server, it should broadcast the formatted message to all users
+        // For now, send it as a regular message but with the formatted content
+        sendMessage(
+          slapMessage,
+          username || 'Anonymous',
+          undefined
+        );
+        return true;
+        
+      case '/kick':
+        // Admin only command
+        if (!isAdmin) {
+          setError('Only admins can use this command');
+          return true;
+        }
+        
+        if (parts.length < 2) {
+          setError('Usage: /kick <username>');
+          return true;
+        }
+        
+        const kickTarget = parts.slice(1).join(' ');
+        const kickMessage = `*** Admin ${username || 'Anonymous'} has kicked ${kickTarget} from the chat ***`;
+        
+        // Send kick command - the server should handle the actual kicking
+        sendMessage(
+          kickMessage,
+          username || 'Anonymous',
+          undefined
+        );
+        return true;
+        
+      // Add more commands here in the future
+      // case '/hug':
+      // case '/dance':
+      // case '/wave':
+      // case '/highfive':
+        
+      default:
+        return false; // Not a recognized command
+    }
+  };
+
   const handleSendMessage = () => {
     if (!newMessage.trim() || !connected || !authenticated) return;
     
     const messageContent = newMessage.trim();
+    
+    // Check if it's a slash command
+    if (messageContent.startsWith('/')) {
+      const handled = processSlashCommand(messageContent);
+      if (handled) {
+        setNewMessage('');
+        setReplyingTo(null);
+        return;
+      }
+      // If not handled, send as regular message
+    }
     
     // Pass reply data if replying
     sendMessage(
@@ -654,6 +772,62 @@ const TrollBox: React.FC = () => {
       flexDirection="column"
       overflow="hidden"
     >
+      {/* Help Overlay */}
+      {showHelp && (
+        <Box
+          position="absolute"
+          top="0"
+          left="0"
+          right="0"
+          bottom="0"
+          bg="rgba(0, 0, 0, 0.85)"
+          backdropFilter="blur(8px)"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          zIndex={100}
+          borderRadius="lg"
+          onClick={() => setShowHelp(false)}
+        >
+          <Box
+            bg="rgba(26, 26, 26, 0.98)"
+            border="2px solid #ff9500"
+            borderRadius="md"
+            p={5}
+            maxW="280px"
+            onClick={(e) => e.stopPropagation()}
+            boxShadow="0 8px 32px rgba(255, 149, 0, 0.2)"
+          >
+            <VStack align="start" gap={3}>
+              <Text fontSize="md" color="#ff9500" fontWeight="bold">
+                ⚡ Available Commands
+              </Text>
+              <VStack align="start" gap={2} pl={2}>
+                <HStack>
+                  <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/slap</Text>
+                  <Text fontSize="sm" color="white">&lt;user&gt; - Slap someone!</Text>
+                </HStack>
+                <HStack>
+                  <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/help</Text>
+                  <Text fontSize="sm" color="white">- Show this help</Text>
+                </HStack>
+                {isAdmin && (
+                  <HStack>
+                    <Text fontSize="sm" color="#ff9500" fontFamily="monospace">/kick</Text>
+                    <Text fontSize="sm" color="white">&lt;user&gt; - Kick a user (Admin)</Text>
+                  </HStack>
+                )}
+              </VStack>
+              <Text fontSize="xs" color="#666" fontStyle="italic" pt={1}>
+                More commands coming soon...
+              </Text>
+              <Text fontSize="xs" color="#888" pt={2} textAlign="center" w="100%">
+                Click anywhere to close
+              </Text>
+            </VStack>
+          </Box>
+        </Box>
+      )}
       {/* Header */}
       <VStack
         p={3}
@@ -845,11 +1019,18 @@ const TrollBox: React.FC = () => {
           </Text>
         ) : (
           messages.slice(-5).map((msg) => (
-          <Box key={msg.id} mb={1}>
+          <Box 
+            key={msg.id} 
+            mb={1}
+            bg={msg.isTradeAlert ? 'rgba(74, 222, 128, 0.05)' : 'transparent'}
+            borderRadius="md"
+            p={msg.isTradeAlert ? 1 : 0}
+            borderLeft={msg.isTradeAlert ? '2px solid #4ade80' : 'none'}
+          >
             <HStack gap={2} align="flex-start">
               <Box>
                 <Text 
-                  color="#4ade80" 
+                  color={msg.isTradeAlert ? '#ffcc00' : ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? '#ff9500' : '#4ade80'}
                   fontSize="xs" 
                   fontWeight="bold" 
                   minW="60px"
@@ -858,23 +1039,62 @@ const TrollBox: React.FC = () => {
                   textOverflow="ellipsis"
                   whiteSpace="nowrap"
                   title={msg.username}
-                  cursor="pointer"
-                  _hover={{ textDecoration: "underline" }}
-                  onClick={() => handleUsernameClick(msg.username, msg.address)}
+                  cursor={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? 'default' : 'pointer'}
+                  _hover={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? {} : { textDecoration: "underline" }}
+                  onClick={() => !msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && handleUsernameClick(msg.username, msg.address)}
                 >
-                  {msg.username}
+                  {msg.isTradeAlert ? 'System' : (msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked'))) ? 'System' : msg.username}
                 </Text>
               </Box>
               <Box flex="1">
-                <Box color="white" fontSize="xs">
+                {msg.replyTo && (
+                  <Box 
+                    mb={0.5} 
+                    p={1} 
+                    bg="rgba(74, 222, 128, 0.05)" 
+                    borderRadius="md" 
+                    borderLeft="2px solid #4ade80"
+                    fontSize="xs"
+                  >
+                    <HStack gap={1} align="center">
+                      <FiCornerUpRight size={10} color="#4ade80" />
+                      <Text fontSize="xs" color="#4ade80" fontWeight="500">
+                        @{msg.replyTo.username}
+                      </Text>
+                      <Text fontSize="xs" color="#888" noOfLines={1}>
+                        {msg.replyTo.content.length > 30 
+                          ? msg.replyTo.content.substring(0, 30) + '...' 
+                          : msg.replyTo.content}
+                      </Text>
+                    </HStack>
+                  </Box>
+                )}
+                <Box 
+                  color={((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? '#ff9500' : 'white'} 
+                  fontSize="xs"
+                  fontWeight={((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? 'bold' : 'normal'}
+                >
                   {renderMessageContent(msg.content, false)}
                 </Box>
               </Box>
-              <Box>
+              <HStack gap={1}>
+                {!msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && (
+                  <IconButton
+                    aria-label="Reply"
+                    icon={<FiCornerUpRight />}
+                    size="xs"
+                    variant="ghost"
+                    color="#666"
+                    h="20px"
+                    minW="20px"
+                    _hover={{ color: '#4ade80', bg: 'rgba(74, 222, 128, 0.1)' }}
+                    onClick={() => handleReply(msg)}
+                  />
+                )}
                 <Text color="#666" fontSize="xs" flexShrink={0}>
                   {formatTime(msg.timestamp)}
                 </Text>
-              </Box>
+              </HStack>
             </HStack>
           </Box>
         ))
@@ -912,6 +1132,7 @@ const TrollBox: React.FC = () => {
                 </HStack>
               </Box>
             )}
+            {/* Help moved to overlay */}
             <HStack position="relative">
               <Box flex="1" position="relative">
               <Input
@@ -919,7 +1140,7 @@ const TrollBox: React.FC = () => {
                 value={newMessage}
                 onChange={handleInputChange}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Type message..."
+                placeholder="Type message or /help for commands..."
                 bg="#2a2a2a"
                 border="none"
                 color="white"
@@ -1115,7 +1336,7 @@ const TrollBox: React.FC = () => {
         ) : (
           <VStack>
             <Text color="#888" textAlign="center" fontSize="xs">
-              {error || (!connected ? 'Not connected to chat' : 'Authenticating...')}
+              {error || (!connected ? 'Not connected to chat' : isAuthenticating ? 'Authenticating...' : authAttempts > 0 ? 'Authentication failed. Retrying...' : 'Waiting for authentication...')}
             </Text>
             {!connected && (
               <Button
@@ -1162,6 +1383,54 @@ const TrollBox: React.FC = () => {
         zIndex={1000}
         onClick={() => setIsExpanded(false)}
       >
+        {/* Help Overlay for Expanded View */}
+        {showHelp && (
+          <Box
+            position="fixed"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%)"
+            bg="rgba(26, 26, 26, 0.98)"
+            border="2px solid #ff9500"
+            borderRadius="md"
+            p={6}
+            maxW="320px"
+            zIndex={2000}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowHelp(false);
+            }}
+            boxShadow="0 8px 32px rgba(255, 149, 0, 0.3)"
+          >
+            <VStack align="start" gap={3}>
+              <Text fontSize="lg" color="#ff9500" fontWeight="bold">
+                ⚡ Available Commands
+              </Text>
+              <VStack align="start" gap={2} pl={2}>
+                <HStack>
+                  <Text fontSize="md" color="#ff9500" fontFamily="monospace">/slap</Text>
+                  <Text fontSize="md" color="white">&lt;user&gt; - Slap someone!</Text>
+                </HStack>
+                <HStack>
+                  <Text fontSize="md" color="#ff9500" fontFamily="monospace">/help</Text>
+                  <Text fontSize="md" color="white">- Show this help</Text>
+                </HStack>
+                {isAdmin && (
+                  <HStack>
+                    <Text fontSize="md" color="#ff9500" fontFamily="monospace">/kick</Text>
+                    <Text fontSize="md" color="white">&lt;user&gt; - Kick a user (Admin)</Text>
+                  </HStack>
+                )}
+              </VStack>
+              <Text fontSize="sm" color="#666" fontStyle="italic" pt={1}>
+                More commands coming soon...
+              </Text>
+              <Text fontSize="sm" color="#888" pt={2} textAlign="center" w="100%">
+                Click anywhere to close
+              </Text>
+            </VStack>
+          </Box>
+        )}
         <Flex
           position="fixed"
           top="50%"
@@ -1335,11 +1604,18 @@ const TrollBox: React.FC = () => {
               </Flex>
             ) : (
               messages.map((msg) => (
-              <Box key={msg.id} mb={2}>
+              <Box 
+                key={msg.id} 
+                mb={2}
+                bg={msg.isTradeAlert ? 'rgba(74, 222, 128, 0.05)' : 'transparent'}
+                borderRadius="md"
+                p={msg.isTradeAlert ? 2 : 0}
+                borderLeft={msg.isTradeAlert ? '3px solid #4ade80' : 'none'}
+              >
                 <HStack gap={3} align="flex-start">
                   <Box>
                     <Text 
-                      color="#4ade80" 
+                      color={msg.isTradeAlert ? '#ffcc00' : ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? '#ff9500' : '#4ade80'}
                       fontSize="sm" 
                       fontWeight="bold" 
                       minW="80px"
@@ -1348,11 +1624,11 @@ const TrollBox: React.FC = () => {
                       textOverflow="ellipsis"
                       whiteSpace="nowrap"
                       title={msg.username}
-                      cursor="pointer"
-                      _hover={{ textDecoration: "underline" }}
-                      onClick={() => handleUsernameClick(msg.username, msg.address)}
+                      cursor={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? 'default' : 'pointer'}
+                      _hover={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? {} : { textDecoration: "underline" }}
+                      onClick={() => !msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && handleUsernameClick(msg.username, msg.address)}
                     >
-                      {msg.username}
+                      {msg.isTradeAlert ? 'System' : (msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked'))) ? 'System' : msg.username}
                     </Text>
                   </Box>
                   <Box flex="1">
@@ -1377,20 +1653,26 @@ const TrollBox: React.FC = () => {
                         </HStack>
                       </Box>
                     )}
-                    <Box color="white" fontSize="sm">
+                    <Box 
+                      color={((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? '#ff9500' : 'white'} 
+                      fontSize="sm"
+                      fontWeight={((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) ? 'bold' : 'normal'}
+                    >
                       {renderMessageContent(msg.content, true)}
                     </Box>
                   </Box>
                   <HStack>
-                    <IconButton
-                      aria-label="Reply"
-                      icon={<FiCornerUpRight />}
-                      size="xs"
-                      variant="ghost"
-                      color="#666"
-                      _hover={{ color: '#4ade80', bg: 'rgba(74, 222, 128, 0.1)' }}
-                      onClick={() => handleReply(msg)}
-                    />
+                    {!msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked')))) && (
+                      <IconButton
+                        aria-label="Reply"
+                        icon={<FiCornerUpRight />}
+                        size="xs"
+                        variant="ghost"
+                        color="#666"
+                        _hover={{ color: '#4ade80', bg: 'rgba(74, 222, 128, 0.1)' }}
+                        onClick={() => handleReply(msg)}
+                      />
+                    )}
                     <Text color="#666" fontSize="xs" flexShrink={0}>
                       {formatTime(msg.timestamp)}
                     </Text>
@@ -1480,6 +1762,7 @@ const TrollBox: React.FC = () => {
                     </Box>
                   )}
                 </HStack>
+                {/* Help moved to overlay */}
                 {replyingTo && (
                   <Box 
                     p={2} 
@@ -1518,7 +1801,7 @@ const TrollBox: React.FC = () => {
                       value={newMessage}
                       onChange={handleInputChange}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      placeholder="Type your message..."
+                      placeholder="Type your message or /help for commands..."
                       bg="#2a2a2a"
                       border="none"
                       color="white"
@@ -1666,7 +1949,7 @@ const TrollBox: React.FC = () => {
             ) : (
               <VStack gap={3}>
                 <Text color="#888" textAlign="center" fontSize="sm">
-                  {error || (!connected ? 'Not connected to chat server' : 'Authenticating...')}
+                  {error || (!connected ? 'Not connected to chat server' : isAuthenticating ? 'Authenticating...' : authAttempts > 0 ? 'Authentication failed. Retrying...' : 'Waiting for authentication...')}
                 </Text>
                 {!connected && (
                   <Button

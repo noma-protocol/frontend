@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import express from 'express';
 import cors from 'cors';
 import { ethers } from 'ethers';
+import BlockchainMonitor from './blockchainMonitor.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
@@ -418,6 +419,9 @@ const profileStore = new ProfileStore();
 const authStore = new AuthStore();
 const rateLimiter = new RateLimiter();
 
+// Blockchain monitor for trade alerts
+let blockchainMonitor = null;
+
 // Create WebSocket server
 const wss = new WebSocketServer({ port: PORT });
 
@@ -444,6 +448,20 @@ function broadcast(message, excludeClient = null) {
       client.send(messageStr);
     }
   }
+}
+
+// Broadcast trade alert from blockchain monitor
+function broadcastTradeAlert(tradeData) {
+  // Store the trade alert as a message
+  const tradeMessage = {
+    ...tradeData,
+    clientId: 'system',
+    address: 'system'
+  };
+  messageStore.addMessage(tradeMessage);
+  
+  // Broadcast to all clients
+  broadcast(tradeData);
 }
 
 // Broadcast user count update to all clients
@@ -629,16 +647,55 @@ wss.on('connection', (ws, req) => {
           // SECURITY: Always get username from server store, never trust client
           const username = usernameStore.getUsername(ws.address) || 'Anonymous';
           
+          // Check for slash commands
+          let processedContent = message.content.trim();
+          let isCommand = false;
+          let commandType = null;
+          
+          // Handle /help command
+          if (processedContent === '/help' || processedContent === '/commands') {
+            const helpMessage = {
+              id: uuidv4(),
+              type: 'message',
+              content: 'Available commands:\n/slap <username> - Slap another user\n/help - Show this help message',
+              username: 'System',
+              timestamp: new Date().toISOString(),
+              clientId: 'system',
+              address: 'system',
+              isCommand: true,
+              commandType: 'help'
+            };
+            
+            // Send only to the user who requested help
+            ws.send(JSON.stringify(helpMessage));
+            return;
+          }
+          
+          // Handle /slap command
+          if (processedContent.startsWith('/slap ')) {
+            const targetUser = processedContent.substring(6).trim();
+            if (!targetUser) {
+              ws.send(JSON.stringify({ type: 'error', message: 'Usage: /slap <username>' }));
+              return;
+            }
+            
+            processedContent = `${username} has slapped ${targetUser}, what u gonna do about it?`;
+            isCommand = true;
+            commandType = 'slap';
+          }
+          
           // Create chat message with server-verified data only
           const chatMessage = {
             id: uuidv4(),
             type: 'message',
-            content: message.content.trim(),
-            username: username, // Server-verified username
+            content: processedContent,
+            username: isCommand ? 'System' : username, // Use System for commands
             address: ws.address, // Server-stored address from authentication
             timestamp: new Date().toISOString(),
             clientId: clientId,
-            verified: true // Mark as cryptographically verified
+            verified: true, // Mark as cryptographically verified
+            isCommand: isCommand,
+            commandType: commandType
           };
           
           // Handle replies if provided
@@ -766,3 +823,26 @@ app.listen(HTTP_PORT, () => {
 });
 
 console.log(`Trollbox WebSocket server running on port ${PORT}`);
+
+// Initialize blockchain monitor
+if (process.env.ENABLE_BLOCKCHAIN_MONITOR === 'true') {
+  blockchainMonitor = new BlockchainMonitor(broadcastTradeAlert);
+  blockchainMonitor.initialize().then((success) => {
+    if (success) {
+      console.log('Blockchain monitor initialized successfully');
+    } else {
+      console.log('Blockchain monitor initialization failed, will retry...');
+    }
+  });
+} else {
+  console.log('Blockchain monitor disabled. Set ENABLE_BLOCKCHAIN_MONITOR=true to enable.');
+}
+
+// Cleanup on exit
+process.on('SIGINT', () => {
+  console.log('Shutting down...');
+  if (blockchainMonitor) {
+    blockchainMonitor.stopMonitoring();
+  }
+  process.exit();
+});

@@ -14,6 +14,9 @@ interface Message {
     username: string;
     content: string;
   };
+  isTradeAlert?: boolean;
+  isCommand?: boolean;
+  commandType?: string;
 }
 
 interface UseTrollboxReturn {
@@ -24,7 +27,7 @@ interface UseTrollboxReturn {
   canChangeUsername: boolean;
   cooldownRemaining: number;
   userCount: number;
-  sendMessage: (content: string, username?: string, replyTo?: { id: string; username: string; content: string }) => void;
+  sendMessage: (content: string, username?: string, replyTo?: { id: string; username: string; content: string }, commandData?: any) => void;
   authenticate: (address: string, username?: string) => void;
   changeUsername: (username: string) => void;
   disconnect: () => void;
@@ -138,7 +141,36 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
           break;
           
         case 'message':
-          setMessages(prev => [...prev.slice(-99), data]); // Keep last 100 messages
+          // Add isCommand and commandType flags from server
+          const messageData = {
+            ...data,
+            isCommand: data.isCommand || false,
+            commandType: data.commandType || null
+          };
+          setMessages(prev => [...prev.slice(-99), messageData]); // Keep last 100 messages
+          break;
+          
+        case 'command':
+          // Handle command messages from server (like slap results)
+          const commandMessage = {
+            ...data,
+            type: 'message',
+            username: 'System',
+            isCommand: true,
+            commandType: data.commandType || 'command'
+          };
+          setMessages(prev => [...prev.slice(-99), commandMessage]);
+          break;
+          
+        case 'tradeAlert':
+          // Handle trade alert messages (server notices)
+          const tradeMessage = {
+            ...data,
+            type: 'message',
+            username: 'System',
+            isTradeAlert: true
+          };
+          setMessages(prev => [...prev.slice(-99), tradeMessage]);
           break;
           
         case 'error':
@@ -168,7 +200,7 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     };
   }, [wsUrl]);
   
-  const sendMessage = useCallback((content: string, username: string = 'Anonymous', replyTo?: { id: string; username: string; content: string }) => {
+  const sendMessage = useCallback((content: string, username: string = 'Anonymous', replyTo?: { id: string; username: string; content: string }, commandData?: any) => {
     const trimmedContent = content.trim();
     if (!trimmedContent) return;
     
@@ -181,7 +213,8 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
       type: 'message',
       content: trimmedContent,
       username: username.trim() || 'Anonymous',
-      replyTo
+      replyTo,
+      ...commandData // Spread any additional command data
     });
     
     if (!success) {
