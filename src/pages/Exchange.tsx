@@ -110,6 +110,7 @@ import addressesMonad from "../assets/deployment_monad.json";
 import addressesBsc from "../assets/deployment.json";
 import { FaArrowTrendUp, FaArrowTrendDown } from "react-icons/fa6";
 import { LuSearch } from "react-icons/lu";
+import { useMonPrice } from '../contexts/MonPriceContext';
 
 const addresses = config.chain == "local"
   ? addressesLocal
@@ -155,6 +156,7 @@ const localProvider = new providers.JsonRpcProvider(
 const Launchpad: React.FC = () => {
     const { address, isConnected } = useAccount();
     const { selectedToken, setSelectedToken } = useToken();
+    const { monPrice } = useMonPrice();
     const [searchTerm, setSearchTerm] = useState("");
     const [tradeAmount, setTradeAmount] = useState("");
     const [isBuying, setIsBuying] = useState(true);
@@ -1068,23 +1070,8 @@ const Launchpad: React.FC = () => {
                     }
                 }
                 
-                // Fetch USD price for the token1
-                const fetchToken1Price = async () => {
-                    try {
-                        // For now, assume MON price is similar to BNB
-                        // In production, this should query actual price feeds
-                        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd');
-                        const data = await response.json();
-                        if (data.binancecoin && data.binancecoin.usd) {
-                            setPriceUSD(data.binancecoin.usd);
-                        }
-                    } catch (error) {
-                        console.error('Error fetching token1 price:', error);
-                        setPriceUSD(300); // Default fallback price
-                    }
-                };
-                
-                fetchToken1Price();
+                // Set USD price for MON
+                setPriceUSD(monPrice || 0);
             } catch (error) {
                 console.error("Error fetching token info:", error);
                 // Default to ETH if error
@@ -1094,7 +1081,7 @@ const Launchpad: React.FC = () => {
         };
         
         fetchTokenInfo();
-    }, [selectedToken]);
+    }, [selectedToken, monPrice]);
 
     // Update chart annotations when spot price changes
     useEffect(() => {
@@ -2605,7 +2592,7 @@ const Launchpad: React.FC = () => {
                                                 </Box>
                                                 <Box>
                                                     <Text color="#888" fontSize="xs">
-                                                        (${commifyDecimals((spotPrice > 0 ? spotPrice : (selectedToken.price || 0)) * (priceUSD || 0), 2)})
+                                                        (${commifyDecimals((spotPrice > 0 ? spotPrice : (selectedToken.price || 0)) * (priceUSD || 0), 6)})
                                                     </Text>
                                                 </Box>
                                                 <Box>
