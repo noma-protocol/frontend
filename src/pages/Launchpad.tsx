@@ -671,22 +671,23 @@ const Launchpad: React.FC = () => {
                         </HStack>
                     </Box>
                 </Box>
-                <Box flex="1">
-                <SimpleGrid columns={isMobile ? 1 : [1, 1, 2]} gap={6} h="100%" w="100%" minH="650px" sx={{ '& > div': { minHeight: '100%' } }}>
-                    {/* Main Form */}
-                    <Box h="100%" display="flex" flexDirection="column">
-                        {deployStep == 0 ? (
+                <Box flex="1" maxW="1400px" mx="auto" overflow="hidden">
+                <Box display="flex" gap={6} h="calc(100vh - 220px)" maxH="900px">
+                    {/* Main Form - Fixed Width Container */}
+                    <Box w={isMobile ? "100%" : "900px"}>
                         <Box 
                             bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
-                            p={isMobile ? 8 : 10} 
+                            p={isMobile ? 6 : 8} 
                             borderRadius="3xl" 
                             border="1px solid #2a2a2a"
                             boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
                             position="relative"
                             overflow="hidden"
                             h="100%"
+                            display="flex"
+                            flexDirection="column"
                         >
-                            {/* Decorative Element */}
+                            {/* Decorative Top Bar - Same for all steps */}
                             <Box
                                 position="absolute"
                                 top={0}
@@ -696,7 +697,12 @@ const Launchpad: React.FC = () => {
                                 bgGradient="linear(to-r, #4ade80, #22c55e)"
                             />
                             
-                            <HStack mb={4} spacing={4} align="center">
+                            {/* Content Area - Flex to fit */}
+                            <Box flex="1" overflow="hidden" display="flex" flexDirection="column" px={2}>
+                                {deployStep == 0 ? (
+                                <>
+                                {/* Step 0: Token Information Content */}
+                                <HStack mb={4} spacing={4} align="center" mt={2}>
                                 <Box p={3} bg="#4ade8020" borderRadius="xl">
                                     <MdToken size={24} color="#4ade80" />
                                 </Box>
@@ -704,12 +710,10 @@ const Launchpad: React.FC = () => {
                                     <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
                                         Token Information
                                     </Heading>
-                                </Box>
-                                <Box>
                                     <Text color="#888" fontSize="md" mt={1}>Define your token's basic properties</Text>
                                 </Box>
                             </HStack>
-                            <VStack align="stretch" spacing={5} flex="1">
+                            <VStack align="stretch" spacing={3} flex="1" overflow="auto">
                                 <Box>
                                     <HStack mb={2}>
                                         <Box>
@@ -989,80 +993,20 @@ const Launchpad: React.FC = () => {
                                     </HStack>
                                 </Box>
                             )}
-                        
-                        <HStack justify="space-between" mt={4}>
-                            <Box>
-                                <Text color="#666" fontSize="xs">
-                                    Step 1 of 4
-                                </Text>
-                            </Box>
-                            <HStack gap={3}>
-                                {deployStep > 0 && (
-                                    <Button 
-                                        onClick={handleClickBack} 
-                                        bg="transparent"
-                                        border="1px solid #2a2a2a"
-                                        color="white"
-                                        _hover={{ bg: "#1a1a1a", borderColor: "#3a3a3a" }}
-                                        px={6}
-                                        h="45px"
-                                        transition="all 0.2s"
-                                    >
-                                        Back
-                                    </Button>
-                                )}
-                                <Button 
-                                    onClick={handleClickNext} 
-                                    bg="#4ade80" 
-                                    color="black"
-                                    fontWeight="600"
-                                    _hover={{ bg: "#22c55e", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(74, 222, 128, 0.3)" }}
-                                    _active={{ transform: "translateY(0)" }}
-                                    px={8}
-                                    h="45px"
-                                    transition="all 0.2s"
-                                    rightIcon={<FaChartLine />}
-                                >
-                                    Continue
-                                </Button>
-                            </HStack>
-                        </HStack>
-                        </Box>
+                        </>
                     ) : deployStep == 1 ? (
-                        <Box 
-                            bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
-                            p={isMobile ? 8 : 10} 
-                            borderRadius="3xl" 
-                            border="1px solid #2a2a2a"
-                            boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
-                            position="relative"
-                            overflow="hidden"
-                            h="100%"
-                            display="flex"
-                            flexDirection="column"
-                        >
-                            {/* Decorative Element */}
-                            <Box
-                                position="absolute"
-                                top={0}
-                                left={0}
-                                right={0}
-                                h="4px"
-                                bgGradient="linear(to-r, #4ade80, #22c55e)"
-                            />
-                            
+                        <>
+                            {/* Step 1: Pool Configuration Content */}
                             <HStack mb={4} spacing={4} align="center">
                                 <Box p={3} bg="#4ade8020" borderRadius="xl">
                                     <FaChartLine size={24} color="#4ade80" />
                                 </Box>
-                                <HStack>
-                                    <Box>
-                                        <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
-                                            Pool Configuration
-                                        </Heading>
-                                    </Box>
-                                    <Box><Text color="#888" fontSize="md" mt={1}>Set pricing and liquidity parameters</Text></Box>
-                                </HStack>
+                                <Box>
+                                    <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
+                                        Pool Configuration
+                                    </Heading>
+                                    <Text color="#888" fontSize="md" mt={1}>Set pricing and liquidity parameters</Text>
+                                </Box>
                             </HStack>
                         <VStack align="stretch" spacing={5} flex="1">
                             <Box>
@@ -1089,6 +1033,7 @@ const Launchpad: React.FC = () => {
                                         onChange={() => { 
                                             handleSetPrice(event.target.value);
                                         }}
+                                        flex="1"
                                     >
                                         <NumberInputField 
                                             h="50px" 
@@ -1130,6 +1075,7 @@ const Launchpad: React.FC = () => {
                                             setTokenSupply(details.value);
                                             calculateSoftCap();
                                         }}
+                                        flex="1"
                                     >
                                         <NumberInputField 
                                             h="50px" 
@@ -1162,17 +1108,17 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </HStack>
                                     <HStack>
-                                        <Box>
                                 <SelectRoot
                                     collection={assets}
                                     onChange={handleSelectAsset}
+                                    flex="1"
                                 >
                                     <SelectTrigger 
                                         bg="#0a0a0a" 
                                         border="1px solid #2a2a2a" 
                                         color="white" 
                                         h="50px"
-                                        w="240px"
+                                        w="100%"
                                         _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
                                         _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
                                         transition="all 0.2s"
@@ -1210,7 +1156,6 @@ const Launchpad: React.FC = () => {
                                         ))}
                                     </SelectContent>
                                 </SelectRoot>
-                                        </Box>
                                         <Box>
                                             <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
                                                 <Image
@@ -1255,82 +1200,20 @@ const Launchpad: React.FC = () => {
                                 </Box>
                             </HStack>
                         </Box>
-                    
-                    <HStack justify="space-between" mt={4}>
-                        <Box>
-                            <Text color="#666" fontSize="xs">
-                                Step 2 of 4
-                            </Text>
-                        </Box>
-                        <Box>
-                            <HStack gap={3}>
-                            <Button 
-                                onClick={handleClickBack} 
-                                bg="transparent"
-                                border="1px solid #2a2a2a"
-                                color="white"
-                                _hover={{ bg: "#1a1a1a", borderColor: "#3a3a3a" }}
-                                px={6}
-                                h="45px"
-                                transition="all 0.2s"
-                            >
-                                Back
-                            </Button>
-                            <Button 
-                                onClick={handleClickNext} 
-                                bg="#4ade80" 
-                                color="black"
-                                fontWeight="600"
-                                _hover={{ bg: "#22c55e", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(74, 222, 128, 0.3)" }}
-                                _active={{ transform: "translateY(0)" }}
-                                px={8}
-                                h="45px"
-                                transition="all 0.2s"
-                                rightIcon={presale == 0 ? <FaRocket /> : <FaCoins />}
-                            >
-                                Continue
-                            </Button>
-                        </HStack>
-                        </Box>
-                    </HStack>
-                </Box>
+                    </>
                 ) : deployStep == 2 ? (
                     <>
-                    <Box 
-                        bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
-                        p={isMobile ? 8 : 10} 
-                        borderRadius="3xl" 
-                        border="1px solid #2a2a2a"
-                        boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
-                        position="relative"
-                        overflow="hidden"
-                        flex="1"
-                        display="flex"
-                        flexDirection="column"
-                        w="700px"
-                    >
-                        {/* Decorative Element */}
-                        <Box
-                            position="absolute"
-                            top={0}
-                            left={0}
-                            right={0}
-                            h="4px"
-                            bgGradient="linear(to-r, #4ade80, #22c55e)"
-                        />
-                        
+                        {/* Step 2: Presale Configuration Content */}
                         <HStack mb={4} spacing={4} align="center">
-                            <Box p={2} bg="#4ade8020" borderRadius="lg">
+                            <Box p={3} bg="#4ade8020" borderRadius="xl">
                                 <FaCoins size={24} color="#4ade80" />
                             </Box>
-                            <HStack>
-                                <Box>
-                                <Heading as="h3" size="lg" color="white">
+                            <Box>
+                                <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
                                     Presale Configuration
                                 </Heading>
-                                </Box>
-                                <Box><Text color="#888" fontSize="sm">Set up your token presale</Text></Box>
-                            </HStack>
+                                <Text color="#888" fontSize="md" mt={1}>Set up your token presale</Text>
+                            </Box>
                         </HStack>
                         {presale == 1 ? (
                             <VStack align="stretch" spacing={5} flex="1">
@@ -1573,78 +1456,19 @@ const Launchpad: React.FC = () => {
                                 <Text color="#666" fontSize="sm">This token will launch directly without a presale phase</Text>
                             </Box>
                         )}
-                    </Box>
-                    
-                    <HStack justify="space-between" mt={4}>
-                        <Box>
-                            <Text color="#666" fontSize="xs">
-                                Step 3 of 4
-                            </Text>
-                        </Box>
-                        <HStack gap={3}>
-                            <Button 
-                                onClick={handleClickBack} 
-                                bg="transparent"
-                                border="1px solid #2a2a2a"
-                                color="white"
-                                _hover={{ bg: "#1a1a1a", borderColor: "#3a3a3a" }}
-                                px={6}
-                                h="45px"
-                                transition="all 0.2s"
-                            >
-                                Back
-                            </Button>
-                            <Button 
-                                onClick={handleClickNext} 
-                                bg="#4ade80" 
-                                color="black"
-                                fontWeight="600"
-                                _hover={{ bg: "#22c55e", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(74, 222, 128, 0.3)" }}
-                                _active={{ transform: "translateY(0)" }}
-                                px={8}
-                                h="45px"
-                                transition="all 0.2s"
-                                rightIcon={<FaRocket />}
-                            >
-                                Review & Launch
-                            </Button>
-                        </HStack>
-                    </HStack>
                 </>
                 ) : (
-                    <Box h="100%" display="flex" flexDirection="column">
-                    {/* Step 3: Review & Deploy - deployStep should be 3 here */}
-                    <Box 
-                        bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
-                        p={isMobile ? 8 : 10} 
-                        borderRadius="3xl" 
-                        border="1px solid #2a2a2a"
-                        boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
-                        position="relative"
-                        overflow="hidden"
-                        flex="1"
-                        display="flex"
-                        flexDirection="column"
-                    >
-                        {/* Decorative Element */}
-                        <Box
-                            position="absolute"
-                            top={0}
-                            left={0}
-                            right={0}
-                            h="4px"
-                            bgGradient="linear(to-r, #4ade80, #22c55e)"
-                        />
-                        
-                        <HStack mb={2} spacing={3}>
-                            <Box p={2} bg="#4ade8020" borderRadius="lg">
-                                <FaRocket size={20} color="#4ade80" />
+                    <>
+                        {/* Step 3: Review & Deploy */}
+                        <HStack mb={4} spacing={4} align="center">
+                            <Box p={3} bg="#4ade8020" borderRadius="xl">
+                                <FaRocket size={24} color="#4ade80" />
                             </Box>
                             <Box>
-                                <Heading as="h3" size="md" color="white">
+                                <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
                                     Review & Launch
                                 </Heading>
-                                <Text color="#888" fontSize="xs">Confirm your token details before deployment</Text>
+                                <Text color="#888" fontSize="md" mt={1}>Confirm your token details before deployment</Text>
                             </Box>
                         </HStack>
 
@@ -1831,8 +1655,8 @@ const Launchpad: React.FC = () => {
                                 </Box>
                             )}
                             
-                            {/* Presale Configuration Card - Always show for debugging */}
-                            {true && (
+                            {/* Presale Configuration Card */}
+                            {presale == "1" && (
                                 <Box 
                                     bg="#0a0a0a" 
                                     p={4} 
@@ -1890,8 +1714,8 @@ const Launchpad: React.FC = () => {
                                 </Box>
                             )}
                             
-                            {/* Presale Summary Box - Green - Always show for debugging */}
-                            {true && (
+                            {/* Presale Summary Box - Green */}
+                            {presale == "1" && (
                                 <Box 
                                     mt={4}
                                     p={4} 
@@ -1983,13 +1807,49 @@ const Launchpad: React.FC = () => {
                                 </Box>
                             </HStack>
                         </Box>
-                    </Box>
-                    
-                    <HStack justify="space-between" mt={4}>
+                    </>
+                )}
+            </Box>
+            
+            {/* Bottom Navigation - Fixed Position */}
+            <Box borderTop="1px solid #2a2a2a" pt={4} mt="auto">
+                {deployStep == 0 ? (
+                    <HStack justify="space-between">
                         <Box>
-                            <Text color="#666" fontSize="xs">
-                                Final Step
-                            </Text>
+                            <Text color="#666" fontSize="xs">Step 1 of 4</Text>
+                        </Box>
+                        <HStack gap={3}>
+                            {deployStep > 0 && (
+                                <Button 
+                                    onClick={handleClickBack} 
+                                    bg="transparent"
+                                    border="1px solid #2a2a2a"
+                                    color="white"
+                                    _hover={{ bg: "#1a1a1a", borderColor: "#3a3a3a" }}
+                                    px={6}
+                                    h="45px"
+                                >
+                                    Back
+                                </Button>
+                            )}
+                            <Button 
+                                onClick={handleClickNext} 
+                                bg="#4ade80" 
+                                color="black"
+                                fontWeight="600"
+                                _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
+                                px={8}
+                                h="45px"
+                                rightIcon={<FaChartLine />}
+                            >
+                                Continue
+                            </Button>
+                        </HStack>
+                    </HStack>
+                ) : deployStep == 1 ? (
+                    <HStack justify="space-between">
+                        <Box>
+                            <Text color="#666" fontSize="xs">Step 2 of 4</Text>
                         </Box>
                         <HStack gap={3}>
                             <Button 
@@ -2000,7 +1860,68 @@ const Launchpad: React.FC = () => {
                                 _hover={{ bg: "#1a1a1a", borderColor: "#3a3a3a" }}
                                 px={6}
                                 h="45px"
-                                transition="all 0.2s"
+                            >
+                                Back
+                            </Button>
+                            <Button 
+                                onClick={handleClickNext} 
+                                bg="#4ade80" 
+                                color="black"
+                                fontWeight="600"
+                                _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
+                                px={8}
+                                h="45px"
+                                rightIcon={presale == 0 ? <FaRocket /> : <FaCoins />}
+                            >
+                                Continue
+                            </Button>
+                        </HStack>
+                    </HStack>
+                ) : deployStep == 2 ? (
+                    <HStack justify="space-between">
+                        <Box>
+                            <Text color="#666" fontSize="xs">Step 3 of 4</Text>
+                        </Box>
+                        <HStack gap={3}>
+                            <Button 
+                                onClick={handleClickBack} 
+                                bg="transparent"
+                                border="1px solid #2a2a2a"
+                                color="white"
+                                _hover={{ bg: "#1a1a1a", borderColor: "#3a3a3a" }}
+                                px={6}
+                                h="45px"
+                            >
+                                Back
+                            </Button>
+                            <Button 
+                                onClick={handleClickNext} 
+                                bg="#4ade80" 
+                                color="black"
+                                fontWeight="600"
+                                _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
+                                px={8}
+                                h="45px"
+                                rightIcon={<FaRocket />}
+                            >
+                                Review & Launch
+                            </Button>
+                        </HStack>
+                    </HStack>
+                ) : (
+                    <HStack justify="space-between">
+                        <Box>
+                            <Text color="#666" fontSize="xs">Final Step</Text>
+                        </Box>
+                        <HStack gap={3}>
+                            <Button 
+                                onClick={handleClickBack} 
+                                bg="transparent"
+                                border="1px solid #2a2a2a"
+                                color="white"
+                                _hover={{ bg: "#1a1a1a", borderColor: "#3a3a3a" }}
+                                px={6}
+                                h="45px"
                             >
                                 Back
                             </Button>
@@ -2017,26 +1938,25 @@ const Launchpad: React.FC = () => {
                                 bg="#4ade80" 
                                 color="black"
                                 fontWeight="600"
-                                _hover={{ bg: "#22c55e", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(74, 222, 128, 0.3)" }}
-                                _active={{ transform: "translateY(0)" }}
-                                _disabled={{ bg: "#2a2a2a", color: "#666", transform: "none", boxShadow: "none" }}
+                                _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
+                                _disabled={{ bg: "#2a2a2a", color: "#666" }}
                                 px={8}
                                 h="45px"
                                 minW="150px"
-                                transition="all 0.2s"
                                 leftIcon={!deploying && <FaRocket />}
                             >
                                 {deploying ? <><Spinner size="sm" mr={2} /> Deploying...</> : "Deploy Token"}
                             </Button>
                         </HStack>
                     </HStack>
-                </Box>
                 )}
             </Box>
+        </Box>
+    </Box>
             
             {/* Live Preview Card - Desktop Only */}
-            {!isMobile && deployStep != 3 && (
-                <Box h="100%" display="flex" flexDirection="column">
+            {!isMobile && (
+                <Box w="400px">
                     <Box
                         bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
                         p={8}
@@ -2065,10 +1985,7 @@ const Launchpad: React.FC = () => {
                                 <FaInfoCircle size={24} color="#4ade80" />
                             </Box>
                             <Box>
-                                <Text color="white" fontSize="xl" fontWeight="700" letterSpacing="-0.02em">Live Preview</Text>
-                            </Box>
-                            <Box>
-                                <Text color="#888" fontSize="md" mt={1}>Your token visualization</Text>
+                                <Text color="white" fontSize="xl" fontWeight="700" letterSpacing="-0.02em">Preview</Text>
                             </Box>
                         </HStack>
                         
@@ -2178,7 +2095,7 @@ const Launchpad: React.FC = () => {
                     </Box>
                 </Box>
             )}
-            </SimpleGrid>
+            </Box>
             </Box>
             </Box>
             </Box>
