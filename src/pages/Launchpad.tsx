@@ -822,7 +822,7 @@ const Launchpad: React.FC = () => {
                                     </HStack>
 
                                 
-                                <Box>
+                                <Box mt={5}>
                                     <HStack mb={2}>
                                         <Box>
                                             <FaFileAlt size={14} color="#888" />
@@ -858,8 +858,8 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </Box>
 
-                                <SimpleGrid columns={2} gap={6}>
-                                    <Box>
+                                <SimpleGrid columns={2} gap={6} mt={5}>
+                                    <Box >
                                         <HStack mb={2}>
                                             <Box>
                                                 <FaLayerGroup size={14} color="#888" />
@@ -933,7 +933,8 @@ const Launchpad: React.FC = () => {
                                                     <SelectItem 
                                                         item={choice} 
                                                         key={choice.value}
-                                                        _hover={{ bg: "#2a2a2a" }}
+                                                        color="white"
+                                                        _hover={{ bg: "#2a2a2a", color: "white" }}
                                                         _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
                                                     >
                                                         {choice.label}
@@ -942,7 +943,7 @@ const Launchpad: React.FC = () => {
                                             </SelectContent>
                                         </SelectRoot>
                                     </Box>
-                                    <Box>
+                                    <Box mt={5}>
                                         <HStack mb={2}>
                                             <Box>
                                                 <FaImage size={14} color="#888" />
@@ -1049,7 +1050,7 @@ const Launchpad: React.FC = () => {
                                         Pool Configuration
                                     </Heading>
                                 </Box>
-                                <Box>
+                                <Box ml={5}>
                                     <Text color="#888" fontSize="md" mt={1}>Set pricing and liquidity parameters</Text>
                                 </Box>
                             </HStack>
@@ -1152,7 +1153,7 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </HStack>
 
-                                <HStack>
+                                <HStack mt={5}>
                                     <Box w="50%" >
                                         <Box>
                                             <HStack mb={2}>
@@ -1204,7 +1205,8 @@ const Launchpad: React.FC = () => {
                                                             <SelectItem 
                                                                 item={asset} 
                                                                 key={asset.value}
-                                                                _hover={{ bg: "#2a2a2a" }}
+                                                                color="white"
+                                                                _hover={{ bg: "#2a2a2a", color: "white" }}
                                                                 _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
                                                             >
                                                                 {asset.label}
@@ -1256,15 +1258,29 @@ const Launchpad: React.FC = () => {
                                             transition="all 0.2s"
                                             display="flex"
                                             alignItems="center"
+                                            px={4}
+                                            css={{
+                                                '& [data-part="trigger"]': {
+                                                    border: 'none !important',
+                                                    outline: 'none !important',
+                                                    boxShadow: 'none !important'
+                                                },
+                                                '& input, & select, & > div': {
+                                                    border: 'none !important',
+                                                    outline: 'none !important',
+                                                    boxShadow: 'none !important'
+                                                },
+                                                '&:focus-within': {
+                                                    borderColor: '#3a3a3a'
+                                                }
+                                            }}
                                         >
                                             <SelectValueText 
                                                 placeholder="Select protocol"
                                                 color="white"
                                                 fontSize="sm"
                                                 fontWeight="600"
-                                            >
-                                                {selectedProtocol === "uniswap" ? "Uniswap V3" : "PancakeSwap V3"}
-                                            </SelectValueText>
+                                            />
                                         </SelectTrigger>
                                         <SelectContent bg="#1a1a1a" borderColor="#2a2a2a">
                                             {[
@@ -1274,7 +1290,8 @@ const Launchpad: React.FC = () => {
                                                 <SelectItem
                                                     key={protocol.value}
                                                     item={{ value: protocol.value }}
-                                                    _hover={{ bg: protocol.hoverBg }}
+                                                    color="white"
+                                                    _hover={{ bg: protocol.hoverBg, color: "white" }}
                                                 >
                                                     <HStack spacing={2}>
                                                         <Box><Image src={protocol.logo} w="20px" h="20px" /></Box>
@@ -1288,10 +1305,10 @@ const Launchpad: React.FC = () => {
                                 </HStack>
                             </VStack>
                             </Box>
-                            <Box w="100%" h="50%"  mt={"15%"}>
+                            <Box w="100%" h="50%"  mt={"5%"}>
+                            <Heading as="h3">Overview</Heading>
                             {/* Enhanced Info Box */}
                             <Box 
-                                mt={5} 
                                 p={5} 
                                 bg="linear-gradient(135deg, #4ade8010 0%, #22c55e10 100%)" 
                                 borderRadius="xl"
@@ -1409,10 +1426,19 @@ const Launchpad: React.FC = () => {
                                                 display="flex"
                                                 alignItems="center"
                                                 px={4}
-                                                sx={{
-                                                    '& > *': {
+                                                css={{
+                                                    '& [data-part="trigger"]': {
                                                         border: 'none !important',
-                                                        outline: 'none !important'
+                                                        outline: 'none !important',
+                                                        boxShadow: 'none !important'
+                                                    },
+                                                    '& input, & select, & > div': {
+                                                        border: 'none !important',
+                                                        outline: 'none !important',
+                                                        boxShadow: 'none !important'
+                                                    },
+                                                    '&:focus-within': {
+                                                        borderColor: '#3a3a3a'
                                                     }
                                                 }}
                                             >
@@ -1423,7 +1449,8 @@ const Launchpad: React.FC = () => {
                                                     <SelectItem 
                                                         item={choice} 
                                                         key={choice.value}
-                                                        _hover={{ bg: "#2a2a2a" }}
+                                                        color="white"
+                                                        _hover={{ bg: "#2a2a2a", color: "white" }}
                                                         // _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
                                                     >
                                                         {choice.label}
@@ -2187,7 +2214,7 @@ const Launchpad: React.FC = () => {
                                     </Text>
                                 </Box>
                                 <Box bg="#0a0a0a" p={4} borderRadius="lg" border="1px solid #2a2a2a">
-                                    <Text color="#888" fontSize="xs" mb={1}>Initial Price</Text>
+                                    <Text color="#888" fontSize="xs" mb={1}>Presale Price</Text>
                                     <Text color="white" fontSize="sm" fontWeight="600">
                                         {price || "0"} MON
                                     </Text>
