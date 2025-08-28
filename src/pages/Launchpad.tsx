@@ -1308,7 +1308,7 @@ const Launchpad: React.FC = () => {
                                         </Text>
                                     </Box>                                
                                     <Box w="33%">
-                                        <Text color="#888" fontSize="xs" mb={1}>Initial price</Text>
+                                        <Text color="#888" fontSize="xs" mb={1}>Presale price</Text>
                                         <Text color="white" fontSize="lg" fontWeight="bold">
                                             {price || "0"} MON
                                         </Text>
@@ -1689,7 +1689,7 @@ const Launchpad: React.FC = () => {
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{floorPrice} MON</Text>
                                     </Box>
                                     <Box>
-                                        <Text color="#888" fontSize="xs">Initial Price</Text>
+                                        <Text color="#888" fontSize="xs">Presale Price</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{price} MON</Text>
                                     </Box>
                                     <Box>
