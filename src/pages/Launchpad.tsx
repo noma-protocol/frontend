@@ -710,6 +710,8 @@ const Launchpad: React.FC = () => {
                                     <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
                                         Token Information
                                     </Heading>
+                                </Box>
+                                <Box ml={5}>
                                     <Text color="#888" fontSize="md" mt={1}>Define your token's basic properties</Text>
                                 </Box>
                             </HStack>
@@ -1005,6 +1007,8 @@ const Launchpad: React.FC = () => {
                                     <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
                                         Pool Configuration
                                     </Heading>
+                                </Box>
+                                <Box>
                                     <Text color="#888" fontSize="md" mt={1}>Set pricing and liquidity parameters</Text>
                                 </Box>
                             </HStack>
@@ -1370,7 +1374,8 @@ const Launchpad: React.FC = () => {
                                 {/* Presale Summary Box */}
                                 <Box 
                                     mt={4}
-                                    p={4} 
+                                    py={3}
+                                    px={4} 
                                     bg="linear-gradient(135deg, #4ade8015 0%, #22c55e15 100%)" 
                                     borderRadius="xl" 
                                     border="1px solid #4ade8040"
@@ -1386,7 +1391,7 @@ const Launchpad: React.FC = () => {
                                         bg="#4ade80"
                                     />
 
-                                    <SimpleGrid  columns={[2, null, 3]} gap="40px">
+                                    <SimpleGrid  columns={[2, null, 3]} gap="20px">
                                         <Box> <Text color="#4ade80" fontSize="sm" fontWeight="bold">Total Presale Raise</Text> </Box>
                                         <Box> 
 
@@ -1468,6 +1473,8 @@ const Launchpad: React.FC = () => {
                                 <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
                                     Review & Launch
                                 </Heading>
+                            </Box>
+                            <Box>
                                 <Text color="#888" fontSize="md" mt={1}>Confirm your token details before deployment</Text>
                             </Box>
                         </HStack>
@@ -1956,7 +1963,7 @@ const Launchpad: React.FC = () => {
             
             {/* Live Preview Card - Desktop Only */}
             {!isMobile && (
-                <Box w="400px">
+                <Box w="500px">
                     <Box
                         bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
                         p={8}
