@@ -46,10 +46,27 @@ import { Toaster, toaster } from "../components/ui/toaster"
 
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
-import { unCommify, commify, generateBytes32String, getContractAddress } from "../utils";
+import { unCommify, commify, generateBytes32String, getContractAddress, formatNumberPrecise } from "../utils";
 import Logo from "../assets/images/noma_logo_transparent.png";
 import { ethers } from "ethers"; // Import ethers.js
 const { formatEther, parseEther } = ethers.utils;
+
+// Safe parseEther wrapper
+const safeParseEther = (value: any): any => {
+    const num = Number(value);
+    if (isNaN(num) || num < 0) return parseEther("0");
+    
+    // Handle very small numbers and scientific notation
+    if (num < 0.000001) return parseEther("0");
+    
+    // Round to 18 decimal places to avoid floating point errors
+    const rounded = Math.round(num * 1e18) / 1e18;
+    
+    // Format to fixed decimal places, removing trailing zeros
+    const formatted = rounded.toFixed(18).replace(/\.?0+$/, '');
+    
+    return parseEther(formatted);
+};
 
 import { ProgressLabel, ProgressBar, ProgressRoot, ProgressValueText } from "../components/ui/progress"
 import PresaleDetails from "../components/PresaleDetails";
@@ -58,6 +75,8 @@ import { set } from "react-ga";
 import placeholderLogo from "../assets/images/question.svg";
 import wethLogo from "../assets/images/weth.svg";
 import monadLogo from "../assets/images/monad.png";
+import uniswapLogo from "../assets/images/uniswap.png";
+import pancakeLogo from "../assets/images/pancake.png";
 import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
@@ -81,7 +100,7 @@ const Launchpad: React.FC = () => {
     const [tokenSymbol, setTokenSymbol] = useState("");
     const [tokenDescription, setTokenDescription] = useState("");
     const [tokenDecimals, setTokenDecimals] = useState("18");
-    const [tokenSupply, setTokenSupply] = useState("1000000");
+    const [tokenSupply, setTokenSupply] = useState("0");
     const [tokenLogo, setTokenLogo] = useState(null);
     const [logoPreview, setLogoPreview] = useState("");
 
@@ -91,6 +110,7 @@ const Launchpad: React.FC = () => {
 
     const [token1, setToken1] = useState(config.protocolAddresses.WMON || "0x");
     const [feeTier, setFeeTier] = useState(10);
+    const [selectedProtocol, setSelectedProtocol] = useState("uniswap");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [presale, setPresale] = useState("0");
@@ -111,23 +131,23 @@ const Launchpad: React.FC = () => {
         functionName: "deployVault",
         args: [
             {
-                softCap: parseEther(`${softCap}`),
+                softCap: safeParseEther(softCap),
                 deadline: duration,
             },
             {
                 name: tokenName,
                 symbol: tokenSymbol,
                 decimals: tokenDecimals.toString(),
-                initialSupply: parseEther(`${Number(tokenSupply)}`),
-                maxTotalSupply: parseEther(`${Number(tokenSupply)}`),
-                IDOPrice: parseEther(`${Number(price)}`),
-                floorPrice: parseEther(`${Number(floorPrice)}`),
+                initialSupply: safeParseEther(tokenSupply),
+                maxTotalSupply: safeParseEther(tokenSupply),
+                IDOPrice: safeParseEther(price),
+                floorPrice: safeParseEther(floorPrice),
                 token1: token1,
                 feeTier: "3000",
                 presale: presale.toString()
             },
         ],
-        value: parseEther(`${1}`), // 0.1 MON for deployment
+        value: safeParseEther(1), // 1 MON for deployment
         gasLimit: 30000000, // Increase gas limit
         onSuccess(data) {
         console.log(`transaction successful: ${data.hash}`);
@@ -184,7 +204,7 @@ const Launchpad: React.FC = () => {
         } else if (deployStep === 1) {
             // Pool Setup step
             let fieldsCompleted = 0;
-            if (tokenSupply && tokenSupply !== "100" && Number(tokenSupply) > 0) fieldsCompleted++;
+            if (tokenSupply && tokenSupply !== "0" && Number(tokenSupply) > 0) fieldsCompleted++;
             if (price && price !== "0" && Number(price) > 0) fieldsCompleted++;
             if (token1) fieldsCompleted++; // This has a default value, so it's always counted
             stepProgress = (fieldsCompleted / 2) * 25; // Only 2 fields need to be changed
@@ -346,10 +366,10 @@ const Launchpad: React.FC = () => {
     
     const calculateSoftCap = () => {
         // Hard cap = floor price * total supply * 10%
-        const hardCap = floorPrice * tokenSupply * 0.1;
+        const hardCap = Number(floorPrice || 0) * Number(tokenSupply || 0) * 0.1;
         // Soft cap = hard cap * 40% (default)
         const calculatedSoftCap = hardCap * 0.4;
-        setSoftCap(calculatedSoftCap);
+        setSoftCap(String(calculatedSoftCap));
     }
 
     const handleSetPrice = (value) => {
@@ -360,13 +380,15 @@ const Launchpad: React.FC = () => {
     
         // If the input is empty, reset the price and floor price
         if (inputValueStr === "") {
-          setPrice("");
-          setFloorPrice("");
+          setPrice("0");
+          setFloorPrice("0");
+          setPresalePrice("0");
+          calculateSoftCap();
           return;
         }
     
-        if (Number(inputValueStr) < 0.000001) {
-          console.error("Invalid input: Price is too low");
+        if (Number(inputValueStr) < 0) {
+          console.error("Invalid input: Price cannot be negative");
           return;
         }
     
@@ -438,7 +460,7 @@ const Launchpad: React.FC = () => {
 
         if (event.target.value != "") {
             const targetValue = unCommify(event.target.value);
-            console.log(`Setting soft cap to ${parseEther(`${targetValue}`)}`);
+            console.log(`Setting soft cap to ${targetValue}`);
             setSoftCap(targetValue);
         }
     }
@@ -482,17 +504,17 @@ const Launchpad: React.FC = () => {
 
         console.log( [
             {
-                softCap: parseEther(`${softCap}`),
+                softCap: safeParseEther(softCap),
                 deadline: duration,
             },
             {
             name: tokenName,
             symbol: tokenSymbol,
             decimals: tokenDecimals.toString(),
-            totalSupply: parseEther(`${Number(tokenSupply)}`),
-            maxTotalSupply: parseEther(`${Number(tokenSupply)}`),
-            IDOPrice: parseEther(`${Number(price)}`),
-            floorPrice: parseEther(`${Number(floorPrice)}`),
+            totalSupply: safeParseEther(tokenSupply),
+            maxTotalSupply: parseEther(`${Math.floor(Number(tokenSupply) || 0)}`),
+            IDOPrice: safeParseEther(price),
+            floorPrice: safeParseEther(floorPrice),
             token1: token1,
             feeTier: "3000",
             presale: presale.toString()
@@ -1024,20 +1046,15 @@ const Launchpad: React.FC = () => {
                                 </HStack>
                                 <HStack>
                                     <NumberInputRoot
-                                        defaultValue={0.001}
-                                        step={Number(0.001)}
-                                        min={0.001}
-                                        customStep={0.001}
-                                        type="price"
-                                        setPrice={setPrice}
-                                        setFloorPrice={setFloorPrice}
-                                        setSupply={null}
-                                        targetValue={Number(0.001)}
-                                        value={floorPrice}
-                                        onChange={() => { 
-                                            handleSetPrice(event.target.value);
+                                        defaultValue={0}
+                                        step={0.001}
+                                        min={0}
+                                        value={floorPrice || "0"}
+                                        onValueChange={(details) => { 
+                                            handleSetPrice(details.value || "0");
                                         }}
                                         flex="1"
+                                        allowDecimal={true}
                                     >
                                         <NumberInputField 
                                             h="50px" 
@@ -1071,12 +1088,20 @@ const Launchpad: React.FC = () => {
                                 </HStack>
                                 <HStack>
                                     <NumberInputRoot
-                                        min={100}
+                                        min={0}
                                         max={10e27}
-                                        value={tokenSupply}
+                                        value={tokenSupply || "0"}
+                                        defaultValue={0}
+                                        step={1}
+                                        allowDecimal={false}
                                         onValueChange={(details) => {
                                             console.log("Token Supply: ", details.value);
-                                            setTokenSupply(details.value);
+                                            if (details.value === "" || details.value === undefined) {
+                                                setTokenSupply("0");
+                                            } else {
+                                                const intValue = Math.floor(Number(details.value) || 0);
+                                                setTokenSupply(String(intValue));
+                                            }
                                             calculateSoftCap();
                                         }}
                                         flex="1"
@@ -1172,6 +1197,51 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                     </HStack>
                              </Box>
+
+                            <Box>
+                                <HStack mb={2}>
+                                    <Box>
+                                        <FaLayerGroup size={14} color="#888" />
+                                    </Box>
+                                    <Box>
+                                        <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Protocol</Text>
+                                    </Box>
+                                </HStack>
+                                <HStack spacing={4}>
+                                    <Box
+                                        flex={1}
+                                        p={4}
+                                        bg={selectedProtocol === "uniswap" ? "rgba(255, 0, 122, 0.1)" : "#0a0a0a"}
+                                        border={`2px solid ${selectedProtocol === "uniswap" ? "#FF007A" : "#2a2a2a"}`}
+                                        borderRadius="lg"
+                                        cursor="pointer"
+                                        transition="all 0.2s"
+                                        _hover={{ borderColor: "#FF007A", bg: "rgba(255, 0, 122, 0.05)" }}
+                                        onClick={() => setSelectedProtocol("uniswap")}
+                                    >
+                                        <VStack spacing={3}>
+                                            <Image src={uniswapLogo} w="40px" h="40px" />
+                                            <Text color="white" fontSize="sm" fontWeight="600">Uniswap V3</Text>
+                                        </VStack>
+                                    </Box>
+                                    <Box
+                                        flex={1}
+                                        p={4}
+                                        bg={selectedProtocol === "pancakeswap" ? "rgba(255, 178, 55, 0.1)" : "#0a0a0a"}
+                                        border={`2px solid ${selectedProtocol === "pancakeswap" ? "#FFB237" : "#2a2a2a"}`}
+                                        borderRadius="lg"
+                                        cursor="pointer"
+                                        transition="all 0.2s"
+                                        _hover={{ borderColor: "#FFB237", bg: "rgba(255, 178, 55, 0.05)" }}
+                                        onClick={() => setSelectedProtocol("pancakeswap")}
+                                    >
+                                        <VStack spacing={3}>
+                                            <Image src={pancakeLogo} w="40px" h="40px" />
+                                            <Text color="white" fontSize="sm" fontWeight="600">PancakeSwap V3</Text>
+                                        </VStack>
+                                    </Box>
+                                </HStack>
+                            </Box>
                            
                         </VStack>
                         
@@ -1196,10 +1266,10 @@ const Launchpad: React.FC = () => {
                                 <Box>
                                     <Text color="#888" fontSize="xs" mb={1}>Market Cap</Text>
                                     <Text color="white" fontSize="lg" fontWeight="bold">
-                                        {commify(Number(tokenSupply) * Number(price || 0), 4)} MON
+                                        {formatNumberPrecise(Number(tokenSupply) * Number(price || 0))} MON
                                     </Text>
                                     <Text color="#4ade80" fontSize="sm">
-                                        ${commify(Number(tokenSupply) * Number(price || 0) * (monPrice), 4)}
+                                        ${formatNumberPrecise(Number(tokenSupply) * Number(price || 0) * (monPrice))}
                                     </Text>
                                 </Box>
                             </HStack>
@@ -1216,6 +1286,8 @@ const Launchpad: React.FC = () => {
                                 <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
                                     Presale Configuration
                                 </Heading>
+                            </Box>
+                            <Box>
                                 <Text color="#888" fontSize="md" mt={1}>Set up your token presale</Text>
                             </Box>
                         </HStack>
@@ -1266,7 +1338,7 @@ const Launchpad: React.FC = () => {
                                             border="1px solid #2a2a2a"
                                             color="#666"
                                             h="50px"
-                                            value={commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)}
+                                            value={commify((Number(floorPrice || 0) * Number(tokenSupply || 0) * 0.1), 0)}
                                             disabled={true}
                                             _disabled={{ bg: "#0a0a0a", color: "#666", cursor: "not-allowed" }}
                                             transition="all 0.2s"
@@ -1401,12 +1473,12 @@ const Launchpad: React.FC = () => {
                                             <VStack align="end">
                                                 <Box>
                                                     <Text color="white" fontSize="lg" fontWeight="bold">
-                                                        {commify(Number(softCap) || 0)} MON
+                                                        {formatNumberPrecise(Number(softCap) || 0)} MON
                                                     </Text>    
                                                 </Box>
                                                 <Box>
                                                     <Text color="#666" fontSize="sm">
-                                                        (${commify((Number(softCap) || 0) * monPrice, 0)})
+                                                        (${formatNumberPrecise((Number(softCap) || 0) * monPrice)})
                                                     </Text>                                                      
                                                 </Box>
                                             </VStack>                                         
@@ -1419,7 +1491,7 @@ const Launchpad: React.FC = () => {
                                              <VStack align="end">
                                                 <Box>
                                                 <Text color="white" fontSize="sm" fontWeight="600">
-                                                    {commify((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
+                                                    {formatNumberPrecise((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
                                                 </Text>   
                                                 </Box>
                                                 <Box>
@@ -1439,12 +1511,12 @@ const Launchpad: React.FC = () => {
                                              <VStack align="end">
                                                 <Box>
                                                 <Text color="white" fontSize="sm" fontWeight="600">
-                                                     {commify(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
+                                                     {formatNumberPrecise(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
                                                 </Text>   
                                                 </Box>
                                                 <Box>
                                                 <Text color="#666" fontSize="sm">
-                                                        (${commify((Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice))) * monPrice, 0)})
+                                                        (${formatNumberPrecise((Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice))) * monPrice)})
                                                 </Text> 
                                                 </Box>
                                             </VStack>    
@@ -1561,7 +1633,7 @@ const Launchpad: React.FC = () => {
                                         <Text color="#4ade80" fontSize="sm" fontWeight="bold">Pool Configuration</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={2} gap={4}>
+                                <SimpleGrid columns={3} gap={4}>
                                     <Box>
                                         <Text color="#888" fontSize="xs">Floor Price</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{floorPrice} MON</Text>
@@ -1589,6 +1661,20 @@ const Launchpad: React.FC = () => {
                                         <Text color="#4ade80" fontSize="xs">
                                             ${commify(Number(tokenSupply) * Number(price || 0) * (monPrice || 3.5), 0)}
                                         </Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="#888" fontSize="xs">Protocol</Text>
+                                        <HStack spacing={1}>
+                                            <Image 
+                                                w="16px" 
+                                                h="16px" 
+                                                src={selectedProtocol === "uniswap" ? uniswapLogo : pancakeLogo} 
+                                                alt={selectedProtocol} 
+                                            />
+                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
+                                                {selectedProtocol === "uniswap" ? "Uniswap V3" : "PancakeSwap V3"}
+                                            </Text>
+                                        </HStack>
                                     </Box>
                                 </SimpleGrid>
                             </Box>
@@ -1711,10 +1797,10 @@ const Launchpad: React.FC = () => {
                                         <Text color="#888" fontSize="xs" mb={1}>Expected to Raise</Text>
                                         <HStack gap={2} align="baseline">
                                             <Text color="#4ade80" fontSize="lg" fontWeight="bold">
-                                                {commify(Number(softCap) || 0)} MON
+                                                {formatNumberPrecise(Number(softCap) || 0)} MON
                                             </Text>
                                             <Text color="#666" fontSize="xs">
-                                                (${commify((Number(softCap) || 0) * (monPrice || 3.5), 0)})
+                                                (${formatNumberPrecise((Number(softCap) || 0) * (monPrice || 3.5))})
                                             </Text>
                                         </HStack>
                                     </Box>
@@ -1745,10 +1831,10 @@ const Launchpad: React.FC = () => {
                                             <Text color="#4ade80" fontSize="sm" fontWeight="bold">Hard Cap (Maximum)</Text>
                                             <HStack gap={2}>
                                                 <Text color="white" fontSize="lg" fontWeight="bold">
-                                                    {commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON
+                                                    {formatNumberPrecise(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0)} MON
                                                 </Text>
                                                 <Text color="#666" fontSize="sm">
-                                                    (${commify((Number(floorPrice) * Number(tokenSupply) * 0.1 || 0) * (monPrice || 3.5), 0)})
+                                                    (${formatNumberPrecise((Number(floorPrice) * Number(tokenSupply) * 0.1 || 0) * (monPrice || 3.5))})
                                                 </Text>
                                             </HStack>
                                         </HStack>
@@ -1756,17 +1842,17 @@ const Launchpad: React.FC = () => {
                                             <Text color="#4ade80" fontSize="sm" fontWeight="bold">Expected Raise (Soft Cap)</Text>
                                             <HStack gap={2}>
                                                 <Text color="white" fontSize="lg" fontWeight="bold">
-                                                    {commify(Number(softCap) || 0)} MON
+                                                    {formatNumberPrecise(Number(softCap) || 0)} MON
                                                 </Text>
                                                 <Text color="#666" fontSize="sm">
-                                                    (${commify((Number(softCap) || 0) * (monPrice || 3.5), 0)})
+                                                    (${formatNumberPrecise((Number(softCap) || 0) * (monPrice || 3.5))})
                                                 </Text>
                                             </HStack>
                                         </HStack>
                                         <HStack justify="space-between">
                                             <Text color="#888" fontSize="sm">Floor Liquidity</Text>
                                             <Text color="white" fontSize="sm" fontWeight="600">
-                                                {commify((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
+                                                {formatNumberPrecise((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
                                             </Text>
                                         </HStack>
                                         <Box borderTop="1px solid #2a2a2a" pt={2}>
@@ -1774,7 +1860,7 @@ const Launchpad: React.FC = () => {
                                                 <Text color="#4ade80" fontSize="sm" fontWeight="bold">Founder Receives</Text>
                                                 <VStack align="end" gap={1}>
                                                     <Text color="#4ade80" fontSize="lg" fontWeight="bold">
-                                                        {commify(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
+                                                        {formatNumberPrecise(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
                                                     </Text>
                                                     <Text color="#666" fontSize="xs">
                                                         ({((1 - (Number(floorPrice) / Number(presalePrice))) * 100).toFixed(0)}% of raise)
@@ -2047,7 +2133,7 @@ const Launchpad: React.FC = () => {
                                 <Box bg="#0a0a0a" p={4} borderRadius="lg" border="1px solid #2a2a2a">
                                     <Text color="#888" fontSize="xs" mb={1}>Supply</Text>
                                     <Text color="white" fontSize="sm" fontWeight="600">
-                                        {tokenSupply ? commify(tokenSupply, 0) : "0"}
+                                        {tokenSupply ? formatNumberPrecise(Number(tokenSupply)) : "0"}
                                     </Text>
                                 </Box>
                                 <Box bg="#0a0a0a" p={4} borderRadius="lg" border="1px solid #2a2a2a">
@@ -2059,10 +2145,10 @@ const Launchpad: React.FC = () => {
                                 <Box bg="#0a0a0a" p={4} borderRadius="lg" border="1px solid #2a2a2a">
                                     <Text color="#888" fontSize="xs" mb={1}>Market Cap</Text>
                                     <Text color="white" fontSize="sm" fontWeight="600">
-                                        {commify(Number(tokenSupply || 0) * Number(price || 0), 0)} MON
+                                        {formatNumberPrecise(Number(tokenSupply || 0) * Number(price || 0))} MON
                                     </Text>
                                     <Text color="#4ade80" fontSize="xs">
-                                        ${commify(Number(tokenSupply || 0) * Number(price || 0) * (monPrice || 3.5), 0)}
+                                        ${formatNumberPrecise(Number(tokenSupply || 0) * Number(price || 0) * (monPrice || 3.5))}
                                     </Text>
                                 </Box>
                                 <Box bg="#0a0a0a" p={4} borderRadius="lg" border="1px solid #2a2a2a">
