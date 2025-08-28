@@ -101,7 +101,7 @@ const Launchpad: React.FC = () => {
     const [isSecondSel, setIsSecondSel] = useState(false);
     const [isThirdSel, setIsThirdSel] = useState(false);
     const [isFourthSel, setIsFourthSel] = useState(false);
-
+ 
     const { 
         isLoading: deploying, 
         write: deployVault 
@@ -1367,6 +1367,39 @@ const Launchpad: React.FC = () => {
                                 <Box>
                                     <HStack mb={2}>
                                         <Box>
+                                            <FaCoins size={14} color="#888" />
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Hard Cap (MON)</Text>
+                                        </Box>
+                                    </HStack>
+                                    <HStack>
+                                        <Input
+                                            bg="#0a0a0a"
+                                            border="1px solid #2a2a2a"
+                                            color="#666"
+                                            h="50px"
+                                            value={commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)}
+                                            disabled={true}
+                                            _disabled={{ bg: "#0a0a0a", color: "#666", cursor: "not-allowed" }}
+                                            transition="all 0.2s"
+                                        />
+                                        <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
+                                            <Image
+                                                w="24px"
+                                                h="24px"
+                                                src={monadLogo}
+                                                alt="MON"
+                                            />
+                                        </Box>
+                                    </HStack>
+                                    <Text color="#666" fontSize="xs" mt={1}>
+                                        Maximum amount that can be raised in presale
+                                    </Text>
+                                </Box>
+                                <Box>
+                                    <HStack mb={2}>
+                                        <Box>
                                             <FaWallet size={14} color="#888" />
                                         </Box>
                                         <Box>
@@ -1397,6 +1430,9 @@ const Launchpad: React.FC = () => {
                                             />
                                         </Box>
                                     </HStack>
+                                    <Text color="#666" fontSize="xs" mt={1}>
+                                        Minimum amount to be raised ({((Number(softCap) / (Number(floorPrice) * Number(tokenSupply) * 0.1)) * 100).toFixed(0)}% of hard cap)
+                                    </Text>
                                 </Box>                                
                                 <Box>
                                     <HStack mb={2}>
@@ -1413,7 +1449,7 @@ const Launchpad: React.FC = () => {
                                         value={duration}
                                     >
                                         <SelectTrigger 
-                                            w="95%"
+                                            w="91%"
                                             bg="#0a0a0a" 
                                             border="1px solid #2a2a2a" 
                                             color="white" 
@@ -1439,7 +1475,7 @@ const Launchpad: React.FC = () => {
                                                     item={choice} 
                                                     key={choice.value}
                                                     _hover={{ bg: "#2a2a2a" }}
-                                                    _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                                    // _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
                                                 >
                                                     {choice.label}
                                                 </SelectItem>
@@ -1466,52 +1502,66 @@ const Launchpad: React.FC = () => {
                                         w="4px"
                                         bg="#4ade80"
                                     />
-                                    <VStack align="stretch" gap={4} pl={2}>
-                                        <HStack justify="space-between">
-                                            <Box> <Text color="#4ade80" fontSize="sm" fontWeight="bold">Total Presale Raise</Text></Box>
-                                            <Box>
-                                            <HStack gap={2}>
+
+                                    <SimpleGrid  columns={[2, null, 3]} gap="40px">
+                                        <Box> <Text color="#4ade80" fontSize="sm" fontWeight="bold">Total Presale Raise</Text> </Box>
+                                        <Box> 
+
+                                     
+                                        </Box>
+                                        <Box> 
+                                            <VStack align="end">
                                                 <Box>
-                                                <Text color="white" fontSize="lg" fontWeight="bold">
-                                                    {commify(Number(softCap) || 0)} MON
-                                                </Text>                                                    
+                                                    <Text color="white" fontSize="lg" fontWeight="bold">
+                                                        {commify(Number(softCap) || 0)} MON
+                                                    </Text>    
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#666" fontSize="sm">
+                                                        (${commify((Number(softCap) || 0) * monPrice, 0)})
+                                                    </Text>                                                      
+                                                </Box>
+                                            </VStack>                                         
+                                        </Box>
+                                        <Box> <Text color="#888" fontSize="sm">Floor Liquidity</Text> </Box>
+                                        <Box> 
+
+                                        </Box>
+                                        <Box> 
+                                             <VStack align="end">
+                                                <Box>
+                                                <Text color="white" fontSize="sm" fontWeight="600">
+                                                    {commify((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
+                                                </Text>   
                                                 </Box>
                                                 <Box>
                                                 <Text color="#666" fontSize="sm">
-                                                    (${commify((Number(softCap) || 0) * 3.5, 0)})
-                                                </Text>                                                    
+                                                    (${commify((Number(softCap) || 0) * monPrice, 0)})
+                                                </Text> 
                                                 </Box>
-                                            </HStack>                                                
-                                            </Box>
-                                        </HStack>
-                                        <HStack justify="space-between">
-                                            <Box><Text color="#888" fontSize="sm">Floor Liquidity</Text></Box>
-                                            <Box>
-                                            <Text color="#ef4444" fontSize="sm" fontWeight="600">
-                                                -{commify((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
-                                            </Text>                                                
-                                            </Box>
-                                        </HStack>
-                                        <Box borderTop="1px solid #2a2a2a" pt={2}>
-                                            <HStack justify="space-between">
-                                               <Box> <Text color="#4ade80" fontSize="sm" fontWeight="bold">Founder Receives</Text></Box>
-                                               <Box>
-                                                <VStack align="end" gap={1}>
-                                                    <Box>
-                                                    <Text color="#4ade80" fontSize="lg" fontWeight="bold">
-                                                        {commify(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
-                                                    </Text>                                                        
-                                                    </Box>
-                                                    <Box>
-                                                    <Text color="#666" fontSize="xs">
-                                                        ({((1 - (Number(floorPrice) / Number(presalePrice))) * 100).toFixed(0)}% of raise)
-                                                    </Text>                                                        
-                                                    </Box>
-                                                </VStack>
-                                                </Box>
-                                            </HStack>
+                                            </VStack>                                           
                                         </Box>
-                                    </VStack>
+                                        <Box>
+                                            <Text color="#4ade80" fontSize="sm" fontWeight="bold">Founder Receives</Text>
+                                        </Box>
+                                        <Box>
+
+                                        </Box>
+                                        <Box>
+                                             <VStack align="end">
+                                                <Box>
+                                                <Text color="white" fontSize="sm" fontWeight="600">
+                                                     {commify(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
+                                                </Text>   
+                                                </Box>
+                                                <Box>
+                                                <Text color="#666" fontSize="sm">
+                                                        (${commify((Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice))) * monPrice, 0)})
+                                                </Text> 
+                                                </Box>
+                                            </VStack>    
+                                        </Box>
+                                    </SimpleGrid>
                                 </Box>
                             </VStack>
                         ) : (
@@ -1597,13 +1647,6 @@ const Launchpad: React.FC = () => {
                                 <Text color="#888" fontSize="xs">Confirm your token details before deployment</Text>
                             </Box>
                         </HStack>
-
-                        {/* Debug Info - Remove this in production */}
-                        <Box mb={2} p={2} bg="orange.900" borderRadius="md">
-                            <Text fontSize="xs" color="white">DEBUG: Presale = "{presale}" (should be "1" for presale enabled)</Text>
-                            <Text fontSize="xs" color="white">Hard Cap Formula: {floorPrice} × {tokenSupply} × 0.1 = {commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON</Text>
-                            <Text fontSize="xs" color="white">Token Symbol: {tokenSymbol || 'TOKEN'}</Text>
-                        </Box>
 
                         {/* Summary Cards */}
                         <VStack align="stretch" spacing={4} mb={2} flex="1">
@@ -1812,6 +1855,10 @@ const Launchpad: React.FC = () => {
                                             <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(price)} MON</Text>
                                         </Box>
                                         <Box>
+                                            <Text color="#888" fontSize="xs">Hard Cap</Text>
+                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON</Text>
+                                        </Box>
+                                        <Box>
                                             <Text color="#888" fontSize="xs">Soft Cap</Text>
                                             <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
                                                 {commify(softCap, 0)} MON
@@ -1819,10 +1866,6 @@ const Launchpad: React.FC = () => {
                                             <Text color="#666" fontSize="xs">
                                                 ({((Number(softCap) / (Number(floorPrice) * Number(tokenSupply) * 0.1)) * 100).toFixed(0)}% of hard cap)
                                             </Text>
-                                        </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="xs">Hard Cap</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON</Text>
                                         </Box>
                                         <Box>
                                             <Text color="#888" fontSize="xs">Duration</Text>
@@ -1891,8 +1934,8 @@ const Launchpad: React.FC = () => {
                                         </HStack>
                                         <HStack justify="space-between">
                                             <Text color="#888" fontSize="sm">Floor Liquidity</Text>
-                                            <Text color="#ef4444" fontSize="sm" fontWeight="600">
-                                                -{commify((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
+                                            <Text color="white" fontSize="sm" fontWeight="600">
+                                                {commify((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
                                             </Text>
                                         </HStack>
                                         <Box borderTop="1px solid #2a2a2a" pt={2}>
