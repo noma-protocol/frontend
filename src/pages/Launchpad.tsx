@@ -753,71 +753,74 @@ const Launchpad: React.FC = () => {
                                 </Box>
                             </HStack>
                             <VStack align="stretch" spacing={3} flex="1" overflow="auto">
-                                <Box>
-                                    <HStack mb={2}>
-                                        <Box>
-                                            <FaTag size={14} color="#888" />
-                                        </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Token Name</Text>
-                                        </Box>
-                                    </HStack>
-                                    <Box position="relative">
-                                        <Input
-                                            bg="#0a0a0a"
-                                            border="1px solid #2a2a2a"
-                                            color="white"
-                                            placeholder="e.g. Noma Token"
-                                            h="50px"
-                                            pl={4}
-                                            pr={tokenName ? 12 : 4}
-                                            _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                            _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
-                                            _placeholder={{ color: "#666" }}
-                                            onChange={handleSetTokenName}
-                                            value={tokenName}
-                                            transition="all 0.2s"
-                                        />
-                                        {tokenName && (
-                                            <Box position="absolute" right={3} top="50%" transform="translateY(-50%)">
-                                                <FaCheckCircle size={16} color="#4ade80" />
+                                    <HStack>
+                                    <Box w="50%">
+                                        <HStack mb={2}>
+                                            <Box>
+                                                <FaTag size={14} color="#888" />
                                             </Box>
-                                        )}
-                                    </Box>
-                                </Box>
-                                <Box>
-                                    <HStack mb={2}>
-                                        <Box>
-                                            <MdToken size={14} color="#888" />
-                                        </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Token Symbol</Text>
-                                        </Box>
-                                    </HStack>
-                                    <Box position="relative">
-                                        <Input
-                                            bg="#0a0a0a"
-                                            border="1px solid #2a2a2a"
-                                            color="white"
-                                            placeholder="e.g. NOMA"
-                                            h="50px"
-                                            pl={4}
-                                            pr={tokenSymbol ? 12 : 4}
-                                            _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                            _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
-                                            _placeholder={{ color: "#666" }}
-                                            onChange={handleSetTokenSymbol}
-                                            value={tokenSymbol}
-                                            textTransform="uppercase"
-                                            transition="all 0.2s"
-                                        />
-                                        {tokenSymbol && (
-                                            <Box position="absolute" right={3} top="50%" transform="translateY(-50%)">
-                                                <FaCheckCircle size={16} color="#4ade80" />
+                                            <Box>
+                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Token Name</Text>
                                             </Box>
-                                        )}
-                                    </Box>
-                                </Box>
+                                        </HStack>
+                                        <Box position="relative">
+                                            <Input
+                                                bg="#0a0a0a"
+                                                border="1px solid #2a2a2a"
+                                                color="white"
+                                                placeholder="e.g. Noma Token"
+                                                h="50px"
+                                                pl={4}
+                                                pr={tokenName ? 12 : 4}
+                                                _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
+                                                _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
+                                                _placeholder={{ color: "#666" }}
+                                                onChange={handleSetTokenName}
+                                                value={tokenName}
+                                                transition="all 0.2s"
+                                            />
+                                            {tokenName && (
+                                                <Box position="absolute" right={3} top="50%" transform="translateY(-50%)">
+                                                    <FaCheckCircle size={16} color="#4ade80" />
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    </Box>     
+                                    <Box w="50%">
+                                        <HStack mb={2}>
+                                            <Box>
+                                                <MdToken size={14} color="#888" />
+                                            </Box>
+                                            <Box>
+                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Token Symbol</Text>
+                                            </Box>
+                                        </HStack>
+                                        <Box position="relative">
+                                            <Input
+                                                bg="#0a0a0a"
+                                                border="1px solid #2a2a2a"
+                                                color="white"
+                                                placeholder="e.g. NOMA"
+                                                h="50px"
+                                                pl={4}
+                                                pr={tokenSymbol ? 12 : 4}
+                                                _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
+                                                _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
+                                                _placeholder={{ color: "#666" }}
+                                                onChange={handleSetTokenSymbol}
+                                                value={tokenSymbol}
+                                                textTransform="uppercase"
+                                                transition="all 0.2s"
+                                            />
+                                            {tokenSymbol && (
+                                                <Box position="absolute" right={3} top="50%" transform="translateY(-50%)">
+                                                    <FaCheckCircle size={16} color="#4ade80" />
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    </Box>                              
+                                    </HStack>
+
                                 
                                 <Box>
                                     <HStack mb={2}>
@@ -1052,7 +1055,7 @@ const Launchpad: React.FC = () => {
                             </HStack>
                             <VStack align="stretch" spacing={5} flex="1" w="100%">
                                 <HStack>
-                                    <Box border="1px solid red" w="50%">
+                                    <Box w="50%">
                                     <HStack mb={2}>
                                         <Box>
                                             <FaTag size={14} color="#888" />
@@ -1094,7 +1097,7 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                     </HStack>
                                     </Box> 
-                                    <Box w="50%">
+                                    <Box w="50%" ml={2}>
                                         <Box>
                                             <HStack mb={2}>
                                                 <Box>
@@ -1149,122 +1152,140 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </HStack>
 
-                                <Box>
-                                    <HStack mb={2}>
+                                <HStack>
+                                    <Box w="50%" >
                                         <Box>
-                                            <FaWallet size={14} color="#888" />
-                                        </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Paired Asset</Text>
-                                        </Box>
-                                    </HStack>
-                                    <HStack>
-                                        <SelectRoot
-                                            collection={assets}
-                                            onChange={handleSelectAsset}
-                                            flex="1"
-                                        >
-                                            <SelectTrigger 
-                                                bg="#0a0a0a" 
-                                                border="1px solid #2a2a2a" 
-                                                color="white" 
-                                                h="50px"
-                                                w="100%"
-                                                _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                                _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
-                                                transition="all 0.2s"
-                                                display="flex"
-                                                alignItems="center"
-                                                px={4}
-                                                css={{
-                                                    '& [data-part="trigger"]': {
-                                                        border: 'none !important',
-                                                        outline: 'none !important',
-                                                        boxShadow: 'none !important'
-                                                    },
-                                                    '& input, & select, & > div': {
-                                                        border: 'none !important',
-                                                        outline: 'none !important',
-                                                        boxShadow: 'none !important'
-                                                    },
-                                                    '&:focus-within': {
-                                                        borderColor: '#3a3a3a'
-                                                    }
-                                                }}
-                                            >
-                                                <SelectValueText placeholder={assets.items[0]?.label} />
-                                            </SelectTrigger>
-                                            <SelectContent bg="#1a1a1a" border="1px solid #2a2a2a">
-                                                {assets.items.map((asset) => (
-                                                    <SelectItem 
-                                                        item={asset} 
-                                                        key={asset.value}
-                                                        _hover={{ bg: "#2a2a2a" }}
-                                                        _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                            <HStack mb={2}>
+                                                <Box>
+                                                    <FaWallet size={14} color="#888" />
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Paired Asset</Text>
+                                                </Box>
+                                            </HStack>
+                                            <HStack w="100%">
+                                                <SelectRoot
+                                                    collection={assets}
+                                                    onChange={handleSelectAsset}
+                                                    flex="1"
+                                                >
+                                                    <SelectTrigger 
+                                                        bg="#0a0a0a" 
+                                                        border="1px solid #2a2a2a" 
+                                                        color="white" 
+                                                        h="50px"
+                                                        w="100%"
+                                                        _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
+                                                        _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
+                                                        transition="all 0.2s"
+                                                        display="flex"
+                                                        alignItems="center"
+                                                        px={4}
+                                                        css={{
+                                                            '& [data-part="trigger"]': {
+                                                                border: 'none !important',
+                                                                outline: 'none !important',
+                                                                boxShadow: 'none !important'
+                                                            },
+                                                            '& input, & select, & > div': {
+                                                                border: 'none !important',
+                                                                outline: 'none !important',
+                                                                boxShadow: 'none !important'
+                                                            },
+                                                            '&:focus-within': {
+                                                                borderColor: '#3a3a3a'
+                                                            }
+                                                        }}
                                                     >
-                                                        {asset.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </SelectRoot>
+                                                        <SelectValueText placeholder={assets.items[0]?.label} />
+                                                    </SelectTrigger>
+                                                    <SelectContent bg="#1a1a1a" border="1px solid #2a2a2a">
+                                                        {assets.items.map((asset) => (
+                                                            <SelectItem 
+                                                                item={asset} 
+                                                                key={asset.value}
+                                                                _hover={{ bg: "#2a2a2a" }}
+                                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                                            >
+                                                                {asset.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </SelectRoot>                                            
+                                                <Box>
+                                                    <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
+                                                        <Image
+                                                            w="24px"
+                                                            h="24px"
+                                                            src={monadLogo}
+                                                            alt="Token"
+                                                        />
+                                                    </Box>                                            
+                                                </Box>
+                                            </HStack>
+                                        </Box>
+                                    </Box>
+                                    <Box w="50%" ml={2}>
+                                    <HStack mb={1}>
                                         <Box>
-                                            <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
-                                                <Image
-                                                    w="24px"
-                                                    h="24px"
-                                                    src={logoPreview || placeholderLogo}
-                                                    alt="Token"
-                                                />
-                                            </Box>                                            
+                                            <FaLayerGroup size={14} color="#888" />
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Protocol</Text>
                                         </Box>
                                     </HStack>
-                                </Box>
-
-                                <Box>
-                                <HStack mb={1}>
-                                    <Box>
-                                        <FaLayerGroup size={14} color="#888" />
-                                    </Box>
-                                    <Box>
-                                        <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Protocol</Text>
+                                    <SelectRoot
+                                        collection={createListCollection({
+                                            items: [
+                                                { value: "uniswap", label: "Uniswap V3" },
+                                                { value: "pancakeswap", label: "PancakeSwap V3" }
+                                            ]
+                                        })}
+                                        value={selectedProtocol}
+                                        onChange={(e) => setSelectedProtocol(e.target.value)}
+                                        flex="1"
+                                    >
+                                        <SelectTrigger
+                                            w="100%"
+                                            h="50px"
+                                            bg="#0a0a0a"
+                                            border="1px solid #2a2a2a"
+                                            color="white"
+                                            _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
+                                            _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
+                                            transition="all 0.2s"
+                                            display="flex"
+                                            alignItems="center"
+                                        >
+                                            <SelectValueText 
+                                                placeholder="Select protocol"
+                                                color="white"
+                                                fontSize="sm"
+                                                fontWeight="600"
+                                            >
+                                                {selectedProtocol === "uniswap" ? "Uniswap V3" : "PancakeSwap V3"}
+                                            </SelectValueText>
+                                        </SelectTrigger>
+                                        <SelectContent bg="#1a1a1a" borderColor="#2a2a2a">
+                                            {[
+                                                { value: "uniswap", label: "Uniswap V3", logo: uniswapLogo, hoverBg: "rgba(255, 0, 122, 0.1)" },
+                                                { value: "pancakeswap", label: "PancakeSwap V3", logo: pancakeLogo, hoverBg: "rgba(255, 178, 55, 0.1)" }
+                                            ].map((protocol) => (
+                                                <SelectItem
+                                                    key={protocol.value}
+                                                    item={{ value: protocol.value }}
+                                                    _hover={{ bg: protocol.hoverBg }}
+                                                >
+                                                    <HStack spacing={2}>
+                                                        <Box><Image src={protocol.logo} w="20px" h="20px" /></Box>
+                                                        <Box><Text color="white" fontSize="sm" fontWeight="600">{protocol.label}</Text></Box>
+                                                    </HStack>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </SelectRoot>
                                     </Box>
                                 </HStack>
-                                <HStack spacing={4}>
-                                    <Box
-                                        flex={1}
-                                        p={4}
-                                        bg={selectedProtocol === "uniswap" ? "rgba(255, 0, 122, 0.1)" : "#0a0a0a"}
-                                        border={`2px solid ${selectedProtocol === "uniswap" ? "#FF007A" : "#2a2a2a"}`}
-                                        borderRadius="lg"
-                                        cursor="pointer"
-                                        transition="all 0.2s"
-                                        _hover={{ borderColor: "#FF007A", bg: "rgba(255, 0, 122, 0.05)" }}
-                                        onClick={() => setSelectedProtocol("uniswap")}
-                                    >
-                                        <VStack spacing={3}>
-                                            <Image src={uniswapLogo} w="40px" h="40px" />
-                                            <Text color="white" fontSize="sm" fontWeight="600">Uniswap V3</Text>
-                                        </VStack>
-                                    </Box>
-                                    <Box
-                                        flex={1}
-                                        p={4}
-                                        bg={selectedProtocol === "pancakeswap" ? "rgba(255, 178, 55, 0.1)" : "#0a0a0a"}
-                                        border={`2px solid ${selectedProtocol === "pancakeswap" ? "#FFB237" : "#2a2a2a"}`}
-                                        borderRadius="lg"
-                                        cursor="pointer"
-                                        transition="all 0.2s"
-                                        _hover={{ borderColor: "#FFB237", bg: "rgba(255, 178, 55, 0.05)" }}
-                                        onClick={() => setSelectedProtocol("pancakeswap")}
-                                    >
-                                        <VStack spacing={3}>
-                                            <Image src={pancakeLogo} w="40px" h="40px" />
-                                            <Text color="white" fontSize="sm" fontWeight="600">PancakeSwap V3</Text>
-                                        </VStack>
-                                    </Box>
-                                </HStack>
-                                </Box>
-                            
                             </VStack>
                             </Box>
                             <Box w="100%" h="50%"  mt={"15%"}>
