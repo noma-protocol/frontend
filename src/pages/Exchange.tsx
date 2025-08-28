@@ -3572,7 +3572,7 @@ const Exchange: React.FC = () => {
                         <Box w="100%">
                             <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
                                 <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
-                                    Wallet Balance
+                                    Wallet
                                 </Text>
                                 
                                 <VStack align="stretch" gap={3}>

@@ -115,6 +115,7 @@ const Launchpad: React.FC = () => {
     const [error, setError] = useState("");
     const [presale, setPresale] = useState("0");
     const [softCap, setSoftCap] = useState("0");
+    const [softCapPercentage, setSoftCapPercentage] = useState(40); // Default 40% of hard cap
     const [duration, setDuration] = useState(Number(86400*30).toString());
 
     const [isFirstSel, setIsFirstSel] = useState(true);
@@ -367,10 +368,15 @@ const Launchpad: React.FC = () => {
     const calculateSoftCap = () => {
         // Hard cap = floor price * total supply * 10%
         const hardCap = Number(floorPrice || 0) * Number(tokenSupply || 0) * 0.1;
-        // Soft cap = hard cap * 40% (default)
-        const calculatedSoftCap = hardCap * 0.4;
+        // Soft cap = hard cap * percentage
+        const calculatedSoftCap = hardCap * (softCapPercentage / 100);
         setSoftCap(String(calculatedSoftCap));
     }
+    
+    // Recalculate soft cap when dependencies change
+    useEffect(() => {
+        calculateSoftCap();
+    }, [floorPrice, tokenSupply, softCapPercentage]);
 
     const handleSetPrice = (value) => {
         console.log(`Got value ${value}`)
@@ -462,6 +468,15 @@ const Launchpad: React.FC = () => {
             const targetValue = unCommify(event.target.value);
             console.log(`Setting soft cap to ${targetValue}`);
             setSoftCap(targetValue);
+            
+            // Update slider percentage based on input value
+            const hardCap = Number(floorPrice || 0) * Number(tokenSupply || 0) * 0.1;
+            if (hardCap > 0) {
+                const percentage = (Number(targetValue) / hardCap) * 100;
+                // Clamp between 20 and 60
+                const clampedPercentage = Math.max(20, Math.min(60, percentage));
+                setSoftCapPercentage(Math.round(clampedPercentage));
+            }
         }
     }
 
@@ -1019,7 +1034,8 @@ const Launchpad: React.FC = () => {
                             )}
                         </>
                     ) : deployStep == 1 ? (
-                        <>
+                        <VStack>
+                            <Box w="100%" h="50%">
                             {/* Step 1: Pool Configuration Content */}
                             <HStack mb={4} spacing={4} align="center">
                                 <Box p={3} bg="#4ade8020" borderRadius="xl">
@@ -1034,17 +1050,18 @@ const Launchpad: React.FC = () => {
                                     <Text color="#888" fontSize="md" mt={1}>Set pricing and liquidity parameters</Text>
                                 </Box>
                             </HStack>
-                        <VStack align="stretch" spacing={5} flex="1">
-                            <Box>
-                                <HStack mb={2}>
-                                    <Box>
-                                        <FaTag size={14} color="#888" />
-                                    </Box>
-                                    <Box>
-                                        <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Floor Price (MON)</Text>
-                                    </Box>
-                                </HStack>
+                            <VStack align="stretch" spacing={5} flex="1" w="100%">
                                 <HStack>
+                                    <Box border="1px solid red" w="50%">
+                                    <HStack mb={2}>
+                                        <Box>
+                                            <FaTag size={14} color="#888" />
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Floor Price (MON)</Text>
+                                        </Box>
+                                    </HStack>
+                                    <HStack>
                                     <NumberInputRoot
                                         defaultValue={0}
                                         step={0.001}
@@ -1075,116 +1092,121 @@ const Launchpad: React.FC = () => {
                                             alt="MON"
                                         />
                                     </Box>
-                                </HStack>
-                            </Box>
-                            <Box>
-                                <HStack mb={2}>
-                                    <Box>
-                                        <FaCoins size={14} color="#888" />
-                                    </Box>
-                                    <Box>
-                                        <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Total Supply</Text>
-                                    </Box>
-                                </HStack>
-                                <HStack>
-                                    <NumberInputRoot
-                                        min={0}
-                                        max={10e27}
-                                        value={tokenSupply || "0"}
-                                        defaultValue={0}
-                                        step={1}
-                                        allowDecimal={false}
-                                        onValueChange={(details) => {
-                                            console.log("Token Supply: ", details.value);
-                                            if (details.value === "" || details.value === undefined) {
-                                                setTokenSupply("0");
-                                            } else {
-                                                const intValue = Math.floor(Number(details.value) || 0);
-                                                setTokenSupply(String(intValue));
-                                            }
-                                            calculateSoftCap();
-                                        }}
-                                        flex="1"
-                                    >
-                                        <NumberInputField 
-                                            h="50px" 
-                                            bg="#0a0a0a" 
-                                            border="1px solid #2a2a2a" 
-                                            color="white"
-                                            _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                            _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
-                                            _placeholder={{ color: "#666" }}
-                                            transition="all 0.2s"
-                                        />
-                                    </NumberInputRoot>
-                                    <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
-                                        <Image
-                                            w="24px"
-                                            h="24px"
-                                            src={logoPreview || placeholderLogo}
-                                            alt="Token"
-                                        />
-                                    </Box>
-                                </HStack>
-                            </Box>
-                            <Box>
-                                <HStack mb={2}>
-                                    <Box>
-                                        <FaWallet size={14} color="#888" />
-                                    </Box>
-                                    <Box>
-                                        <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Paired Asset</Text>
+                                    </HStack>
+                                    </Box> 
+                                    <Box w="50%">
+                                        <Box>
+                                            <HStack mb={2}>
+                                                <Box>
+                                                    <FaCoins size={14} color="#888" />
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Total Supply</Text>
+                                                </Box>
+                                            </HStack>
+                                            <HStack w="100%">
+                                                <NumberInputRoot
+                                                    
+                                                    min={0}
+                                                    max={10e27}
+                                                    value={tokenSupply || "0"}
+                                                    defaultValue={0}
+                                                    step={1}
+                                                    allowDecimal={false}
+                                                    onValueChange={(details) => {
+                                                        console.log("Token Supply: ", details.value);
+                                                        if (details.value === "" || details.value === undefined) {
+                                                            setTokenSupply("0");
+                                                        } else {
+                                                            const intValue = Math.floor(Number(details.value) || 0);
+                                                            setTokenSupply(String(intValue));
+                                                        }
+                                                        calculateSoftCap();
+                                                    }}
+                                                    flex="1"
+                                                >
+                                                    <NumberInputField 
+                                                        h="50px" 
+                                                        bg="#0a0a0a" 
+                                                        border="1px solid #2a2a2a" 
+                                                        color="white"
+                                                        _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
+                                                        _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
+                                                        _placeholder={{ color: "#666" }}
+                                                        transition="all 0.2s"
+                                                    />
+                                                </NumberInputRoot>
+                                                <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
+                                                    <Image
+                                                        w="24px"
+                                                        h="24px"
+                                                        src={logoPreview || placeholderLogo}
+                                                        alt="Token"
+                                                    />
+                                                </Box>
+                                            </HStack>
+                                        </Box>
                                     </Box>
                                 </HStack>
+
+                                <Box>
+                                    <HStack mb={2}>
+                                        <Box>
+                                            <FaWallet size={14} color="#888" />
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Paired Asset</Text>
+                                        </Box>
+                                    </HStack>
                                     <HStack>
-                                <SelectRoot
-                                    collection={assets}
-                                    onChange={handleSelectAsset}
-                                    flex="1"
-                                >
-                                    <SelectTrigger 
-                                        bg="#0a0a0a" 
-                                        border="1px solid #2a2a2a" 
-                                        color="white" 
-                                        h="50px"
-                                        w="100%"
-                                        _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                        _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
-                                        transition="all 0.2s"
-                                        display="flex"
-                                        alignItems="center"
-                                        px={4}
-                                        css={{
-                                            '& [data-part="trigger"]': {
-                                                border: 'none !important',
-                                                outline: 'none !important',
-                                                boxShadow: 'none !important'
-                                            },
-                                            '& input, & select, & > div': {
-                                                border: 'none !important',
-                                                outline: 'none !important',
-                                                boxShadow: 'none !important'
-                                            },
-                                            '&:focus-within': {
-                                                borderColor: '#3a3a3a'
-                                            }
-                                        }}
-                                    >
-                                        <SelectValueText placeholder={assets.items[0]?.label} />
-                                    </SelectTrigger>
-                                    <SelectContent bg="#1a1a1a" border="1px solid #2a2a2a">
-                                        {assets.items.map((asset) => (
-                                            <SelectItem 
-                                                item={asset} 
-                                                key={asset.value}
-                                                _hover={{ bg: "#2a2a2a" }}
-                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                        <SelectRoot
+                                            collection={assets}
+                                            onChange={handleSelectAsset}
+                                            flex="1"
+                                        >
+                                            <SelectTrigger 
+                                                bg="#0a0a0a" 
+                                                border="1px solid #2a2a2a" 
+                                                color="white" 
+                                                h="50px"
+                                                w="100%"
+                                                _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
+                                                _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
+                                                transition="all 0.2s"
+                                                display="flex"
+                                                alignItems="center"
+                                                px={4}
+                                                css={{
+                                                    '& [data-part="trigger"]': {
+                                                        border: 'none !important',
+                                                        outline: 'none !important',
+                                                        boxShadow: 'none !important'
+                                                    },
+                                                    '& input, & select, & > div': {
+                                                        border: 'none !important',
+                                                        outline: 'none !important',
+                                                        boxShadow: 'none !important'
+                                                    },
+                                                    '&:focus-within': {
+                                                        borderColor: '#3a3a3a'
+                                                    }
+                                                }}
                                             >
-                                                {asset.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </SelectRoot>
+                                                <SelectValueText placeholder={assets.items[0]?.label} />
+                                            </SelectTrigger>
+                                            <SelectContent bg="#1a1a1a" border="1px solid #2a2a2a">
+                                                {assets.items.map((asset) => (
+                                                    <SelectItem 
+                                                        item={asset} 
+                                                        key={asset.value}
+                                                        _hover={{ bg: "#2a2a2a" }}
+                                                        _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                                    >
+                                                        {asset.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </SelectRoot>
                                         <Box>
                                             <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
                                                 <Image
@@ -1196,10 +1218,10 @@ const Launchpad: React.FC = () => {
                                             </Box>                                            
                                         </Box>
                                     </HStack>
-                             </Box>
+                                </Box>
 
-                            <Box>
-                                <HStack mb={2}>
+                                <Box>
+                                <HStack mb={1}>
                                     <Box>
                                         <FaLayerGroup size={14} color="#888" />
                                     </Box>
@@ -1241,85 +1263,154 @@ const Launchpad: React.FC = () => {
                                         </VStack>
                                     </Box>
                                 </HStack>
+                                </Box>
+                            
+                            </VStack>
                             </Box>
-                           
-                        </VStack>
-                        
-                        {/* Enhanced Info Box */}
-                        <Box 
-                            mt={6} 
-                            p={5} 
-                            bg="linear-gradient(135deg, #4ade8010 0%, #22c55e10 100%)" 
-                            borderRadius="xl"
-                            border="1px solid #4ade8040"
-                        >
-                            <HStack spacing={4}>
-                                <Box w="50%">
-                                    <Text color="#888" fontSize="xs" mb={1}>Initial Price</Text>
-                                    <Text color="white" fontSize="lg" fontWeight="bold">
-                                        {price || "0"} MON
-                                    </Text>
-                                    <Text color="#4ade80" fontSize="sm">
-                                        ${commify(Number(price || 0) * (monPrice), 4)}
-                                    </Text>                                    
-                                </Box>
-                                <Box>
-                                    <Text color="#888" fontSize="xs" mb={1}>Market Cap</Text>
-                                    <Text color="white" fontSize="lg" fontWeight="bold">
-                                        {formatNumberPrecise(Number(tokenSupply) * Number(price || 0))} MON
-                                    </Text>
-                                    <Text color="#4ade80" fontSize="sm">
-                                        ${formatNumberPrecise(Number(tokenSupply) * Number(price || 0) * (monPrice))}
-                                    </Text>
-                                </Box>
-                            </HStack>
-                        </Box>
-                    </>
+                            <Box w="100%" h="50%"  mt={"15%"}>
+                            {/* Enhanced Info Box */}
+                            <Box 
+                                mt={5} 
+                                p={5} 
+                                bg="linear-gradient(135deg, #4ade8010 0%, #22c55e10 100%)" 
+                                borderRadius="xl"
+                                border="1px solid #4ade8040"
+                            >
+                                <HStack gap={4}>
+                                    <Box w="33%">
+                                        <Text color="#888" fontSize="xs" mb={1}>Floor price</Text>
+                                        <Text color="white" fontSize="lg" fontWeight="bold">
+                                            {formatNumberPrecise(Number(floorPrice) )} MON
+                                        </Text>
+                                        <Text color="#4ade80" fontSize="sm">
+                                            ${formatNumberPrecise( Number(floorPrice || 0) * (monPrice))}
+                                        </Text>
+                                    </Box>                                
+                                    <Box w="33%">
+                                        <Text color="#888" fontSize="xs" mb={1}>Initial price</Text>
+                                        <Text color="white" fontSize="lg" fontWeight="bold">
+                                            {price || "0"} MON
+                                        </Text>
+                                        <Text color="#4ade80" fontSize="sm">
+                                            ${commify(Number(price || 0) * (monPrice), 4)}
+                                        </Text>                                    
+                                    </Box>
+                                    <Box  w="33%">
+                                        <Text color="#888" fontSize="xs" mb={1}>FDV</Text>
+                                        <Text color="white" fontSize="lg" fontWeight="bold">
+                                            {formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0))} MON
+                                        </Text>
+                                        <Text color="#4ade80" fontSize="sm">
+                                            ${formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0) * (monPrice))}
+                                        </Text>
+                                    </Box>
+                                </HStack>
+                            </Box>                            
+                            </Box> 
+                    </VStack>
                 ) : deployStep == 2 ? (
                     <>
-                        {/* Step 2: Presale Configuration Content */}
-                        <HStack mb={4} spacing={4} align="center">
-                            <Box p={3} bg="#4ade8020" borderRadius="xl">
-                                <FaCoins size={24} color="#4ade80" />
-                            </Box>
-                            <Box>
-                                <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
-                                    Presale Configuration
-                                </Heading>
-                            </Box>
-                            <Box>
-                                <Text color="#888" fontSize="md" mt={1}>Set up your token presale</Text>
-                            </Box>
-                        </HStack>
+
                         {presale == 1 ? (
+                        <VStack>
+                            <Box w="100%" h="50%">
+                                {/* Step 2: Presale Configuration Content */}
+                                <HStack mb={4} spacing={4} align="center">
+                                    <Box p={3} bg="#4ade8020" borderRadius="xl">
+                                        <FaCoins size={24} color="#4ade80" />
+                                    </Box>
+                                    <Box>
+                                        <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
+                                            Presale Configuration
+                                        </Heading>
+                                    </Box>
+                                    <Box>
+                                        <Text color="#888" fontSize="md" mt={1}>Set up your token presale</Text>
+                                    </Box>
+                                </HStack>
                             <VStack align="stretch" spacing={5} flex="1">
                                 <Box>
-                                    <HStack mb={2}>
-                                        <Box>
-                                            <FaTag size={14} color="#888" />
-                                        </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Presale Price (MON)</Text>
-                                        </Box>
-                                    </HStack>
-                                    <HStack>
-                                        <Input 
-                                            bg="#0a0a0a"
-                                            border="1px solid #2a2a2a"
-                                            color="#666"
-                                            h="50px"
-                                            value={price}
-                                            disabled={true}
-                                            _disabled={{ bg: "#0a0a0a", color: "#666", cursor: "not-allowed" }}
-                                            transition="all 0.2s"
-                                        />
-                                        <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
-                                            <Image
-                                                w="24px"
-                                                h="24px"
-                                                src={monadLogo}
-                                                alt="MON"
+                                    <HStack columns={2}>
+                                        <Box w="50%">
+                                        <HStack mb={2}>
+                                            <Box>
+                                                <FaTag size={14} color="#888" />
+                                            </Box>
+                                            <Box>
+                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Presale Price (MON)</Text>
+                                            </Box>
+                                        </HStack>
+                                        <HStack>
+                                            <Input 
+                                                bg="#0a0a0a"
+                                                border="1px solid #2a2a2a"
+                                                color="#666"
+                                                h="50px"
+                                                value={price}
+                                                disabled={true}
+                                                _disabled={{ bg: "#0a0a0a", color: "#666", cursor: "not-allowed" }}
+                                                transition="all 0.2s"
                                             />
+                                            <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
+                                                <Image
+                                                    w="24px"
+                                                    h="24px"
+                                                    src={monadLogo}
+                                                    alt="MON"
+                                                />
+                                            </Box>
+                                        </HStack>
+                                        </Box>
+                                        <Box w="50%">
+                                            <Box ml={2}>
+                                        <HStack mb={2}>
+                                            <Box>
+                                                <FaClock size={14} color="#888" />
+                                            </Box>
+                                            <Box>
+                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Presale Duration</Text>
+                                            </Box>
+                                        </HStack>
+                                        <SelectRoot
+                                            collection={durationChoices}
+                                            onChange={handleSetDuration}
+                                            value={duration}
+                                        >
+                                            <SelectTrigger 
+                                                w="100%"
+                                                bg="#0a0a0a" 
+                                                border="1px solid #2a2a2a" 
+                                                color="white" 
+                                                h="50px"
+                                                _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
+                                                _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
+                                                transition="all 0.2s"
+                                                display="flex"
+                                                alignItems="center"
+                                                px={4}
+                                                sx={{
+                                                    '& > *': {
+                                                        border: 'none !important',
+                                                        outline: 'none !important'
+                                                    }
+                                                }}
+                                            >
+                                                <SelectValueText placeholder={durationChoices.items[0]?.label} />
+                                            </SelectTrigger>
+                                            <SelectContent bg="#1a1a1a" border="1px solid #2a2a2a">
+                                                {durationChoices.items.map((choice) => (
+                                                    <SelectItem 
+                                                        item={choice} 
+                                                        key={choice.value}
+                                                        _hover={{ bg: "#2a2a2a" }}
+                                                        // _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                                    >
+                                                        {choice.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </SelectRoot>                                               
+                                            </Box>                                         
                                         </Box>
                                     </HStack>
                                 </Box>
@@ -1389,141 +1480,79 @@ const Launchpad: React.FC = () => {
                                             />
                                         </Box>
                                     </HStack>
-                                    <Text color="#666" fontSize="xs" mt={1}>
-                                        Minimum amount to be raised ({((Number(softCap) / (Number(floorPrice) * Number(tokenSupply) * 0.1)) * 100).toFixed(0)}% of hard cap)
-                                    </Text>
-                                </Box>                                
-                                <Box>
-                                    <HStack mb={2}>
-                                        <Box>
-                                            <FaClock size={14} color="#888" />
+                                    <Box mt={3}>
+                                        <Slider
+                                            value={[softCapPercentage]}
+                                            onValueChange={(details) => {
+                                                const percentage = details.value[0];
+                                                setSoftCapPercentage(percentage);
+                                                // Update soft cap based on new percentage
+                                                const hardCap = Number(floorPrice || 0) * Number(tokenSupply || 0) * 0.1;
+                                                const newSoftCap = hardCap * (percentage / 100);
+                                                setSoftCap(String(newSoftCap));
+                                            }}
+                                            min={20}
+                                            max={60}
+                                            step={1}
+                                            defaultValue={[40]}
+                                        />
+                                        <HStack justify="space-between" mt={2}>
+                                            <Box><Text color="#666" fontSize="xs">20%</Text></Box>
+                                            <Box><Text color="#4ade80" fontSize="xs" fontWeight="600">{softCapPercentage}% of hard cap</Text></Box>
+                                            <Box><Text color="#666" fontSize="xs">60%</Text></Box>
+                                        </HStack>
+                                    </Box>
+                                    {/* <Text color="#666" fontSize="xs" mt={1}>
+                                        Minimum amount to be raised ({softCapPercentage}% of hard cap)
+                                    </Text> */}
+                                </Box>                                                                
+                                {/* Presale Summary Box */}
+
+                            </VStack>                                
+                            </Box>
+                            <Box w="100%" h="50%" mt={"15%"}>
+                                {/* Enhanced Info Box */}
+                                <Box 
+                                    mt={5} 
+                                    p={5} 
+                                    bg="linear-gradient(135deg, #4ade8010 0%, #22c55e10 100%)" 
+                                    borderRadius="xl"
+                                    border="1px solid #4ade8040"
+                                >
+                                    <HStack spacing={4}>
+                                        <Box w="33%">
+                                            <Text color="#888" fontSize="xs" mb={1}>Total Presale Raise</Text>
+                                            <Text color="white" fontSize="lg" fontWeight="bold">
+                                                {formatNumberPrecise(Number(softCap) || 0)} MON
+                                            </Text>
+                                            <Text color="#4ade80" fontSize="sm">
+                                                (${formatNumberPrecise((Number(softCap) || 0) * monPrice)})
+                                            </Text>
+                                        </Box>                                
+                                        <Box w="33%">
+                                            <Text color="#888" fontSize="xs" mb={1}>Floor Liquidity</Text>
+                                            <Text color="white" fontSize="lg" fontWeight="bold">
+                                                {formatNumberPrecise((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
+                                            </Text>
+                                            <Text color="#4ade80" fontSize="sm">
+                                                (${commify((Number(softCap) || 0) * monPrice, 0)})
+                                            </Text>                                    
                                         </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Presale Duration</Text>
+                                        <Box  w="33%">
+                                            <Text color="#888" fontSize="xs" mb={1}>Founder Share</Text>
+                                            <Text color="white" fontSize="lg" fontWeight="bold">
+                                                    {formatNumberPrecise(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
+                                            </Text>
+                                            <Text color="#4ade80" fontSize="sm">
+                                                    (${formatNumberPrecise((Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice))) * monPrice)})
+                                            </Text>
                                         </Box>
                                     </HStack>
-                                    <SelectRoot
-                                        collection={durationChoices}
-                                        onChange={handleSetDuration}
-                                        value={duration}
-                                    >
-                                        <SelectTrigger 
-                                            w="91%"
-                                            bg="#0a0a0a" 
-                                            border="1px solid #2a2a2a" 
-                                            color="white" 
-                                            h="50px"
-                                            _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                            _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
-                                            transition="all 0.2s"
-                                            display="flex"
-                                            alignItems="center"
-                                            px={4}
-                                            sx={{
-                                                '& > *': {
-                                                    border: 'none !important',
-                                                    outline: 'none !important'
-                                                }
-                                            }}
-                                        >
-                                            <SelectValueText placeholder={durationChoices.items[0]?.label} />
-                                        </SelectTrigger>
-                                        <SelectContent bg="#1a1a1a" border="1px solid #2a2a2a">
-                                            {durationChoices.items.map((choice) => (
-                                                <SelectItem 
-                                                    item={choice} 
-                                                    key={choice.value}
-                                                    _hover={{ bg: "#2a2a2a" }}
-                                                    // _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
-                                                >
-                                                    {choice.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </SelectRoot>
                                 </Box>
-                                
-                                {/* Presale Summary Box */}
-                                <Box 
-                                    mt={4}
-                                    py={3}
-                                    px={4} 
-                                    bg="linear-gradient(135deg, #4ade8015 0%, #22c55e15 100%)" 
-                                    borderRadius="xl" 
-                                    border="1px solid #4ade8040"
-                                    position="relative"
-                                    overflow="hidden"
-                                >
-                                    <Box
-                                        position="absolute"
-                                        top={0}
-                                        left={0}
-                                        bottom={0}
-                                        w="4px"
-                                        bg="#4ade80"
-                                    />
+                            </Box>
+                        </VStack>
 
-                                    <SimpleGrid  columns={[2, null, 3]} gap="20px">
-                                        <Box> <Text color="#4ade80" fontSize="sm" fontWeight="bold">Total Presale Raise</Text> </Box>
-                                        <Box> 
 
-                                     
-                                        </Box>
-                                        <Box> 
-                                            <VStack align="end">
-                                                <Box>
-                                                    <Text color="white" fontSize="lg" fontWeight="bold">
-                                                        {formatNumberPrecise(Number(softCap) || 0)} MON
-                                                    </Text>    
-                                                </Box>
-                                                <Box>
-                                                    <Text color="#666" fontSize="sm">
-                                                        (${formatNumberPrecise((Number(softCap) || 0) * monPrice)})
-                                                    </Text>                                                      
-                                                </Box>
-                                            </VStack>                                         
-                                        </Box>
-                                        <Box> <Text color="#888" fontSize="sm">Floor Liquidity</Text> </Box>
-                                        <Box> 
-
-                                        </Box>
-                                        <Box> 
-                                             <VStack align="end">
-                                                <Box>
-                                                <Text color="white" fontSize="sm" fontWeight="600">
-                                                    {formatNumberPrecise((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
-                                                </Text>   
-                                                </Box>
-                                                <Box>
-                                                <Text color="#666" fontSize="sm">
-                                                    (${commify((Number(softCap) || 0) * monPrice, 0)})
-                                                </Text> 
-                                                </Box>
-                                            </VStack>                                           
-                                        </Box>
-                                        <Box>
-                                            <Text color="#4ade80" fontSize="sm" fontWeight="bold">Founder Receives</Text>
-                                        </Box>
-                                        <Box>
-
-                                        </Box>
-                                        <Box>
-                                             <VStack align="end">
-                                                <Box>
-                                                <Text color="white" fontSize="sm" fontWeight="600">
-                                                     {formatNumberPrecise(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
-                                                </Text>   
-                                                </Box>
-                                                <Box>
-                                                <Text color="#666" fontSize="sm">
-                                                        (${formatNumberPrecise((Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice))) * monPrice)})
-                                                </Text> 
-                                                </Box>
-                                            </VStack>    
-                                        </Box>
-                                    </SimpleGrid>
-                                </Box>
-                            </VStack>
                         ) : (
                             <Box p={8} textAlign="center" bg="#0a0a0a" borderRadius="xl" border="1px dashed #2a2a2a">
                                 <Box mb={4} color="#666">
