@@ -116,6 +116,7 @@ const Launchpad: React.FC = () => {
     const [presale, setPresale] = useState("0");
     const [softCap, setSoftCap] = useState("0");
     const [softCapPercentage, setSoftCapPercentage] = useState(40); // Default 40% of hard cap
+    const [capView, setCapView] = useState("softcap"); // Toggle between hardcap and softcap
     const [duration, setDuration] = useState(Number(86400*30).toString());
 
     const [isFirstSel, setIsFirstSel] = useState(true);
@@ -460,6 +461,11 @@ const Launchpad: React.FC = () => {
         console.log("Duration: ", event.target.value);
         setDuration(event.target.value);
     }
+    
+    const handleSetCapView = (event) => {
+        console.log("Cap View: ", event.target.value);
+        setCapView(event.target.value);
+    }
 
     const handleSetSoftCap = (event) => {
         console.log("Soft Cap: ", event.target.value);
@@ -502,6 +508,13 @@ const Launchpad: React.FC = () => {
             { label: "1 minute", value: Number((60)).toString() },
             { label: "30 seconds", value: Number((30)).toString() },
             ],
+    });
+    
+    const capViewChoices = createListCollection({
+        items: [
+            { label: "Hard Cap", value: "hardcap" },
+            { label: "Soft Cap", value: "softcap" }
+        ]
     });
 
     const getAssetLabelByValue = (value) => {
@@ -709,7 +722,7 @@ const Launchpad: React.FC = () => {
                     </Box>
                 </Box>
                 <Box flex="1" maxW="1400px" mx="auto" overflow="hidden">
-                <Box display="flex" gap={6} h="calc(100vh - 220px)" maxH="900px">
+                <Box display="flex" gap={6}>
                     {/* Main Form - Fixed Width Container */}
                     <Box w={isMobile ? "100%" : "900px"}>
                         <Box 
@@ -1243,7 +1256,8 @@ const Launchpad: React.FC = () => {
                                                 { value: "pancakeswap", label: "PancakeSwap V3" }
                                             ]
                                         })}
-                                        value={selectedProtocol}
+                                        value={[selectedProtocol]}
+                                        defaultValue={["uniswap"]}
                                         onChange={(e) => setSelectedProtocol(e.target.value)}
                                         flex="1"
                                     >
@@ -1315,7 +1329,7 @@ const Launchpad: React.FC = () => {
                                 border="1px solid #4ade8040"
                             >
                                 <HStack gap={4}>
-                                    <Box w="33%">
+                                    <Box w="25%">
                                         <Text color="#888" fontSize="xs" mb={1}>Floor price</Text>
                                         <Text color="white" fontSize="lg" fontWeight="bold">
                                             {formatNumberPrecise(Number(floorPrice) )} MON
@@ -1324,7 +1338,7 @@ const Launchpad: React.FC = () => {
                                             ${formatNumberPrecise( Number(floorPrice || 0) * (monPrice))}
                                         </Text>
                                     </Box>                                
-                                    <Box w="33%">
+                                    <Box w="25%">
                                         <Text color="#888" fontSize="xs" mb={1}>Presale price</Text>
                                         <Text color="white" fontSize="lg" fontWeight="bold">
                                             {price || "0"} MON
@@ -1333,13 +1347,19 @@ const Launchpad: React.FC = () => {
                                             ${commify(Number(price || 0) * (monPrice), 4)}
                                         </Text>                                    
                                     </Box>
-                                    <Box  w="33%">
+                                    <Box  w="25%">
                                         <Text color="#888" fontSize="xs" mb={1}>FDV</Text>
                                         <Text color="white" fontSize="lg" fontWeight="bold">
                                             {formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0))} MON
                                         </Text>
                                         <Text color="#4ade80" fontSize="sm">
                                             ${formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0) * (monPrice))}
+                                        </Text>
+                                    </Box>
+                                    <Box  w="25%" alignItems={"left"} alignContent={"left"} textAlign={"left"}>
+                                        <Text color="#888" fontSize="xs" mb={1}>Protocol</Text>
+                                        <Image src={uniswapLogo} w="65px" h="65px"  />
+                                        <Text color="#4ade80" fontSize="sm">
                                         </Text>
                                     </Box>
                                 </HStack>
@@ -1362,7 +1382,7 @@ const Launchpad: React.FC = () => {
                                             Presale Configuration
                                         </Heading>
                                     </Box>
-                                    <Box>
+                                    <Box ml={2}>
                                         <Text color="#888" fontSize="md" mt={1}>Set up your token presale</Text>
                                     </Box>
                                 </HStack>
@@ -1399,7 +1419,7 @@ const Launchpad: React.FC = () => {
                                             </Box>
                                         </HStack>
                                         </Box>
-                                        <Box w="50%">
+                                        <Box w="50%" ml={5}>
                                             <Box ml={2}>
                                         <HStack mb={2}>
                                             <Box>
@@ -1462,7 +1482,8 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                     </HStack>
                                 </Box>
-                                <Box>
+                                <HStack>
+                                    <Box w="50%">
                                     <HStack mb={2}>
                                         <Box>
                                             <FaCoins size={14} color="#888" />
@@ -1495,7 +1516,7 @@ const Launchpad: React.FC = () => {
                                         Maximum amount that can be raised in presale
                                     </Text>
                                 </Box>
-                                <Box>
+                                    <Box w="50%" mt={10} ml={5}>
                                     <HStack mb={2}>
                                         <Box>
                                             <FaWallet size={14} color="#888" />
@@ -1549,16 +1570,71 @@ const Launchpad: React.FC = () => {
                                             <Box><Text color="#4ade80" fontSize="xs" fontWeight="600">{softCapPercentage}% of hard cap</Text></Box>
                                             <Box><Text color="#666" fontSize="xs">60%</Text></Box>
                                         </HStack>
+                                    </Box>                                        
                                     </Box>
-                                    {/* <Text color="#666" fontSize="xs" mt={1}>
-                                        Minimum amount to be raised ({softCapPercentage}% of hard cap)
-                                    </Text> */}
-                                </Box>                                                                
+                                </HStack>
+
                                 {/* Presale Summary Box */}
 
                             </VStack>                                
                             </Box>
-                            <Box w="100%" h="50%" mt={"15%"}>
+                            <Box w="100%" h="50%" mt={"10%"}>
+                                <HStack justify="space-between" align="center" mb={4}>
+                                    <Heading as="h3">Overview</Heading>
+                                    <SelectRoot
+                                        collection={capViewChoices}
+                                        value={capView}
+                                        defaultValue="softcap"
+                                        onChange={handleSetCapView}
+                                        w="200px"
+                                    >
+                                        <SelectTrigger
+                                            h="40px"
+                                            bg="#0a0a0a"
+                                            border="1px solid #2a2a2a"
+                                            color="white"
+                                            _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
+                                            _focus={{ borderColor: "#3a3a3a", bg: "#0a0a0a", outline: "none" }}
+                                            transition="all 0.2s"
+                                            display="flex"
+                                            alignItems="center"
+                                            px={4}
+                                            css={{
+                                                '& [data-part="trigger"]': {
+                                                    border: 'none !important',
+                                                    outline: 'none !important',
+                                                    boxShadow: 'none !important'
+                                                },
+                                                '& input, & select, & > div': {
+                                                    border: 'none !important',
+                                                    outline: 'none !important',
+                                                    boxShadow: 'none !important'
+                                                },
+                                                '&:focus-within': {
+                                                    borderColor: '#3a3a3a'
+                                                }
+                                            }}
+                                        >
+                                            <SelectValueText 
+                                                color="white"
+                                                fontSize="sm"
+                                                fontWeight="600"
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent bg="#1a1a1a" borderColor="#2a2a2a">
+                                            {capViewChoices.items.map((choice) => (
+                                                <SelectItem
+                                                    item={choice}
+                                                    key={choice.value}
+                                                    color="white"
+                                                    _hover={{ bg: "#2a2a2a", color: "white" }}
+                                                >
+                                                    {choice.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </SelectRoot>
+                                </HStack>
                                 {/* Enhanced Info Box */}
                                 <Box 
                                     mt={5} 
@@ -1569,30 +1645,48 @@ const Launchpad: React.FC = () => {
                                 >
                                     <HStack spacing={4}>
                                         <Box w="33%">
-                                            <Text color="#888" fontSize="xs" mb={1}>Total Presale Raise</Text>
+                                            <Text color="#888" fontSize="xs" mb={1}>Raise Goal</Text>
                                             <Text color="white" fontSize="lg" fontWeight="bold">
-                                                {formatNumberPrecise(Number(softCap) || 0)} MON
+                                                {formatNumberPrecise(capView === "hardcap" ? (Number(floorPrice) * Number(tokenSupply) * 0.1 || 0) : (Number(softCap) || 0))} MON
                                             </Text>
                                             <Text color="#4ade80" fontSize="sm">
-                                                (${formatNumberPrecise((Number(softCap) || 0) * monPrice)})
+                                                (${formatNumberPrecise((capView === "hardcap" ? (Number(floorPrice) * Number(tokenSupply) * 0.1 || 0) : (Number(softCap) || 0)) * monPrice)})
                                             </Text>
                                         </Box>                                
                                         <Box w="33%">
                                             <Text color="#888" fontSize="xs" mb={1}>Floor Liquidity</Text>
                                             <Text color="white" fontSize="lg" fontWeight="bold">
-                                                {formatNumberPrecise((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
+                                                {formatNumberPrecise(
+                                                    capView === "hardcap" 
+                                                        ? ((Number(floorPrice) * Number(tokenSupply) * 0.1) / Number(price)) * Number(floorPrice) || 0
+                                                        : ((Number(softCap) / Number(price)) * Number(floorPrice) || 0)
+                                                )} MON
                                             </Text>
                                             <Text color="#4ade80" fontSize="sm">
-                                                (${commify((Number(softCap) || 0) * monPrice, 0)})
+                                                (${formatNumberPrecise(
+                                                    (capView === "hardcap" 
+                                                        ? ((Number(floorPrice) * Number(tokenSupply) * 0.1) / Number(price)) * Number(floorPrice) || 0
+                                                        : ((Number(softCap) / Number(price)) * Number(floorPrice) || 0)
+                                                    ) * monPrice
+                                                )})
                                             </Text>                                    
                                         </Box>
                                         <Box  w="33%">
                                             <Text color="#888" fontSize="xs" mb={1}>Founder Share</Text>
                                             <Text color="white" fontSize="lg" fontWeight="bold">
-                                                    {formatNumberPrecise(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
+                                                {formatNumberPrecise(
+                                                    capView === "hardcap"
+                                                        ? (Number(floorPrice) * Number(tokenSupply) * 0.1) - (((Number(floorPrice) * Number(tokenSupply) * 0.1) / Number(price)) * Number(floorPrice)) || 0
+                                                        : Number(softCap) - ((Number(softCap) / Number(price)) * Number(floorPrice)) || 0
+                                                )} MON
                                             </Text>
                                             <Text color="#4ade80" fontSize="sm">
-                                                    (${formatNumberPrecise((Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice))) * monPrice)})
+                                                (${formatNumberPrecise(
+                                                    (capView === "hardcap"
+                                                        ? (Number(floorPrice) * Number(tokenSupply) * 0.1) - (((Number(floorPrice) * Number(tokenSupply) * 0.1) / Number(price)) * Number(floorPrice)) || 0
+                                                        : Number(softCap) - ((Number(softCap) / Number(price)) * Number(floorPrice)) || 0
+                                                    ) * monPrice
+                                                )})
                                             </Text>
                                         </Box>
                                     </HStack>
@@ -1623,28 +1717,28 @@ const Launchpad: React.FC = () => {
                                     Review & Launch
                                 </Heading>
                             </Box>
-                            <Box>
+                            <Box ml={5}>
                                 <Text color="#888" fontSize="md" mt={1}>Confirm your token details before deployment</Text>
                             </Box>
                         </HStack>
 
                         {/* Summary Cards */}
-                        <VStack align="stretch" spacing={4} mb={2} flex="1">
+                        <VStack align="stretch" spacing={3} mb={2} flex="1">
                             {/* Token Details Card */}
                             <Box 
                                 bg="#0a0a0a" 
-                                p={5} 
+                                p={4} 
                                 borderRadius="xl" 
                                 border="1px solid #2a2a2a"
                                 transition="all 0.2s"
                                 _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                             >
-                                <HStack mb={3} spacing={2} align="center">
+                                <HStack mb={2} spacing={2} align="center">
                                     <Box>
                                         {logoPreview ? (
                                             <Box
-                                                w={10}
-                                                h={10}
+                                                w={8}
+                                                h={8}
                                                 borderRadius="full"
                                                 overflow="hidden"
                                                 border="1px solid #2a2a2a"
@@ -1658,14 +1752,14 @@ const Launchpad: React.FC = () => {
                                                 />
                                             </Box>
                                         ) : (
-                                            <MdToken size={24} color="#4ade80" />
+                                            <MdToken size={20} color="#4ade80" />
                                         )}
                                     </Box>
                                     <Box>
                                         <Text color="#4ade80" fontSize="sm" fontWeight="bold">Token Details</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={2} gap={4}>
+                                <SimpleGrid columns={3} gap={3}>
                                     <Box>
                                         <Text color="#888" fontSize="xs">Name</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenName}</Text>
@@ -1696,21 +1790,21 @@ const Launchpad: React.FC = () => {
                             {/* Pool Configuration Card */}
                             <Box 
                                 bg="#0a0a0a" 
-                                p={5} 
+                                p={4} 
                                 borderRadius="xl" 
                                 border="1px solid #2a2a2a"
                                 transition="all 0.2s"
                                 _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                             >
-                                <HStack mb={3} spacing={2}>
+                                <HStack mb={2} spacing={2}>
                                     <Box>
-                                        <FaChartLine size={18} color="#4ade80" />
+                                        <FaChartLine size={16} color="#4ade80" />
                                     </Box>
                                     <Box>
                                         <Text color="#4ade80" fontSize="sm" fontWeight="bold">Pool Configuration</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={3} gap={4}>
+                                <SimpleGrid columns={3} gap={3}>
                                     <Box>
                                         <Text color="#888" fontSize="xs">Floor Price</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{floorPrice} MON</Text>
@@ -1758,21 +1852,21 @@ const Launchpad: React.FC = () => {
                             {/* Project Founder Info */}
                             <Box 
                                 bg="#0a0a0a" 
-                                p={5} 
+                                p={4} 
                                 borderRadius="xl" 
                                 border="1px solid #2a2a2a"
                                 transition="all 0.2s"
                                 _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                             >
-                                <HStack mb={3} spacing={2}>
+                                <HStack mb={2} spacing={2}>
                                     <Box>
-                                        <FaUserTie size={18} color="#ff9500" />
+                                        <FaUserTie size={16} color="#ff9500" />
                                     </Box>
                                     <Box>
                                         <Text color="#ff9500" fontSize="sm" fontWeight="bold">Project Founder</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={2} gap={4}>
+                                <SimpleGrid columns={3} gap={3}>
                                     <Box>
                                         <Text color="#888" fontSize="xs">Your Allocation</Text>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
@@ -1835,15 +1929,15 @@ const Launchpad: React.FC = () => {
                                     transition="all 0.2s"
                                     _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                                 >
-                                    <HStack mb={3} spacing={2}>
+                                    <HStack mb={2} spacing={2}>
                                         <Box>
-                                            <FaCoins size={18} color="#4ade80" />
+                                            <FaCoins size={16} color="#4ade80" />
                                         </Box>
                                         <Box>
                                             <Text color="#4ade80" fontSize="sm" fontWeight="bold">Presale Configuration</Text>
                                         </Box>
                                     </HStack>
-                                    <SimpleGrid columns={2} gap={4}>
+                                    <SimpleGrid columns={3} gap={3}>
                                         <Box>
                                             <Text color="#888" fontSize="xs">Presale Price</Text>
                                             <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(price)} MON</Text>
@@ -1870,10 +1964,10 @@ const Launchpad: React.FC = () => {
                                             <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(Number(tokenSupply) * 0.1 || 0)} {tokenSymbol || 'TOKEN'}</Text>
                                         </Box>
                                     </SimpleGrid>
-                                    <Box mt={3} pt={3} borderTop="1px solid #2a2a2a">
-                                        <Text color="#888" fontSize="xs" mb={1}>Expected to Raise</Text>
+                                    <Box mt={2} pt={2} borderTop="1px solid #2a2a2a">
+                                        <Text color="#888" fontSize="xs">Expected to Raise</Text>
                                         <HStack gap={2} align="baseline">
-                                            <Text color="#4ade80" fontSize="lg" fontWeight="bold">
+                                            <Text color="#4ade80" fontSize="md" fontWeight="bold">
                                                 {formatNumberPrecise(Number(softCap) || 0)} MON
                                             </Text>
                                             <Text color="#666" fontSize="xs">
