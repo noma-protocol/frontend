@@ -1490,12 +1490,14 @@ const Borrow = () => {
                         
                         {/* Right side - Wallet Box */}
                         {!isMobile && (
-                            <WalletSidebar 
-                                ethBalance={ethBalance}
-                                token0Info={token0Info}
-                                token1Info={token1Info}
-                                address={address}
-                            />
+                            <Box flex="0 0 300px" maxW="300px" w="300px">
+                                <WalletSidebar 
+                                    ethBalance={ethBalance}
+                                    token0Info={token0Info}
+                                    token1Info={token1Info}
+                                    address={address}
+                                />
+                            </Box>
                         )}
                     </Flex>
                     
