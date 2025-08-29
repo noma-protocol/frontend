@@ -889,7 +889,7 @@ const Exchange: React.FC = () => {
         
         return () => clearInterval(interval);
         
-    }, [selectedToken, chartTimeframe, chartGranularity, token1Symbol, chartUpdateTrigger]);
+    }, [selectedToken?.id, chartTimeframe, chartGranularity, token1Symbol, chartUpdateTrigger]);
 
     // Listen to Uniswap pool events for real-time price updates
     useEffect(() => {
