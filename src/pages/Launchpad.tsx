@@ -512,8 +512,8 @@ const Launchpad: React.FC = () => {
     
     const capViewChoices = createListCollection({
         items: [
-            { label: "Hard Cap", value: "hardcap" },
-            { label: "Soft Cap", value: "softcap" }
+            { value: "hardcap", label: "Hard Cap" },
+            { value: "softcap", label: "Soft Cap" }
         ]
     });
 
@@ -1419,8 +1419,8 @@ const Launchpad: React.FC = () => {
                                             </Box>
                                         </HStack>
                                         </Box>
-                                        <Box w="50%" ml={5}>
-                                            <Box ml={2}>
+                                        <Box w="50%">
+                                        <Box ml={2}>
                                         <HStack mb={2}>
                                             <Box>
                                                 <FaClock size={14} color="#888" />
@@ -1583,8 +1583,8 @@ const Launchpad: React.FC = () => {
                                     <Heading as="h3">Overview</Heading>
                                     <SelectRoot
                                         collection={capViewChoices}
-                                        value={capView}
                                         defaultValue="softcap"
+                                        value={capView}
                                         onChange={handleSetCapView}
                                         w="200px"
                                     >
@@ -1616,6 +1616,7 @@ const Launchpad: React.FC = () => {
                                             }}
                                         >
                                             <SelectValueText 
+                                                placeholder={capViewChoices.items.find(item => item.value === "softcap")?.label}
                                                 color="white"
                                                 fontSize="sm"
                                                 fontWeight="600"
@@ -1760,31 +1761,29 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </HStack>
                                 <SimpleGrid columns={3} gap={3}>
-                                    <Box>
+                                    <Box p={4}>
                                         <Text color="#888" fontSize="xs">Name</Text>
-                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenName}</Text>
+                                        <Text  mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenName}</Text>
                                     </Box>
-                                    <Box>
+                                    <Box  p={4}>
                                         <Text color="#888" fontSize="xs">Symbol</Text>
-                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenSymbol}</Text>
+                                        <Text  mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenSymbol}</Text>
                                     </Box>
-                                    <Box>
+                                    <Box  p={4}>
                                         <Text color="#888" fontSize="xs">Decimals</Text>
-                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenDecimals}</Text>
-                                    </Box>
-                                    <Box>
-                                        <Text color="#888" fontSize="xs">Total Supply</Text>
-                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(tokenSupply, 0)}</Text>
+                                        <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenDecimals}</Text>
                                     </Box>
                                 </SimpleGrid>
-                                {tokenDescription && (
-                                    <Box mt={2}>
-                                        <Text color="#888" fontSize="xs" mb={1}>Description</Text>
-                                        <Text color="white" fontSize="sm" lineHeight="1.5" noOfLines={3}>
-                                            {tokenDescription}
-                                        </Text>
-                                    </Box>
-                                )}
+                                <Box p={4}>
+                                    {tokenDescription && (
+                                        <Box mt={2}>
+                                            <Text color="#888" fontSize="xs" mb={1}>Description</Text>
+                                            <Text  color="white" fontSize="sm" lineHeight="1.5" noOfLines={3}>
+                                                {tokenDescription}
+                                            </Text>
+                                        </Box>
+                                    )}
+                                </Box>
                             </Box>
                             
                             {/* Pool Configuration Card */}
@@ -1805,119 +1804,62 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </HStack>
                                 <SimpleGrid columns={3} gap={3}>
-                                    <Box>
+                                   <Box p={4}>
+                                        <Text color="#888" fontSize="xs">Total Supply</Text>
+                                        <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(tokenSupply, 0)}</Text>
+                                    </Box>                                    
+                                    <Box p={4}>
                                         <Text color="#888" fontSize="xs">Floor Price</Text>
-                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{floorPrice} MON</Text>
+                                        <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{floorPrice} MON</Text>
                                     </Box>
-                                    <Box>
+                                    {/* <Box p={4}>
                                         <Text color="#888" fontSize="xs">Presale Price</Text>
-                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{price} MON</Text>
-                                    </Box>
-                                    <Box>
+                                        <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{price} MON</Text>
+                                    </Box> */}
+                                    <Box p={4}>
                                         <Text color="#888" fontSize="xs">Paired Asset</Text>
                                         <HStack spacing={1}>
-                                            <Box>
-                                                <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{getAssetLabelByValue(token1)}</Text>
-                                            </Box>
-                                            <Box>
+                                            <Box mt={-2}>
                                                 <Image w="16px" h="16px" src={monadLogo} alt="MON" />
                                             </Box>
+                                            <Box mt={-2}>
+                                                <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{getAssetLabelByValue(token1)}</Text>
+                                            </Box>
                                         </HStack>
                                     </Box>
-                                    <Box>
-                                        <Text color="#888" fontSize="xs">Market Cap</Text>
-                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
-                                            {commify(Number(tokenSupply) * Number(price || 0), 0)} MON
-                                        </Text>
-                                        <Text color="#4ade80" fontSize="xs">
-                                            ${commify(Number(tokenSupply) * Number(price || 0) * (monPrice || 3.5), 0)}
-                                        </Text>
+
+                                    <Box p={4}>
+                                        <Text color="#888" fontSize="xs">Fully Diluted Value</Text>
+                                        <HStack gap={2} mt={-2}>
+                                            <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="bold">
+                                                {formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0), 0)} MON
+                                            </Text>
+                                            <Text mt={-6} color="#666" fontSize="xs">
+                                                (${formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0) * (monPrice), 0)})
+                                            </Text>
+                                        </HStack>
                                     </Box>
-                                    <Box>
+                                    <Box p={4}>
                                         <Text color="#888" fontSize="xs">Protocol</Text>
-                                        <HStack spacing={1}>
+                                        <HStack spacing={1} ml={-2}>
+                                            <Box>
                                             <Image 
-                                                w="16px" 
-                                                h="16px" 
+                                                mt={-3}
+                                                w="35px" 
+                                                h="35px" 
                                                 src={selectedProtocol === "uniswap" ? uniswapLogo : pancakeLogo} 
                                                 alt={selectedProtocol} 
-                                            />
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
+                                            />                                                
+                                            </Box>
+                                            <Box mt={-3}>
+                                            <Text  color="white" fontSize="sm" fontWeight="600">
                                                 {selectedProtocol === "uniswap" ? "Uniswap V3" : "PancakeSwap V3"}
-                                            </Text>
+                                            </Text>                                                
+                                            </Box>
                                         </HStack>
                                     </Box>
                                 </SimpleGrid>
                             </Box>
-                            {/* Project Founder Info */}
-                            <Box 
-                                bg="#0a0a0a" 
-                                p={4} 
-                                borderRadius="xl" 
-                                border="1px solid #2a2a2a"
-                                transition="all 0.2s"
-                                _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
-                            >
-                                <HStack mb={2} spacing={2}>
-                                    <Box>
-                                        <FaUserTie size={16} color="#ff9500" />
-                                    </Box>
-                                    <Box>
-                                        <Text color="#ff9500" fontSize="sm" fontWeight="bold">Project Founder</Text>
-                                    </Box>
-                                </HStack>
-                                <SimpleGrid columns={3} gap={3}>
-                                    <Box>
-                                        <Text color="#888" fontSize="xs">Your Allocation</Text>
-                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
-                                            {presale == "1" 
-                                                ? commify(Number(tokenSupply) * 0.0) + " " + (tokenSymbol || 'TOKEN') + " (0%)"
-                                                : commify(Number(tokenSupply) * 0.1) + " " + (tokenSymbol || 'TOKEN') + " (10%)"}
-                                        </Text>
-                                    </Box>
-                                    <Box>
-                                        <Text color="#888" fontSize="xs">Liquidity Pool</Text>
-                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
-                                            {presale == "1" 
-                                                ? commify(Number(tokenSupply) * 0.9) + " " + (tokenSymbol || 'TOKEN') + " (90%)"
-                                                : commify(Number(tokenSupply) * 0.9) + " " + (tokenSymbol || 'TOKEN') + " (90%)"}
-                                        </Text>
-                                    </Box>
-                                </SimpleGrid>
-                            </Box>
-                            
-                            {/* Presale Participants Box */}
-                            {presale == "1" && (
-                                <Box 
-                                    bg="#0a0a0a" 
-                                    p={4} 
-                                    borderRadius="xl" 
-                                    border="1px solid #2a2a2a"
-                                    transition="all 0.2s"
-                                    _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
-                                >
-                                    <HStack mb={3} spacing={2}>
-                                        <Box>
-                                            <FaWallet size={18} color="#22c55e" />
-                                        </Box>
-                                        <Box>
-                                            <Text color="#22c55e" fontSize="sm" fontWeight="bold">Presale Participants</Text>
-                                        </Box>
-                                    </HStack>
-                                    <SimpleGrid columns={2} gap={4}>
-                                        <Box>
-                                            <Text color="#888" fontSize="xs">Token Allocation</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
-                                                {commify(Number(tokenSupply) * 0.1)} {tokenSymbol || 'TOKEN'}
-                                            </Text>
-                                        </Box>
-                                        <Box>
-                                            <Text color="#888" fontSize="xs">Percentage</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">10%</Text>
-                                        </Box>
-                                    </SimpleGrid>
-                                </Box>
-                            )}
                             
                             {/* Presale Configuration Card */}
                             {presale == "1" && (
@@ -1938,110 +1880,47 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                     </HStack>
                                     <SimpleGrid columns={3} gap={3}>
-                                        <Box>
+                                        <Box p={4}>
                                             <Text color="#888" fontSize="xs">Presale Price</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(price)} MON</Text>
+                                            <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(price)} MON</Text>
                                         </Box>
-                                        <Box>
+                                        <Box p={4}>
                                             <Text color="#888" fontSize="xs">Hard Cap</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON</Text>
+                                            <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON</Text>
                                         </Box>
-                                        <Box>
+                                        <Box  p={4}>
                                             <Text color="#888" fontSize="xs">Soft Cap</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
-                                                {commify(softCap, 0)} MON
+                                            <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
+                                                {formatNumberPrecise(softCap, 0)} MON
                                             </Text>
-                                            <Text color="#666" fontSize="xs">
+                                            <Text mt={-2} color="#666" fontSize="xs">
                                                 ({((Number(softCap) / (Number(floorPrice) * Number(tokenSupply) * 0.1)) * 100).toFixed(0)}% of hard cap)
                                             </Text>
                                         </Box>
-                                        <Box>
+                                        <Box  p={4}>
                                             <Text color="#888" fontSize="xs">Duration</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{getDaysFromDuration(duration)} days</Text>
+                                            <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{getDaysFromDuration(duration)} days</Text>
                                         </Box>
-                                        <Box>
+                                        <Box p={4}>
                                             <Text color="#888" fontSize="xs">Tokens for Sale</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(Number(tokenSupply) * 0.1 || 0)} {tokenSymbol || 'TOKEN'}</Text>
+                                            <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(Number(tokenSupply) * 0.1 || 0)} {tokenSymbol || 'TOKEN'}</Text>
                                         </Box>
-                                    </SimpleGrid>
-                                    <Box mt={2} pt={2} borderTop="1px solid #2a2a2a">
+                                       <Box p={4}>
                                         <Text color="#888" fontSize="xs">Expected to Raise</Text>
-                                        <HStack gap={2} align="baseline">
-                                            <Text color="#4ade80" fontSize="md" fontWeight="bold">
+                                        <HStack gap={2} mt={-2}>
+                                            <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="bold">
                                                 {formatNumberPrecise(Number(softCap) || 0)} MON
                                             </Text>
-                                            <Text color="#666" fontSize="xs">
+                                            <Text mt={-6} color="#666" fontSize="xs">
                                                 (${formatNumberPrecise((Number(softCap) || 0) * (monPrice || 3.5))})
                                             </Text>
                                         </HStack>
                                     </Box>
+                                    </SimpleGrid>
+
                                 </Box>
                             )}
-                            
-                            {/* Presale Summary Box - Green */}
-                            {presale == "1" && (
-                                <Box 
-                                    mt={4}
-                                    p={4} 
-                                    bg="linear-gradient(135deg, #4ade8015 0%, #22c55e15 100%)" 
-                                    borderRadius="xl" 
-                                    border="1px solid #4ade8040"
-                                    position="relative"
-                                    overflow="hidden"
-                                >
-                                    <Box
-                                        position="absolute"
-                                        top={0}
-                                        left={0}
-                                        bottom={0}
-                                        w="4px"
-                                        bg="#4ade80"
-                                    />
-                                    <VStack align="stretch" gap={3} pl={2}>
-                                        <HStack justify="space-between">
-                                            <Text color="#4ade80" fontSize="sm" fontWeight="bold">Hard Cap (Maximum)</Text>
-                                            <HStack gap={2}>
-                                                <Text color="white" fontSize="lg" fontWeight="bold">
-                                                    {formatNumberPrecise(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0)} MON
-                                                </Text>
-                                                <Text color="#666" fontSize="sm">
-                                                    (${formatNumberPrecise((Number(floorPrice) * Number(tokenSupply) * 0.1 || 0) * (monPrice || 3.5))})
-                                                </Text>
-                                            </HStack>
-                                        </HStack>
-                                        <HStack justify="space-between">
-                                            <Text color="#4ade80" fontSize="sm" fontWeight="bold">Expected Raise (Soft Cap)</Text>
-                                            <HStack gap={2}>
-                                                <Text color="white" fontSize="lg" fontWeight="bold">
-                                                    {formatNumberPrecise(Number(softCap) || 0)} MON
-                                                </Text>
-                                                <Text color="#666" fontSize="sm">
-                                                    (${formatNumberPrecise((Number(softCap) || 0) * (monPrice || 3.5))})
-                                                </Text>
-                                            </HStack>
-                                        </HStack>
-                                        <HStack justify="space-between">
-                                            <Text color="#888" fontSize="sm">Floor Liquidity</Text>
-                                            <Text color="white" fontSize="sm" fontWeight="600">
-                                                {formatNumberPrecise((Number(softCap) / Number(presalePrice)) * Number(floorPrice) || 0)} MON
-                                            </Text>
-                                        </HStack>
-                                        <Box borderTop="1px solid #2a2a2a" pt={2}>
-                                            <HStack justify="space-between">
-                                                <Text color="#4ade80" fontSize="sm" fontWeight="bold">Founder Receives</Text>
-                                                <VStack align="end" gap={1}>
-                                                    <Text color="#4ade80" fontSize="lg" fontWeight="bold">
-                                                        {formatNumberPrecise(Number(softCap) - ((Number(softCap) / Number(presalePrice)) * Number(floorPrice)) || 0)} MON
-                                                    </Text>
-                                                    <Text color="#666" fontSize="xs">
-                                                        ({((1 - (Number(floorPrice) / Number(presalePrice))) * 100).toFixed(0)}% of raise)
-                                                    </Text>
-                                                </VStack>
-                                            </HStack>
-                                        </Box>
-                                    </VStack>
-                                </Box>
-                            )}
+
                         </VStack>
                         
                         {/* Deployment Fee Notice */}
@@ -2062,12 +1941,18 @@ const Launchpad: React.FC = () => {
                                 bg="#4ade80"
                             />
                             <HStack spacing={3} pl={3}>
-                                <Box color="#4ade80">
+                                <Box w="5%" color="#4ade80">
                                     <FaInfoCircle size={20} />
                                 </Box>
                                 <Box>
-                                    <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Deployment Fee: 1 MON</Text>
-                                    <Text color="#888" fontSize="xs">This fee helps maintain the protocol and prevent spam</Text>
+                                <VStack align={"left"}>
+                                    <Box>
+                                        <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Deployment Fee: 1 MON</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="#888" fontSize="xs">This fee helps maintain the protocol and prevent spam</Text>
+                                    </Box>
+                                </VStack>
                                 </Box>
                             </HStack>
                         </Box>
