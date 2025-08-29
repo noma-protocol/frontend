@@ -1734,11 +1734,11 @@ const Launchpad: React.FC = () => {
                             {/* Token Details Card */}
                             <Box 
                                 bg="#0a0a0a" 
-                                p={4} 
+                                p={isMobile ? 3 : 4} 
                                 borderRadius="xl" 
                                 border="1px solid #2a2a2a"
                                 transition="all 0.2s"
-                                _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
+                                _hover={{ borderColor: "#3a3a3a", transform: isMobile ? "none" : "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                             >
                                 <HStack mb={2} spacing={2} align="center">
                                     <Box>
@@ -1767,7 +1767,7 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </HStack>
                                 <SimpleGrid columns={isMobile ? 1 : 3} gap={3}>
-                                    <Box p={4}>
+                                    <Box p={isMobile ? 2 : 4}>
                                         <Text color="#888" fontSize="xs">Name</Text>
                                         <Text  mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenName}</Text>
                                     </Box>
@@ -1795,11 +1795,11 @@ const Launchpad: React.FC = () => {
                             {/* Pool Configuration Card */}
                             <Box 
                                 bg="#0a0a0a" 
-                                p={4} 
+                                p={isMobile ? 3 : 4} 
                                 borderRadius="xl" 
                                 border="1px solid #2a2a2a"
                                 transition="all 0.2s"
-                                _hover={{ borderColor: "#3a3a3a", transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
+                                _hover={{ borderColor: "#3a3a3a", transform: isMobile ? "none" : "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
                             >
                                 <HStack mb={2} spacing={2}>
                                     <Box>
@@ -1814,7 +1814,7 @@ const Launchpad: React.FC = () => {
                                         <Text color="#888" fontSize="xs">Total Supply</Text>
                                         <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(tokenSupply, 0)} {tokenSymbol}</Text>
                                     </Box>                                    
-                                    <Box p={4}>
+                                    <Box p={isMobile ? 2 : 4}>
                                         <Text color="#888" fontSize="xs">Floor Price</Text>
                                         <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{floorPrice} MON</Text>
                                     </Box>
@@ -1822,7 +1822,7 @@ const Launchpad: React.FC = () => {
                                         <Text color="#888" fontSize="xs">Presale Price</Text>
                                         <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{price} MON</Text>
                                     </Box> */}
-                                    <Box p={4}>
+                                    <Box p={isMobile ? 2 : 4}>
                                         <Text color="#888" fontSize="xs">Reserve Asset</Text>
                                         <HStack spacing={1}>
                                             <Box mt={-2}>
@@ -1834,7 +1834,7 @@ const Launchpad: React.FC = () => {
                                         </HStack>
                                     </Box>
 
-                                    <Box p={4}>
+                                    <Box p={isMobile ? 2 : 4}>
                                         <Text color="#888" fontSize="xs">Fully Diluted Value</Text>
                                         <HStack gap={2} mt={-2}>
                                             <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="bold">
@@ -1845,7 +1845,7 @@ const Launchpad: React.FC = () => {
                                             </Text>
                                         </HStack>
                                     </Box>
-                                    <Box p={4}>
+                                    <Box p={isMobile ? 2 : 4}>
                                         <Text color="#888" fontSize="xs">Protocol</Text>
                                         <HStack spacing={1} ml={-2}>
                                             <Box>
@@ -1886,11 +1886,11 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                     </HStack>
                                     <SimpleGrid columns={isMobile ? 1 : 3} gap={3}>
-                                        <Box p={4}>
+                                        <Box p={isMobile ? 2 : 4}>
                                             <Text color="#888" fontSize="xs">Presale Price</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(price)} MON</Text>
                                         </Box>
-                                        <Box p={4}>
+                                        <Box p={isMobile ? 2 : 4}>
                                             <Text color="#888" fontSize="xs">Hard Cap</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON</Text>
                                         </Box>
@@ -1907,11 +1907,11 @@ const Launchpad: React.FC = () => {
                                             <Text color="#888" fontSize="xs">Duration</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{getDaysFromDuration(duration)} days</Text>
                                         </Box>
-                                        <Box p={4}>
+                                        <Box p={isMobile ? 2 : 4}>
                                             <Text color="#888" fontSize="xs">Tokens for Sale</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(Number(tokenSupply) * 0.1 || 0)} {tokenSymbol || 'TOKEN'}</Text>
                                         </Box>
-                                       <Box p={4}>
+                                       <Box p={isMobile ? 2 : 4}>
                                         <Text color="#888" fontSize="xs">Expected to Raise</Text>
                                         <HStack gap={2} mt={-2}>
                                             <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="bold">
@@ -2198,7 +2198,7 @@ const Launchpad: React.FC = () => {
                             </VStack>
                             
                             {/* Stats Grid */}
-                            <SimpleGrid columns={2} gap={6} w="100%">
+                            <SimpleGrid columns={isMobile ? 1 : 2} gap={isMobile ? 4 : 6} w="100%">
                                 <Box bg="#0a0a0a" p={4} borderRadius="lg" border="1px solid #2a2a2a">
                                     <Text color="#888" fontSize="xs" mb={1}>Supply</Text>
                                     <Text color="white" fontSize="sm" fontWeight="600">

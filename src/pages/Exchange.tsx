@@ -2451,7 +2451,7 @@ const Exchange: React.FC = () => {
                                         <Table.ColumnHeader color="#888" fontSize="xs" py={2} pl={isMobile ? 2 : 0} pr={isMobile ? 1 : 3}>Token</Table.ColumnHeader>
                                         <Table.ColumnHeader color="#888" fontSize="xs" py={2} px={isMobile ? 1 : 2} textAlign="right">Price</Table.ColumnHeader>
                                         <Table.ColumnHeader color="#888" fontSize="xs" py={2} px={isMobile ? 1 : 2} textAlign="right">24h</Table.ColumnHeader>
-                                        {!isMobile && <Table.ColumnHeader color="#888" fontSize="xs" py={2} pr={3} pl={2} textAlign="right">MCap</Table.ColumnHeader>}
+                                        {!isMobile && <Table.ColumnHeader color="#888" fontSize="xs" py={2} pr={3} pl={2} textAlign="right">FDV</Table.ColumnHeader>}
                                     </Table.Row>
                                 </Table.Header>
                                 <Table.Body>
