@@ -2955,7 +2955,7 @@ const Exchange: React.FC = () => {
                                                 color="#888"
                                                 fontWeight="600"
                                             >
-                                                All Transactions
+                                                {isMobile ? "All" : "All Transactions"}
                                             </Tabs.Trigger>
                                             <Tabs.Trigger 
                                                 value="my" 
@@ -2964,7 +2964,7 @@ const Exchange: React.FC = () => {
                                                 color="#888"
                                                 fontWeight="600"
                                             >
-                                                My Transactions
+                                                {isMobile ? "My" : "My Transactions"}
                                             </Tabs.Trigger>
                                         </Tabs.List>
                                         {tradeHistory.length > 0 && (
@@ -3851,7 +3851,7 @@ const Exchange: React.FC = () => {
                                             color="#888"
                                             fontWeight="600"
                                         >
-                                            All Transactions
+                                            {isMobile ? "All" : "All Transactions"}
                                         </Tabs.Trigger>
                                         <Tabs.Trigger 
                                             value="my" 
@@ -3860,7 +3860,7 @@ const Exchange: React.FC = () => {
                                             color="#888"
                                             fontWeight="600"
                                         >
-                                            My Transactions
+                                            {isMobile ? "My" : "My Transactions"}
                                         </Tabs.Trigger>
                                     </Tabs.List>
                                     {tradeHistory.length > 0 && (
