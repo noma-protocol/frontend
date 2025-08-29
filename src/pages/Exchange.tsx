@@ -987,27 +987,11 @@ const Exchange: React.FC = () => {
                 // IMPORTANT: We need to check which position our selected token is in the pool
                 // The pool's token0/token1 ordering may be different from our selectedToken.token0/token1
                 
-                // We need to determine which pool token corresponds to our selected token (NOMA)
-                // The selectedToken object contains token0 and token1, but we're viewing a specific token
-                // We'll use the vault address to identify which token is being viewed
+                // We know that token1 is always the reserve asset (MON/WMON)
+                // So token0 is always the token being traded (e.g., NOMA)
+                // We just need to check if our selectedToken.token0 matches the pool's token0
                 
-                // Get the token address from the vault (this is the token being traded)
-                const viewedTokenAddress = selectedToken?.vault ? await (async () => {
-                    try {
-                        const vaultContract = new ethers.Contract(
-                            selectedToken.vault,
-                            ["function token0() view returns (address)"],
-                            localProvider
-                        );
-                        return await vaultContract.token0();
-                    } catch {
-                        // Fallback: assume token0 is the non-WMON token
-                        return selectedToken?.token0;
-                    }
-                })() : selectedToken?.token0;
-                
-                // Check if the viewed token matches pool's token0
-                const isSelectedTokenPoolToken0 = viewedTokenAddress?.toLowerCase() === poolInfo?.token0?.toLowerCase();
+                const isSelectedTokenPoolToken0 = selectedToken?.token0?.toLowerCase() === poolInfo?.token0?.toLowerCase();
                 
                 // If our selected token is in the pool's token0 position:
                 //   - amount0 < 0 means our token is flowing OUT of the pool (someone is BUYING our token)
