@@ -1338,23 +1338,31 @@ const Exchange: React.FC = () => {
                 }
                 
                 // Convert vault descriptions to token format for display
-                const tokenList = flattenedVaults.map((vault, index) => ({
-                    id: index + 1,
-                    name: vault.tokenName,
-                    symbol: vault.tokenSymbol,
-                    price: vault.spotPrice ? parseFloat(formatEther(vault.spotPrice)) : 0.0000186, // Use actual spot price
-                    change24h: priceStats?.percentageChange || 0, // Use API percentage change or 0 as fallback
-                    volume24h: priceStats?.volume_24h || Math.floor(Math.random() * 1000000),
-                    marketCap: priceStats?.market_cap || Math.floor(Math.random() * 10000000),
-                    liquidity: priceStats?.liquidity || Math.floor(Math.random() * 1000000),
-                    fdv: priceStats?.fdv || Math.floor(Math.random() * 10000000),
-                    holders: priceStats?.holders || Math.floor(Math.random() * 10000),
-                    token0: vault.token0,
-                    token1: vault.token1,
-                    vault: vault.vault,
-                    poolAddress: vault.poolAddress,
-                    spotPrice: vault.spotPrice // Keep the raw spot price
-                }));
+                const tokenList = flattenedVaults.map((vault, index) => {
+                    // Use API percentage change for NOMA token, random for others
+                    const isNoma = vault.tokenSymbol === 'NOMA' || vault.tokenSymbol === 'noma';
+                    const change24h = isNoma && priceStats?.percentageChange !== undefined 
+                        ? priceStats.percentageChange 
+                        : (Math.random() - 0.5) * 20; // Random change between -10% and +10%
+                    
+                    return {
+                        id: index + 1,
+                        name: vault.tokenName,
+                        symbol: vault.tokenSymbol,
+                        price: vault.spotPrice ? parseFloat(formatEther(vault.spotPrice)) : 0.0000186, // Use actual spot price
+                        change24h: change24h,
+                        volume24h: Math.floor(Math.random() * 1000000),
+                        marketCap: Math.floor(Math.random() * 10000000),
+                        liquidity: Math.floor(Math.random() * 1000000),
+                        fdv: Math.floor(Math.random() * 10000000),
+                        holders: Math.floor(Math.random() * 10000),
+                        token0: vault.token0,
+                        token1: vault.token1,
+                        vault: vault.vault,
+                        poolAddress: vault.poolAddress,
+                        spotPrice: vault.spotPrice // Keep the raw spot price
+                    };
+                });
                 
                 // Ensure minimum loading time for better UX
                 const elapsedTime = Date.now() - startTime;
@@ -1386,6 +1394,38 @@ const Exchange: React.FC = () => {
         
         fetchVaults();
     }, [deployersData]);
+    
+    // Periodically update 24h change for tokens
+    useEffect(() => {
+        if (tokens.length === 0) return;
+        
+        const updateTokenStats = async () => {
+            try {
+                const priceStats = await fetchTokenPriceStats("24h");
+                if (priceStats?.percentageChange !== undefined) {
+                    // Update NOMA token's 24h change
+                    setTokens(prevTokens => 
+                        prevTokens.map(token => {
+                            if (token.symbol === 'NOMA' || token.symbol === 'noma') {
+                                return { ...token, change24h: priceStats.percentageChange };
+                            }
+                            return token;
+                        })
+                    );
+                }
+            } catch (error) {
+                console.error("Error updating token stats:", error);
+            }
+        };
+        
+        // Update immediately
+        updateTokenStats();
+        
+        // Then update every 60 seconds
+        const interval = setInterval(updateTokenStats, 60000);
+        
+        return () => clearInterval(interval);
+    }, [tokens.length]);
     
     const formatPrice = (price) => {
         if (price === 0) return '0.00';
