@@ -984,20 +984,24 @@ const Exchange: React.FC = () => {
                 const timestamp = new Date(block.timestamp * 1000);
                 
                 // Determine if it's a buy or sell based on amounts and token positions
-                // Check if our selected token is token0 or token1
-                const isSelectedTokenToken0 = selectedToken?.token0?.toLowerCase() === poolInfo?.token0?.toLowerCase();
+                // IMPORTANT: We need to check which position our selected token is in the pool
+                // The pool's token0/token1 ordering may be different from our selectedToken.token0/token1
                 
-                // If selected token is token0:
-                //   - amount0 > 0 means token0 is flowing IN (we're buying the token)
-                //   - amount0 < 0 means token0 is flowing OUT (we're selling the token)
-                // If selected token is token1:
-                //   - amount1 > 0 means token1 is flowing IN (we're buying the token)
-                //   - amount1 < 0 means token1 is flowing OUT (we're selling the token)
-                const isBuy = isSelectedTokenToken0 ? amount0.gt(0) : amount1.gt(0);
+                // Check if our selected token (NOMA) matches the pool's token0 or token1
+                const isSelectedTokenPoolToken0 = selectedToken?.token0?.toLowerCase() === poolInfo?.token0?.toLowerCase() ||
+                                                  selectedToken?.token1?.toLowerCase() === poolInfo?.token0?.toLowerCase();
                 
-                // Get the correct amounts based on which token is which
-                const tokenAmount = isSelectedTokenToken0 ? amount0.abs() : amount1.abs();
-                const ethAmount = isSelectedTokenToken0 ? amount1.abs() : amount0.abs();
+                // If our selected token is in the pool's token0 position:
+                //   - amount0 > 0 means our token is flowing IN (someone is buying our token)
+                //   - amount0 < 0 means our token is flowing OUT (someone is selling our token)
+                // If our selected token is in the pool's token1 position:
+                //   - amount1 > 0 means our token is flowing IN (someone is buying our token)
+                //   - amount1 < 0 means our token is flowing OUT (someone is selling our token)
+                const isBuy = isSelectedTokenPoolToken0 ? amount0.gt(0) : amount1.gt(0);
+                
+                // Get the correct amounts based on which token is which in the pool
+                const tokenAmount = isSelectedTokenPoolToken0 ? amount0.abs() : amount1.abs();
+                const ethAmount = isSelectedTokenPoolToken0 ? amount1.abs() : amount0.abs();
                 
                 // Calculate price
                 const tokenAmountFormatted = parseFloat(formatEther(tokenAmount));
@@ -1129,13 +1133,35 @@ const Exchange: React.FC = () => {
                     setSpotPrice(selectedToken.price || 0.0000186);
                 }
                 
-                // Fetch pool address
+                // Fetch pool address and token ordering
                 if (selectedToken.token0 && selectedToken.token1) {
                     try {
                         const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1);
-                        setPoolInfo({ poolAddress });
+                        
+                        // Get token0 and token1 from the pool to determine correct ordering
+                        if (poolAddress && poolAddress !== zeroAddress) {
+                            const poolContract = new ethers.Contract(
+                                poolAddress,
+                                uniswapV3PoolABI,
+                                localProvider
+                            );
+                            
+                            const [poolToken0, poolToken1] = await Promise.all([
+                                poolContract.token0(),
+                                poolContract.token1()
+                            ]);
+                            
+                            setPoolInfo({ 
+                                poolAddress, 
+                                token0: poolToken0,
+                                token1: poolToken1
+                            });
+                        } else {
+                            setPoolInfo({ poolAddress });
+                        }
                     } catch (error) {
-                        console.error("Error fetching pool address:", error);
+                        console.error("Error fetching pool info:", error);
+                        setPoolInfo({ poolAddress: null });
                     }
                 }
                 
