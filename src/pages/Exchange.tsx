@@ -379,6 +379,7 @@ const Exchange: React.FC = () => {
     const mockPriceUSD = "3500";
     
     const [percentChange, setPercentChange] = useState(0);
+    const [intervalVolume, setIntervalVolume] = useState(0); // Volume for selected interval
     const [chartSeries, setChartSeries] = useState([]);
     const [chartTimeframe, setChartTimeframe] = useState("24h");
     const [chartGranularity, setChartGranularity] = useState("1h");
@@ -780,10 +781,19 @@ const Exchange: React.FC = () => {
             setIsChartLoading(true);
             
             try {
-                // First try to fetch price stats for accurate percentage based on selected interval
+                // First try to fetch price stats for accurate percentage and volume based on selected interval
                 const priceStats = await fetchTokenPriceStats(chartTimeframe);
-                if (priceStats && priceStats.percentageChange !== undefined) {
-                    setPercentChange(priceStats.percentageChange);
+                if (priceStats) {
+                    if (priceStats.percentageChange !== undefined) {
+                        setPercentChange(priceStats.percentageChange);
+                    }
+                    
+                    // Set volume based on selected interval
+                    if (priceStats.volume) {
+                        const intervalKey = mapTimeframeToApiInterval(chartTimeframe);
+                        const volume = priceStats.volume[intervalKey] || priceStats.volume['24h'] || 0;
+                        setIntervalVolume(volume);
+                    }
                 }
                 
                 const ohlcData = await fetchOHLCData(chartTimeframe, chartGranularity);
@@ -2762,11 +2772,26 @@ const Exchange: React.FC = () => {
                                 </Box>
                                 
                                 <Box bg="#1a1a1a" p={4} borderRadius="lg">
-                                    <Text color="#888" fontSize="sm" mb={2}>24h Volume</Text>
+                                    <Text color="#888" fontSize="sm" mb={2}>
+                                        {chartTimeframe === "15m" ? "15m" : 
+                                         chartTimeframe === "1h" ? "1h" :
+                                         chartTimeframe === "1w" ? "7d" :
+                                         chartTimeframe === "1M" ? "30d" : "24h"} Volume
+                                    </Text>
                                     <Box>
-                                        <Text color="white" fontSize="xl" fontWeight="bold">
-                                            ${formatNumber(selectedToken.volume24h)}
-                                        </Text>
+                                        <VStack align="start" spacing={0}>
+                                            <Text color="white" fontSize="xl" fontWeight="bold">
+                                                {intervalVolume > 0 ? 
+                                                    `${commify(intervalVolume.toFixed(2), 2)} MON` : 
+                                                    `$${formatNumber(selectedToken.volume24h)}`
+                                                }
+                                            </Text>
+                                            {intervalVolume > 0 && monPrice > 0 && (
+                                                <Text color="#888" fontSize="sm">
+                                                    ${formatNumber(intervalVolume * monPrice)}
+                                                </Text>
+                                            )}
+                                        </VStack>
                                     </Box>
                                 </Box>
                                 
