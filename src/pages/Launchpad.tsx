@@ -625,7 +625,7 @@ const Launchpad: React.FC = () => {
                 </Box> */}
 
                 {/* Enhanced Progress Stepper */}
-                <Box mb={isMobile ? 4 : 6} mt="10px">
+                <Box mb={isMobile ? 4 : "10px"} mt="10px" maxW={isMobile ? "100%" : "1400px"} mx="auto" w="100%">
                     <Box 
                         bg={isMobile ? "transparent" : "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"} 
                         p={isMobile ? 4 : 8} 
@@ -634,6 +634,33 @@ const Launchpad: React.FC = () => {
                         boxShadow={isMobile ? "none" : "0 10px 30px rgba(0, 0, 0, 0.5)"}
                     >
                         <HStack spacing={isMobile ? 1 : 8} justify="space-between" position="relative">
+                            {/* Progress Line Background - Desktop only */}
+                            {!isMobile && (
+                                <>
+                                    <Box
+                                        position="absolute"
+                                        top="50%"
+                                        left="10%"
+                                        right="10%"
+                                        h="2px"
+                                        bg="#2a2a2a"
+                                        transform="translateY(calc(-50% - 20px))"
+                                        zIndex={0}
+                                    />
+                                    {/* Progress Line Fill */}
+                                    <Box
+                                        position="absolute"
+                                        top="50%"
+                                        left="10%"
+                                        w={`${Math.min(deployStep / 3 * 80, 80)}%`}
+                                        h="2px"
+                                        bg="#4ade80"
+                                        transform="translateY(calc(-50% - 20px))"
+                                        transition="width 0.3s ease"
+                                        zIndex={0}
+                                    />
+                                </>
+                            )}
                             
                             {[
                                 { name: "Token Info", icon: MdToken },
@@ -655,6 +682,16 @@ const Launchpad: React.FC = () => {
                                             alignItems="center"
                                             justifyContent="center"
                                         >
+                                            {/* Background to hide the line - Desktop only */}
+                                            {!isMobile && (
+                                                <Box
+                                                    position="absolute"
+                                                    w="100%"
+                                                    h="100%"
+                                                    bg="#1a1a1a"
+                                                    borderRadius="full"
+                                                />
+                                            )}
                                             <Box
                                                 position="relative"
                                                 w={isMobile ? 14 : 16}
@@ -690,7 +727,7 @@ const Launchpad: React.FC = () => {
                         </HStack>
                     </Box>
                 </Box>
-                <Box flex="1" maxW={isMobile ? "100%" : "1400px"} mx="auto" overflow="hidden" w="100%" mt={-5}>
+                <Box flex="1" maxW={isMobile ? "100%" : "1400px"} mx="auto" overflow="hidden" w="100%">
                 <Box display="flex" gap={isMobile ? 0 : 6} flexDirection={isMobile ? "column" : "row"} w="100%">
                     {/* Main Form - Responsive Width Container */}
                     <Box w="100%" maxW={isMobile ? "100%" : "900px"} mb={isMobile ? 4 : 0} px={isMobile ? 0 : 0}>
