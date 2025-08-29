@@ -47,6 +47,7 @@ import { Toaster, toaster } from "../components/ui/toaster"
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
 import { unCommify, commify, generateBytes32String, getContractAddress, formatNumberPrecise } from "../utils";
+import { tokenApi } from "../services/tokenApi";
 import Logo from "../assets/images/noma_logo_transparent.png";
 import { ethers } from "ethers"; // Import ethers.js
 const { formatEther, parseEther } = ethers.utils;
@@ -154,8 +155,23 @@ const Launchpad: React.FC = () => {
         ],
         value: safeParseEther(1), // 1 MON for deployment
         gasLimit: 30000000, // Increase gas limit
-        onSuccess(data) {
+        onSuccess: async (data) => {
         console.log(`transaction successful: ${data.hash}`);
+        
+        // Update token status to success
+        const pendingTokenId = sessionStorage.getItem('pendingTokenId');
+        if (pendingTokenId) {
+            try {
+                await tokenApi.updateTokenStatus(
+                    pendingTokenId, 
+                    'success', 
+                    data.hash
+                );
+                sessionStorage.removeItem('pendingTokenId');
+            } catch (error) {
+                console.error('Failed to update token status:', error);
+            }
+        }
 
         toaster.create({
             title: "Success",
@@ -165,12 +181,24 @@ const Launchpad: React.FC = () => {
             window.location.href = "markets?v=my";
         }, 1500); // 3000ms = 3 seconds
         },
-        onError(error) {
+        onError: async (error) => {
         const msg = error.message.indexOf("TokenAlreadyExists") > -1 ? "Token already exists" : 
                     error.message.indexOf("Already contributed") > -1 ? "Already contributed" : 
                     error.message.indexOf("0xf4354b39") > -1 ? "Invalid soft cap" :
                     error.message.indexOf("NotAuthorityError") > -1 ? "Permissionless deployment is disabled. Reach out on Discord." :
                     error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
+        
+        // Update token status to failed
+        const pendingTokenId = sessionStorage.getItem('pendingTokenId');
+        if (pendingTokenId) {
+            try {
+                await tokenApi.updateTokenStatus(pendingTokenId, 'failed');
+                sessionStorage.removeItem('pendingTokenId');
+            } catch (err) {
+                console.error('Failed to update token status:', err);
+            }
+        }
+        
         toaster.create({
             title: "Error",
             description: msg,
@@ -531,7 +559,36 @@ const Launchpad: React.FC = () => {
         return Number(duration) / 86400;
     }
 
-    const handleClickDeploy = () => {  
+    const handleClickDeploy = async () => {  
+        // Save token data to server
+        try {
+            const tokenData = {
+                tokenName,
+                tokenSymbol,
+                tokenDescription,
+                tokenDecimals,
+                tokenSupply,
+                logoPreview,
+                price,
+                floorPrice,
+                presalePrice,
+                token1,
+                selectedProtocol,
+                presale,
+                softCap,
+                duration,
+                deployerAddress: address
+            };
+            
+            const savedToken = await tokenApi.saveToken(tokenData);
+            console.log('Token saved to server:', savedToken);
+            
+            // Store token ID for later status update
+            sessionStorage.setItem('pendingTokenId', savedToken.id);
+        } catch (error) {
+            console.error('Failed to save token data:', error);
+            // Continue with deployment even if save fails
+        }
 
         console.log( [
             {
