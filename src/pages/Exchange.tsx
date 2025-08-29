@@ -657,10 +657,23 @@ const Exchange: React.FC = () => {
     
     const API_BASE_URL = "https://pricefeed.noma.money";
     
-    // Fetch token price stats including 24h change
-    const fetchTokenPriceStats = async () => {
+    // Map chart timeframe to API interval
+    const mapTimeframeToApiInterval = (timeframe: string): string => {
+        switch (timeframe) {
+            case "15m": return "15m";
+            case "1h": return "1h";
+            case "24h": return "24h";
+            case "1w": return "7d";
+            case "1M": return "30d";
+            default: return "24h";
+        }
+    };
+    
+    // Fetch token price stats including percentage change based on interval
+    const fetchTokenPriceStats = async (interval: string = "24h") => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/price/stats`);
+            const apiInterval = mapTimeframeToApiInterval(interval);
+            const response = await fetch(`${API_BASE_URL}/api/stats?interval=${apiInterval}`);
             if (!response.ok) {
                 throw new Error(`API error: ${response.status}`);
             }
@@ -669,18 +682,7 @@ const Exchange: React.FC = () => {
             return data;
         } catch (error) {
             console.error("Error fetching price stats:", error);
-            // Try alternative endpoint
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/stats`);
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`);
-                }
-                const data = await response.json();
-                return data;
-            } catch (altError) {
-                console.error("Error fetching alternative price stats:", altError);
-                return null;
-            }
+            return null;
         }
     };
     
@@ -778,10 +780,10 @@ const Exchange: React.FC = () => {
             setIsChartLoading(true);
             
             try {
-                // First try to fetch price stats for accurate percentage
-                const priceStats = await fetchTokenPriceStats();
-                if (priceStats && (priceStats.price_change_24h !== undefined || priceStats.change_24h !== undefined)) {
-                    setPercentChange(priceStats.price_change_24h || priceStats.change_24h || 0);
+                // First try to fetch price stats for accurate percentage based on selected interval
+                const priceStats = await fetchTokenPriceStats(chartTimeframe);
+                if (priceStats && priceStats.percentageChange !== undefined) {
+                    setPercentChange(priceStats.percentageChange);
                 }
                 
                 const ohlcData = await fetchOHLCData(chartTimeframe, chartGranularity);
@@ -846,7 +848,7 @@ const Exchange: React.FC = () => {
                 };
                 
                 // Only calculate from OHLC if we didn't get it from the API
-                if (!priceStats || (priceStats.price_change_24h === undefined && priceStats.change_24h === undefined)) {
+                if (!priceStats || priceStats.percentageChange === undefined) {
                     const change = calculatePercentChange(ohlcData, chartTimeframe);
                     // console.log("Calculated percentage change:", change, "for timeframe:", chartTimeframe);
                     setPercentChange(change);
@@ -858,7 +860,7 @@ const Exchange: React.FC = () => {
                     data: []
                 }]);
                 // Only reset to 0 if we didn't get data from API
-                if (!priceStats || (priceStats.price_change_24h === undefined && priceStats.change_24h === undefined)) {
+                if (!priceStats || priceStats.percentageChange === undefined) {
                     setPercentChange(0);
                 }
             }
@@ -869,7 +871,7 @@ const Exchange: React.FC = () => {
                     data: []
                 }]);
                 // Keep any API-fetched percentage even if chart fails
-                if (!priceStats || (priceStats.price_change_24h === undefined && priceStats.change_24h === undefined)) {
+                if (!priceStats || priceStats.percentageChange === undefined) {
                     setPercentChange(0);
                 }
             } finally {
@@ -1327,10 +1329,10 @@ const Exchange: React.FC = () => {
                 const flattenedVaults = allVaultDescriptions.flat().filter(Boolean);
                 setVaultDescriptions(flattenedVaults);
                 
-                // Fetch price stats from API
+                // Fetch price stats from API with default 24h interval
                 let priceStats = null;
                 try {
-                    priceStats = await fetchTokenPriceStats();
+                    priceStats = await fetchTokenPriceStats("24h");
                 } catch (error) {
                     console.error("Failed to fetch price stats:", error);
                 }
@@ -1341,7 +1343,7 @@ const Exchange: React.FC = () => {
                     name: vault.tokenName,
                     symbol: vault.tokenSymbol,
                     price: vault.spotPrice ? parseFloat(formatEther(vault.spotPrice)) : 0.0000186, // Use actual spot price
-                    change24h: priceStats?.price_change_24h || priceStats?.change_24h || 0, // Use API data or 0 as fallback
+                    change24h: priceStats?.percentageChange || 0, // Use API percentage change or 0 as fallback
                     volume24h: priceStats?.volume_24h || Math.floor(Math.random() * 1000000),
                     marketCap: priceStats?.market_cap || Math.floor(Math.random() * 10000000),
                     liquidity: priceStats?.liquidity || Math.floor(Math.random() * 1000000),
