@@ -1616,7 +1616,7 @@ const Launchpad: React.FC = () => {
                                         <Box p={2} bg="#4ade8020" borderRadius="lg">
                                             <FaChartLine size={18} color="#4ade80" />
                                         </Box>
-                                        <Heading as="h3">Summary</Heading>
+                                        <Heading as="h3" size={isMobile ? "md" : "lg"} color="white">Summary</Heading>
                                     </HStack>
                                     <SelectRoot
                                         collection={capViewChoices}
