@@ -650,7 +650,9 @@ const Stake = () => {
                         {lastOpTimestamp !== "0" && (
                             <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
                                 <HStack justify="space-between">
-                                    <Text fontSize="lg" fontWeight="bold" color="white">Cooldown Status</Text>
+                                    <Box>
+                                        <Text fontSize="lg" fontWeight="bold" color="white">Cooldown Status</Text>                                        
+                                    </Box>
                                     <Box>
                                         {getTimeLeft(lastOpTimestamp, 3) > 0 ? (
                                             <CountdownTimer
@@ -996,12 +998,14 @@ const Stake = () => {
                     
                     {/* Right side - Wallet Box */}
                     {!isMobile && (
-                        <WalletSidebar 
-                            ethBalance={ethBalance}
-                            token0Info={token0Info}
-                            token1Info={token1Info}
-                            address={address}
-                        />
+                        <Box flex="0 0 300px" maxW="300px" w="300px">
+                            <WalletSidebar 
+                                ethBalance={ethBalance}
+                                token0Info={token0Info}
+                                token1Info={token1Info}
+                                address={address}
+                            />
+                        </Box>
                     )}
                 </Flex>
             ) : (

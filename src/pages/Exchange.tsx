@@ -380,6 +380,7 @@ const Exchange: React.FC = () => {
     
     const [percentChange, setPercentChange] = useState(0);
     const [intervalVolume, setIntervalVolume] = useState(0); // Volume for selected interval
+    const [priceStatsData, setPriceStatsData] = useState(null); // Store full API response for average price calculation
     const [chartSeries, setChartSeries] = useState([]);
     const [chartTimeframe, setChartTimeframe] = useState("24h");
     const [chartGranularity, setChartGranularity] = useState("1h");
@@ -784,6 +785,8 @@ const Exchange: React.FC = () => {
                 // First try to fetch price stats for accurate percentage and volume based on selected interval
                 const priceStats = await fetchTokenPriceStats(chartTimeframe);
                 if (priceStats) {
+                    setPriceStatsData(priceStats); // Store full data for average price calculation
+                    
                     if (priceStats.percentageChange !== undefined) {
                         setPercentChange(priceStats.percentageChange);
                     }
@@ -2780,11 +2783,17 @@ const Exchange: React.FC = () => {
                                     </Text>
                                     <Box>
                                         <VStack align="start" spacing={0}>
-                                            {intervalVolume > 0 && monPrice > 0 ? (
+                                            {intervalVolume > 0 && priceStatsData ? (
                                                 <>
                                                 <Box>
                                                     <Text color="white" fontSize="xl" fontWeight="bold">
-                                                        ${formatNumber(intervalVolume * monPrice)}
+                                                        ${(() => {
+                                                            // Calculate average price from API data
+                                                            const currentPrice = priceStatsData.currentPrice || 0;
+                                                            const startPrice = priceStatsData.startPrice || currentPrice;
+                                                            const averagePrice = (currentPrice + startPrice) / 2;
+                                                            return formatNumber(intervalVolume * averagePrice);
+                                                        })()}
                                                     </Text>
                                                 </Box>
                                                 <Box>
@@ -3014,7 +3023,7 @@ const Exchange: React.FC = () => {
                                                             </Box>
                                                             <Box>
                                                                 <Text color="#888" fontSize="sm">
-                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
+                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON
                                                                 </Text>
                                                             </Box>
                                                         </HStack>
@@ -3136,7 +3145,7 @@ const Exchange: React.FC = () => {
                                                                 </Box>
                                                                 <Box>
                                                                     <Text color="#888" fontSize="sm">
-                                                                        {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
+                                                                        {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON
                                                                     </Text>
                                                                 </Box>
                                                             </HStack>
@@ -3916,7 +3925,7 @@ const Exchange: React.FC = () => {
                                                         <Flex justifyContent="space-between" alignItems="center">
                                                             <Box>
                                                                 <Text color="#888" fontSize="xs">
-                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
+                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON
                                                                 </Text>
                                                             </Box>
                                                             <HStack gap={3}>
@@ -4040,7 +4049,7 @@ const Exchange: React.FC = () => {
                                                                         <Flex justifyContent="space-between" alignItems="center">
                                                                             <Box>
                                                                                 <Text color="#888" fontSize="xs">
-                                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${ formatPrice(trade.price * monPrice)})</Text>}
+                                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON
                                                                                 </Text>
                                                                             </Box>
                                                                             <HStack gap={3}>
