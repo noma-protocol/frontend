@@ -1,0 +1,65 @@
+/* Windows Chrome specific fixes for Launchpad wizard */
+
+/* Fix font rendering on Windows Chrome */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  /* Windows Chrome detection */
+  @supports (-webkit-appearance:none) and (not (-ms-ime-align:auto)) and (not (-moz-appearance:none)) {
+    /* Improve text rendering */
+    body {
+      -webkit-font-smoothing: subpixel-antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    
+    /* Fix blurry text on Windows - apply only to launchpad elements */
+    .launchpad-wizard {
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    
+    /* Fix progress bar alignment */
+    [data-part="progress-line"] {
+      transform: translateY(-50%) translateZ(0);
+      -webkit-transform: translateY(-50%) translateZ(0);
+    }
+    
+    /* Fix icon centering in circles */
+    svg {
+      vertical-align: middle;
+      display: block;
+      margin: auto;
+    }
+    
+    /* Fix flexbox alignment issues */
+    [data-part="step-indicator"] {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-justify-content: center;
+      justify-content: center;
+    }
+    
+    /* Fix subpixel rendering issues */
+    [data-part="wizard-step"] {
+      position: relative;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+    }
+    
+    /* Ensure proper box sizing for launchpad */
+    .launchpad-wizard,
+    .launchpad-wizard * {
+      box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+    }
+    
+    /* Fix input field focus outlines */
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline-offset: -2px;
+    }
+  }
+}

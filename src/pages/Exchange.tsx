@@ -39,6 +39,7 @@ import {
     SelectValueText,
   } from "../components/ui/select";
 import { Checkbox } from "../components/ui/checkbox"
+import { Tooltip } from "../components/ui/tooltip"
   
 import { useAccount, useBalance, useContractRead } from "wagmi";
 import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
@@ -294,6 +295,8 @@ const Exchange: React.FC = () => {
     const [tokenBalance, setTokenBalance] = useState("0");
     const [wethBalance, setWethBalance] = useState("0");
     const [useWeth, setUseWeth] = useState(false);
+    const [useMax, setUseMax] = useState(false);
+    const [approveMax, setApproveMax] = useState(false);
     const [spotPrice, setSpotPrice] = useState(0);
     const [slippage, setSlippage] = useState("1");
     const [quote, setQuote] = useState("");
@@ -2366,7 +2369,7 @@ const Exchange: React.FC = () => {
             approveWeth({
                 args: [
                     exchangeHelperAddress,
-                    safeParseEther(tradeAmount)
+                    approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount)
                 ]
             });
         } else {
@@ -2452,11 +2455,22 @@ const Exchange: React.FC = () => {
         approve({
             args: [
                 exchangeHelperAddress,
-                safeParseEther(tradeAmount)
+                approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount)
             ]
         });
     };
 
+    // Update trade amount when useMax changes or when switching between buy/sell
+    useEffect(() => {
+        if (useMax) {
+            if (isBuying) {
+                const maxAmount = useWeth ? wethBalance : ethBalance;
+                validateAndSetTradeAmount(maxAmount);
+            } else {
+                validateAndSetTradeAmount(tokenBalance);
+            }
+        }
+    }, [useMax, isBuying, useWeth, wethBalance, ethBalance, tokenBalance]);
 
 
     return (
@@ -3368,46 +3382,116 @@ const Exchange: React.FC = () => {
                             <Box mb={2}>
                                 <Flex justifyContent="space-between" alignItems="center">
                                     <Text color="#888" fontSize="sm" mb={"3px"}>Amount</Text>
-                                    <Box display="inline-flex" alignItems="center" gap="6px">
-                                        <Checkbox 
-                                        size="sm" 
-                                        checked={useWeth}
-                                        onCheckedChange={(e) => setUseWeth(e.checked)}
-                                        colorPalette="green"
-                                        display="inline-block"
-                                        css={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            '& .chakra-checkbox__control': {
-                                                borderColor: '#666',
-                                                backgroundColor: useWeth ? '#4ade80' : '#2a2a2a',
-                                                width: '16px',
-                                                height: '16px',
-                                                '&:hover': {
-                                                    borderColor: '#4ade80'
+                                    <Box display="inline-flex" alignItems="center" gap="12px">
+                                        <Box display="inline-flex" alignItems="center" gap="6px">
+                                            <Checkbox 
+                                            size="sm" 
+                                            checked={useWeth}
+                                            onCheckedChange={(e) => setUseWeth(e.checked)}
+                                            colorPalette="green"
+                                            display="inline-block"
+                                            css={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                '& .chakra-checkbox__control': {
+                                                    borderColor: '#666',
+                                                    backgroundColor: useWeth ? '#4ade80' : '#2a2a2a',
+                                                    width: '16px',
+                                                    height: '16px',
+                                                    '&:hover': {
+                                                        borderColor: '#4ade80'
+                                                    }
+                                                },
+                                                '& .chakra-checkbox__control[data-checked]': {
+                                                    borderColor: '#4ade80',
+                                                    backgroundColor: '#4ade80'
+                                                },
+                                                '& .chakra-checkbox__label': {
+                                                    display: 'none'
                                                 }
-                                            },
-                                            '& .chakra-checkbox__control[data-checked]': {
-                                                borderColor: '#4ade80',
-                                                backgroundColor: '#4ade80'
-                                            },
-                                            '& .chakra-checkbox__label': {
-                                                display: 'none'
-                                            }
-                                        }}
-                                    />
-                                    <Text 
-                                        as="span"
-                                        fontSize="xs" 
-                                        color="#888" 
-                                        cursor="pointer" 
-                                        onClick={() => setUseWeth(!useWeth)}
-                                        userSelect="none"
-                                        display="inline-block"
-                                        lineHeight="16px"
-                                    >
-                                        Use WMON
-                                    </Text>
+                                            }}
+                                            />
+                                            <Text 
+                                                as="span"
+                                                fontSize="xs" 
+                                                color="#888" 
+                                                cursor="pointer" 
+                                                onClick={() => setUseWeth(!useWeth)}
+                                                userSelect="none"
+                                                display="inline-block"
+                                                lineHeight="16px"
+                                            >
+                                                Use WMON
+                                            </Text>
+                                        </Box>
+                                        <Box display="inline-flex" alignItems="center" gap="6px">
+                                            <Checkbox 
+                                            size="sm" 
+                                            checked={useMax}
+                                            onCheckedChange={(e) => {
+                                                setUseMax(e.checked);
+                                                if (e.checked) {
+                                                    // Set max amount based on whether buying or selling
+                                                    if (isBuying) {
+                                                        const maxAmount = useWeth ? wethBalance : ethBalance;
+                                                        validateAndSetTradeAmount(maxAmount);
+                                                    } else {
+                                                        validateAndSetTradeAmount(tokenBalance);
+                                                    }
+                                                } else {
+                                                    setTradeAmount("");
+                                                }
+                                            }}
+                                            colorPalette="green"
+                                            display="inline-block"
+                                            css={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                '& .chakra-checkbox__control': {
+                                                    borderColor: '#666',
+                                                    backgroundColor: useMax ? '#4ade80' : '#2a2a2a',
+                                                    width: '16px',
+                                                    height: '16px',
+                                                    '&:hover': {
+                                                        borderColor: '#4ade80'
+                                                    }
+                                                },
+                                                '& .chakra-checkbox__control[data-checked]': {
+                                                    borderColor: '#4ade80',
+                                                    backgroundColor: '#4ade80'
+                                                },
+                                                '& .chakra-checkbox__label': {
+                                                    display: 'none'
+                                                }
+                                            }}
+                                            />
+                                            <Text 
+                                                as="span"
+                                                fontSize="xs" 
+                                                color="#888" 
+                                                cursor="pointer" 
+                                                onClick={() => {
+                                                    const newUseMax = !useMax;
+                                                    setUseMax(newUseMax);
+                                                    if (newUseMax) {
+                                                        // Set max amount based on whether buying or selling
+                                                        if (isBuying) {
+                                                            const maxAmount = useWeth ? wethBalance : ethBalance;
+                                                            validateAndSetTradeAmount(maxAmount);
+                                                        } else {
+                                                            validateAndSetTradeAmount(tokenBalance);
+                                                        }
+                                                    } else {
+                                                        setTradeAmount("");
+                                                    }
+                                                }}
+                                                userSelect="none"
+                                                display="inline-block"
+                                                lineHeight="16px"
+                                            >
+                                                Use Max
+                                            </Text>
+                                        </Box>
                                     </Box>
                                 </Flex>
                             </Box>
@@ -3453,13 +3537,61 @@ const Exchange: React.FC = () => {
                                     </Text>
                                 </Box>
                             </Flex>
-                            <Flex justifyContent="space-between">
+                            <Flex justifyContent="space-between" mb={2}>
                                 <Box>
                                     <Text color="#888" fontSize="sm">Network Fee</Text>
                                 </Box>
                                 <Box>
                                     <Text color="white" fontSize="sm">~$0.12</Text>
                                 </Box>
+                            </Flex>
+                            <Flex justifyContent="space-between" alignItems="center">
+                                <Box display="inline-flex" alignItems="center" gap="6px">
+                                    <Checkbox 
+                                        size="sm" 
+                                        checked={approveMax}
+                                        onCheckedChange={(e) => setApproveMax(e.checked)}
+                                        colorPalette="green"
+                                        display="inline-block"
+                                        css={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            '& .chakra-checkbox__control': {
+                                                borderColor: '#666',
+                                                backgroundColor: approveMax ? '#4ade80' : '#2a2a2a',
+                                                width: '16px',
+                                                height: '16px',
+                                                '&:hover': {
+                                                    borderColor: '#4ade80'
+                                                }
+                                            },
+                                            '& .chakra-checkbox__control[data-checked]': {
+                                                borderColor: '#4ade80',
+                                                backgroundColor: '#4ade80'
+                                            },
+                                            '& .chakra-checkbox__label': {
+                                                display: 'none'
+                                            }
+                                        }}
+                                    />
+                                    <Text 
+                                        as="span"
+                                        fontSize="xs" 
+                                        color="#888" 
+                                        cursor="pointer" 
+                                        onClick={() => setApproveMax(!approveMax)}
+                                        userSelect="none"
+                                        display="inline-block"
+                                        lineHeight="16px"
+                                    >
+                                        Approve Max
+                                    </Text>
+                                </Box>
+                                <Tooltip content="Approve unlimited amount to avoid repeated approvals">
+                                    <Box>
+                                        <Text color="#666" fontSize="xs">ⓘ</Text>
+                                    </Box>
+                                </Tooltip>
                             </Flex>
                         </Box>
                         
@@ -3592,46 +3724,116 @@ const Exchange: React.FC = () => {
                                     <Box mb={2}>
                                         <Flex justifyContent="space-between" alignItems="center">
                                             <Text color="#888" fontSize="sm">Amount</Text>
-                                            <Box display="inline-flex" alignItems="center" gap="6px">
-                                            <Checkbox 
-                                                size="sm" 
-                                                checked={useWeth}
-                                                onCheckedChange={(e) => setUseWeth(e.checked)}
-                                                colorPalette="green"
-                                                display="inline-block"
-                                                css={{
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    '& .chakra-checkbox__control': {
-                                                        borderColor: '#666',
-                                                        backgroundColor: useWeth ? '#4ade80' : '#2a2a2a',
-                                                        width: '16px',
-                                                        height: '16px',
-                                                        '&:hover': {
-                                                            borderColor: '#4ade80'
+                                            <Box display="inline-flex" alignItems="center" gap="12px">
+                                                <Box display="inline-flex" alignItems="center" gap="6px">
+                                                <Checkbox 
+                                                    size="sm" 
+                                                    checked={useWeth}
+                                                    onCheckedChange={(e) => setUseWeth(e.checked)}
+                                                    colorPalette="green"
+                                                    display="inline-block"
+                                                    css={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        '& .chakra-checkbox__control': {
+                                                            borderColor: '#666',
+                                                            backgroundColor: useWeth ? '#4ade80' : '#2a2a2a',
+                                                            width: '16px',
+                                                            height: '16px',
+                                                            '&:hover': {
+                                                                borderColor: '#4ade80'
+                                                            }
+                                                        },
+                                                        '& .chakra-checkbox__control[data-checked]': {
+                                                            borderColor: '#4ade80',
+                                                            backgroundColor: '#4ade80'
+                                                        },
+                                                        '& .chakra-checkbox__label': {
+                                                            display: 'none'
                                                         }
-                                                    },
-                                                    '& .chakra-checkbox__control[data-checked]': {
-                                                        borderColor: '#4ade80',
-                                                        backgroundColor: '#4ade80'
-                                                    },
-                                                    '& .chakra-checkbox__label': {
-                                                        display: 'none'
-                                                    }
-                                                }}
-                                            />
-                                            <Text 
-                                                as="span"
-                                                fontSize="xs" 
-                                                color="#888" 
-                                                cursor="pointer" 
-                                                onClick={() => setUseWeth(!useWeth)}
-                                                userSelect="none"
-                                                display="inline-block"
-                                                lineHeight="16px"
-                                            >
-                                                Use WMON
-                                            </Text>
+                                                    }}
+                                                />
+                                                <Text 
+                                                    as="span"
+                                                    fontSize="xs" 
+                                                    color="#888" 
+                                                    cursor="pointer" 
+                                                    onClick={() => setUseWeth(!useWeth)}
+                                                    userSelect="none"
+                                                    display="inline-block"
+                                                    lineHeight="16px"
+                                                >
+                                                    Use WMON
+                                                </Text>
+                                                </Box>
+                                                <Box display="inline-flex" alignItems="center" gap="6px">
+                                                <Checkbox 
+                                                    size="sm" 
+                                                    checked={useMax}
+                                                    onCheckedChange={(e) => {
+                                                        setUseMax(e.checked);
+                                                        if (e.checked) {
+                                                            // Set max amount based on whether buying or selling
+                                                            if (isBuying) {
+                                                                const maxAmount = useWeth ? wethBalance : ethBalance;
+                                                                validateAndSetTradeAmount(maxAmount);
+                                                            } else {
+                                                                validateAndSetTradeAmount(tokenBalance);
+                                                            }
+                                                        } else {
+                                                            setTradeAmount("");
+                                                        }
+                                                    }}
+                                                    colorPalette="green"
+                                                    display="inline-block"
+                                                    css={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        '& .chakra-checkbox__control': {
+                                                            borderColor: '#666',
+                                                            backgroundColor: useMax ? '#4ade80' : '#2a2a2a',
+                                                            width: '16px',
+                                                            height: '16px',
+                                                            '&:hover': {
+                                                                borderColor: '#4ade80'
+                                                            }
+                                                        },
+                                                        '& .chakra-checkbox__control[data-checked]': {
+                                                            borderColor: '#4ade80',
+                                                            backgroundColor: '#4ade80'
+                                                        },
+                                                        '& .chakra-checkbox__label': {
+                                                            display: 'none'
+                                                        }
+                                                    }}
+                                                />
+                                                <Text 
+                                                    as="span"
+                                                    fontSize="xs" 
+                                                    color="#888" 
+                                                    cursor="pointer" 
+                                                    onClick={() => {
+                                                        const newUseMax = !useMax;
+                                                        setUseMax(newUseMax);
+                                                        if (newUseMax) {
+                                                            // Set max amount based on whether buying or selling
+                                                            if (isBuying) {
+                                                                const maxAmount = useWeth ? wethBalance : ethBalance;
+                                                                validateAndSetTradeAmount(maxAmount);
+                                                            } else {
+                                                                validateAndSetTradeAmount(tokenBalance);
+                                                            }
+                                                        } else {
+                                                            setTradeAmount("");
+                                                        }
+                                                    }}
+                                                    userSelect="none"
+                                                    display="inline-block"
+                                                    lineHeight="16px"
+                                                >
+                                                    Use Max
+                                                </Text>
+                                                </Box>
                                             </Box>
                                         </Flex>
                                     </Box>
@@ -3677,13 +3879,61 @@ const Exchange: React.FC = () => {
                                             </Text>
                                         </Box>
                                     </Flex>
-                                    <Flex justifyContent="space-between">
+                                    <Flex justifyContent="space-between" mb={2}>
                                         <Box>
                                             <Text color="#888" fontSize="sm">Network Fee</Text>
                                         </Box>
                                         <Box>
                                             <Text color="white" fontSize="sm">~$0.12</Text>
                                         </Box>
+                                    </Flex>
+                                    <Flex justifyContent="space-between" alignItems="center">
+                                        <Box display="inline-flex" alignItems="center" gap="6px">
+                                            <Checkbox 
+                                                size="sm" 
+                                                checked={approveMax}
+                                                onCheckedChange={(e) => setApproveMax(e.checked)}
+                                                colorPalette="green"
+                                                display="inline-block"
+                                                css={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    '& .chakra-checkbox__control': {
+                                                        borderColor: '#666',
+                                                        backgroundColor: approveMax ? '#4ade80' : '#2a2a2a',
+                                                        width: '16px',
+                                                        height: '16px',
+                                                        '&:hover': {
+                                                            borderColor: '#4ade80'
+                                                        }
+                                                    },
+                                                    '& .chakra-checkbox__control[data-checked]': {
+                                                        borderColor: '#4ade80',
+                                                        backgroundColor: '#4ade80'
+                                                    },
+                                                    '& .chakra-checkbox__label': {
+                                                        display: 'none'
+                                                    }
+                                                }}
+                                            />
+                                            <Text 
+                                                as="span"
+                                                fontSize="xs" 
+                                                color="#888" 
+                                                cursor="pointer" 
+                                                onClick={() => setApproveMax(!approveMax)}
+                                                userSelect="none"
+                                                display="inline-block"
+                                                lineHeight="16px"
+                                            >
+                                                Approve Max
+                                            </Text>
+                                        </Box>
+                                        <Tooltip content="Approve unlimited amount to avoid repeated approvals">
+                                            <Box>
+                                                <Text color="#666" fontSize="xs">ⓘ</Text>
+                                            </Box>
+                                        </Tooltip>
                                     </Flex>
                                 </Box>
                                 

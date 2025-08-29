@@ -4,4 +4,6 @@ node_modules/
 *.bak.*
 trollbox-server/data/profiles.json
 /*.png
+/*.jpg
+/*.jpeg
 CLAUDE.md

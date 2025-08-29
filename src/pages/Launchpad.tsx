@@ -616,7 +616,7 @@ const Launchpad: React.FC = () => {
 
 
     return (
-        <Container maxW="100%" p={0} bg={isMobile ? "#000" : "#0a0a0a"} minH="100vh" position="relative" overflow="hidden"> 
+        <Container maxW="100%" p={0} bg={isMobile ? "#000" : "#0a0a0a"} minH="100vh" position="relative" overflow="hidden" className="launchpad-wizard"> 
             {/* Background Gradient Effects */}
             <Box
                 position="absolute"
@@ -693,31 +693,37 @@ const Launchpad: React.FC = () => {
                         border={isMobile ? "none" : "1px solid #2a2a2a"}
                         boxShadow={isMobile ? "none" : "0 10px 30px rgba(0, 0, 0, 0.5)"}
                     >
-                        <HStack spacing={isMobile ? 1 : 8} justify="space-between" position="relative">
+                        <HStack 
+                            spacing={isMobile ? 1 : 8} 
+                            justify="space-between" 
+                            position="relative"
+                            alignItems="center"
+                            w="100%"
+                        >
                             {/* Progress Line Background - Desktop only */}
                             {!isMobile && (
                                 <>
                                     <Box
                                         position="absolute"
-                                        top="50%"
+                                        top="calc(50% - 1px)"
                                         left="10%"
                                         right="10%"
                                         h="2px"
                                         bg="#2a2a2a"
-                                        transform="translateY(calc(-50% - 20px))"
                                         zIndex={0}
+                                        data-part="progress-line"
                                     />
                                     {/* Progress Line Fill */}
                                     <Box
                                         position="absolute"
-                                        top="50%"
+                                        top="calc(50% - 1px)"
                                         left="10%"
                                         w={`${Math.min(deployStep / 3 * 80, 80)}%`}
                                         h="2px"
                                         bg="#4ade80"
-                                        transform="translateY(calc(-50% - 20px))"
                                         transition="width 0.3s ease"
                                         zIndex={0}
+                                        data-part="progress-line"
                                     />
                                 </>
                             )}
@@ -733,14 +739,23 @@ const Launchpad: React.FC = () => {
                                 const isCompleted = deployStep > index;
                                 
                                 return (
-                                    <VStack key={index} spacing={2} zIndex={1} position="relative">
+                                    <VStack 
+                                        key={index} 
+                                        spacing={2} 
+                                        zIndex={1} 
+                                        position="relative" 
+                                        alignItems="center"
+                                        data-part="wizard-step"
+                                    >
                                         <Box
                                             position="relative"
-                                            w={20}
-                                            h={20}
+                                            w={isMobile ? 16 : 20}
+                                            h={isMobile ? 16 : 20}
                                             display="flex"
                                             alignItems="center"
                                             justifyContent="center"
+                                            flexShrink={0}
+                                            data-part="step-indicator"
                                         >
                                             {/* Background to hide the line - Desktop only */}
                                             {!isMobile && (
@@ -764,11 +779,16 @@ const Launchpad: React.FC = () => {
                                                 justifyContent="center"
                                                 transition="all 0.3s ease"
                                                 transform={isActive ? "scale(1.1)" : "scale(1)"}
+                                                flexShrink={0}
                                             >
                                             {isCompleted ? (
-                                                <FaCheckCircle size={isMobile ? 20 : 24} color="black" />
+                                                <Box display="flex" alignItems="center" justifyContent="center" w="100%" h="100%">
+                                                    <FaCheckCircle size={isMobile ? 18 : 20} color="black" />
+                                                </Box>
                                             ) : (
-                                                <Icon size={isMobile ? 20 : 24} color={isActive ? "#4ade80" : "#888"} />
+                                                <Box display="flex" alignItems="center" justifyContent="center" w="100%" h="100%">
+                                                    <Icon size={isMobile ? 18 : 20} color={isActive ? "#4ade80" : "#888"} />
+                                                </Box>
                                             )}
                                             </Box>
                                         </Box>
@@ -776,7 +796,13 @@ const Launchpad: React.FC = () => {
                                             <Text
                                                 color={isActive ? "white" : "#888"}
                                                 fontSize="sm"
-                                                fontWeight={isActive ? "bold" : "normal"}
+                                                fontWeight={isActive ? "600" : "400"}
+                                                textAlign="center"
+                                                whiteSpace="nowrap"
+                                                style={{ 
+                                                    WebkitFontSmoothing: "antialiased",
+                                                    MozOsxFontSmoothing: "grayscale"
+                                                }}
                                             >
                                                 {step.name}
                                             </Text>
@@ -823,7 +849,7 @@ const Launchpad: React.FC = () => {
                                     <MdToken size={isMobile ? 20 : 24} color="#4ade80" />
                                 </Box>
                                 <Box>
-                                    <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="700" letterSpacing="-0.02em">
+                                    <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="600" letterSpacing="-0.02em">
                                         Token Information
                                     </Heading>
                                 </Box>
@@ -1128,7 +1154,7 @@ const Launchpad: React.FC = () => {
                                     <FaChartLine size={isMobile ? 20 : 24} color="#4ade80" />
                                 </Box>
                                 <Box>
-                                    <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="700" letterSpacing="-0.02em">
+                                    <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="600" letterSpacing="-0.02em">
                                         Pool Configuration
                                     </Heading>
                                 </Box>
@@ -1411,7 +1437,7 @@ const Launchpad: React.FC = () => {
                                 <SimpleGrid columns={isMobile ? 2 : 4} gap={isMobile ? 3 : 4} rowGap={isMobile ? 6 : 4}>
                                     <Box>
                                         <Text color="#888" fontSize="xs" mb={0}>Floor price</Text>
-                                        <Text color="white" fontSize="lg" fontWeight="bold">
+                                        <Text color="white" fontSize="lg" fontWeight="600">
                                             {formatNumberPrecise(Number(floorPrice) )} MON
                                         </Text>
                                         <Text color="#4ade80" fontSize="sm">
@@ -1420,7 +1446,7 @@ const Launchpad: React.FC = () => {
                                     </Box>                                
                                     <Box>
                                         <Text color="#888" fontSize="xs" mb={0}>Presale price</Text>
-                                        <Text color="white" fontSize="lg" fontWeight="bold">
+                                        <Text color="white" fontSize="lg" fontWeight="600">
                                             {price || "0"} MON
                                         </Text>
                                         <Text color="#4ade80" fontSize="sm">
@@ -1429,7 +1455,7 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                     <Box>
                                         <Text color="#888" fontSize="xs" mb={0}>FDV</Text>
-                                        <Text color="white" fontSize="lg" fontWeight="bold">
+                                        <Text color="white" fontSize="lg" fontWeight="600">
                                             {formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0))} MON
                                         </Text>
                                         <Text color="#4ade80" fontSize="sm">
@@ -1465,7 +1491,7 @@ const Launchpad: React.FC = () => {
                                         <FaCoins size={isMobile ? 20 : 24} color="#4ade80" />
                                     </Box>
                                     <Box>
-                                        <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="700" letterSpacing="-0.02em">
+                                        <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="600" letterSpacing="-0.02em">
                                             Presale Configuration
                                         </Heading>
                                     </Box>
@@ -1741,7 +1767,7 @@ const Launchpad: React.FC = () => {
                                     <HStack spacing={4}>
                                         <Box w="33%">
                                             <Text color="#888" fontSize="xs" mb={1}>Raise Goal</Text>
-                                            <Text color="white" fontSize="lg" fontWeight="bold">
+                                            <Text color="white" fontSize="lg" fontWeight="600">
                                                 {formatNumberPrecise(capView === "hardcap" ? (Number(floorPrice) * Number(tokenSupply) * 0.1 || 0) : (Number(softCap) || 0))} MON
                                             </Text>
                                             <Text color="#4ade80" fontSize="sm">
@@ -1750,7 +1776,7 @@ const Launchpad: React.FC = () => {
                                         </Box>                                
                                         <Box w="33%">
                                             <Text color="#888" fontSize="xs" mb={1}>Floor Liquidity</Text>
-                                            <Text color="white" fontSize="lg" fontWeight="bold">
+                                            <Text color="white" fontSize="lg" fontWeight="600">
                                                 {formatNumberPrecise(
                                                     capView === "hardcap" 
                                                         ? ((Number(floorPrice) * Number(tokenSupply) * 0.1) / Number(price)) * Number(floorPrice) || 0
@@ -1768,7 +1794,7 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                         <Box  w="33%">
                                             <Text color="#888" fontSize="xs" mb={1}>Founder Share</Text>
-                                            <Text color="white" fontSize="lg" fontWeight="bold">
+                                            <Text color="white" fontSize="lg" fontWeight="600">
                                                 {formatNumberPrecise(
                                                     capView === "hardcap"
                                                         ? (Number(floorPrice) * Number(tokenSupply) * 0.1) - (((Number(floorPrice) * Number(tokenSupply) * 0.1) / Number(price)) * Number(floorPrice)) || 0
@@ -1808,7 +1834,7 @@ const Launchpad: React.FC = () => {
                                 <FaRocket size={isMobile ? 18 : 24} color="#4ade80" />
                             </Box>
                             <Box>
-                                <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="700" letterSpacing="-0.02em">
+                                <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="600" letterSpacing="-0.02em">
                                     Review & Launch
                                 </Heading>
                             </Box>
@@ -1853,7 +1879,7 @@ const Launchpad: React.FC = () => {
                                         )}
                                     </Box>
                                     <Box>
-                                        <Text color="#4ade80" fontSize="sm" fontWeight="bold">Token Details</Text>
+                                        <Text color="#4ade80" fontSize="sm" fontWeight="600">Token Details</Text>
                                     </Box>
                                 </HStack>
                                 <SimpleGrid columns={isMobile ? 2 : 3} gap={isMobile ? 2 : 3}>
@@ -1896,7 +1922,7 @@ const Launchpad: React.FC = () => {
                                         <FaChartLine size={16} color="#4ade80" />
                                     </Box>
                                     <Box>
-                                        <Text color="#4ade80" fontSize="sm" fontWeight="bold">Pool Configuration</Text>
+                                        <Text color="#4ade80" fontSize="sm" fontWeight="600">Pool Configuration</Text>
                                     </Box>
                                 </HStack>
                                 <SimpleGrid columns={isMobile ? 2 : 3} gap={isMobile ? 2 : 3}>
@@ -1927,7 +1953,7 @@ const Launchpad: React.FC = () => {
                                     <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Fully Diluted Value</Text>
                                         <HStack gap={2} mt={-2}>
-                                            <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="bold">
+                                            <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="600">
                                                 {formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0), 0)} MON
                                             </Text>
                                             <Text mt={-6} color="#666" fontSize="xs">
@@ -1972,7 +1998,7 @@ const Launchpad: React.FC = () => {
                                             <FaCoins size={16} color="#4ade80" />
                                         </Box>
                                         <Box>
-                                            <Text color="#4ade80" fontSize="sm" fontWeight="bold">Presale Configuration</Text>
+                                            <Text color="#4ade80" fontSize="sm" fontWeight="600">Presale Configuration</Text>
                                         </Box>
                                     </HStack>
                                     <SimpleGrid columns={isMobile ? 2 : 3} gap={isMobile ? 2 : 3}>
@@ -2004,7 +2030,7 @@ const Launchpad: React.FC = () => {
                                        <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Expected to Raise</Text>
                                         <HStack gap={2} mt={-2}>
-                                            <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="bold">
+                                            <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="600">
                                                 {formatNumberPrecise(Number(softCap) || 0)} MON
                                             </Text>
                                             <Text mt={-6} color="#666" fontSize="xs">
@@ -2237,12 +2263,12 @@ const Launchpad: React.FC = () => {
                                 <FaInfoCircle size={24} color="#4ade80" />
                             </Box>
                             <Box>
-                                <Text color="white" fontSize="xl" fontWeight="700" letterSpacing="-0.02em">Preview</Text>
+                                <Text color="white" fontSize="xl" fontWeight="600" letterSpacing="-0.02em">Preview</Text>
                             </Box>
                         </HStack>
                         
                         {/* Token Logo Placeholder */}
-                        <VStack spacing={6}>
+                        <VStack spacing={6} alignItems="center" w="100%">
                             <Box
                                 w="120px"
                                 h="120px"
@@ -2254,6 +2280,7 @@ const Launchpad: React.FC = () => {
                                 justifyContent="center"
                                 position="relative"
                                 overflow="hidden"
+                                flexShrink={0}
                             >
                                 <Box
                                     position="absolute"
@@ -2269,17 +2296,21 @@ const Launchpad: React.FC = () => {
                                         objectFit="cover"
                                     />
                                 ) : tokenSymbol ? (
-                                    <Text color="#4ade80" fontSize="3xl" fontWeight="bold">
-                                        {tokenSymbol.slice(0, 3).toUpperCase()}
-                                    </Text>
+                                    <Box display="flex" alignItems="center" justifyContent="center" w="100%" h="100%">
+                                        <Text color="#4ade80" fontSize="3xl" fontWeight="600" textAlign="center">
+                                            {tokenSymbol.slice(0, 3).toUpperCase()}
+                                        </Text>
+                                    </Box>
                                 ) : (
-                                    <MdToken size={50} color="#4ade80" />
+                                    <Box display="flex" alignItems="center" justifyContent="center" w="100%" h="100%">
+                                        <MdToken size={50} color="#4ade80" />
+                                    </Box>
                                 )}
                             </Box>
                             
                             {/* Token Info */}
                             <VStack spacing={1}>
-                                <Text color="white" fontSize="2xl" fontWeight="bold">
+                                <Text color="white" fontSize="2xl" fontWeight="600">
                                     {tokenName || "Your Token"}
                                 </Text>
                                 <Text color="#888" fontSize="lg">
