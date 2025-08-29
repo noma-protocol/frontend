@@ -657,6 +657,33 @@ const Exchange: React.FC = () => {
     
     const API_BASE_URL = "https://pricefeed.noma.money";
     
+    // Fetch token price stats including 24h change
+    const fetchTokenPriceStats = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/price/stats`);
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Error fetching price stats:", error);
+            // Try alternative endpoint
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/stats`);
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+            } catch (altError) {
+                console.error("Error fetching alternative price stats:", altError);
+                return null;
+            }
+        }
+    };
+    
     // Helper function to get time parameters for API
     const getTimeParams = (timeframe, granularity) => {
         const now = Date.now();
@@ -751,6 +778,12 @@ const Exchange: React.FC = () => {
             setIsChartLoading(true);
             
             try {
+                // First try to fetch price stats for accurate percentage
+                const priceStats = await fetchTokenPriceStats();
+                if (priceStats && (priceStats.price_change_24h !== undefined || priceStats.change_24h !== undefined)) {
+                    setPercentChange(priceStats.price_change_24h || priceStats.change_24h || 0);
+                }
+                
                 const ohlcData = await fetchOHLCData(chartTimeframe, chartGranularity);
                 
                 // Validate data before setting
@@ -812,16 +845,22 @@ const Exchange: React.FC = () => {
                     return 0;
                 };
                 
-                const change = calculatePercentChange(ohlcData, chartTimeframe);
-                // console.log("Calculated percentage change:", change, "for timeframe:", chartTimeframe);
-                setPercentChange(change);
+                // Only calculate from OHLC if we didn't get it from the API
+                if (!priceStats || (priceStats.price_change_24h === undefined && priceStats.change_24h === undefined)) {
+                    const change = calculatePercentChange(ohlcData, chartTimeframe);
+                    // console.log("Calculated percentage change:", change, "for timeframe:", chartTimeframe);
+                    setPercentChange(change);
+                }
             } else {
                 // console.log("No chart data available");
                 setChartSeries([{
                     name: `${selectedToken.symbol}/${token1Symbol}`,
                     data: []
                 }]);
-                setPercentChange(0);
+                // Only reset to 0 if we didn't get data from API
+                if (!priceStats || (priceStats.price_change_24h === undefined && priceStats.change_24h === undefined)) {
+                    setPercentChange(0);
+                }
             }
             } catch (error) {
                 console.error("Error loading chart data:", error);
@@ -829,7 +868,10 @@ const Exchange: React.FC = () => {
                     name: `${selectedToken.symbol}/${token1Symbol}`,
                     data: []
                 }]);
-                setPercentChange(0);
+                // Keep any API-fetched percentage even if chart fails
+                if (!priceStats || (priceStats.price_change_24h === undefined && priceStats.change_24h === undefined)) {
+                    setPercentChange(0);
+                }
             } finally {
                 setIsChartLoading(false);
             }
@@ -1285,18 +1327,26 @@ const Exchange: React.FC = () => {
                 const flattenedVaults = allVaultDescriptions.flat().filter(Boolean);
                 setVaultDescriptions(flattenedVaults);
                 
+                // Fetch price stats from API
+                let priceStats = null;
+                try {
+                    priceStats = await fetchTokenPriceStats();
+                } catch (error) {
+                    console.error("Failed to fetch price stats:", error);
+                }
+                
                 // Convert vault descriptions to token format for display
                 const tokenList = flattenedVaults.map((vault, index) => ({
                     id: index + 1,
                     name: vault.tokenName,
                     symbol: vault.tokenSymbol,
                     price: vault.spotPrice ? parseFloat(formatEther(vault.spotPrice)) : 0.0000186, // Use actual spot price
-                    change24h: (Math.random() - 0.5) * 20, // Mock 24h change
-                    volume24h: Math.floor(Math.random() * 1000000),
-                    marketCap: Math.floor(Math.random() * 10000000),
-                    liquidity: Math.floor(Math.random() * 1000000),
-                    fdv: Math.floor(Math.random() * 10000000),
-                    holders: Math.floor(Math.random() * 10000),
+                    change24h: priceStats?.price_change_24h || priceStats?.change_24h || 0, // Use API data or 0 as fallback
+                    volume24h: priceStats?.volume_24h || Math.floor(Math.random() * 1000000),
+                    marketCap: priceStats?.market_cap || Math.floor(Math.random() * 10000000),
+                    liquidity: priceStats?.liquidity || Math.floor(Math.random() * 1000000),
+                    fdv: priceStats?.fdv || Math.floor(Math.random() * 10000000),
+                    holders: priceStats?.holders || Math.floor(Math.random() * 10000),
                     token0: vault.token0,
                     token1: vault.token1,
                     vault: vault.vault,
