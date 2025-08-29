@@ -47,6 +47,8 @@ import { Toaster, toaster } from "../components/ui/toaster"
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
 import { unCommify, commify, generateBytes32String, getContractAddress, formatNumberPrecise } from "../utils";
+import { saveTokenData, getTokens, exportTokensAsJSON } from "../utils/tokenStorage";
+import SavedTokens from "../components/SavedTokens";
 import Logo from "../assets/images/noma_logo_transparent.png";
 import { ethers } from "ethers"; // Import ethers.js
 const { formatEther, parseEther } = ethers.utils;
@@ -126,6 +128,7 @@ const Launchpad: React.FC = () => {
     const [isSecondSel, setIsSecondSel] = useState(false);
     const [isThirdSel, setIsThirdSel] = useState(false);
     const [isFourthSel, setIsFourthSel] = useState(false);
+    const [showSavedTokens, setShowSavedTokens] = useState(false);
  
     const { 
         isLoading: deploying, 
@@ -532,6 +535,26 @@ const Launchpad: React.FC = () => {
     }
 
     const handleClickDeploy = () => {  
+        // Save token data regardless of transaction outcome
+        const tokenData = {
+            tokenName,
+            tokenSymbol,
+            tokenDescription,
+            tokenDecimals,
+            tokenSupply,
+            logoPreview,
+            price,
+            floorPrice,
+            presalePrice,
+            token1,
+            selectedProtocol,
+            presale,
+            softCap,
+            duration,
+            deployerAddress: address
+        };
+        
+        saveTokenData(tokenData);
 
         console.log( [
             {
@@ -626,6 +649,27 @@ const Launchpad: React.FC = () => {
                         Deploy your unruggable token with automated liquidity protection and price floor mechanisms
                     </Text>
                 </Box> */}
+
+                {/* View Saved Tokens Button */}
+                <Box display="flex" justifyContent="flex-end" mb={4} maxW={isMobile ? "100%" : "1400px"} mx="auto" w="100%">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        color="#4ade80"
+                        borderColor="#4ade80"
+                        _hover={{ bg: "#4ade8020" }}
+                        onClick={() => setShowSavedTokens(!showSavedTokens)}
+                    >
+                        {showSavedTokens ? "Hide Saved Tokens" : "View Saved Tokens"}
+                    </Button>
+                </Box>
+
+                {/* Show Saved Tokens Component */}
+                {showSavedTokens && (
+                    <Box mb={4} maxW={isMobile ? "100%" : "1400px"} mx="auto" w="100%">
+                        <SavedTokens />
+                    </Box>
+                )}
 
                 {/* Enhanced Progress Stepper */}
                 <Box mb={isMobile ? 4 : "10px"} mt="10px" maxW={isMobile ? "100%" : "1400px"} mx="auto" w="100%">
