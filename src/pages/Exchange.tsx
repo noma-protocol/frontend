@@ -992,12 +992,12 @@ const Exchange: React.FC = () => {
                                                   selectedToken?.token1?.toLowerCase() === poolInfo?.token0?.toLowerCase();
                 
                 // If our selected token is in the pool's token0 position:
-                //   - amount0 > 0 means our token is flowing IN (someone is buying our token)
-                //   - amount0 < 0 means our token is flowing OUT (someone is selling our token)
+                //   - amount0 < 0 means our token is flowing OUT of the pool (someone is BUYING our token)
+                //   - amount0 > 0 means our token is flowing INTO the pool (someone is SELLING our token)
                 // If our selected token is in the pool's token1 position:
-                //   - amount1 > 0 means our token is flowing IN (someone is buying our token)
-                //   - amount1 < 0 means our token is flowing OUT (someone is selling our token)
-                const isBuy = isSelectedTokenPoolToken0 ? amount0.gt(0) : amount1.gt(0);
+                //   - amount1 < 0 means our token is flowing OUT of the pool (someone is BUYING our token)
+                //   - amount1 > 0 means our token is flowing INTO the pool (someone is SELLING our token)
+                const isBuy = isSelectedTokenPoolToken0 ? amount0.lt(0) : amount1.lt(0);
                 
                 // Get the correct amounts based on which token is which in the pool
                 const tokenAmount = isSelectedTokenPoolToken0 ? amount0.abs() : amount1.abs();
