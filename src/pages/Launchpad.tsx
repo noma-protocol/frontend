@@ -633,7 +633,7 @@ const Launchpad: React.FC = () => {
                         border="1px solid #2a2a2a"
                         boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
                     >
-                        <HStack spacing={8} justify="space-between" position="relative">
+                        <HStack spacing={isMobile ? 2 : 8} justify="space-between" position="relative">
                             {/* Progress Line Background */}
                             <Box
                                 position="absolute"
@@ -688,8 +688,8 @@ const Launchpad: React.FC = () => {
                                             />
                                             <Box
                                                 position="relative"
-                                                w={16}
-                                                h={16}
+                                                w={isMobile ? 12 : 16}
+                                                h={isMobile ? 12 : 16}
                                                 borderRadius="full"
                                                 bg={isCompleted ? "#4ade80" : isActive ? "#4ade8040" : "#2a2a2a"}
                                                 border={isActive ? "2px solid #4ade80" : "none"}
@@ -700,9 +700,9 @@ const Launchpad: React.FC = () => {
                                                 transform={isActive ? "scale(1.1)" : "scale(1)"}
                                             >
                                             {isCompleted ? (
-                                                <FaCheckCircle size={24} color="black" />
+                                                <FaCheckCircle size={isMobile ? 16 : 24} color="black" />
                                             ) : (
-                                                <Icon size={24} color={isActive ? "#4ade80" : "#888"} />
+                                                <Icon size={isMobile ? 16 : 24} color={isActive ? "#4ade80" : "#888"} />
                                             )}
                                             </Box>
                                         </Box>
@@ -722,13 +722,13 @@ const Launchpad: React.FC = () => {
                     </Box>
                 </Box>
                 <Box flex="1" maxW="1400px" mx="auto" overflow="hidden">
-                <Box display="flex" gap={6}>
-                    {/* Main Form - Fixed Width Container */}
-                    <Box w={isMobile ? "100%" : "900px"}>
+                <Box display="flex" gap={isMobile ? 0 : 6} flexDirection={isMobile ? "column" : "row"}>
+                    {/* Main Form - Responsive Width Container */}
+                    <Box w={isMobile ? "100%" : "900px"} mb={isMobile ? 4 : 0} px={isMobile ? 2 : 0}>
                         <Box 
                             bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
-                            p={isMobile ? 6 : 8} 
-                            borderRadius="3xl" 
+                            p={isMobile ? 4 : 8} 
+                            borderRadius={isMobile ? "xl" : "3xl"} 
                             border="1px solid #2a2a2a"
                             boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
                             position="relative"
@@ -752,22 +752,25 @@ const Launchpad: React.FC = () => {
                                 {deployStep == 0 ? (
                                 <>
                                 {/* Step 0: Token Information Content */}
-                                <HStack mb={4} spacing={4} align="center" mt={2}>
+                                <HStack mb={4} spacing={4} align="center" mt={2} flexWrap={isMobile ? "wrap" : "nowrap"}>
                                 <Box p={3} bg="#4ade8020" borderRadius="xl">
-                                    <MdToken size={24} color="#4ade80" />
+                                    <MdToken size={isMobile ? 18 : 24} color="#4ade80" />
                                 </Box>
                                 <Box>
-                                    <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
+                                    <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="700" letterSpacing="-0.02em">
                                         Token Information
                                     </Heading>
                                 </Box>
-                                <Box ml={5}>
-                                    <Text color="#888" fontSize="md" mt={1}>Define your token's basic properties</Text>
+                                {!isMobile && (
+                                    <Box ml={5}>
+                                        <Text color="#888" fontSize="md" mt={1}>Define your token's basic properties</Text>
+                                    </Box>
+                                )}
                                 </Box>
                             </HStack>
                             <VStack align="stretch" spacing={3} flex="1" overflow="auto">
-                                    <HStack>
-                                    <Box w="50%">
+                                    <HStack flexDirection={isMobile ? "column" : "row"} w="100%" spacing={isMobile ? 0 : 4}>
+                                    <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 3 : 0}>
                                         <HStack mb={2}>
                                             <Box>
                                                 <FaTag size={14} color="#888" />
@@ -799,7 +802,7 @@ const Launchpad: React.FC = () => {
                                             )}
                                         </Box>
                                     </Box>     
-                                    <Box w="50%">
+                                    <Box w={isMobile ? "100%" : "50%"}>
                                         <HStack mb={2}>
                                             <Box>
                                                 <MdToken size={14} color="#888" />
@@ -871,7 +874,7 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                 </Box>
 
-                                <SimpleGrid columns={2} gap={6} mt={5}>
+                                <SimpleGrid columns={isMobile ? 1 : 2} gap={6} mt={5}>
                                     <Box >
                                         <HStack mb={2}>
                                             <Box>
@@ -1174,7 +1177,7 @@ const Launchpad: React.FC = () => {
                                                     <FaWallet size={14} color="#888" />
                                                 </Box>
                                                 <Box>
-                                                    <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Paired Asset</Text>
+                                                    <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Reserve Asset</Text>
                                                 </Box>
                                             </HStack>
                                             <HStack w="100%">
@@ -1320,7 +1323,7 @@ const Launchpad: React.FC = () => {
                             </VStack>
                             </Box>
                             <Box w="100%" h="50%"  mt={"5%"}>
-                            <Heading as="h3">Overview</Heading>
+                            <Heading as="h3">Summary</Heading>
                             {/* Enhanced Info Box */}
                             <Box 
                                 p={5} 
@@ -1419,7 +1422,7 @@ const Launchpad: React.FC = () => {
                                             </Box>
                                         </HStack>
                                         </Box>
-                                        <Box w="50%">
+                                        <Box w={isMobile ? "100%" : "50%"}>
                                         <Box ml={2}>
                                         <HStack mb={2}>
                                             <Box>
@@ -1580,7 +1583,7 @@ const Launchpad: React.FC = () => {
                             </Box>
                             <Box w="100%" h="50%" mt={"10%"}>
                                 <HStack justify="space-between" align="center" mb={4}>
-                                    <Heading as="h3">Overview</Heading>
+                                    <Heading as="h3">Summary</Heading>
                                     <SelectRoot
                                         collection={capViewChoices}
                                         defaultValue="softcap"
@@ -1709,17 +1712,20 @@ const Launchpad: React.FC = () => {
                 ) : (
                     <>
                         {/* Step 3: Review & Deploy */}
-                        <HStack mb={4} spacing={4} align="center">
+                        <HStack mb={4} spacing={4} align="center" flexWrap={isMobile ? "wrap" : "nowrap"}>
                             <Box p={3} bg="#4ade8020" borderRadius="xl">
-                                <FaRocket size={24} color="#4ade80" />
+                                <FaRocket size={isMobile ? 18 : 24} color="#4ade80" />
                             </Box>
                             <Box>
-                                <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
+                                <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="700" letterSpacing="-0.02em">
                                     Review & Launch
                                 </Heading>
                             </Box>
-                            <Box ml={5}>
-                                <Text color="#888" fontSize="md" mt={1}>Confirm your token details before deployment</Text>
+                            {!isMobile && (
+                                <Box ml={5}>
+                                    <Text color="#888" fontSize="md" mt={1}>Confirm your token details before deployment</Text>
+                                </Box>
+                            )}
                             </Box>
                         </HStack>
 
@@ -1760,7 +1766,7 @@ const Launchpad: React.FC = () => {
                                         <Text color="#4ade80" fontSize="sm" fontWeight="bold">Token Details</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={3} gap={3}>
+                                <SimpleGrid columns={isMobile ? 1 : 3} gap={3}>
                                     <Box p={4}>
                                         <Text color="#888" fontSize="xs">Name</Text>
                                         <Text  mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenName}</Text>
@@ -1803,10 +1809,10 @@ const Launchpad: React.FC = () => {
                                         <Text color="#4ade80" fontSize="sm" fontWeight="bold">Pool Configuration</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={3} gap={3}>
+                                <SimpleGrid columns={isMobile ? 1 : 3} gap={3}>
                                    <Box p={4}>
                                         <Text color="#888" fontSize="xs">Total Supply</Text>
-                                        <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(tokenSupply, 0)}</Text>
+                                        <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(tokenSupply, 0)} {tokenSymbol}</Text>
                                     </Box>                                    
                                     <Box p={4}>
                                         <Text color="#888" fontSize="xs">Floor Price</Text>
@@ -1817,7 +1823,7 @@ const Launchpad: React.FC = () => {
                                         <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{price} MON</Text>
                                     </Box> */}
                                     <Box p={4}>
-                                        <Text color="#888" fontSize="xs">Paired Asset</Text>
+                                        <Text color="#888" fontSize="xs">Reserve Asset</Text>
                                         <HStack spacing={1}>
                                             <Box mt={-2}>
                                                 <Image w="16px" h="16px" src={monadLogo} alt="MON" />
@@ -1879,7 +1885,7 @@ const Launchpad: React.FC = () => {
                                             <Text color="#4ade80" fontSize="sm" fontWeight="bold">Presale Configuration</Text>
                                         </Box>
                                     </HStack>
-                                    <SimpleGrid columns={3} gap={3}>
+                                    <SimpleGrid columns={isMobile ? 1 : 3} gap={3}>
                                         <Box p={4}>
                                             <Text color="#888" fontSize="xs">Presale Price</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(price)} MON</Text>
@@ -1975,8 +1981,9 @@ const Launchpad: React.FC = () => {
                                     border="1px solid #2a2a2a"
                                     color="white"
                                     _hover={{ bg: "#1a1a1a", borderColor: "#3a3a3a" }}
-                                    px={6}
-                                    h="45px"
+                                    px={isMobile ? 8 : 6}
+                                    h={isMobile ? "50px" : "45px"}
+                                    fontSize={isMobile ? "md" : "sm"}
                                 >
                                     Back
                                 </Button>
@@ -1987,8 +1994,9 @@ const Launchpad: React.FC = () => {
                                 color="black"
                                 fontWeight="600"
                                 _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
-                                px={8}
-                                h="45px"
+                                px={isMobile ? 10 : 8}
+                                h={isMobile ? "50px" : "45px"}
+                                fontSize={isMobile ? "md" : "sm"}
                                 rightIcon={<FaChartLine />}
                             >
                                 Continue
@@ -2018,8 +2026,9 @@ const Launchpad: React.FC = () => {
                                 color="black"
                                 fontWeight="600"
                                 _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
-                                px={8}
-                                h="45px"
+                                px={isMobile ? 10 : 8}
+                                h={isMobile ? "50px" : "45px"}
+                                fontSize={isMobile ? "md" : "sm"}
                                 rightIcon={presale == 0 ? <FaRocket /> : <FaCoins />}
                             >
                                 Continue
@@ -2049,8 +2058,9 @@ const Launchpad: React.FC = () => {
                                 color="black"
                                 fontWeight="600"
                                 _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
-                                px={8}
-                                h="45px"
+                                px={isMobile ? 10 : 8}
+                                h={isMobile ? "50px" : "45px"}
+                                fontSize={isMobile ? "md" : "sm"}
                                 rightIcon={<FaRocket />}
                             >
                                 Review & Launch
@@ -2084,7 +2094,10 @@ const Launchpad: React.FC = () => {
                                     }
                                 }}
                                 isLoading={deploying}
-                                bg="#4ade80" 
+                                bg="#4ade80"
+                                h={isMobile ? "50px" : "45px"}
+                                px={isMobile ? 10 : 8}
+                                fontSize={isMobile ? "md" : "sm"} 
                                 color="black"
                                 fontWeight="600"
                                 _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
