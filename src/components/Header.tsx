@@ -418,16 +418,16 @@ const Header: React.FC = () => {
             bg="#4ade80" 
             color="black" 
             h="40px" 
-            px={6}
+            px={isMobile ? 3 : 6}
             fontWeight="600"
             _hover={{ bg: "#22c55e" }}
           >
-            <i className="fa-solid fa-wallet" style={{ marginRight: "8px" }}></i>
+            <i className="fa-solid fa-wallet" style={{ marginRight: isMobile ? "4px" : "8px" }}></i>
             {isConnected
-              ? `${address?.slice(0, 6)}...${address?.slice(-6)}`
+              ? `${address?.slice(0, isMobile ? 4 : 6)}...${address?.slice(isMobile ? -3 : -6)}`
               : !ctx.isSpanishCountry
-              ? "Connect wallet"
-              : "Conectar billetera"}
+              ? isMobile ? "Connect" : "Connect wallet"
+              : isMobile ? "Conectar" : "Conectar billetera"}
           </Button>
           
           {/* Mobile Menu Toggle */}

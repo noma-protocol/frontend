@@ -556,7 +556,7 @@ const Launchpad: React.FC = () => {
 
 
     return (
-        <Container maxW="100%" p={0} bg="#0a0a0a" minH="100vh" position="relative" overflow="hidden"> 
+        <Container maxW="100%" p={0} bg={isMobile ? "#000" : "#0a0a0a"} minH="100vh" position="relative" overflow="hidden"> 
             {/* Background Gradient Effects */}
             <Box
                 position="absolute"
@@ -588,13 +588,13 @@ const Launchpad: React.FC = () => {
             <Box
                 w="100%"
                 bg="#0a0a0a"
-                p={isMobile ? 4 : 8}
+                p={isMobile ? 2 : 8}
                 position="relative"
                 zIndex={1}
                 minH="100vh"
                 display="flex"
             >
-            <Box maxW="1600px" mx="auto" h="100%" display="flex" flexDirection="column">
+            <Box maxW={isMobile ? "100%" : "1600px"} mx="auto" h="100%" display="flex" flexDirection="column" w="100%">
                 {/* Header */}
                 {/* <Box mb={12} textAlign="center">
                     <HStack justify="center" mb={4}>
@@ -625,38 +625,15 @@ const Launchpad: React.FC = () => {
                 </Box> */}
 
                 {/* Enhanced Progress Stepper */}
-                <Box mb={6} mt="10px">
+                <Box mb={isMobile ? 4 : 6} mt="10px">
                     <Box 
-                        bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)" 
-                        p={8} 
+                        bg={isMobile ? "transparent" : "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"} 
+                        p={isMobile ? 4 : 8} 
                         borderRadius="3xl" 
-                        border="1px solid #2a2a2a"
-                        boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
+                        border={isMobile ? "none" : "1px solid #2a2a2a"}
+                        boxShadow={isMobile ? "none" : "0 10px 30px rgba(0, 0, 0, 0.5)"}
                     >
-                        <HStack spacing={isMobile ? 2 : 8} justify="space-between" position="relative">
-                            {/* Progress Line Background */}
-                            <Box
-                                position="absolute"
-                                top="50%"
-                                left="10%"
-                                right="10%"
-                                h="2px"
-                                bg="#2a2a2a"
-                                transform="translateY(calc(-50% - 20px))"
-                                zIndex={0}
-                            />
-                            {/* Progress Line Fill */}
-                            <Box
-                                position="absolute"
-                                top="50%"
-                                left="10%"
-                                w={`${Math.min(deployStep / 3 * 80, 80)}%`}
-                                h="2px"
-                                bg="#4ade80"
-                                transform="translateY(calc(-50% - 20px))"
-                                transition="width 0.3s ease"
-                                zIndex={0}
-                            />
+                        <HStack spacing={isMobile ? 1 : 8} justify="space-between" position="relative">
                             
                             {[
                                 { name: "Token Info", icon: MdToken },
@@ -678,20 +655,12 @@ const Launchpad: React.FC = () => {
                                             alignItems="center"
                                             justifyContent="center"
                                         >
-                                            {/* Background to hide the line */}
-                                            <Box
-                                                position="absolute"
-                                                w="100%"
-                                                h="100%"
-                                                bg="#1a1a1a"
-                                                borderRadius="full"
-                                            />
                                             <Box
                                                 position="relative"
-                                                w={isMobile ? 12 : 16}
-                                                h={isMobile ? 12 : 16}
+                                                w={isMobile ? 14 : 16}
+                                                h={isMobile ? 14 : 16}
                                                 borderRadius="full"
-                                                bg={isCompleted ? "#4ade80" : isActive ? "#4ade8040" : "#2a2a2a"}
+                                                bg={isCompleted ? "#4ade80" : isActive ? "#4ade8040" : "#333"}
                                                 border={isActive ? "2px solid #4ade80" : "none"}
                                                 display="flex"
                                                 alignItems="center"
@@ -700,9 +669,9 @@ const Launchpad: React.FC = () => {
                                                 transform={isActive ? "scale(1.1)" : "scale(1)"}
                                             >
                                             {isCompleted ? (
-                                                <FaCheckCircle size={isMobile ? 16 : 24} color="black" />
+                                                <FaCheckCircle size={isMobile ? 20 : 24} color="black" />
                                             ) : (
-                                                <Icon size={isMobile ? 16 : 24} color={isActive ? "#4ade80" : "#888"} />
+                                                <Icon size={isMobile ? 20 : 24} color={isActive ? "#4ade80" : "#888"} />
                                             )}
                                             </Box>
                                         </Box>
@@ -721,16 +690,16 @@ const Launchpad: React.FC = () => {
                         </HStack>
                     </Box>
                 </Box>
-                <Box flex="1" maxW="1400px" mx="auto" overflow="hidden">
-                <Box display="flex" gap={isMobile ? 0 : 6} flexDirection={isMobile ? "column" : "row"}>
+                <Box flex="1" maxW={isMobile ? "100%" : "1400px"} mx="auto" overflow="hidden" w="100%" mt={-5}>
+                <Box display="flex" gap={isMobile ? 0 : 6} flexDirection={isMobile ? "column" : "row"} w="100%">
                     {/* Main Form - Responsive Width Container */}
-                    <Box w={isMobile ? "100%" : "900px"} mb={isMobile ? 4 : 0} px={isMobile ? 2 : 0}>
+                    <Box w="100%" maxW={isMobile ? "100%" : "900px"} mb={isMobile ? 4 : 0} px={isMobile ? 0 : 0}>
                         <Box 
-                            bg="linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"
-                            p={isMobile ? 4 : 8} 
+                            bg={isMobile ? "transparent" : "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)"}
+                            p={isMobile ? 1 : 8} 
                             borderRadius={isMobile ? "xl" : "3xl"} 
-                            border="1px solid #2a2a2a"
-                            boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
+                            border={isMobile ? "none" : "1px solid #2a2a2a"}
+                            boxShadow={isMobile ? "none" : "0 10px 30px rgba(0, 0, 0, 0.5)"}
                             position="relative"
                             overflow="hidden"
                             h="100%"
@@ -748,13 +717,13 @@ const Launchpad: React.FC = () => {
                             />
                             
                             {/* Content Area - Flex to fit */}
-                            <Box flex="1" overflow="hidden" display="flex" flexDirection="column" px={2}>
+                            <Box flex="1" overflow="hidden" display="flex" flexDirection="column" px={isMobile ? 0 : 2} w="100%">
                                 {deployStep == 0 ? (
                                 <>
                                 {/* Step 0: Token Information Content */}
-                                <HStack mb={4} spacing={4} align="center" mt={2} flexWrap={isMobile ? "wrap" : "nowrap"}>
-                                <Box p={3} bg="#4ade8020" borderRadius="xl">
-                                    <MdToken size={isMobile ? 18 : 24} color="#4ade80" />
+                                <HStack mb={isMobile ? 3 : 4} spacing={isMobile ? 3 : 4} align="center" mt={2} flexWrap={isMobile ? "wrap" : "nowrap"}>
+                                <Box p={isMobile ? 2.5 : 3} bg="#4ade8020" borderRadius="xl">
+                                    <MdToken size={isMobile ? 20 : 24} color="#4ade80" />
                                 </Box>
                                 <Box>
                                     <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="700" letterSpacing="-0.02em">
@@ -766,30 +735,29 @@ const Launchpad: React.FC = () => {
                                         <Text color="#888" fontSize="md" mt={1}>Define your token's basic properties</Text>
                                     </Box>
                                 )}
-                                </Box>
                             </HStack>
-                            <VStack align="stretch" spacing={3} flex="1" overflow="auto">
-                                    <HStack flexDirection={isMobile ? "column" : "row"} w="100%" spacing={isMobile ? 0 : 4}>
-                                    <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 3 : 0}>
-                                        <HStack mb={2}>
+                            <VStack align="stretch" spacing={isMobile ? 3 : 3} flex="1" overflow="auto" w={isMobile ? "95%" : "100%"} px={isMobile ? 2 : 0} mx="auto">
+                                    <HStack flexDirection={isMobile ? "column" : "row"} w="100%" spacing={isMobile ? 0 : 4} alignItems="stretch">
+                                    <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 4 : 0}>
+                                        <HStack mb={isMobile ? 3 : 2}>
                                             <Box>
                                                 <FaTag size={14} color="#888" />
                                             </Box>
                                             <Box>
-                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Token Name</Text>
+                                                <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Token Name</Text>
                                             </Box>
                                         </HStack>
                                         <Box position="relative">
                                             <Input
-                                                bg="#0a0a0a"
-                                                border="1px solid #2a2a2a"
+                                                bg={isMobile ? "#1a1a1a" : "#0a0a0a"}
+                                                border={isMobile ? "1px solid #3a3a3a" : "1px solid #2a2a2a"}
                                                 color="white"
                                                 placeholder="e.g. Noma Token"
                                                 h="50px"
                                                 pl={4}
-                                                pr={tokenName ? 12 : 4}
+                                                pr={12}
                                                 _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                                _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
+                                                _focus={{ borderColor: "#4ade80", bg: isMobile ? "#1a1a1a" : "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
                                                 _placeholder={{ color: "#666" }}
                                                 onChange={handleSetTokenName}
                                                 value={tokenName}
@@ -803,25 +771,25 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                     </Box>     
                                     <Box w={isMobile ? "100%" : "50%"}>
-                                        <HStack mb={2}>
+                                        <HStack mb={isMobile ? 3 : 2}>
                                             <Box>
                                                 <MdToken size={14} color="#888" />
                                             </Box>
                                             <Box>
-                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Token Symbol</Text>
+                                                <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Token Symbol</Text>
                                             </Box>
                                         </HStack>
                                         <Box position="relative">
                                             <Input
-                                                bg="#0a0a0a"
-                                                border="1px solid #2a2a2a"
+                                                bg={isMobile ? "#1a1a1a" : "#0a0a0a"}
+                                                border={isMobile ? "1px solid #3a3a3a" : "1px solid #2a2a2a"}
                                                 color="white"
                                                 placeholder="e.g. NOMA"
                                                 h="50px"
                                                 pl={4}
-                                                pr={tokenSymbol ? 12 : 4}
+                                                pr={12}
                                                 _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                                _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
+                                                _focus={{ borderColor: "#4ade80", bg: isMobile ? "#1a1a1a" : "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
                                                 _placeholder={{ color: "#666" }}
                                                 onChange={handleSetTokenSymbol}
                                                 value={tokenSymbol}
@@ -849,8 +817,8 @@ const Launchpad: React.FC = () => {
                                     </HStack>
                                     <Box position="relative">
                                         <Textarea
-                                            bg="#0a0a0a"
-                                            border="1px solid #2a2a2a"
+                                            bg={isMobile ? "#1a1a1a" : "#0a0a0a"}
+                                            border={isMobile ? "1px solid #3a3a3a" : "1px solid #2a2a2a"}
                                             color="white"
                                             placeholder="Describe your token's purpose and utility (optional)"
                                             minH="100px"
@@ -859,7 +827,7 @@ const Launchpad: React.FC = () => {
                                             pr={4}
                                             py={3}
                                             _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                            _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
+                                            _focus={{ borderColor: "#4ade80", bg: isMobile ? "#1a1a1a" : "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
                                             _placeholder={{ color: "#666" }}
                                             onChange={handleSetTokenDescription}
                                             value={tokenDescription}
@@ -876,12 +844,12 @@ const Launchpad: React.FC = () => {
 
                                 <SimpleGrid columns={isMobile ? 1 : 2} gap={6} mt={5}>
                                     <Box >
-                                        <HStack mb={2}>
+                                        <HStack mb={isMobile ? 3 : 2}>
                                             <Box>
                                                 <FaLayerGroup size={14} color="#888" />
                                             </Box>
                                             <Box>
-                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Decimals</Text>
+                                                <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Decimals</Text>
                                             </Box>
                                         </HStack>
                                         <NumberInputRoot
@@ -893,20 +861,20 @@ const Launchpad: React.FC = () => {
                                         >
                                             <NumberInputField 
                                                 h="50px" 
-                                                bg="#0a0a0a"
-                                                border="1px solid #2a2a2a"
+                                                bg={isMobile ? "#1a1a1a" : "#0a0a0a"}
+                                                border={isMobile ? "1px solid #3a3a3a" : "1px solid #2a2a2a"}
                                                 color="#666"
-                                                _disabled={{ bg: "#0a0a0a", color: "#666", cursor: "not-allowed" }}
+                                                _disabled={{ bg: isMobile ? "#1a1a1a" : "#0a0a0a", color: "#666", cursor: "not-allowed" }}
                                             />
                                         </NumberInputRoot>
                                     </Box>
                                     <Box>
-                                        <HStack mb={2}>
+                                        <HStack mb={isMobile ? 3 : 2}>
                                             <Box>
                                                 <FaCoins size={14} color="#888" />
                                             </Box>
                                             <Box>
-                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Enable Presale</Text>
+                                                <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Enable Presale</Text>
                                             </Box>
                                         </HStack>
                                         <SelectRoot
@@ -916,8 +884,8 @@ const Launchpad: React.FC = () => {
                                             value={presale}
                                         >
                                             <SelectTrigger 
-                                                bg="#0a0a0a"
-                                                border="1px solid #2a2a2a"
+                                                bg={isMobile ? "#1a1a1a" : "#0a0a0a"}
+                                                border={isMobile ? "1px solid #3a3a3a" : "1px solid #2a2a2a"}
                                                 color="white" 
                                                 h="50px"
                                                 _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
@@ -960,12 +928,12 @@ const Launchpad: React.FC = () => {
                                         </SelectRoot>
                                     </Box>
                                     <Box mt={5}>
-                                        <HStack mb={2}>
+                                        <HStack mb={isMobile ? 3 : 2}>
                                             <Box>
                                                 <FaImage size={14} color="#888" />
                                             </Box>
                                             <Box>
-                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Token Logo (Optional)</Text>
+                                                <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Token Logo (Optional)</Text>
                                             </Box>
                                         </HStack>
                                         <Box>
@@ -979,8 +947,8 @@ const Launchpad: React.FC = () => {
                                             <label htmlFor="logo-upload">
                                                 <Box
                                                     as="div"
-                                                    bg="#0a0a0a"
-                                                    border="1px solid #2a2a2a"
+                                                    bg={isMobile ? "#1a1a1a" : "#0a0a0a"}
+                                                    border={isMobile ? "none" : "1px solid #2a2a2a"}
                                                     borderRadius="lg"
                                                     p={4}
                                                     cursor="pointer"
@@ -1031,6 +999,7 @@ const Launchpad: React.FC = () => {
                                                                 <FaUpload size={18} color="#888" />
                                                             </Box>
                                                             <Text color="#888" fontSize="sm" mb={2}>Click to upload logo</Text>
+                                                            
                                                         </VStack>
                                                     )}
                                                 </Box>
@@ -1057,22 +1026,24 @@ const Launchpad: React.FC = () => {
                         <VStack>
                             <Box w="100%" h="50%">
                             {/* Step 1: Pool Configuration Content */}
-                            <HStack mb={4} spacing={4} align="center">
-                                <Box p={3} bg="#4ade8020" borderRadius="xl">
-                                    <FaChartLine size={24} color="#4ade80" />
+                            <HStack mb={isMobile ? 3 : 4} spacing={isMobile ? 3 : 4} align="center" flexWrap={isMobile ? "wrap" : "nowrap"}>
+                                <Box p={isMobile ? 2.5 : 3} bg="#4ade8020" borderRadius="xl">
+                                    <FaChartLine size={isMobile ? 20 : 24} color="#4ade80" />
                                 </Box>
                                 <Box>
-                                    <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
+                                    <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="700" letterSpacing="-0.02em">
                                         Pool Configuration
                                     </Heading>
                                 </Box>
-                                <Box ml={5}>
-                                    <Text color="#888" fontSize="md" mt={1}>Set pricing and liquidity parameters</Text>
-                                </Box>
+                                {!isMobile && (
+                                    <Box ml={5}>
+                                        <Text color="#888" fontSize="md" mt={1}>Set pricing and liquidity parameters</Text>
+                                    </Box>
+                                )}
                             </HStack>
-                            <VStack align="stretch" spacing={5} flex="1" w="100%">
-                                <HStack>
-                                    <Box w="50%">
+                            <VStack align="stretch" spacing={isMobile ? 3 : 5} flex="1" w={isMobile ? "95%" : "100%"} px={isMobile ? 2 : 0} mx="auto">
+                                <HStack flexDirection={isMobile ? "column" : "row"} w="100%" spacing={isMobile ? 0 : 4} alignItems="stretch">
+                                    <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 4 : 0}>
                                     <HStack mb={2}>
                                         <Box>
                                             <FaTag size={14} color="#888" />
@@ -1099,7 +1070,7 @@ const Launchpad: React.FC = () => {
                                             border="1px solid #2a2a2a" 
                                             color="white"
                                             _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                            _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
+                                            _focus={{ borderColor: "#4ade80", bg: isMobile ? "#1a1a1a" : "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
                                             _placeholder={{ color: "#666" }}
                                             transition="all 0.2s"
                                         />
@@ -1114,14 +1085,14 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                     </HStack>
                                     </Box> 
-                                    <Box w="50%" ml={2}>
+                                    <Box w={isMobile ? "100%" : "50%"} ml={isMobile ? 0 : 2}>
                                         <Box>
-                                            <HStack mb={2}>
+                                            <HStack mb={isMobile ? 3 : 2}>
                                                 <Box>
                                                     <FaCoins size={14} color="#888" />
                                                 </Box>
                                                 <Box>
-                                                    <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Total Supply</Text>
+                                                    <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Total Supply</Text>
                                                 </Box>
                                             </HStack>
                                             <HStack w="100%">
@@ -1151,7 +1122,7 @@ const Launchpad: React.FC = () => {
                                                         border="1px solid #2a2a2a" 
                                                         color="white"
                                                         _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                                        _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
+                                                        _focus={{ borderColor: "#4ade80", bg: isMobile ? "#1a1a1a" : "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
                                                         _placeholder={{ color: "#666" }}
                                                         transition="all 0.2s"
                                                     />
@@ -1172,12 +1143,12 @@ const Launchpad: React.FC = () => {
                                 <HStack mt={5}>
                                     <Box w="50%" >
                                         <Box>
-                                            <HStack mb={2}>
+                                            <HStack mb={isMobile ? 3 : 2}>
                                                 <Box>
                                                     <FaWallet size={14} color="#888" />
                                                 </Box>
                                                 <Box>
-                                                    <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Reserve Asset</Text>
+                                                    <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Reserve Asset</Text>
                                                 </Box>
                                             </HStack>
                                             <HStack w="100%">
@@ -1323,17 +1294,22 @@ const Launchpad: React.FC = () => {
                             </VStack>
                             </Box>
                             <Box w="100%" h="50%"  mt={"5%"}>
-                            <Heading as="h3">Summary</Heading>
+                            <HStack mb={isMobile ? 2 : 3} spacing={isMobile ? 2 : 3} align="center">
+                                <Box p={isMobile ? 2 : 2.5} bg="#4ade8020" borderRadius="xl">
+                                    <FaFileAlt size={isMobile ? 16 : 20} color="#4ade80" />
+                                </Box>
+                                <Heading as="h3" size={isMobile ? "md" : "lg"}>Summary</Heading>
+                            </HStack>
                             {/* Enhanced Info Box */}
                             <Box 
-                                p={5} 
+                                p={isMobile ? 4 : 5} 
                                 bg="linear-gradient(135deg, #4ade8010 0%, #22c55e10 100%)" 
                                 borderRadius="xl"
                                 border="1px solid #4ade8040"
                             >
-                                <HStack gap={4}>
-                                    <Box w="25%">
-                                        <Text color="#888" fontSize="xs" mb={1}>Floor price</Text>
+                                <SimpleGrid columns={isMobile ? 2 : 4} gap={isMobile ? 3 : 4} rowGap={isMobile ? 6 : 4}>
+                                    <Box>
+                                        <Text color="#888" fontSize="xs" mb={0}>Floor price</Text>
                                         <Text color="white" fontSize="lg" fontWeight="bold">
                                             {formatNumberPrecise(Number(floorPrice) )} MON
                                         </Text>
@@ -1341,8 +1317,8 @@ const Launchpad: React.FC = () => {
                                             ${formatNumberPrecise( Number(floorPrice || 0) * (monPrice))}
                                         </Text>
                                     </Box>                                
-                                    <Box w="25%">
-                                        <Text color="#888" fontSize="xs" mb={1}>Presale price</Text>
+                                    <Box>
+                                        <Text color="#888" fontSize="xs" mb={0}>Presale price</Text>
                                         <Text color="white" fontSize="lg" fontWeight="bold">
                                             {price || "0"} MON
                                         </Text>
@@ -1350,8 +1326,8 @@ const Launchpad: React.FC = () => {
                                             ${commify(Number(price || 0) * (monPrice), 4)}
                                         </Text>                                    
                                     </Box>
-                                    <Box  w="25%">
-                                        <Text color="#888" fontSize="xs" mb={1}>FDV</Text>
+                                    <Box>
+                                        <Text color="#888" fontSize="xs" mb={0}>FDV</Text>
                                         <Text color="white" fontSize="lg" fontWeight="bold">
                                             {formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0))} MON
                                         </Text>
@@ -1359,13 +1335,13 @@ const Launchpad: React.FC = () => {
                                             ${formatNumberPrecise(Number(tokenSupply) * Number(floorPrice || 0) * (monPrice))}
                                         </Text>
                                     </Box>
-                                    <Box  w="25%" alignItems={"left"} alignContent={"left"} textAlign={"left"}>
-                                        <Text color="#888" fontSize="xs" mb={1}>Protocol</Text>
+                                    <Box alignItems={"left"} alignContent={"left"} textAlign={"left"}>
+                                        <Text color="#888" fontSize="xs" mb={0}>Protocol</Text>
                                         <Image src={uniswapLogo} w="65px" h="65px"  />
                                         <Text color="#4ade80" fontSize="sm">
                                         </Text>
                                     </Box>
-                                </HStack>
+                                </SimpleGrid>
                             </Box>                            
                             </Box> 
                     </VStack>
@@ -1393,18 +1369,18 @@ const Launchpad: React.FC = () => {
                                 <Box>
                                     <HStack columns={2}>
                                         <Box w="50%">
-                                        <HStack mb={2}>
+                                        <HStack mb={isMobile ? 3 : 2}>
                                             <Box>
                                                 <FaTag size={14} color="#888" />
                                             </Box>
                                             <Box>
-                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Presale Price (MON)</Text>
+                                                <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Presale Price (MON)</Text>
                                             </Box>
                                         </HStack>
                                         <HStack>
                                             <Input 
-                                                bg="#0a0a0a"
-                                                border="1px solid #2a2a2a"
+                                                bg={isMobile ? "#1a1a1a" : "#0a0a0a"}
+                                                border={isMobile ? "1px solid #3a3a3a" : "1px solid #2a2a2a"}
                                                 color="#666"
                                                 h="50px"
                                                 value={price}
@@ -1424,12 +1400,12 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                         <Box w={isMobile ? "100%" : "50%"}>
                                         <Box ml={2}>
-                                        <HStack mb={2}>
+                                        <HStack mb={isMobile ? 3 : 2}>
                                             <Box>
                                                 <FaClock size={14} color="#888" />
                                             </Box>
                                             <Box>
-                                                <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Presale Duration</Text>
+                                                <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Presale Duration</Text>
                                             </Box>
                                         </HStack>
                                         <SelectRoot
@@ -1535,7 +1511,7 @@ const Launchpad: React.FC = () => {
                                             color="white"
                                             h="50px"
                                             _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                            _focus={{ borderColor: "#4ade80", bg: "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
+                                            _focus={{ borderColor: "#4ade80", bg: isMobile ? "#1a1a1a" : "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
                                             defaultValue={((tokenSupply * 10/100) * price) / 8}
                                             min={((tokenSupply * 10/100) * price) / 8 } 
                                             max={((tokenSupply * 10/100) * price) * 60/100}
@@ -1726,7 +1702,6 @@ const Launchpad: React.FC = () => {
                                     <Text color="#888" fontSize="md" mt={1}>Confirm your token details before deployment</Text>
                                 </Box>
                             )}
-                            </Box>
                         </HStack>
 
                         {/* Summary Cards */}
@@ -1967,7 +1942,7 @@ const Launchpad: React.FC = () => {
             </Box>
             
             {/* Bottom Navigation - Fixed Position */}
-            <Box borderTop="1px solid #2a2a2a" pt={4} mt="auto">
+            <Box borderTop="1px solid #2a2a2a" pt={4} mt={5}>
                 {deployStep == 0 ? (
                     <HStack justify="space-between">
                         <Box>
@@ -1994,9 +1969,9 @@ const Launchpad: React.FC = () => {
                                 color="black"
                                 fontWeight="600"
                                 _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
-                                px={isMobile ? 10 : 8}
-                                h={isMobile ? "50px" : "45px"}
-                                fontSize={isMobile ? "md" : "sm"}
+                                px={isMobile ? 6 : 8}
+                                h={isMobile ? "42px" : "45px"}
+                                fontSize={isMobile ? "sm" : "sm"}
                                 rightIcon={<FaChartLine />}
                             >
                                 Continue
@@ -2026,9 +2001,9 @@ const Launchpad: React.FC = () => {
                                 color="black"
                                 fontWeight="600"
                                 _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
-                                px={isMobile ? 10 : 8}
-                                h={isMobile ? "50px" : "45px"}
-                                fontSize={isMobile ? "md" : "sm"}
+                                px={isMobile ? 6 : 8}
+                                h={isMobile ? "42px" : "45px"}
+                                fontSize={isMobile ? "sm" : "sm"}
                                 rightIcon={presale == 0 ? <FaRocket /> : <FaCoins />}
                             >
                                 Continue
@@ -2058,9 +2033,9 @@ const Launchpad: React.FC = () => {
                                 color="black"
                                 fontWeight="600"
                                 _hover={{ bg: "#22c55e", transform: "translateY(-2px)" }}
-                                px={isMobile ? 10 : 8}
-                                h={isMobile ? "50px" : "45px"}
-                                fontSize={isMobile ? "md" : "sm"}
+                                px={isMobile ? 6 : 8}
+                                h={isMobile ? "42px" : "45px"}
+                                fontSize={isMobile ? "sm" : "sm"}
                                 rightIcon={<FaRocket />}
                             >
                                 Review & Launch
