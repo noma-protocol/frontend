@@ -1002,15 +1002,19 @@ const Exchange: React.FC = () => {
                 // Calculate price
                 const tokenAmountFormatted = parseFloat(formatEther(tokenAmount));
                 const ethAmountFormatted = parseFloat(formatEther(ethAmount));
-                const price = ethAmountFormatted / tokenAmountFormatted;
+                
+                // Price should be MON per TOKEN (how much MON for 1 TOKEN)
+                // If buying: we spend MON to get TOKEN, so price = MON spent / TOKEN received
+                // If selling: we give TOKEN to get MON, so price = MON received / TOKEN given
+                const price = tokenAmountFormatted > 0 ? ethAmountFormatted / tokenAmountFormatted : 0;
                 
                 const newTrade = {
                     id: Date.now() + Math.random(), // Unique ID
                     type: isBuy ? "buy" : "sell",
                     token: selectedToken?.symbol || "TOKEN",
-                    amount: tokenAmountFormatted,
-                    price: price,
-                    total: ethAmountFormatted,
+                    amount: tokenAmountFormatted, // Amount of TOKEN bought/sold
+                    price: price, // Price in MON per TOKEN
+                    total: ethAmountFormatted, // Total MON spent/received
                     time: timestamp,
                     txHash: `${txHash.slice(0, 6)}...${txHash.slice(-4)}`,
                     // For swap events, sender is the router/pool, recipient is the user
