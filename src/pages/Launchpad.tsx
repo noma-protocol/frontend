@@ -807,7 +807,7 @@ const Launchpad: React.FC = () => {
 
                                 
                                 <Box mt={5}>
-                                    <HStack mb={2}>
+                                    <HStack mb={isMobile ? 3 : 2}>
                                         <Box>
                                             <FaFileAlt size={14} color="#888" />
                                         </Box>
@@ -1044,7 +1044,7 @@ const Launchpad: React.FC = () => {
                             <VStack align="stretch" spacing={isMobile ? 3 : 5} flex="1" w={isMobile ? "95%" : "100%"} px={isMobile ? 2 : 0} mx="auto">
                                 <HStack flexDirection={isMobile ? "column" : "row"} w="100%" spacing={isMobile ? 0 : 4} alignItems="stretch">
                                     <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 4 : 0}>
-                                    <HStack mb={2}>
+                                    <HStack mb={isMobile ? 3 : 2}>
                                         <Box>
                                             <FaTag size={14} color="#888" />
                                         </Box>
@@ -1352,23 +1352,25 @@ const Launchpad: React.FC = () => {
                         <VStack>
                             <Box w="100%" h="50%">
                                 {/* Step 2: Presale Configuration Content */}
-                                <HStack mb={4} spacing={4} align="center">
-                                    <Box p={3} bg="#4ade8020" borderRadius="xl">
-                                        <FaCoins size={24} color="#4ade80" />
+                                <HStack mb={isMobile ? 3 : 4} spacing={isMobile ? 3 : 4} align="center" flexWrap={isMobile ? "wrap" : "nowrap"}>
+                                    <Box p={isMobile ? 2.5 : 3} bg="#4ade8020" borderRadius="xl">
+                                        <FaCoins size={isMobile ? 20 : 24} color="#4ade80" />
                                     </Box>
                                     <Box>
-                                        <Heading as="h3" size="xl" color="white" fontWeight="700" letterSpacing="-0.02em">
+                                        <Heading as="h3" size={isMobile ? "lg" : "xl"} color="white" fontWeight="700" letterSpacing="-0.02em">
                                             Presale Configuration
                                         </Heading>
                                     </Box>
-                                    <Box ml={2}>
-                                        <Text color="#888" fontSize="md" mt={1}>Set up your token presale</Text>
-                                    </Box>
+                                    {!isMobile && (
+                                        <Box ml={2}>
+                                            <Text color="#888" fontSize="md" mt={1}>Set up your token presale</Text>
+                                        </Box>
+                                    )}
                                 </HStack>
-                            <VStack align="stretch" spacing={5} flex="1">
+                            <VStack align="stretch" spacing={isMobile ? 3 : 5} flex="1" w={isMobile ? "95%" : "100%"} px={isMobile ? 2 : 0} mx="auto">
                                 <Box>
-                                    <HStack columns={2}>
-                                        <Box w="50%">
+                                    <HStack flexDirection={isMobile ? "column" : "row"} w="100%" spacing={isMobile ? 0 : 4} alignItems="stretch">
+                                        <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 4 : 0}>
                                         <HStack mb={isMobile ? 3 : 2}>
                                             <Box>
                                                 <FaTag size={14} color="#888" />
@@ -1398,8 +1400,8 @@ const Launchpad: React.FC = () => {
                                             </Box>
                                         </HStack>
                                         </Box>
-                                        <Box w={isMobile ? "100%" : "50%"}>
-                                        <Box ml={2}>
+                                        <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 4 : 0}>
+                                        <Box ml={isMobile ? 0 : 2}>
                                         <HStack mb={isMobile ? 3 : 2}>
                                             <Box>
                                                 <FaClock size={14} color="#888" />
@@ -1461,14 +1463,14 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                     </HStack>
                                 </Box>
-                                <HStack>
-                                    <Box w="50%">
-                                    <HStack mb={2}>
+                                <HStack flexDirection={isMobile ? "column" : "row"} w="100%" spacing={isMobile ? 0 : 4} alignItems="stretch">
+                                    <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 4 : 0}>
+                                    <HStack mb={isMobile ? 3 : 2}>
                                         <Box>
                                             <FaCoins size={14} color="#888" />
                                         </Box>
                                         <Box>
-                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Hard Cap (MON)</Text>
+                                            <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Hard Cap (MON)</Text>
                                         </Box>
                                     </HStack>
                                     <HStack>
@@ -1495,13 +1497,13 @@ const Launchpad: React.FC = () => {
                                         Maximum amount that can be raised in presale
                                     </Text>
                                 </Box>
-                                    <Box w="50%" mt={10} ml={5}>
-                                    <HStack mb={2}>
+                                    <Box w={isMobile ? "100%" : "50%"} mt={isMobile ? 0 : 10} ml={isMobile ? 0 : 5}>
+                                    <HStack mb={isMobile ? 3 : 2}>
                                         <Box>
                                             <FaWallet size={14} color="#888" />
                                         </Box>
                                         <Box>
-                                            <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Soft Cap (MON)</Text>
+                                            <Text color={isMobile ? "#bbb" : "#888"} fontSize={isMobile ? "md" : "sm"} fontWeight="600" letterSpacing="0.02em">Soft Cap (MON)</Text>
                                         </Box>
                                     </HStack>
                                     <HStack>
@@ -1741,16 +1743,16 @@ const Launchpad: React.FC = () => {
                                         <Text color="#4ade80" fontSize="sm" fontWeight="bold">Token Details</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={isMobile ? 1 : 3} gap={3}>
-                                    <Box p={isMobile ? 2 : 4}>
+                                <SimpleGrid columns={isMobile ? 2 : 3} gap={isMobile ? 2 : 3}>
+                                    <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Name</Text>
                                         <Text  mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenName}</Text>
                                     </Box>
-                                    <Box  p={4}>
+                                    <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Symbol</Text>
                                         <Text  mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenSymbol}</Text>
                                     </Box>
-                                    <Box  p={4}>
+                                    <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Decimals</Text>
                                         <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{tokenDecimals}</Text>
                                     </Box>
@@ -1784,12 +1786,12 @@ const Launchpad: React.FC = () => {
                                         <Text color="#4ade80" fontSize="sm" fontWeight="bold">Pool Configuration</Text>
                                     </Box>
                                 </HStack>
-                                <SimpleGrid columns={isMobile ? 1 : 3} gap={3}>
+                                <SimpleGrid columns={isMobile ? 2 : 3} gap={isMobile ? 2 : 3}>
                                    <Box p={4}>
                                         <Text color="#888" fontSize="xs">Total Supply</Text>
                                         <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(tokenSupply, 0)} {tokenSymbol}</Text>
                                     </Box>                                    
-                                    <Box p={isMobile ? 2 : 4}>
+                                    <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Floor Price</Text>
                                         <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{floorPrice} MON</Text>
                                     </Box>
@@ -1797,7 +1799,7 @@ const Launchpad: React.FC = () => {
                                         <Text color="#888" fontSize="xs">Presale Price</Text>
                                         <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{price} MON</Text>
                                     </Box> */}
-                                    <Box p={isMobile ? 2 : 4}>
+                                    <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Reserve Asset</Text>
                                         <HStack spacing={1}>
                                             <Box mt={-2}>
@@ -1809,7 +1811,7 @@ const Launchpad: React.FC = () => {
                                         </HStack>
                                     </Box>
 
-                                    <Box p={isMobile ? 2 : 4}>
+                                    <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Fully Diluted Value</Text>
                                         <HStack gap={2} mt={-2}>
                                             <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="bold">
@@ -1820,7 +1822,7 @@ const Launchpad: React.FC = () => {
                                             </Text>
                                         </HStack>
                                     </Box>
-                                    <Box p={isMobile ? 2 : 4}>
+                                    <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Protocol</Text>
                                         <HStack spacing={1} ml={-2}>
                                             <Box>
@@ -1860,16 +1862,16 @@ const Launchpad: React.FC = () => {
                                             <Text color="#4ade80" fontSize="sm" fontWeight="bold">Presale Configuration</Text>
                                         </Box>
                                     </HStack>
-                                    <SimpleGrid columns={isMobile ? 1 : 3} gap={3}>
-                                        <Box p={isMobile ? 2 : 4}>
+                                    <SimpleGrid columns={isMobile ? 2 : 3} gap={isMobile ? 2 : 3}>
+                                        <Box p={isMobile ? 3 : 4}>
                                             <Text color="#888" fontSize="xs">Presale Price</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{commify(price)} MON</Text>
                                         </Box>
-                                        <Box p={isMobile ? 2 : 4}>
+                                        <Box p={isMobile ? 3 : 4}>
                                             <Text color="#888" fontSize="xs">Hard Cap</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(Number(floorPrice) * Number(tokenSupply) * 0.1 || 0, 0)} MON</Text>
                                         </Box>
-                                        <Box  p={4}>
+                                        <Box p={isMobile ? 3 : 4}>
                                             <Text color="#888" fontSize="xs">Soft Cap</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">
                                                 {formatNumberPrecise(softCap, 0)} MON
@@ -1878,15 +1880,15 @@ const Launchpad: React.FC = () => {
                                                 ({((Number(softCap) / (Number(floorPrice) * Number(tokenSupply) * 0.1)) * 100).toFixed(0)}% of hard cap)
                                             </Text>
                                         </Box>
-                                        <Box  p={4}>
+                                        <Box p={isMobile ? 3 : 4}>
                                             <Text color="#888" fontSize="xs">Duration</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{getDaysFromDuration(duration)} days</Text>
                                         </Box>
-                                        <Box p={isMobile ? 2 : 4}>
+                                        <Box p={isMobile ? 3 : 4}>
                                             <Text color="#888" fontSize="xs">Tokens for Sale</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(Number(tokenSupply) * 0.1 || 0)} {tokenSymbol || 'TOKEN'}</Text>
                                         </Box>
-                                       <Box p={isMobile ? 2 : 4}>
+                                       <Box p={isMobile ? 3 : 4}>
                                         <Text color="#888" fontSize="xs">Expected to Raise</Text>
                                         <HStack gap={2} mt={-2}>
                                             <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="bold">
