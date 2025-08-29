@@ -1093,18 +1093,17 @@ const Launchpad: React.FC = () => {
                                         </Box>
                                     </HStack>
                                     <HStack>
-                                    <NumberInputRoot
-                                        defaultValue={0}
-                                        step={0.001}
-                                        min={0}
-                                        value={floorPrice}
-                                        onValueChange={(details) => { 
-                                            handleSetPrice(details.value);
-                                        }}
-                                        flex="1"
-                                        allowDecimal={true}
-                                    >
-                                        <NumberInputField 
+                                        <Input
+                                            type="text"
+                                            value={floorPrice}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                // Allow only numbers and decimal point
+                                                if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                                                    handleSetPrice(value);
+                                                }
+                                            }}
+                                            placeholder="0"
                                             h="50px" 
                                             bg="#0a0a0a" 
                                             border="1px solid #2a2a2a" 
@@ -1113,8 +1112,8 @@ const Launchpad: React.FC = () => {
                                             _focus={{ borderColor: "#4ade80", bg: isMobile ? "#1a1a1a" : "#0a0a0a", boxShadow: "0 0 0 3px rgba(74, 222, 128, 0.1)" }}
                                             _placeholder={{ color: "#666" }}
                                             transition="all 0.2s"
+                                            flex="1"
                                         />
-                                    </NumberInputRoot>
                                     <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
                                         <Image
                                             w="24px"
