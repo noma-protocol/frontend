@@ -3,3 +3,5 @@ node_modules/
 **/.claude/settings.local.json
 *.bak.*
 trollbox-server/data/profiles.json
+/*.png
+CLAUDE.md
