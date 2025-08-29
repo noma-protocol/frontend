@@ -1261,11 +1261,12 @@ const Launchpad: React.FC = () => {
                                             <Text color="#888" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Protocol</Text>
                                         </Box>
                                     </HStack>
+                                    <Box mt={2}>
                                     <SelectRoot
                                         collection={createListCollection({
                                             items: [
-                                                { value: "uniswap", label: "Uniswap V3" },
-                                                { value: "pancakeswap", label: "PancakeSwap V3" }
+                                                { value: "uniswap", label: "Uniswap" },
+                                                { value: "pancakeswap", label: "PancakeSwap" }
                                             ]
                                         })}
                                         value={[selectedProtocol]}
@@ -1310,8 +1311,8 @@ const Launchpad: React.FC = () => {
                                         </SelectTrigger>
                                         <SelectContent bg="#1a1a1a" borderColor="#2a2a2a">
                                             {[
-                                                { value: "uniswap", label: "Uniswap V3", logo: uniswapLogo, hoverBg: "rgba(255, 0, 122, 0.1)" },
-                                                { value: "pancakeswap", label: "PancakeSwap V3", logo: pancakeLogo, hoverBg: "rgba(255, 178, 55, 0.1)" }
+                                                { value: "uniswap", label: "Uniswap", logo: uniswapLogo, hoverBg: "rgba(255, 0, 122, 0.1)" },
+                                                { value: "pancakeswap", label: "PancakeSwap", logo: pancakeLogo, hoverBg: "rgba(255, 178, 55, 0.1)" }
                                             ].map((protocol) => (
                                                 <SelectItem
                                                     key={protocol.value}
@@ -1326,17 +1327,22 @@ const Launchpad: React.FC = () => {
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
-                                    </SelectRoot>
+                                    </SelectRoot>                                        
+                                    </Box>
                                     </Box>
                                 </HStack>
                             </VStack>
                             </Box>
-                            <Box w="100%" h="50%"  mt={"5%"}>
-                            <HStack mb={isMobile ? 2 : 3} spacing={isMobile ? 2 : 3} align="center">
+                            <Box w="100%" h="50%"  mt={"5%"} >
+                            <HStack mb={isMobile ? 2 : 3} spacing={isMobile ? 2 : 3} align="center" ml={2}>
+                                <Box>
                                 <Box p={isMobile ? 2 : 2.5} bg="#4ade8020" borderRadius="xl">
                                     <FaFileAlt size={isMobile ? 16 : 20} color="#4ade80" />
+                                </Box>                                    
                                 </Box>
-                                <Heading as="h3" size={isMobile ? "md" : "lg"}>Summary</Heading>
+                                <Box>
+                                    <Heading as="h3" size={isMobile ? "md" : "lg"}>Summary</Heading>
+                                </Box>
                             </HStack>
                             {/* Enhanced Info Box */}
                             <Box 
@@ -1377,6 +1383,7 @@ const Launchpad: React.FC = () => {
                                         <Text color="#888" fontSize="xs" mb={0}>Protocol</Text>
                                         <Image src={uniswapLogo} w="65px" h="65px"  />
                                         <Text color="#4ade80" fontSize="sm">
+                                            {selectedProtocol === "uniswap" ? "Uniswap V3" : selectedProtocol === "pancakeswap" ? "PancakeSwap" : "Unknown"}
                                         </Text>
                                     </Box>
                                 </SimpleGrid>
@@ -1874,7 +1881,7 @@ const Launchpad: React.FC = () => {
                                             </Box>
                                             <Box mt={-3}>
                                             <Text  color="white" fontSize="sm" fontWeight="600">
-                                                {selectedProtocol === "uniswap" ? "Uniswap V3" : "PancakeSwap V3"}
+                                                {selectedProtocol === "uniswap" ? "Uniswap" : "PancakeSwap"}
                                             </Text>                                                
                                             </Box>
                                         </HStack>
