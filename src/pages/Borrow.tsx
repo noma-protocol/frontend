@@ -1501,14 +1501,14 @@ const Borrow = () => {
                     
                     {/* Mobile Wallet Sidebar */}
                     {isMobile && isConnected && (
-                        <Flex px={2} pb={4}>
+                        <Box px={2} pb={2}>
                             <WalletSidebar 
                                 ethBalance={ethBalance}
                                 token0Info={token0Info}
                                 token1Info={token1Info}
                                 address={address}
                             />
-                        </Flex>
+                        </Box>
                     )}
                     
                     {/* Loan History Section */}

@@ -287,7 +287,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
     ) : 0;
 
     return (
-        <Box w="300px">
+        <Box w="100%">
             <Box 
                 bg="rgba(26, 26, 26, 0.8)"
                 backdropFilter="blur(10px)"
