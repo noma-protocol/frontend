@@ -53,6 +53,9 @@ const { formatEther, parseEther } = ethers.utils;
 
 // Safe parseEther wrapper
 const safeParseEther = (value: any): any => {
+    // Handle empty strings
+    if (value === "" || value === undefined || value === null) return parseEther("0");
+    
     const num = Number(value);
     if (isNaN(num) || num < 0) return parseEther("0");
     
@@ -100,13 +103,13 @@ const Launchpad: React.FC = () => {
     const [tokenSymbol, setTokenSymbol] = useState("");
     const [tokenDescription, setTokenDescription] = useState("");
     const [tokenDecimals, setTokenDecimals] = useState("18");
-    const [tokenSupply, setTokenSupply] = useState("0");
+    const [tokenSupply, setTokenSupply] = useState("");
     const [tokenLogo, setTokenLogo] = useState(null);
     const [logoPreview, setLogoPreview] = useState("");
 
-    const [price, setPrice] = useState("0");
-    const [floorPrice, setFloorPrice] = useState("0");
-    const [presalePrice, setPresalePrice] = useState("0");
+    const [price, setPrice] = useState("");
+    const [floorPrice, setFloorPrice] = useState("");
+    const [presalePrice, setPresalePrice] = useState("");
 
     const [token1, setToken1] = useState(config.protocolAddresses.WMON || "0x");
     const [feeTier, setFeeTier] = useState(10);
@@ -114,7 +117,7 @@ const Launchpad: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [presale, setPresale] = useState("0");
-    const [softCap, setSoftCap] = useState("0");
+    const [softCap, setSoftCap] = useState("");
     const [softCapPercentage, setSoftCapPercentage] = useState(40); // Default 40% of hard cap
     const [capView, setCapView] = useState("softcap"); // Toggle between hardcap and softcap
     const [duration, setDuration] = useState(Number(86400*30).toString());
@@ -243,7 +246,7 @@ const Launchpad: React.FC = () => {
                 return;
             }
         } else if (deployStep == 1) {
-            if (tokenSupply == 0 || price == 0 || token1 == "") {
+            if (tokenSupply == "" || tokenSupply == "0" || price == "" || price == "0" || token1 == "") {
                 console.log("error", "Please fill in all fields");
                 setError("Please fill in all fields");
                 return;
@@ -381,30 +384,37 @@ const Launchpad: React.FC = () => {
 
     const handleSetPrice = (value) => {
         console.log(`Got value ${value}`)
-        if (value == (floorPrice * 1.25)) return;
-
-        const inputValueStr = value.trim(); // Trim whitespace
+        
+        // Handle undefined or null
+        if (value === undefined || value === null) {
+            value = "";
+        }
+        
+        const inputValueStr = String(value).trim(); // Convert to string and trim whitespace
     
         // If the input is empty, reset the price and floor price
         if (inputValueStr === "") {
-          setPrice("0");
-          setFloorPrice("0");
-          setPresalePrice("0");
+          setPrice("");
+          setFloorPrice("");
+          setPresalePrice("");
           calculateSoftCap();
           return;
         }
     
-        if (Number(inputValueStr) < 0) {
-          console.error("Invalid input: Price cannot be negative");
-          return;
-        }
-    
+        // Allow "0" as a valid input
+        setFloorPrice(inputValueStr);
+        
         // Parse the input value as a number
         const inputValue = parseFloat(inputValueStr);
     
         // Check if the input value is a valid number
         if (isNaN(inputValue)) {
           console.error("Invalid input: Not a number");
+          return;
+        }
+        
+        if (inputValue < 0) {
+          console.error("Invalid input: Price cannot be negative");
           return;
         }
     
@@ -420,20 +430,13 @@ const Launchpad: React.FC = () => {
         // Ensure at least 7 decimals for very small values, avoiding scientific notation
         let formattedSalePrice = salePrice.toFixed(Math.max(precision, 7));
     
-        // If the formatted sale price is still "0", ensure proper formatting
-        if (formattedSalePrice === '0') {
-          console.error("Invalid input: Sale price is zero");
-          return;
-        }
-    
         // Log the result for debugging
         console.log(`Input: ${inputValueStr}, Sale Price: ${formattedSalePrice}`);
     
         // Update state
         setPrice(`${formattedSalePrice}`);
-        setFloorPrice(`${inputValueStr}`);
         // Presale price is floor price * 1.25 (25% markup)
-        const presalePriceValue = parseFloat(inputValueStr) * 1.25;
+        const presalePriceValue = inputValue * 1.25;
         setPresalePrice(`${presalePriceValue}`);
         calculateSoftCap();
       };
@@ -1094,9 +1097,9 @@ const Launchpad: React.FC = () => {
                                         defaultValue={0}
                                         step={0.001}
                                         min={0}
-                                        value={floorPrice || "0"}
+                                        value={floorPrice}
                                         onValueChange={(details) => { 
-                                            handleSetPrice(details.value || "0");
+                                            handleSetPrice(details.value);
                                         }}
                                         flex="1"
                                         allowDecimal={true}
@@ -1137,17 +1140,16 @@ const Launchpad: React.FC = () => {
                                                     
                                                     min={0}
                                                     max={10e27}
-                                                    value={tokenSupply || "0"}
+                                                    value={tokenSupply}
                                                     defaultValue={0}
                                                     step={1}
                                                     allowDecimal={false}
                                                     onValueChange={(details) => {
                                                         console.log("Token Supply: ", details.value);
                                                         if (details.value === "" || details.value === undefined) {
-                                                            setTokenSupply("0");
+                                                            setTokenSupply("");
                                                         } else {
-                                                            const intValue = Math.floor(Number(details.value) || 0);
-                                                            setTokenSupply(String(intValue));
+                                                            setTokenSupply(details.value);
                                                         }
                                                         calculateSoftCap();
                                                     }}
@@ -1516,7 +1518,7 @@ const Launchpad: React.FC = () => {
                                             border="1px solid #2a2a2a"
                                             color="#666"
                                             h="50px"
-                                            value={commify((Number(floorPrice || 0) * Number(tokenSupply || 0) * 0.1), 0)}
+                                            value={floorPrice && tokenSupply ? commify((Number(floorPrice) * Number(tokenSupply) * 0.1), 0) : ""}
                                             disabled={true}
                                             _disabled={{ bg: "#0a0a0a", color: "#666", cursor: "not-allowed" }}
                                             transition="all 0.2s"
@@ -1555,7 +1557,7 @@ const Launchpad: React.FC = () => {
                                             min={((tokenSupply * 10/100) * price) / 8 } 
                                             max={((tokenSupply * 10/100) * price) * 60/100}
                                             onChange={handleSetSoftCap}
-                                            value={commify(softCap, 0)}
+                                            value={softCap ? commify(softCap, 0) : ""}
                                             transition="all 0.2s"
                                         />
                                         <Box bg="#2a2a2a" p={3} borderRadius="lg" border="1px solid #3a3a3a">
