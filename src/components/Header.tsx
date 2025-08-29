@@ -293,21 +293,24 @@ const Header: React.FC = () => {
         )}
         
         {/* Navigation and Wallet */}
-        <Box display="flex" alignItems="center" gap={3}>
+        <Box display="flex" alignItems="center" gap={isMobile ? 2 : 3}>
+          {/* Dropdowns wrapper for mobile liquidity page */}
+          {isMobile && location.pathname === '/liquidity' ? (
+            <Box display="flex" flexDirection="column" gap={1} alignItems="stretch">
           {/* Vault Selector - Only on Liquidity page */}
           {location.pathname === '/liquidity' && !isVaultsLoading && vaultsSelectData?.items?.length > 0 && (
             <SelectRoot
               key={`vault-select-${vaultsSelectData.items.length}`}
               collection={vaultsSelectData}
               size="sm"
-              width="160px"
+              width={isMobile ? "120px" : "160px"}
               value={selectedVault ? [selectedVault] : []}
               onValueChange={handleVaultChange}
             >
               <SelectTrigger
                 bg="#1a1a1a"
                 border="1px solid #2a2a2a"
-                h="38px"
+                h={isMobile ? "32px" : "38px"}
                 color="white"
                 _hover={{ 
                   bg: "#2a2a2a",
@@ -318,7 +321,7 @@ const Header: React.FC = () => {
                   outline: "none"
                 }}
               >
-                <SelectValueText placeholder="Select vault" />
+                <SelectValueText placeholder="Select vault" fontSize={isMobile ? "xs" : "sm"} />
               </SelectTrigger>
               <SelectContent
                 bg="#1a1a1a"
@@ -358,7 +361,7 @@ const Header: React.FC = () => {
           <SelectRoot
             collection={navigationItems}
             size="sm"
-            width="140px"
+            width={isMobile ? "120px" : "140px"}
             value={[location.pathname === '/borrow' ? `/borrow?v=${vaultAddress}` : 
                     location.pathname === '/stake' ? `/stake?v=${vaultAddress}` : 
                     location.pathname]}
@@ -367,7 +370,7 @@ const Header: React.FC = () => {
             <SelectTrigger
               bg="#1a1a1a"
               border="1px solid #2a2a2a"
-              h="38px"
+              h={isMobile ? "32px" : "38px"}
               color="white"
               _hover={{ 
                 bg: "#2a2a2a",
@@ -378,7 +381,7 @@ const Header: React.FC = () => {
                 outline: "none"
               }}
             >
-              <SelectValueText placeholder="Navigate" />
+              <SelectValueText placeholder="Navigate" fontSize={isMobile ? "xs" : "sm"} />
             </SelectTrigger>
             <SelectContent
               bg="#1a1a1a"
@@ -411,6 +414,129 @@ const Header: React.FC = () => {
               ))}
             </SelectContent>
           </SelectRoot>
+            </Box>
+          ) : (
+            <>
+              {/* Desktop layout or non-liquidity mobile layout */}
+              {/* Vault Selector - Only on Liquidity page */}
+              {location.pathname === '/liquidity' && !isVaultsLoading && vaultsSelectData?.items?.length > 0 && (
+                <SelectRoot
+                  key={`vault-select-${vaultsSelectData.items.length}`}
+                  collection={vaultsSelectData}
+                  size="sm"
+                  width={isMobile ? "120px" : "160px"}
+                  value={selectedVault ? [selectedVault] : []}
+                  onValueChange={handleVaultChange}
+                >
+                  <SelectTrigger
+                    bg="#1a1a1a"
+                    border="1px solid #2a2a2a"
+                    h={isMobile ? "32px" : "38px"}
+                    color="white"
+                    _hover={{ 
+                      bg: "#2a2a2a",
+                      borderColor: "#3a3a3a" 
+                    }}
+                    _focus={{
+                      borderColor: "#2a2a2a",
+                      outline: "none"
+                    }}
+                  >
+                    <SelectValueText placeholder="Select vault" fontSize={isMobile ? "xs" : "sm"} />
+                  </SelectTrigger>
+                  <SelectContent
+                    bg="#1a1a1a"
+                    border="1px solid #2a2a2a"
+                    borderRadius="md"
+                  >
+                    {vaultsSelectData.items.map((vaultData) => (
+                      <SelectItem 
+                        item={vaultData} 
+                        key={vaultData.value}
+                        _hover={{ 
+                          bg: "#2a2a2a",
+                          color: "white" 
+                        }}
+                        _selected={{
+                          bg: "#2a2a2a",
+                          color: "#4ade80"
+                        }}
+                        color="#888"
+                      >
+                        {vaultData.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </SelectRoot>
+              )}
+
+              {/* Loading spinner for vaults */}
+              {location.pathname === '/liquidity' && isVaultsLoading && (
+                <HStack>
+                  <Spinner size="sm" color="#4ade80" />
+                  <Text color="#888" fontSize="sm">Loading vaults...</Text>
+                </HStack>
+              )}
+
+              {/* Navigation Dropdown */}
+              <SelectRoot
+                collection={navigationItems}
+                size="sm"
+                width={isMobile ? "120px" : "140px"}
+                value={[location.pathname === '/borrow' ? `/borrow?v=${vaultAddress}` : 
+                        location.pathname === '/stake' ? `/stake?v=${vaultAddress}` : 
+                        location.pathname]}
+                onValueChange={handleNavigationChange}
+              >
+                <SelectTrigger
+                  bg="#1a1a1a"
+                  border="1px solid #2a2a2a"
+                  h={isMobile ? "32px" : "38px"}
+                  color="white"
+                  _hover={{ 
+                    bg: "#2a2a2a",
+                    borderColor: "#3a3a3a" 
+                  }}
+                  _focus={{
+                    borderColor: "#2a2a2a",
+                    outline: "none"
+                  }}
+                >
+                  <SelectValueText placeholder="Navigate" fontSize={isMobile ? "xs" : "sm"} />
+                </SelectTrigger>
+                <SelectContent
+                  bg="#1a1a1a"
+                  border="1px solid #2a2a2a"
+                  borderRadius="md"
+                  boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
+                >
+                  {navigationItems.items.map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      item={item}
+                      py={3}
+                      px={4}
+                      color="white"
+                      bg="transparent"
+                      cursor="pointer"
+                      transition="all 0.2s"
+                      _hover={{ 
+                        bg: "#2a2a2a",
+                        color: "#4ade80"
+                      }}
+                      _selected={{
+                        bg: "#2a2a2a",
+                        color: "#4ade80",
+                        fontWeight: "600"
+                      }}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </SelectRoot>
+            </>
+          )}
 
           {/* Wallet Connect Button */}
           <Button 
@@ -459,7 +585,7 @@ const Header: React.FC = () => {
             <div className="menu modal-body">
               <div className="row w-100">
                 <div className="items p-0 col-12 text-center">
-                  {/* <ul className="navbar-nav items mx-auto">
+                  <ul className="navbar-nav items mx-auto">
                     <li
                       className="nav-item"
                       data-bs-dismiss="modal"
@@ -520,7 +646,7 @@ const Header: React.FC = () => {
                         Launchpad
                       </a>
                     </li>
-                  </ul> */}
+                  </ul>
                 </div>
               </div>
             </div>
