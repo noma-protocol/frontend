@@ -2780,16 +2780,25 @@ const Exchange: React.FC = () => {
                                     </Text>
                                     <Box>
                                         <VStack align="start" spacing={0}>
-                                            <Text color="white" fontSize="xl" fontWeight="bold">
-                                                {intervalVolume > 0 ? 
-                                                    `${commify(intervalVolume.toFixed(2), 2)} MON` : 
-                                                    `$${formatNumber(selectedToken.volume24h)}`
-                                                }
-                                            </Text>
-                                            {intervalVolume > 0 && monPrice > 0 && (
-                                                <Text color="#888" fontSize="sm">
-                                                    ${formatNumber(intervalVolume * monPrice)}
-                                                </Text>
+                                            {intervalVolume > 0 && monPrice > 0 ? (
+                                                <>
+                                                <Box>
+                                                    <Text color="white" fontSize="xl" fontWeight="bold">
+                                                        ${formatNumber(intervalVolume * monPrice)}
+                                                    </Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text color="#888" fontSize="sm">
+                                                        {commify(intervalVolume.toFixed(2), 2)} MON
+                                                    </Text>
+                                                </Box>                                                
+                                                </>
+                                            ) : (
+                                                <Box>
+                                                    <Text color="white" fontSize="xl" fontWeight="bold">
+                                                        ${formatNumber(selectedToken.volume24h)}
+                                                    </Text>                                                    
+                                                </Box>
                                             )}
                                         </VStack>
                                     </Box>

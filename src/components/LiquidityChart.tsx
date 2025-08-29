@@ -27,11 +27,11 @@ return (
     {typeof data["Floor"] !== "undefined" && typeof data["Anchor"] !== "undefined" ? (
       <Box>
         {/* Two column layout with 30/70 split */}
-        <Grid templateColumns={isMobile ? "1fr" : "2fr 3fr"} gap={2} mb={2}>
+        <Grid templateColumns={isMobile ? "1fr" : "2fr 3fr"} gap={2} mb={2} >
           {/* Left column - Stats in 2x2 grid */}
           <GridItem>
             <SimpleGrid columns={2} gap={2}>
-            <Box bg="#2a2a2a" p={2} borderRadius="lg">
+            <Box bg="#2a2a2a" p={4} borderRadius="lg">
               <Text color="#888" fontSize="xs" mb={0}>Spot Price</Text>
               <Text color="white" fontSize="lg" fontWeight="bold">
                 ${commifyDecimals(spotPrice * parseFloat(priceUSD), 4)}
@@ -41,7 +41,7 @@ return (
               </Text>
             </Box>
             
-            <Box bg="#2a2a2a" p={2} borderRadius="lg">
+            <Box bg="#2a2a2a" p={4} borderRadius="lg">
               <Text color="#888" fontSize="xs" mb={0}>Liquidity Ratio</Text>
               <Text color="white" fontSize="lg" fontWeight="bold">
                 {commifyDecimals(formatEther(liquidityRatio), 2)}
@@ -51,7 +51,7 @@ return (
               </Text>
             </Box>
             
-            <Box bg="#2a2a2a" p={2} borderRadius="lg">
+            <Box bg="#2a2a2a" p={4} borderRadius="lg">
               <Text color="#888" fontSize="xs" mb={0}>Circulating Supply</Text>
               <Text color="white" fontSize="lg" fontWeight="bold">
                 {commify(formatEther(circulatingSupply), 0)}
@@ -61,7 +61,7 @@ return (
               </Text>
             </Box>
             
-            <Box bg="#2a2a2a" p={2} borderRadius="lg">
+            <Box bg="#2a2a2a" p={4} borderRadius="lg">
               <Text color="#888" fontSize="xs" mb={0}>IMV Price</Text>
               <Text color="white" fontSize="lg" fontWeight="bold">
                 ${commifyDecimals(formatEther(imvPrice || 0) * parseFloat(priceUSD), 4)}
