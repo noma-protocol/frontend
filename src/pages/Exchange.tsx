@@ -380,7 +380,6 @@ const Exchange: React.FC = () => {
     
     const [percentChange, setPercentChange] = useState(0);
     const [intervalVolume, setIntervalVolume] = useState(0); // Volume for selected interval
-    const [priceStatsData, setPriceStatsData] = useState(null); // Store full API response for average price calculation
     const [chartSeries, setChartSeries] = useState([]);
     const [chartTimeframe, setChartTimeframe] = useState("24h");
     const [chartGranularity, setChartGranularity] = useState("1h");
@@ -785,8 +784,6 @@ const Exchange: React.FC = () => {
                 // First try to fetch price stats for accurate percentage and volume based on selected interval
                 const priceStats = await fetchTokenPriceStats(chartTimeframe);
                 if (priceStats) {
-                    setPriceStatsData(priceStats); // Store full data for average price calculation
-                    
                     if (priceStats.percentageChange !== undefined) {
                         setPercentChange(priceStats.percentageChange);
                     }
@@ -2783,17 +2780,11 @@ const Exchange: React.FC = () => {
                                     </Text>
                                     <Box>
                                         <VStack align="start" spacing={0}>
-                                            {intervalVolume > 0 && priceStatsData ? (
+                                            {intervalVolume > 0 && monPrice > 0 ? (
                                                 <>
                                                 <Box>
                                                     <Text color="white" fontSize="xl" fontWeight="bold">
-                                                        ${(() => {
-                                                            // Calculate average price from API data
-                                                            const currentPrice = priceStatsData.currentPrice || 0;
-                                                            const startPrice = priceStatsData.startPrice || currentPrice;
-                                                            const averagePrice = (currentPrice + startPrice) / 2;
-                                                            return formatNumber(intervalVolume * averagePrice);
-                                                        })()}
+                                                        ${formatNumber(intervalVolume * monPrice)}
                                                     </Text>
                                                 </Box>
                                                 <Box>
