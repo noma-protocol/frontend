@@ -1381,10 +1381,16 @@ const Launchpad: React.FC = () => {
                                     </Box>
                                     <Box alignItems={"left"} alignContent={"left"} textAlign={"left"}>
                                         <Text color="#888" fontSize="xs" mb={0}>Protocol</Text>
-                                        <Image src={uniswapLogo} w="65px" h="65px"  />
-                                        <Text color="#4ade80" fontSize="sm">
-                                            {selectedProtocol === "uniswap" ? "Uniswap V3" : selectedProtocol === "pancakeswap" ? "PancakeSwap" : "Unknown"}
-                                        </Text>
+                                        <HStack mt={2}>
+                                            <Box>
+                                                <Image src={uniswapLogo} w="45px" h="45px"  />
+                                            </Box>
+                                            <Box>
+                                            <Text color="white" fontSize="sm">
+                                                {selectedProtocol === "uniswap" ? "Uniswap" : selectedProtocol === "pancakeswap" ? "PancakeSwap" : "Unknown"}
+                                            </Text>
+                                            </Box>
+                                        </HStack>
                                     </Box>
                                 </SimpleGrid>
                             </Box>                            
@@ -1606,7 +1612,12 @@ const Launchpad: React.FC = () => {
                             </Box>
                             <Box w="100%" h="50%" mt={"10%"}>
                                 <HStack justify="space-between" align="center" mb={4}>
-                                    <Heading as="h3">Summary</Heading>
+                                    <HStack align="center" spacing={3}>
+                                        <Box p={2} bg="#4ade8020" borderRadius="lg">
+                                            <FaChartLine size={18} color="#4ade80" />
+                                        </Box>
+                                        <Heading as="h3">Summary</Heading>
+                                    </HStack>
                                     <SelectRoot
                                         collection={capViewChoices}
                                         defaultValue="softcap"
