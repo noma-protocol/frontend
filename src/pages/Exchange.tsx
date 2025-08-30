@@ -43,7 +43,7 @@ import { Tooltip } from "../components/ui/tooltip"
   
 import { useAccount, useBalance, useContractRead } from "wagmi";
 import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
-import { useAllowance } from "../hooks/useAllowance";
+// import { useAllowance } from "../hooks/useAllowance";
 import { isMobile } from "react-device-detect";
 import { Slider } from "../components/ui/slider"
 import {
@@ -176,21 +176,27 @@ const Exchange: React.FC = () => {
     const [isBuying, setIsBuying] = useState(true);
     const [tradeHistoryTab, setTradeHistoryTab] = useState("all");
     
-    // Check token allowance for selling
-    const { allowance, hasEnoughAllowance, isMaxApproved } = useAllowance(
-        selectedToken?.token0,
-        exchangeHelperAddress
-    );
+    // Check token allowance for selling - TEMPORARILY DISABLED
+    // const { allowance, hasEnoughAllowance, isMaxApproved } = useAllowance(
+    //     selectedToken?.token0,
+    //     exchangeHelperAddress
+    // );
     
-    // Check WETH allowance for buying with WETH
-    const { 
-        allowance: wethAllowance, 
-        hasEnoughAllowance: hasEnoughWethAllowance,
-        isMaxApproved: isMaxApprovedWeth
-    } = useAllowance(
-        selectedToken?.token1 || config.protocolAddresses.WMON,
-        exchangeHelperAddress
-    );
+    // Check WETH allowance for buying with WETH - TEMPORARILY DISABLED
+    // const { 
+    //     allowance: wethAllowance, 
+    //     hasEnoughAllowance: hasEnoughWethAllowance,
+    //     isMaxApproved: isMaxApprovedWeth
+    // } = useAllowance(
+    //     selectedToken?.token1 || config.protocolAddresses.WMON,
+    //     exchangeHelperAddress
+    // );
+    
+    // Temporary replacements
+    const hasEnoughAllowance = () => false;
+    const hasEnoughWethAllowance = () => false;
+    const isMaxApproved = () => false;
+    const isMaxApprovedWeth = () => false;
     
     // Input validation function
     const validateAndSetTradeAmount = (value) => {
@@ -2414,9 +2420,9 @@ const Exchange: React.FC = () => {
             const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
             
             // If approveMax is false but we have max approval, we need to re-approve for the exact amount
-            const needsExactApproval = !approveMax && isMaxApprovedWeth();
+            const needsExactApproval = false; // !approveMax && isMaxApprovedWeth();
             
-            if (hasEnoughWethAllowance(amountToApprove.toBigInt()) && !needsExactApproval) {
+            if (false) { // hasEnoughWethAllowance(amountToApprove.toBigInt()) && !needsExactApproval
                 // Skip approval and directly buy
                 buyTokensWETH({
                     args: args
@@ -2515,9 +2521,9 @@ const Exchange: React.FC = () => {
         const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
         
         // If approveMax is false but we have max approval, we need to re-approve for the exact amount
-        const needsExactApproval = !approveMax && isMaxApproved();
+        const needsExactApproval = false; // !approveMax && isMaxApproved();
         
-        if (hasEnoughAllowance(amountToApprove.toBigInt()) && !needsExactApproval) {
+        if (false) { // hasEnoughAllowance(amountToApprove.toBigInt()) && !needsExactApproval
             // Skip approval and directly sell
             sellTokens({
                 args: args
