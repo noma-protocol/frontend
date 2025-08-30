@@ -11,7 +11,7 @@ import ethLogo from '../assets/images/weth.svg';
 import bnbLogo from '../assets/images/bnb.png';
 import monadLogo from '../assets/images/monad.png';
 import StandaloneAddCollateralModal from '../components/StandaloneAddCollateralModal';
-import LoanRepay from '../components/LoanRepay';
+import StandaloneRepayModal from '../components/StandaloneRepayModal';
 import LoanRoll from '../components/LoanRoll';
 import {
     DialogRoot,
@@ -110,6 +110,7 @@ const Borrow = () => {
     const [isApproving, setIsApproving] = useState(false);
     const [isBorrowing, setIsBorrowing] = useState(false);
     const [isRepaying, setIsRepaying] = useState(false);
+    const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
     const [isRolling, setIsRolling] = useState(false);
 
     const [isTokenInfoLoading, setIsTokenInfoLoading] = useState(true);
@@ -1481,21 +1482,35 @@ const Borrow = () => {
                                                 </Button>
                                             </Box>
                                             <Box>
-                                                <LoanRepay
-                                                size="lg"
-                                                fullCollateral={loanData?.collateralAmount}
-                                                loanAmount={loanData?.borrowAmount}
-                                                token0Symbol={token0Info.tokenSymbol}
-                                                repayAmount={repayAmount}
-                                                setRepayAmount={setRepayAmount}
-                                                handleClickRepayAmount={handleClickRepayAmount}
-                                                isRepaying={isRepaying}
-                                                setIsRepaying={setIsRepaying}
-                                                isMobile={isMobile}
-                                                imv={IMV}
-                                                ltv={ltv}
-                                                isLoading={isTokenInfoLoading}
-                                                />
+                                                <Button
+                                                    h="38px"
+                                                    disabled={isRepaying || isTokenInfoLoading}
+                                                    w="100%"
+                                                    bg="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+                                                    backdropFilter="blur(10px)"
+                                                    color="white"
+                                                    borderRadius="md"
+                                                    border="1px solid rgba(239, 68, 68, 0.3)"
+                                                    boxShadow="0 4px 12px rgba(239, 68, 68, 0.2)"
+                                                    fontWeight="600"
+                                                    fontSize="sm"
+                                                    _hover={{
+                                                        bg: "linear-gradient(135deg, #f87171 0%, #b91c1c 100%)",
+                                                        transform: "translateY(-1px)",
+                                                        boxShadow: "0 6px 16px rgba(239, 68, 68, 0.25)"
+                                                    }}
+                                                    _active={{
+                                                        transform: "translateY(0)",
+                                                        boxShadow: "0 2px 8px rgba(239, 68, 68, 0.2)"
+                                                    }}
+                                                    _disabled={{
+                                                        opacity: 0.6,
+                                                        cursor: "not-allowed"
+                                                    }}
+                                                    onClick={() => setIsRepayModalOpen(true)}
+                                                >
+                                                    {isRepaying ? <Spinner size="sm" /> : "Repay"}
+                                                </Button>
                                             </Box>
                                             <Box>
                                                 <LoanRoll
@@ -1859,6 +1874,29 @@ const Borrow = () => {
                     setIsAddCollateralModalOpen(false);
                 }}
                 token0Balance={token0Info?.balance}
+            />
+
+            {/* Repay Modal */}
+            <StandaloneRepayModal
+                isOpen={isRepayModalOpen}
+                onClose={() => {
+                    setIsRepayModalOpen(false);
+                    setIsRepaying(false);
+                }}
+                token0Symbol={token0Info.tokenSymbol}
+                loanAmount={loanData?.borrowAmount || BigInt(0)}
+                fullCollateral={loanData?.collateralAmount || BigInt(0)}
+                repayAmount={repayAmount}
+                setRepayAmount={setRepayAmount}
+                handleClickRepayAmount={() => {
+                    handleClickRepayAmount();
+                    setIsRepayModalOpen(false);
+                }}
+                isMobile={isMobile}
+                imv={IMV || BigInt(0)}
+                ltv={ltv}
+                isLoading={isTokenInfoLoading}
+                isRepaying={isRepaying}
             />
         </Container>
     );

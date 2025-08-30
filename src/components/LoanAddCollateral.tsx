@@ -237,33 +237,11 @@ const LoanAddCollateral = ({
                             letterSpacing="0.1em"
                             textTransform="uppercase"
                         >
-                            Transaction Preview
-                        </Text>
-                        <VStack align="stretch" spacing={3}>
-                            <Flex justify="space-between" align="center">
-                                <Box>
-                                    <Text color="#666" fontSize="sm">Adding</Text>
-                                </Box>
-                                <Box>
-                                    <Text color="white" fontSize="sm">
-                                        <Text as="span" fontWeight="600">{displayCollateral}</Text>
-                                        {" "}
-                                        <Text as="span" color="#666">{token0Symbol}</Text>
-                                    </Text>                                    
-                                </Box>
-                            </Flex>
-                            
-                            <Flex justify="space-between" align="center">
-                                <Box>
-                                    <Text color="#666" fontSize="sm">New LTV</Text>
-                                </Box>
-                                <Box>
-                                    <Text color="#4ade80" fontSize="lg" fontWeight="600">
-                                        {ltv ? `${(ltv * 100).toFixed(2)}%` : "100.00%"}
-                                    </Text>                                    
-                                </Box>
-                            </Flex>
-                        </VStack>
+                            Transaction Preview x
+                        </Text> 
+                        <Box border="1px solid red">
+                            Test
+                        </Box>
                     </Box>
 
                     {/* Action Buttons */}
