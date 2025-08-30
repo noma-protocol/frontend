@@ -185,7 +185,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 const nomaPrice = (1 / nomaSpotPrice) * monPrice;
                 usdValue = balanceValue * nomaPrice;
                 
-                console.log(`Spot is ${1 / nomaSpotPrice} Noma price is ${nomaPrice} usd value ${usdValue}`)
+                // console.log(`Spot is ${1 / nomaSpotPrice} Noma price is ${nomaPrice} usd value ${usdValue}`)
                 // console.log('NOMA USD calculation:', {
                 //     balanceValue,
                 //     nomaSpotPrice,

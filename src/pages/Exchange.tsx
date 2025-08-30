@@ -617,34 +617,7 @@ const Exchange: React.FC = () => {
             }
         },
         annotations: {
-            yaxis: [{
-                y: 0, // This will be updated dynamically
-                borderColor: '#4ade8040', // 40% opacity
-                strokeDashArray: 5,
-                borderWidth: 2,
-                label: {
-                    borderColor: '#4ade80',
-                    borderWidth: 1,
-                    borderRadius: 0,
-                    style: {
-                        color: '#000',
-                        background: '#4ade80',
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        padding: {
-                            left: 5,
-                            right: 5,
-                            top: 2,
-                            bottom: 2
-                        }
-                    },
-                    text: 'Spot Price',
-                    textAnchor: 'middle',
-                    position: 'right',
-                    offsetX: 80, // Position 30px more to the right
-                    offsetY: 0
-                }
-            }]
+            yaxis: [] // Will be populated dynamically
         }
     });
 
@@ -1346,6 +1319,7 @@ const Exchange: React.FC = () => {
                 });
             }
             
+            console.log("Setting chart annotations:", annotations);
             setChartOptions(prevOptions => ({
                 ...prevOptions,
                 annotations: {
