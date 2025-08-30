@@ -78,20 +78,27 @@ const LoanRoll = ({
                     p={6}
                 >
                     <HStack justify="space-between" align="center">
-                        <HStack gap={3}>
-                            <Box 
-                                w="4px" 
-                                h="24px" 
-                                bg="#8a2be2" 
-                                borderRadius="full"
-                            />
-                            <DrawerTitle>
-                                <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
-                                    Roll Loan
-                                </Text>
-                            </DrawerTitle>
-                        </HStack>
-                        <DrawerCloseTrigger asChild>
+                        <Box>
+                            <HStack gap={3}>
+                                <Box>
+                                    <Box 
+                                        w="4px" 
+                                        h="24px" 
+                                        bg="#8a2be2" 
+                                        borderRadius="full"
+                                    />
+                                </Box>
+                                <Box>
+                                    <DrawerTitle>
+                                        <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
+                                            Roll Loan
+                                        </Text>
+                                    </DrawerTitle>
+                                </Box>
+                            </HStack>
+                        </Box>
+                        <Box>
+                            <DrawerCloseTrigger asChild>
                             <Button 
                                 variant="ghost" 
                                 size="sm" 
@@ -106,6 +113,7 @@ const LoanRoll = ({
                                 ×
                             </Button>
                         </DrawerCloseTrigger>
+                        </Box>
                     </HStack>
                 </DrawerHeader>
                 <DrawerBody p={6}>
@@ -123,16 +131,24 @@ const LoanRoll = ({
                         >
                             <VStack align="stretch" spacing={3}>
                                 <Flex justify="space-between" align="center">
-                                    <Text color="#888" fontSize="sm">New Duration</Text>
-                                    <Text color="white" fontSize="sm" fontWeight="bold">
-                                        {duration / 86400} days
-                                    </Text>
+                                    <Box>
+                                        <Text color="#888" fontSize="sm">New Duration</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="white" fontSize="sm" fontWeight="bold">
+                                            {duration / 86400} days
+                                        </Text>
+                                    </Box>
                                 </Flex>
                                 <Flex justify="space-between" align="center">
-                                    <Text color="#888" fontSize="sm">New Expiry Date</Text>
-                                    <Text color="white" fontSize="sm" fontWeight="bold">
-                                        {calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}
-                                    </Text>
+                                    <Box>
+                                        <Text color="#888" fontSize="sm">New Expiry Date</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="white" fontSize="sm" fontWeight="bold">
+                                            {calculateExpiryDate(getDaysLeft(`${loanData?.expires}`))}
+                                        </Text>
+                                    </Box>
                                 </Flex>
                             </VStack>
                         </Box>
@@ -150,27 +166,43 @@ const LoanRoll = ({
                         </Text>
                         <VStack align="stretch" spacing={3}>
                             <Flex justify="space-between" align="center">
-                                <Text color="#888" fontSize="sm">Loan Amount</Text>
-                                <Flex align="center" gap={3}>
-                                    <Text color="white" fontSize="sm" fontWeight="bold">
-                                        {commifyDecimals(rollLoanAmount, 4)}
-                                    </Text>
-                                    <Text color="#888" fontSize="sm" ml="auto">
-                                        {isTokenInfoLoading ? <Spinner size="sm" />: token1Info?.tokenSymbol}
-                                    </Text>
-                                </Flex>
+                                <Box>
+                                    <Text color="#888" fontSize="sm">Loan Amount</Text>
+                                </Box>
+                                <Box>
+                                    <Flex align="center" gap={3}>
+                                        <Box>
+                                            <Text color="white" fontSize="sm" fontWeight="bold">
+                                                {commifyDecimals(rollLoanAmount, 4)}
+                                            </Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" ml="auto">
+                                                {isTokenInfoLoading ? <Spinner size="sm" />: token1Info?.tokenSymbol}
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                </Box>
                             </Flex>
                             <Box borderTop="1px solid rgba(255, 255, 255, 0.05)" pt={3}>
                                 <Flex justify="space-between" align="center">
-                                    <Text color="#888" fontSize="sm">Extension Fee</Text>
-                                    <Flex align="center" gap={3}>
-                                        <Text color="#8a2be2" fontSize="sm" fontWeight="bold">
-                                            {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}
-                                        </Text>
-                                        <Text color="#888" fontSize="sm" ml="auto">
-                                            {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info?.tokenSymbol}
-                                        </Text>
-                                    </Flex>
+                                    <Box>
+                                        <Text color="#888" fontSize="sm">Extension Fee</Text>
+                                    </Box>
+                                    <Box>
+                                        <Flex align="center" gap={3}>
+                                            <Box>
+                                                <Text color="#8a2be2" fontSize="sm" fontWeight="bold">
+                                                    {commifyDecimals((rollLoanAmount * 0.057 / 100) * (duration / 86400), 4)}
+                                                </Text>
+                                            </Box>
+                                            <Box>
+                                                <Text color="#888" fontSize="sm" ml="auto">
+                                                    {isTokenInfoLoading ? <Spinner size="sm" /> : token1Info?.tokenSymbol}
+                                                </Text>
+                                            </Box>
+                                        </Flex>
+                                    </Box>
                                 </Flex>
                             </Box>
                         </VStack>
@@ -178,8 +210,9 @@ const LoanRoll = ({
 
                     {/* Action Buttons */}
                     <HStack spacing={3} pt={4}>
-                        <DrawerActionTrigger asChild>
-                            <Button 
+                        <Box>
+                            <DrawerActionTrigger asChild>
+                                <Button 
                                 variant="outline"
                                 flex="1"
                                 h="48px"
@@ -194,8 +227,10 @@ const LoanRoll = ({
                             >
                                 Cancel
                             </Button>
-                        </DrawerActionTrigger>
-                        <Button 
+                            </DrawerActionTrigger>
+                        </Box>
+                        <Box>
+                            <Button 
                             flex="1"
                             h="48px"
                             onClick={handleClickRoll}
@@ -214,6 +249,7 @@ const LoanRoll = ({
                         >
                             {isRolling ? <Spinner size="sm" /> : "Extend Loan"}
                         </Button>
+                        </Box>
                     </HStack>
                 </VStack>                              
                 </DrawerBody>

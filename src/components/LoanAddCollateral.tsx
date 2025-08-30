@@ -106,16 +106,18 @@ const LoanAddCollateral = ({
                 >
                     <HStack justify="space-between" align="start">
                         <Box>
-                        <HStack gap={1}>
-                            <DrawerTitle>
-                                <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
-                                    Add Collateral
-                                </Text>
-                            </DrawerTitle>
-                        </HStack>                            
+                            <HStack gap={1}>
+                                <Box>
+                                    <DrawerTitle>
+                                        <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
+                                            Add Collateral
+                                        </Text>
+                                    </DrawerTitle>
+                                </Box>
+                            </HStack>                            
                         </Box>
-                    <Box>
-                        <DrawerCloseTrigger asChild >
+                        <Box>
+                            <DrawerCloseTrigger asChild >
                             <Button 
                                 variant="ghost" 
                                 size="sm" 
@@ -130,7 +132,7 @@ const LoanAddCollateral = ({
                                 ×
                             </Button>
                         </DrawerCloseTrigger>                        
-                    </Box>
+                        </Box>
                     </HStack>
                 </DrawerHeader>
                 <DrawerBody p={6}>     
@@ -150,7 +152,7 @@ const LoanAddCollateral = ({
                         </Text>                            
                         </Box>
                         <HStack>
-                        <Box>
+                            <Box>
                         <Box 
                             bg="rgba(0, 0, 0, 0.3)"
                             borderRadius="12px"
@@ -184,16 +186,21 @@ const LoanAddCollateral = ({
                             </NumberInputRoot>
                             
                             <Grid templateColumns="1fr auto auto" gap={2} mt={3} alignItems="center">
-                                <Flex gap={1} align="center">
-                                    <Box><Text color="#666" fontSize="xs">Balance:</Text></Box>
-                                    <Box>
-                                    <Text color="#999" fontSize="xs">
-                                        {token0Balance ? commify(formatEther(token0Balance), 3) : "0"}
-                                    </Text>                                        
-                                    </Box>
-                                </Flex>
-                                <Text color="#666" fontSize="xs">{token0Symbol}</Text>
-                                <Button
+                                <Box>
+                                    <Flex gap={1} align="center">
+                                        <Box><Text color="#666" fontSize="xs">Balance:</Text></Box>
+                                        <Box>
+                                            <Text color="#999" fontSize="xs">
+                                                {token0Balance ? commify(formatEther(token0Balance), 3) : "0"}
+                                            </Text>                                        
+                                        </Box>
+                                    </Flex>
+                                </Box>
+                                <Box>
+                                    <Text color="#666" fontSize="xs">{token0Symbol}</Text>
+                                </Box>
+                                <Box>
+                                    <Button
                                     size="xs"
                                     variant="unstyled"
                                     color="#4ade80"
@@ -207,11 +214,10 @@ const LoanAddCollateral = ({
                                 >
                                     Use Max
                                 </Button>
+                                </Box>
                             </Grid>
-                        </Box>                            
+                            </Box>                            
                         </Box>
-
-
                         </HStack>
 
                     </Box>
@@ -235,22 +241,26 @@ const LoanAddCollateral = ({
                         </Text>
                         <VStack align="stretch" spacing={3}>
                             <Flex justify="space-between" align="center">
-                                <Box><Text color="#666" fontSize="sm">Adding</Text></Box>
                                 <Box>
-                                <Text color="white" fontSize="sm">
-                                    <Text as="span" fontWeight="600">{displayCollateral}</Text>
-                                    {" "}
-                                    <Text as="span" color="#666">{token0Symbol}</Text>
-                                </Text>                                    
+                                    <Text color="#666" fontSize="sm">Adding</Text>
+                                </Box>
+                                <Box>
+                                    <Text color="white" fontSize="sm">
+                                        <Text as="span" fontWeight="600">{displayCollateral}</Text>
+                                        {" "}
+                                        <Text as="span" color="#666">{token0Symbol}</Text>
+                                    </Text>                                    
                                 </Box>
                             </Flex>
                             
                             <Flex justify="space-between" align="center">
-                                <Box> <Text color="#666" fontSize="sm">New LTV</Text></Box>
                                 <Box>
-                                <Text color="#4ade80" fontSize="lg" fontWeight="600">
-                                    {ltv ? `${(ltv * 100).toFixed(2)}%` : "100.00%"}
-                                </Text>                                    
+                                    <Text color="#666" fontSize="sm">New LTV</Text>
+                                </Box>
+                                <Box>
+                                    <Text color="#4ade80" fontSize="lg" fontWeight="600">
+                                        {ltv ? `${(ltv * 100).toFixed(2)}%` : "100.00%"}
+                                    </Text>                                    
                                 </Box>
                             </Flex>
                         </VStack>
@@ -258,8 +268,9 @@ const LoanAddCollateral = ({
 
                     {/* Action Buttons */}
                     <HStack spacing={3} mt="auto">
-                        <DrawerActionTrigger asChild>
-                            <Button 
+                        <Box>
+                            <DrawerActionTrigger asChild>
+                                <Button 
                                 variant="outline"
                                 flex="1"
                                 h="48px"
@@ -276,8 +287,10 @@ const LoanAddCollateral = ({
                             >
                                 Cancel
                             </Button>
-                        </DrawerActionTrigger>
-                        <Button 
+                            </DrawerActionTrigger>
+                        </Box>
+                        <Box>
+                            <Button 
                             flex="1"
                             h="48px"
                             onClick={handleClickAdd}
@@ -295,6 +308,7 @@ const LoanAddCollateral = ({
                         >
                             {isAdding ? <Spinner size="sm" /> : "Add Collateral"}
                         </Button>
+                        </Box>
                     </HStack>
                 </VStack>                                
                 </DrawerBody>

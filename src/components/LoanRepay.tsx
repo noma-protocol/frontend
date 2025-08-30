@@ -81,20 +81,27 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                 p={6}
             >
                 <HStack justify="space-between" align="center">
-                    <HStack gap={3}>
-                        <Box 
-                            w="4px" 
-                            h="24px" 
-                            bg="#ef4444" 
-                            borderRadius="full"
-                        />
-                        <DrawerTitle>
-                            <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
-                                Repay Loan
-                            </Text>
-                        </DrawerTitle>
-                    </HStack>
-                    <DrawerCloseTrigger asChild>
+                    <Box>
+                        <HStack gap={3}>
+                            <Box>
+                                <Box 
+                                    w="4px" 
+                                    h="24px" 
+                                    bg="#ef4444" 
+                                    borderRadius="full"
+                                />
+                            </Box>
+                            <Box>
+                                <DrawerTitle>
+                                    <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
+                                        Repay Loan
+                                    </Text>
+                                </DrawerTitle>
+                            </Box>
+                        </HStack>
+                    </Box>
+                    <Box>
+                        <DrawerCloseTrigger asChild>
                         <Button 
                             variant="ghost" 
                             size="sm" 
@@ -109,6 +116,7 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                             ×
                         </Button>
                     </DrawerCloseTrigger>
+                    </Box>
                 </HStack>
             </DrawerHeader>
             <DrawerBody p={6}>
@@ -169,27 +177,43 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                     </Text>
                     <VStack align="stretch" spacing={3}>
                         <Flex justify="space-between" align="center">
-                            <Text color="#888" fontSize="sm">Repaying</Text>
-                            <Flex align="center" gap={3}>
-                                <Text color="white" fontSize="sm" fontWeight="bold">
-                                    {repayAmount == 0 ? commify(formatEther(`${loanAmount}`), 4) : commify(`${repayAmount}`)}
-                                </Text>
-                                <Text color="#888" fontSize="sm" ml="auto">
-                                    {isLoading ? <Spinner size="sm" /> : "WMON"}
-                                </Text>
-                            </Flex>
+                            <Box>
+                                <Text color="#888" fontSize="sm">Repaying</Text>
+                            </Box>
+                            <Box>
+                                <Flex align="center" gap={3}>
+                                    <Box>
+                                        <Text color="white" fontSize="sm" fontWeight="bold">
+                                            {repayAmount == 0 ? commify(formatEther(`${loanAmount}`), 4) : commify(`${repayAmount}`)}
+                                        </Text>
+                                    </Box>
+                                    <Box>
+                                        <Text color="#888" fontSize="sm" ml="auto">
+                                            {isLoading ? <Spinner size="sm" /> : "WMON"}
+                                        </Text>
+                                    </Box>
+                                </Flex>
+                            </Box>
                         </Flex>
                         <Box borderTop="1px solid rgba(255, 255, 255, 0.05)" pt={3}>
                             <Flex justify="space-between" align="center">
-                                <Text color="#888" fontSize="sm">Collateral to Withdraw</Text>
-                                <Flex align="center" gap={3}>
-                                    <Text color="#4ade80" fontSize="sm" fontWeight="bold">
-                                        {commify(collateral)}
-                                    </Text>
-                                    <Text color="#888" fontSize="sm" ml="auto">
-                                        {isLoading ? <Spinner size="sm" /> : token0Symbol}
-                                    </Text>
-                                </Flex>
+                                <Box>
+                                    <Text color="#888" fontSize="sm">Collateral to Withdraw</Text>
+                                </Box>
+                                <Box>
+                                    <Flex align="center" gap={3}>
+                                        <Box>
+                                            <Text color="#4ade80" fontSize="sm" fontWeight="bold">
+                                                {commify(collateral)}
+                                            </Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm" ml="auto">
+                                                {isLoading ? <Spinner size="sm" /> : token0Symbol}
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                </Box>
                             </Flex>
                         </Box>
                     </VStack>
@@ -197,8 +221,9 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
 
                 {/* Action Buttons */}
                 <HStack spacing={3} pt={4}>
-                    <DrawerActionTrigger asChild>
-                        <Button 
+                    <Box>
+                        <DrawerActionTrigger asChild>
+                            <Button 
                             variant="outline"
                             flex="1"
                             h="48px"
@@ -212,9 +237,11 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                             }}
                         >
                             Cancel
-                        </Button>
-                    </DrawerActionTrigger>
-                    <Button 
+                            </Button>
+                        </DrawerActionTrigger>
+                    </Box>
+                    <Box>
+                        <Button 
                         flex="1"
                         h="48px"
                         onClick={handleClickRepayAmount}
@@ -231,7 +258,8 @@ const LoanRepay = ({ size, token0Symbol, loanAmount, fullCollateral, repayAmount
                         }}
                     >
                         {isRepaying ? <Spinner size="sm" /> : "Repay Loan"}
-                    </Button>
+                        </Button>
+                    </Box>
                 </HStack>
             </VStack>                                
             </DrawerBody>
