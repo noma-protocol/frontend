@@ -191,11 +191,11 @@ const StandaloneWrapModal: React.FC<StandaloneWrapModalProps> = ({
                                         {bnbBalance && (
                                             <Box>
                                                 <HStack spacing={2}>
-                                                    <Box>
+                                                    {/* <Box ml={-5}>
                                                         <Text color="#666" fontSize="xs">
                                                             Balance: {commify(formatEther(bnbBalance), 4)}
                                                         </Text>
-                                                    </Box>
+                                                    </Box> */}
                                                     <Box>
                                                         <Button
                                                     onClick={handleUseMax}
@@ -205,6 +205,8 @@ const StandaloneWrapModal: React.FC<StandaloneWrapModalProps> = ({
                                                     fontSize="xs"
                                                     h="20px"
                                                     px={2}
+                                                    mt={-1}
+                                                    border="1px solid green"
                                                     _hover={{ bg: "rgba(74, 222, 128, 0.1)" }}
                                                 >
                                                     MAX

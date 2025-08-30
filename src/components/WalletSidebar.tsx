@@ -366,9 +366,9 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         justifyContent="space-between" 
                         alignItems="center"
                     >
-                        <HStack>
-                            <Box><Text color="#888" fontSize="sm" fontWeight="600">Total Value</Text></Box>
-                            <Box ml={5}>
+                        <HStack w="100%">
+                            <Box w='50%'><Text color="#888" fontSize="sm" fontWeight="600">Total Value</Text></Box>
+                            <Box w='50%' ml={2}>
                             <Text color="#4ade80" fontWeight="bold" fontSize="lg">
                                 ${formatUsdValue(totalValue)}
                             </Text>                                

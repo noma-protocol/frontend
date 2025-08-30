@@ -191,11 +191,11 @@ const StandaloneUnwrapModal: React.FC<StandaloneUnwrapModalProps> = ({
                                         {wethBalance && (
                                             <Box>
                                                 <HStack spacing={2}>
-                                                    <Box>
+                                                    {/* <Box>
                                                         <Text color="#666" fontSize="xs">
                                                             Balance: {commify(formatEther(wethBalance), 4)}
                                                         </Text>
-                                                    </Box>
+                                                    </Box> */}
                                                     <Box>
                                                         <Button
                                                     onClick={handleUseMax}
@@ -205,6 +205,8 @@ const StandaloneUnwrapModal: React.FC<StandaloneUnwrapModalProps> = ({
                                                     fontSize="xs"
                                                     h="20px"
                                                     px={2}
+                                                    mt={-1}
+                                                    border="1px solid green"
                                                     _hover={{ bg: "rgba(74, 222, 128, 0.1)" }}
                                                 >
                                                     MAX

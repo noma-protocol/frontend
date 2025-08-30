@@ -10,7 +10,7 @@ import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import ethLogo from '../assets/images/weth.svg';
 import bnbLogo from '../assets/images/bnb.png';
 import monadLogo from '../assets/images/monad.png';
-import LoanAddCollateral from '../components/LoanAddCollateral';
+import StandaloneAddCollateralModal from '../components/StandaloneAddCollateralModal';
 import LoanRepay from '../components/LoanRepay';
 import LoanRoll from '../components/LoanRoll';
 import {
@@ -124,6 +124,7 @@ const Borrow = () => {
     const [collateral, setCollateral] = useState("0");
     const [extraCollateral, setExtraCollateral] = useState("0");
     const [isAdding, setIsAdding] = useState(false);
+    const [isAddCollateralModalOpen, setIsAddCollateralModalOpen] = useState(false);
     const [repayAmount, setRepayAmount] = useState("0");
     const [isComputing, setIsComputing] = useState(false);
     const [ltv, setLtv] = useState(0);
@@ -1010,7 +1011,7 @@ const Borrow = () => {
                                                 </HStack>
                                             </Box>
                                             <Text color="#4ade80" fontSize="xl" fontWeight="bold">
-                                                {commifyDecimals(formatEther(`${IMV || 0}`) || 0, 4)}
+                                                {commifyDecimals(formatEther(`${IMV || 0}`) || 0, 6)}
                                             </Text>
                                         </Box>
                                         
@@ -1021,7 +1022,7 @@ const Borrow = () => {
                                             border="1px solid rgba(255, 255, 255, 0.05)"
                                         >
                                             <Text color="#888" fontSize="xs" mb={1}>
-                                                DAILY FEE
+                                                DAILY INTEREST
                                             </Text>
                                             <Text color="white" fontSize="xl" fontWeight="bold">
                                                 0.027%
@@ -1449,22 +1450,35 @@ const Borrow = () => {
                                         </Text>
                                         <SimpleGrid columns={{ base: 1, md: 3 }} gap={3} w="100%">
                                             <Box>
-                                                <LoanAddCollateral
-                                                size="lg"
-                                                token0Symbol={token0Info.tokenSymbol}
-                                                handleSetCollateral={setCollateral}
-                                                handleSetExtraCollateral={handleSetExtraCollateral}
-                                                extraCollateral={extraCollateral}
-                                                isMobile={isMobile}
-                                                ltv={ltv}
-                                                handleClickAdd={handleClickAdd}
-                                                isAdding={isAdding}
-                                                setIsAdding={setIsAdding}
-                                                isLoading={isLoading}
-                                                setIsLoading={setIsLoading}
-                                                isTokenInfoLoading={isTokenInfoLoading}
-                                                token0Balance={token0Info?.balance}
-                                                />
+                                                <Button
+                                                    h="38px"
+                                                    disabled={isTokenInfoLoading}
+                                                    w="100%"
+                                                    bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
+                                                    backdropFilter="blur(10px)"
+                                                    color="black"
+                                                    borderRadius="md"
+                                                    border="1px solid rgba(74, 222, 128, 0.3)"
+                                                    boxShadow="0 4px 12px rgba(74, 222, 128, 0.2)"
+                                                    fontWeight="600"
+                                                    fontSize="sm"
+                                                    _hover={{
+                                                        bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
+                                                        transform: "translateY(-1px)",
+                                                        boxShadow: "0 6px 16px rgba(74, 222, 128, 0.25)"
+                                                    }}
+                                                    _active={{
+                                                        transform: "translateY(0)",
+                                                        boxShadow: "0 2px 8px rgba(74, 222, 128, 0.2)"
+                                                    }}
+                                                    _disabled={{
+                                                        opacity: 0.6,
+                                                        cursor: "not-allowed"
+                                                    }}
+                                                    onClick={() => setIsAddCollateralModalOpen(true)}
+                                                >
+                                                    {isAdding ? <Spinner size="sm" /> : "Add"}
+                                                </Button>
                                             </Box>
                                             <Box>
                                                 <LoanRepay
@@ -1823,6 +1837,29 @@ const Borrow = () => {
                     </DialogFooter>
                 </DialogContent>
             </DialogRoot>
+
+            {/* Add Collateral Modal */}
+            <StandaloneAddCollateralModal
+                isOpen={isAddCollateralModalOpen}
+                onClose={() => {
+                    setIsAddCollateralModalOpen(false);
+                    setIsAdding(false);
+                }}
+                token0Symbol={token0Info.tokenSymbol}
+                extraCollateral={extraCollateral}
+                handleSetCollateral={setCollateral}
+                handleSetExtraCollateral={handleSetExtraCollateral}
+                isMobile={isMobile}
+                ltv={ltv}
+                isLoading={isLoading}
+                isTokenInfoLoading={isTokenInfoLoading}
+                isAdding={isAdding}
+                handleClickAdd={() => {
+                    handleClickAdd();
+                    setIsAddCollateralModalOpen(false);
+                }}
+                token0Balance={token0Info?.balance}
+            />
         </Container>
     );
 };
