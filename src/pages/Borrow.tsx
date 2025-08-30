@@ -12,7 +12,7 @@ import bnbLogo from '../assets/images/bnb.png';
 import monadLogo from '../assets/images/monad.png';
 import StandaloneAddCollateralModal from '../components/StandaloneAddCollateralModal';
 import StandaloneRepayModal from '../components/StandaloneRepayModal';
-import LoanRoll from '../components/LoanRoll';
+import StandaloneRollModal from '../components/StandaloneRollModal';
 import {
     DialogRoot,
     DialogContent,
@@ -112,6 +112,7 @@ const Borrow = () => {
     const [isRepaying, setIsRepaying] = useState(false);
     const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
     const [isRolling, setIsRolling] = useState(false);
+    const [isRollModalOpen, setIsRollModalOpen] = useState(false);
 
     const [isTokenInfoLoading, setIsTokenInfoLoading] = useState(true);
 
@@ -1299,7 +1300,7 @@ const Borrow = () => {
                                                 textTransform="uppercase"
                                                 mb={3}
                                             >
-                                                Collateral Amount
+                                                Collateral
                                             </Text>
                                             <HStack align="baseline" spacing={3}>
                                                 <Box>
@@ -1331,7 +1332,7 @@ const Borrow = () => {
                                                         textTransform="uppercase"
                                                         mb={3}
                                                     >
-                                                        Borrowed Amount
+                                                        Borrowed
                                                     </Text>
                                                     <HStack align="baseline" spacing={3}>
                                                         <Box>
@@ -1373,7 +1374,7 @@ const Borrow = () => {
                                                         textTransform="uppercase"
                                                         mb={3}
                                                     >
-                                                        Current LTV
+                                                        LTV
                                                     </Text>
                                                     <HStack align="center" spacing={2}>
                                                         <Box>
@@ -1408,7 +1409,7 @@ const Borrow = () => {
                                                         textTransform="uppercase"
                                                         mb={3}
                                                     >
-                                                        Expires In
+                                                        Expiry
                                                     </Text>
                                                     <HStack align="baseline" spacing={2}>
                                                         <Box>
@@ -1513,21 +1514,36 @@ const Borrow = () => {
                                                 </Button>
                                             </Box>
                                             <Box>
-                                                <LoanRoll
-                                                size="lg"
-                                                isRolling={isRolling}
-                                                setIsRolling={setIsRolling}
-                                                isLoading={isLoading}
-                                                isTokenInfoLoading={isTokenInfoLoading}
-                                                ltv={ltv}
-                                                duration={duration}
-                                                loanData={loanData}
-                                                rollLoanAmount={rollLoanAmount}
-                                                token1Info={token1Info}
-                                                handleClickRoll={handleClickRoll}
-                                                getDaysLeft={getDaysLeft}
-                                                calculateExpiryDate={calculateExpiryDate}
-                                                />
+                                                <Button
+                                                    h="38px"
+                                                    disabled={isRolling || isLoading || isTokenInfoLoading || ltv <= 1}
+                                                    w="100%"
+                                                    bg="rgba(255, 255, 255, 0.05)"
+                                                    backdropFilter="blur(10px)"
+                                                    color="white"
+                                                    borderRadius="md"
+                                                    border="1px solid rgba(255, 255, 255, 0.1)"
+                                                    boxShadow="0 2px 8px rgba(0, 0, 0, 0.1)"
+                                                    fontWeight="600"
+                                                    fontSize="sm"
+                                                    _hover={{
+                                                        bg: "rgba(74, 222, 128, 0.1)",
+                                                        transform: "translateY(-1px)",
+                                                        boxShadow: "0 4px 12px rgba(74, 222, 128, 0.15)",
+                                                        borderColor: "rgba(74, 222, 128, 0.3)"
+                                                    }}
+                                                    _active={{
+                                                        transform: "translateY(0)",
+                                                        boxShadow: "0 2px 6px rgba(74, 222, 128, 0.1)"
+                                                    }}
+                                                    _disabled={{
+                                                        opacity: 0.6,
+                                                        cursor: "not-allowed"
+                                                    }}
+                                                    onClick={() => setIsRollModalOpen(true)}
+                                                >
+                                                    {isLoading ? <Spinner size="sm" /> : "Roll"}
+                                                </Button>
                                             </Box>
                                         </SimpleGrid>
                                     </Box>
@@ -1897,6 +1913,29 @@ const Borrow = () => {
                 ltv={ltv}
                 isLoading={isTokenInfoLoading}
                 isRepaying={isRepaying}
+            />
+
+            {/* Roll Modal */}
+            <StandaloneRollModal
+                isOpen={isRollModalOpen}
+                onClose={() => {
+                    setIsRollModalOpen(false);
+                    setIsRolling(false);
+                }}
+                isRolling={isRolling}
+                isLoading={isLoading}
+                isTokenInfoLoading={isTokenInfoLoading}
+                ltv={ltv}
+                duration={duration}
+                loanData={loanData}
+                rollLoanAmount={rollLoanAmount}
+                token1Info={token1Info}
+                handleClickRoll={() => {
+                    handleClickRoll();
+                    setIsRollModalOpen(false);
+                }}
+                getDaysLeft={getDaysLeft}
+                calculateExpiryDate={calculateExpiryDate}
             />
         </Container>
     );

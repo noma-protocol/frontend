@@ -222,6 +222,11 @@ const StandaloneAddCollateralModal: React.FC<StandaloneAddCollateralModalProps> 
                                                     {token0Balance ? commify(formatEther(token0Balance), 3) : "0"}
                                                 </Text>
                                             </Box>
+                                            <Box>
+                                                <Text color="#888" fontSize="xs">
+                                                    {token0Symbol || "TOKEN"}
+                                                </Text>
+                                            </Box>
                                         </Flex>
                                     </Box>
                                     <Box>
@@ -238,11 +243,7 @@ const StandaloneAddCollateralModal: React.FC<StandaloneAddCollateralModalProps> 
                                             MAX
                                         </Button>
                                     </Box>
-                                    <Box>
-                                        <Text color="#888" fontSize="sm">
-                                            {token0Symbol || "TOKEN"}
-                                        </Text>
-                                    </Box>
+
                                 </Grid>
                             </Box>
                         </Box>
@@ -266,7 +267,7 @@ const StandaloneAddCollateralModal: React.FC<StandaloneAddCollateralModalProps> 
                                 borderRadius="lg"
                                 border="1px solid rgba(255, 255, 255, 0.05)"
                             >
-                                <Box>
+                                <Box w="100%">
                                     <Flex justify="space-between" align="center" w="100%">
                                         <Box>
                                             <Text color="#666" fontSize="sm">Adding Collateral</Text>
@@ -280,7 +281,7 @@ const StandaloneAddCollateralModal: React.FC<StandaloneAddCollateralModalProps> 
                                         </Box>
                                     </Flex>
                                 </Box>
-                                <Box>
+                                <Box  w="100%">
                                     <Flex justify="space-between" align="center" w="100%">
                                         <Box>
                                             <Text color="#666" fontSize="sm">New LTV</Text>
