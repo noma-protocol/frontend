@@ -46,9 +46,26 @@ const StandaloneUnwrapModal: React.FC<StandaloneUnwrapModalProps> = ({
         };
     }, []);
 
+    const handleAmountChange = (value: string) => {
+        // Remove any non-numeric characters except decimal point
+        const cleanedValue = value.replace(/[^0-9.]/g, '');
+        
+        // Prevent multiple decimal points
+        const parts = cleanedValue.split('.');
+        if (parts.length > 2) {
+            // Join all parts after the first decimal point
+            const formattedValue = `${parts[0]}.${parts.slice(1).join('')}`;
+            setWrapAmount(formattedValue);
+        } else {
+            setWrapAmount(cleanedValue);
+        }
+    };
+
     const handleUseMax = () => {
         if (wethBalance) {
-            setWrapAmount(formatEther(wethBalance));
+            const maxAmount = formatEther(wethBalance);
+            // Use the same validation as handleAmountChange
+            handleAmountChange(maxAmount);
         }
     };
 
@@ -149,7 +166,7 @@ const StandaloneUnwrapModal: React.FC<StandaloneUnwrapModalProps> = ({
                                 >
                                     <Input
                                         placeholder="0"
-                                        onChange={(e) => setWrapAmount(e.target.value)}
+                                        onChange={(e) => handleAmountChange(e.target.value)}
                                         value={wrapAmount}
                                         h="48px" 
                                         bg="transparent"
