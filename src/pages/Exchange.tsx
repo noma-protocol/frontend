@@ -62,8 +62,8 @@ import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
 import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress } from "../utils";
 import WalletSidebar from "../components/WalletSidebar";
-import StandaloneWrapModal from "../components/StandaloneWrapModal";
-import StandaloneUnwrapModal from "../components/StandaloneUnwrapModal";
+// import StandaloneWrapModal from "../components/StandaloneWrapModal";
+// import StandaloneUnwrapModal from "../components/StandaloneUnwrapModal";
 // import WalletNotConnected from '../components/WalletNotConnected';
 import { useToken } from "../contexts/TokenContext";
 
@@ -4567,29 +4567,7 @@ const Exchange: React.FC = () => {
                 </DialogContent>
             </DialogRoot>
 
-            {/* Standalone Modals */}
-            <StandaloneWrapModal
-                isOpen={isWrapDrawerOpen}
-                onClose={() => setIsWrapDrawerOpen(false)}
-                onWrap={(amount) => {
-                    setWrapAmount(parseFloat(amount));
-                    setIsWrapping(true);
-                    deposit();
-                }}
-                isWrapping={isWrapping}
-                bnbBalance={ethBalance}
-            />
-            <StandaloneUnwrapModal
-                isOpen={isUnwrapDrawerOpen}
-                onClose={() => setIsUnwrapDrawerOpen(false)}
-                onUnwrap={(amount) => {
-                    setWrapAmount(parseFloat(amount));
-                    setIsUnwrapping(true);
-                    withdraw();
-                }}
-                isUnwrapping={isUnwrapping}
-                wethBalance={wethBalance}
-            />
+            {/* Standalone Modals - Temporarily disabled due to initialization error */}
         </Container>
     );
 };
