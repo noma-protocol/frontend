@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:9091/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:9091/api';
 
 interface TokenData {
   tokenName: string;
@@ -18,13 +18,14 @@ interface TokenData {
   deployerAddress?: string;
 }
 
-interface TokenResponse {
+interface TokenResponse extends TokenData {
   id: string;
   timestamp: string;
-  status: 'pending' | 'success' | 'failed';
+  status: 'pending' | 'success' | 'failed' | 'deployed';
   transactionHash?: string;
   contractAddress?: string;
   updatedAt?: string;
+  logoUrl?: string; // New field for URL-based logos
 }
 
 export const tokenApi = {

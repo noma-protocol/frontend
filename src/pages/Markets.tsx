@@ -33,6 +33,7 @@ import uniswapLogo from "../assets/images/uniswap.png";
 import pancakeLogo from "../assets/images/pancake.png";
 import walletIcon from '../assets/images/walletIcon.svg';
 import addressesBsc from "../assets/deployment.json";
+import { tokenApi } from '../services/tokenApi';
 // import WalletNotConnected from '../components/WalletNotConnected';
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -50,8 +51,8 @@ const localProvider = new JsonRpcProvider(
 );
 
 // Dynamically import the NomaFactory artifact and extract its ABI
-const OikosFactoryArtifact = await import(`../assets/OikosFactory.json`);
-const OikosFactoryAbi = OikosFactoryArtifact.abi;
+const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
+const NomaFactoryAbi = NomaFactoryArtifact.abi;
 
 const uniswapV3FactoryABI = [
   "function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool)",
@@ -77,6 +78,7 @@ const Markets: React.FC = () => {
   const [vaultDescriptions, setVaultDescriptions] = useState<any[]>([]);
   const [isAllVaultsLoading, setIsAllVaultsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tokenProtocols, setTokenProtocols] = useState<{ [symbol: string]: string }>({});
 
   const [modalFocus, setModalFocus] = useState<boolean>(false);
 
@@ -107,6 +109,32 @@ const Markets: React.FC = () => {
   }
   , [showVaults]);
 
+  // Fetch tokens and build protocol mapping
+  useEffect(() => {
+    const fetchTokens = async () => {
+      try {
+        const response = await tokenApi.getTokens();
+        const protocols: { [symbol: string]: string } = {};
+        
+        // Build a map of token symbols to their protocols
+        response.tokens.forEach(token => {
+          if (token.tokenSymbol && token.selectedProtocol) {
+            protocols[token.tokenSymbol] = token.selectedProtocol;
+            console.log(`Mapping ${token.tokenSymbol} to ${token.selectedProtocol}`);
+          }
+        });
+        
+        setTokenProtocols(protocols);
+        console.log("Token protocols loaded:", protocols);
+        console.log("NOMA protocol:", protocols["NOMA"]);
+      } catch (error) {
+        console.error("Failed to fetch token protocols:", error);
+      }
+    };
+    
+    fetchTokens();
+  }, []);
+
   // fetch label for reserve asset
   const getReserveAssetLabel = (address: string) => {
     console.log("Fetching reserve asset label for address:", address);
@@ -132,7 +160,7 @@ const Markets: React.FC = () => {
     isError: isAllVaultsError,
   } = useContractRead({
     address: oikosFactoryAddress,
-    abi: OikosFactoryAbi,
+    abi: NomaFactoryAbi,
     functionName: "getDeployers",
     enabled: view === "all" && isConnected,
   });
@@ -144,7 +172,7 @@ const Markets: React.FC = () => {
 
       const nomaFactoryContract = new ethers.Contract(
         oikosFactoryAddress,
-        OikosFactoryAbi,
+        NomaFactoryAbi,
         localProvider
       );
 
@@ -230,7 +258,7 @@ const Markets: React.FC = () => {
           try {
             const nomaFactoryContract = new ethers.Contract(
               oikosFactoryAddress,
-              OikosFactoryAbi,
+              NomaFactoryAbi,
               localProvider
             );
 
@@ -328,7 +356,7 @@ const Markets: React.FC = () => {
         try {
             const nomaFactoryContract = new ethers.Contract(
                 oikosFactoryAddress,
-                OikosFactoryAbi,
+                NomaFactoryAbi,
                 localProvider
             );
 
@@ -553,7 +581,8 @@ const Markets: React.FC = () => {
                     )}
                   </Box>
                   {vaultsDataArray?.map((vault, index) => {
-                    console.log("Vault info:", vault.tokenSymbol, vault.vault, "Protocol:", config.vault2ProtocolMap[vault.vault])
+                    const protocol = tokenProtocols[vault.tokenSymbol] || "pancakeswap";
+                    console.log("Vault info:", vault.tokenSymbol, vault.vault, "Protocol:", protocol)
                     console.log({ vault })
 
                     let hasPresale;
@@ -627,7 +656,7 @@ const Markets: React.FC = () => {
                             <Image
                               w="60px"
                               h="auto"
-                              src={config.vault2ProtocolMap[vault.vault] == "uniswap" ? uniswapLogo : pancakeLogo}
+                              src={protocol === "uniswap" ? uniswapLogo : pancakeLogo}
                               alt="protocol logo"
                               opacity={0.8}
                             />

@@ -92,7 +92,7 @@ const addresses = config.chain == "local"
 
 const { environment, presaleContractAddress } = config;
 
-const FactoryArtifact = await import(`../assets/OikosFactory.json`);
+const FactoryArtifact = await import(`../assets/NomaFactory.json`);
 const FactoryAbi = FactoryArtifact.abi;
 const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory"); 
 
@@ -105,8 +105,7 @@ const Launchpad: React.FC = () => {
     const [tokenDescription, setTokenDescription] = useState("");
     const [tokenDecimals, setTokenDecimals] = useState("18");
     const [tokenSupply, setTokenSupply] = useState("");
-    const [tokenLogo, setTokenLogo] = useState(null);
-    const [logoPreview, setLogoPreview] = useState("");
+    const [logoUrl, setLogoUrl] = useState("");
 
     const [price, setPrice] = useState("");
     const [floorPrice, setFloorPrice] = useState("");
@@ -208,17 +207,13 @@ const Launchpad: React.FC = () => {
         }
     }); 
 
-    const handleLogoUpload = (event) => {
-        const file = event.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            setTokenLogo(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setLogoPreview(reader.result);
-            };
-            reader.readAsDataURL(file);
+    const handleLogoUrlChange = (value) => {
+        setLogoUrl(value);
+        // Basic URL validation
+        if (value && !value.match(/^https?:\/\/.+/)) {
+            setError("Please enter a valid URL starting with http:// or https://");
         } else {
-            setError("Please upload a valid image file");
+            setError("");
         }
     };
 
@@ -568,7 +563,7 @@ const Launchpad: React.FC = () => {
                 tokenDescription,
                 tokenDecimals,
                 tokenSupply,
-                logoPreview,
+                logoUrl,
                 price,
                 floorPrice,
                 presalePrice,
@@ -1060,73 +1055,45 @@ const Launchpad: React.FC = () => {
                                             </Box>
                                         </HStack>
                                         <Box>
-                                            <Input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleLogoUpload}
-                                                display="none"
-                                                id="logo-upload"
-                                            />
-                                            <label htmlFor="logo-upload">
-                                                <Box
-                                                    as="div"
+                                            <HStack spacing={3}>
+                                                <Input
+                                                    type="url"
+                                                    placeholder="https://example.com/logo.png"
+                                                    value={logoUrl}
+                                                    onChange={(e) => handleLogoUrlChange(e.target.value)}
                                                     bg={isMobile ? "#1a1a1a" : "#0a0a0a"}
                                                     border={isMobile ? "none" : "1px solid #2a2a2a"}
                                                     borderRadius="lg"
-                                                    p={4}
-                                                    cursor="pointer"
-                                                    _hover={{ borderColor: "#3a3a3a", bg: "#1a1a1a" }}
-                                                    transition="all 0.2s"
-                                                    display="flex"
-                                                    alignItems="center"
-                                                    justifyContent="center"
-                                                    h="120px"
-                                                >
-                                                    {logoPreview ? (
-                                                        <Box position="relative" w="80px" h="80px">
-                                                            <Image
-                                                                src={logoPreview}
-                                                                alt="Token Logo"
-                                                                w="100%"
-                                                                h="100%"
-                                                                objectFit="cover"
-                                                                borderRadius="full"
-                                                            />
-                                                            <Box
-                                                                position="absolute"
-                                                                inset={0}
-                                                                bg="blackAlpha.600"
-                                                                borderRadius="full"
-                                                                display="flex"
-                                                                alignItems="center"
-                                                                justifyContent="center"
-                                                                opacity={0}
-                                                                _hover={{ opacity: 1 }}
-                                                                transition="opacity 0.2s"
-                                                            >
-                                                                <FaUpload size={20} color="white" />
-                                                            </Box>
-                                                        </Box>
-                                                    ) : (
-                                                        <VStack spacing={2}>
-                                                            <Box
-                                                                w="40px"
-                                                                h="40px"
-                                                                borderRadius="full"
-                                                                bg="#2a2a2a"
-                                                                display="flex"
-                                                                alignItems="center"
-                                                                justifyContent="center"
-                                                                mt={4}
-                                                            >
-                                                                <FaUpload size={18} color="#888" />
-                                                            </Box>
-                                                            <Text color="#888" fontSize="sm" mb={2}>Click to upload logo</Text>
-                                                            
-                                                        </VStack>
-                                                    )}
-                                                </Box>
-                                            </label>
+                                                    h="48px"
+                                                    color="white"
+                                                    _hover={{ borderColor: "#3a3a3a" }}
+                                                    _focus={{ borderColor: "#4ade80", boxShadow: "0 0 0 1px #4ade80" }}
+                                                    flex={1}
+                                                />
+                                                {logoUrl ? (
+                                                    <Box
+                                                        w="48px"
+                                                        h="48px"
+                                                        borderRadius="lg"
+                                                        overflow="hidden"
+                                                        border="1px solid #2a2a2a"
+                                                        flexShrink={0}
+                                                    >
+                                                        <Image
+                                                            src={logoUrl}
+                                                            alt="Logo preview"
+                                                            w="100%"
+                                                            h="100%"
+                                                            objectFit="cover"
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                                setError("Failed to load image from URL");
+                                                            }}
+                                                            onLoad={() => setError("")}
+                                                        />
+                                                    </Box>
+                                                ) : null}
+                                            </HStack>
                                         </Box>
                                     </Box>
                                 </SimpleGrid>
@@ -1252,7 +1219,7 @@ const Launchpad: React.FC = () => {
                                                     <Image
                                                         w="24px"
                                                         h="24px"
-                                                        src={logoPreview || placeholderLogo}
+                                                        src={logoUrl || placeholderLogo}
                                                         alt="Token"
                                                     />
                                                 </Box>
@@ -1858,7 +1825,7 @@ const Launchpad: React.FC = () => {
                             >
                                 <HStack mb={2} spacing={2} align="center">
                                     <Box>
-                                        {logoPreview ? (
+                                        {logoUrl ? (
                                             <Box
                                                 w={8}
                                                 h={8}
@@ -1867,7 +1834,7 @@ const Launchpad: React.FC = () => {
                                                 border="1px solid #2a2a2a"
                                             >
                                                 <Image
-                                                    src={logoPreview}
+                                                    src={logoUrl}
                                                     alt="Token Logo"
                                                     w="100%"
                                                     h="100%"
@@ -2287,9 +2254,9 @@ const Launchpad: React.FC = () => {
                                     inset={0}
                                     bgGradient="linear(to-br, #4ade8040, transparent)"
                                 />
-                                {logoPreview ? (
+                                {logoUrl ? (
                                     <Image
-                                        src={logoPreview}
+                                        src={logoUrl}
                                         alt="Token Logo"
                                         w="100%"
                                         h="100%"
