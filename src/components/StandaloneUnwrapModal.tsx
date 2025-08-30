@@ -102,10 +102,13 @@ const StandaloneUnwrapModal: React.FC<StandaloneUnwrapModalProps> = ({
                     {/* Header */}
                     <Box borderBottom="1px solid rgba(255, 255, 255, 0.1)" p={6}>
                         <HStack justify="space-between" align="start">
-                            <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
-                                Unwrap WMON
-                            </Text>
-                            <Button 
+                            <Box>
+                                <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
+                                    Unwrap WMON
+                                </Text>
+                            </Box>
+                            <Box>
+                                <Button 
                                 variant="ghost" 
                                 size="sm" 
                                 color="#888"
@@ -117,7 +120,8 @@ const StandaloneUnwrapModal: React.FC<StandaloneUnwrapModalProps> = ({
                                 onClick={onClose}
                             >
                                 ×
-                            </Button>
+                                </Button>
+                            </Box>
                         </HStack>
                     </Box>
 
@@ -164,13 +168,19 @@ const StandaloneUnwrapModal: React.FC<StandaloneUnwrapModalProps> = ({
                                         textAlign="right"
                                     />
                                     <HStack justify="space-between" mt={2}>
-                                        <Text color="#666" fontSize="sm">WMON</Text>
+                                        <Box>
+                                            <Text color="#666" fontSize="sm">WMON</Text>
+                                        </Box>
                                         {wethBalance && (
-                                            <HStack spacing={2}>
-                                                <Text color="#666" fontSize="xs">
-                                                    Balance: {commify(formatEther(wethBalance), 4)}
-                                                </Text>
-                                                <Button
+                                            <Box>
+                                                <HStack spacing={2}>
+                                                    <Box>
+                                                        <Text color="#666" fontSize="xs">
+                                                            Balance: {commify(formatEther(wethBalance), 4)}
+                                                        </Text>
+                                                    </Box>
+                                                    <Box>
+                                                        <Button
                                                     onClick={handleUseMax}
                                                     size="xs"
                                                     variant="ghost"
@@ -181,8 +191,10 @@ const StandaloneUnwrapModal: React.FC<StandaloneUnwrapModalProps> = ({
                                                     _hover={{ bg: "rgba(74, 222, 128, 0.1)" }}
                                                 >
                                                     MAX
-                                                </Button>
-                                            </HStack>
+                                                        </Button>
+                                                    </Box>
+                                                </HStack>
+                                            </Box>
                                         )}
                                     </HStack>
                                 </Box>
@@ -198,12 +210,16 @@ const StandaloneUnwrapModal: React.FC<StandaloneUnwrapModalProps> = ({
                                     border="1px solid rgba(255, 255, 255, 0.05)"
                                 >
                                     <Flex justify="space-between" align="center" w="100%">
-                                        <Text color="#666" fontSize="sm">You will receive</Text>
-                                        <Text color="white" fontSize="sm">
-                                            <Text as="span" fontWeight="600">{wrapAmount || "0"}</Text>
-                                            {" "}
-                                            <Text as="span" color="#666">MON</Text>
-                                        </Text>
+                                        <Box>
+                                            <Text color="#666" fontSize="sm">You will receive</Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="white" fontSize="sm">
+                                                <Text as="span" fontWeight="600">{wrapAmount || "0"}</Text>
+                                                {" "}
+                                                <Text as="span" color="#666">MON</Text>
+                                            </Text>
+                                        </Box>
                                     </Flex>
                                 </VStack>
                             </Box>

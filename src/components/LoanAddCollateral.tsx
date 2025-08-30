@@ -184,16 +184,21 @@ const LoanAddCollateral = ({
                             </NumberInputRoot>
                             
                             <Grid templateColumns="1fr auto auto" gap={2} mt={3} alignItems="center">
-                                <Flex gap={1} align="center">
-                                    <Box><Text color="#666" fontSize="xs">Balance:</Text></Box>
-                                    <Box>
-                                    <Text color="#999" fontSize="xs">
-                                        {token0Balance ? commify(formatEther(token0Balance), 3) : "0"}
-                                    </Text>                                        
-                                    </Box>
-                                </Flex>
-                                <Text color="#666" fontSize="xs">{token0Symbol}</Text>
-                                <Button
+                                <Box>
+                                    <Flex gap={1} align="center">
+                                        <Box><Text color="#666" fontSize="xs">Balance:</Text></Box>
+                                        <Box>
+                                            <Text color="#999" fontSize="xs">
+                                                {token0Balance ? commify(formatEther(token0Balance), 3) : "0"}
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                </Box>
+                                <Box>
+                                    <Text color="#666" fontSize="xs">{token0Symbol}</Text>
+                                </Box>
+                                <Box>
+                                    <Button
                                     size="xs"
                                     variant="unstyled"
                                     color="#4ade80"
@@ -206,7 +211,8 @@ const LoanAddCollateral = ({
                                     p={0}
                                 >
                                     Use Max
-                                </Button>
+                                    </Button>
+                                </Box>
                             </Grid>
                         </Box>                            
                         </Box>
@@ -258,7 +264,8 @@ const LoanAddCollateral = ({
 
                     {/* Action Buttons */}
                     <HStack spacing={3} mt="auto">
-                        <DrawerActionTrigger asChild>
+                        <Box flex="1">
+                            <DrawerActionTrigger asChild>
                             <Button 
                                 variant="outline"
                                 flex="1"
@@ -276,8 +283,10 @@ const LoanAddCollateral = ({
                             >
                                 Cancel
                             </Button>
-                        </DrawerActionTrigger>
-                        <Button 
+                            </DrawerActionTrigger>
+                        </Box>
+                        <Box flex="1">
+                            <Button 
                             flex="1"
                             h="48px"
                             onClick={handleClickAdd}
@@ -294,7 +303,8 @@ const LoanAddCollateral = ({
                             isDisabled={!extraCollateral || parseFloat(extraCollateral) <= 0}
                         >
                             {isAdding ? <Spinner size="sm" /> : "Add Collateral"}
-                        </Button>
+                            </Button>
+                        </Box>
                     </HStack>
                 </VStack>                                
                 </DrawerBody>
