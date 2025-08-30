@@ -1168,10 +1168,13 @@ const Exchange: React.FC = () => {
                 
                 try {
                     const vaultInfo = await vaultContract.getVaultInfo();
-                    // Based on Exchange.tsx, the order is:
-                    // [liquidityRatio, circulatingSupply, spotPrice, anchorCapacity, floorCapacity, token0Address, token1Address, newFloorPrice]
-                    const spotPriceFromContract = vaultInfo[2]; // spotPrice is at index 2
-                    const floorPriceFromContract = vaultInfo[7]; // newFloorPrice is at index 7
+                    console.log("Vault info:", vaultInfo);
+                    // The vault info is returned as an array/tuple
+                    // Order: [liquidityRatio, circulatingSupply, spotPriceX96, anchorCapacity, floorCapacity, token0, token1, newFloor]
+                    const spotPriceFromContract = vaultInfo[2]; // spotPriceX96 is at index 2
+                    const floorPriceFromContract = vaultInfo[7]; // newFloor is at index 7
+                    
+                    console.log("Raw floor price from contract:", floorPriceFromContract);
                     
                     const formattedPrice = formatEther(spotPriceFromContract);
                     const numericPrice = parseFloat(formattedPrice);
@@ -1184,13 +1187,34 @@ const Exchange: React.FC = () => {
                     }
                     
                     // Set floor price (IMV)
-                    const formattedFloorPrice = formatEther(floorPriceFromContract);
-                    const numericFloorPrice = parseFloat(formattedFloorPrice);
-                    
-                    if (!isNaN(numericFloorPrice) && isFinite(numericFloorPrice) && numericFloorPrice > 0) {
-                        setFloorPrice(numericFloorPrice);
+                    // Check if floor price is in X96 format or normal wei format
+                    if (floorPriceFromContract) {
+                        // Try treating it as X96 format first
+                        const floorPriceX96 = parseFloat(floorPriceFromContract.toString());
+                        const sqrtFloorPrice = floorPriceX96 / Math.pow(2, 96);
+                        const floorPriceFromX96 = Math.pow(sqrtFloorPrice, 2);
+                        
+                        // Also try as normal wei format
+                        const formattedFloorPrice = formatEther(floorPriceFromContract);
+                        const numericFloorPrice = parseFloat(formattedFloorPrice);
+                        
+                        console.log("Floor price X96 calculation:", floorPriceFromX96);
+                        console.log("Floor price Wei calculation:", numericFloorPrice);
+                        
+                        // Use whichever seems more reasonable (likely the wei format)
+                        if (!isNaN(numericFloorPrice) && isFinite(numericFloorPrice) && numericFloorPrice > 0) {
+                            setFloorPrice(numericFloorPrice);
+                            console.log("Floor price set to (wei format):", numericFloorPrice);
+                        } else if (!isNaN(floorPriceFromX96) && isFinite(floorPriceFromX96) && floorPriceFromX96 > 0) {
+                            setFloorPrice(floorPriceFromX96);
+                            console.log("Floor price set to (X96 format):", floorPriceFromX96);
+                        } else {
+                            setFloorPrice(0);
+                            console.log("Floor price set to 0 (invalid or zero value)");
+                        }
                     } else {
                         setFloorPrice(0);
+                        console.log("Floor price is null or undefined");
                     }
                 } catch (error) {
                     console.error("Error fetching vault info:", error);

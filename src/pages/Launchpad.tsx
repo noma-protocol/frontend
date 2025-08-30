@@ -1358,7 +1358,7 @@ const Launchpad: React.FC = () => {
                                         flex="1"
                                     >
                                         <SelectTrigger
-                                            w="100%"
+                                            w="85%"
                                             h="50px"
                                             bg="#0a0a0a"
                                             border="1px solid #2a2a2a"
@@ -1598,7 +1598,7 @@ const Launchpad: React.FC = () => {
                                     </HStack>
                                 </Box>
                                 <HStack flexDirection={isMobile ? "column" : "row"} w="100%" spacing={isMobile ? 0 : 4} alignItems="stretch">
-                                    <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 4 : 0}>
+                                    <Box w={isMobile ? "100%" : "50%"} mb={isMobile ? 4 : 0} mt={isMobile ? 0 : 5}>
                                     <HStack mb={isMobile ? 3 : 2}>
                                         <Box>
                                             <FaCoins size={14} color="#888" />
@@ -1631,7 +1631,7 @@ const Launchpad: React.FC = () => {
                                         Maximum amount that can be raised in presale
                                     </Text>
                                 </Box>
-                                    <Box w={isMobile ? "100%" : "50%"} mt={isMobile ? 0 : 10} ml={isMobile ? 0 : 5}>
+                                    <Box w={isMobile ? "100%" : "50%"} mt={isMobile ? 0 : 5} ml={isMobile ? 0 : 5}>
                                     <HStack mb={isMobile ? 3 : 2}>
                                         <Box>
                                             <FaWallet size={14} color="#888" />
@@ -1900,7 +1900,7 @@ const Launchpad: React.FC = () => {
                                     {tokenDescription && (
                                         <Box mt={2}>
                                             <Text color="#888" fontSize="xs" mb={1}>Description</Text>
-                                            <Text  color="white" fontSize="sm" lineHeight="1.5" noOfLines={3}>
+                                            <Text color="white" fontSize="sm" lineHeight="1.5" noOfLines={3}>
                                                 {tokenDescription}
                                             </Text>
                                         </Box>
@@ -2019,15 +2019,15 @@ const Launchpad: React.FC = () => {
                                                 ({((Number(softCap) / (Number(floorPrice) * Number(tokenSupply) * 0.1)) * 100).toFixed(0)}% of hard cap)
                                             </Text>
                                         </Box>
-                                        <Box p={isMobile ? 3 : 4}>
+                                        <Box p={isMobile ? 3 : 4} mt={-5}>
                                             <Text color="#888" fontSize="xs">Duration</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{getDaysFromDuration(duration)} days</Text>
                                         </Box>
-                                        <Box p={isMobile ? 3 : 4}>
+                                        <Box p={isMobile ? 3 : 4} mt={-5}>
                                             <Text color="#888" fontSize="xs">Tokens for Sale</Text>
                                             <Text mt={-2} color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">{formatNumberPrecise(Number(tokenSupply) * 0.1 || 0)} {tokenSymbol || 'TOKEN'}</Text>
                                         </Box>
-                                       <Box p={isMobile ? 3 : 4}>
+                                       <Box p={isMobile ? 3 : 4} mt={-5}>
                                         <Text color="#888" fontSize="xs">Expected to Raise</Text>
                                         <HStack gap={2} mt={-2}>
                                             <Text mt={-6} color="#4ade80" fontSize="md" fontWeight="600">
@@ -2037,7 +2037,7 @@ const Launchpad: React.FC = () => {
                                                 (${formatNumberPrecise((Number(softCap) || 0) * (monPrice || 3.5))})
                                             </Text>
                                         </HStack>
-                                    </Box>
+                                        </Box>
                                     </SimpleGrid>
 
                                 </Box>
