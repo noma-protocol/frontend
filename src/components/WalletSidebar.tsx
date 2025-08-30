@@ -67,7 +67,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
             try {
                 // NOMA/WMON pool address from the logs
                 const poolAddress = "0xBb7EfF3E685c6564F2F09DD90b6C05754E3BDAC0";
-                const provider = new ethers.providers.JsonRpcProvider(publicClient?.transport?.url || "https://devnet.monad.xyz");
+                const provider = new ethers.providers.JsonRpcProvider(publicClient?.transport?.url || "https://testnet-rpc.monad.xyz");
                 
                 const poolABI = [
                     "function slot0() view returns (uint160 sqrtPriceX96, int24 tick, uint16 observationIndex, uint16 observationCardinality, uint16 observationCardinalityNext, uint8 feeProtocol, bool unlocked)",
@@ -182,9 +182,10 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 usdValue = balanceValue * monPrice;
             } else if (symbol === 'NOMA') {
                 // NOMA price calculation using spot price from vault
-                const nomaPrice = nomaSpotPrice * monPrice;
+                const nomaPrice = (1 / nomaSpotPrice) * monPrice;
                 usdValue = balanceValue * nomaPrice;
                 
+                console.log(`Spot is ${1 / nomaSpotPrice} Noma price is ${nomaPrice} usd value ${usdValue}`)
                 // console.log('NOMA USD calculation:', {
                 //     balanceValue,
                 //     nomaSpotPrice,
@@ -284,7 +285,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                     <Text color="white" fontWeight="bold" fontSize="sm" lineHeight="1.2">
                         {commify(balanceValue, 4)}
                     </Text>
-                    <Text color="#4ade80" fontSize="xs" lineHeight="1.2" whiteSpace="nowrap">
+                    <Text color="#4ade80" fontSize="xs" lineHeight="1.2" whiteSpace="nowrap" mt={-2}>
                         ≈ ${formatUsdValue(usdValue)}
                     </Text>
                 </Box>
@@ -361,14 +362,14 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                     {/* Total Portfolio Value */}
                     <Flex 
                         borderTop="1px solid rgba(255, 255, 255, 0.1)" 
-                        pt={2} 
+                        p={2} 
                         mt={1}
                         justifyContent="space-between" 
                         alignItems="center"
                     >
                         <HStack w="100%">
                             <Box w='50%'><Text color="#888" fontSize="sm" fontWeight="600">Total Value</Text></Box>
-                            <Box w='50%' ml={2}>
+                            <Box w='50%' textAlign={"right"}>
                             <Text color="#4ade80" fontWeight="bold" fontSize="lg">
                                 ${formatUsdValue(totalValue)}
                             </Text>                                

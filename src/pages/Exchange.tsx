@@ -321,11 +321,13 @@ const Exchange: React.FC = () => {
         return stored === 'true';
     });
     const [spotPrice, setSpotPrice] = useState(0);
+    const [floorPrice, setFloorPrice] = useState(0);
     const [slippage, setSlippage] = useState("1");
     const [quote, setQuote] = useState("");
     const [priceImpact, setPriceImpact] = useState("0");
     const [showQuoteLoading, setShowQuoteLoading] = useState(false);
-    
+    const [totalSupply, setTotalSupply] = useState("0");
+
     // Handler to update approveMax and persist to localStorage
     const handleApproveMaxChange = (value: boolean) => {
         setApproveMax(value);
@@ -1136,6 +1138,14 @@ const Exchange: React.FC = () => {
                     ERC20Abi,
                     localProvider
                 );
+                const token0Contract = new ethers.Contract(
+                    selectedToken.token0,
+                    ERC20Abi,
+                    localProvider
+                )
+
+                const totalSupply = await token0Contract.totalSupply();
+                setTotalSupply(totalSupply);
                 
                 const symbol = await token1Contract.symbol();
                 setToken1Symbol(symbol);
@@ -1161,6 +1171,7 @@ const Exchange: React.FC = () => {
                     // Based on Exchange.tsx, the order is:
                     // [liquidityRatio, circulatingSupply, spotPrice, anchorCapacity, floorCapacity, token0Address, token1Address, newFloorPrice]
                     const spotPriceFromContract = vaultInfo[2]; // spotPrice is at index 2
+                    const floorPriceFromContract = vaultInfo[7]; // newFloorPrice is at index 7
                     
                     const formattedPrice = formatEther(spotPriceFromContract);
                     const numericPrice = parseFloat(formattedPrice);
@@ -1170,6 +1181,16 @@ const Exchange: React.FC = () => {
                     } else {
                         console.warn("Invalid spot price from contract, using fallback");
                         setSpotPrice(selectedToken.price || 0.0000186);
+                    }
+                    
+                    // Set floor price (IMV)
+                    const formattedFloorPrice = formatEther(floorPriceFromContract);
+                    const numericFloorPrice = parseFloat(formattedFloorPrice);
+                    
+                    if (!isNaN(numericFloorPrice) && isFinite(numericFloorPrice) && numericFloorPrice > 0) {
+                        setFloorPrice(numericFloorPrice);
+                    } else {
+                        setFloorPrice(0);
                     }
                 } catch (error) {
                     console.error("Error fetching vault info:", error);
@@ -1222,48 +1243,88 @@ const Exchange: React.FC = () => {
         fetchTokenInfo();
     }, [selectedToken, monPrice]);
 
-    // Update chart annotations when spot price changes
+    // Update chart annotations when spot price or floor price changes
     useEffect(() => {
-        if (spotPrice > 0) {
+        if (spotPrice > 0 || floorPrice > 0) {
+            const annotations = [];
+            
+            // Add spot price annotation
+            if (spotPrice > 0) {
+                annotations.push({
+                    y: spotPrice,
+                    borderColor: '#4ade8040', // 40% opacity green
+                    strokeDashArray: 5,
+                    borderWidth: 2,
+                    label: {
+                        borderColor: '#4ade80',
+                        borderWidth: 1,
+                        borderRadius: 0,
+                        style: {
+                            color: '#000',
+                            background: '#4ade80',
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            padding: {
+                                left: 5,
+                                right: 5,
+                                top: 2,
+                                bottom: 2
+                            }
+                        },
+                        text: `${spotPrice < 0.00001 ? spotPrice.toExponential(2) : spotPrice < 0.01 ? spotPrice.toFixed(6) : spotPrice.toFixed(4)}`,
+                        textAnchor: 'middle',
+                        position: 'right',
+                        offsetX: 80,
+                        offsetY: 0
+                    }
+                });
+            }
+            
+            // Add floor price (IMV) annotation
+            if (floorPrice > 0) {
+                annotations.push({
+                    y: floorPrice,
+                    borderColor: '#3b82f640', // 40% opacity blue
+                    strokeDashArray: 5,
+                    borderWidth: 2,
+                    label: {
+                        borderColor: '#3b82f6',
+                        borderWidth: 1,
+                        borderRadius: 0,
+                        style: {
+                            color: '#fff',
+                            background: '#3b82f6',
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            padding: {
+                                left: 5,
+                                right: 5,
+                                top: 2,
+                                bottom: 2
+                            }
+                        },
+                        text: `IMV: ${floorPrice < 0.00001 ? floorPrice.toExponential(2) : floorPrice < 0.01 ? floorPrice.toFixed(6) : floorPrice.toFixed(4)}`,
+                        textAnchor: 'middle',
+                        position: 'right',
+                        offsetX: 80,
+                        offsetY: 0
+                    }
+                });
+            }
+            
             setChartOptions(prevOptions => ({
                 ...prevOptions,
                 annotations: {
-                    yaxis: [{
-                        y: spotPrice,
-                        borderColor: '#4ade8040', // 40% opacity
-                        strokeDashArray: 5,
-                        borderWidth: 2,
-                        label: {
-                            borderColor: '#4ade80',
-                            borderWidth: 1,
-                            borderRadius: 0,
-                            style: {
-                                color: '#000',
-                                background: '#4ade80',
-                                fontSize: '10px',
-                                fontWeight: 'bold',
-                                padding: {
-                                    left: 5,
-                                    right: 5,
-                                    top: 2,
-                                    bottom: 2
-                                }
-                            },
-                            text: `${spotPrice < 0.00001 ? spotPrice.toExponential(2) : spotPrice < 0.01 ? spotPrice.toFixed(6) : spotPrice.toFixed(4)}`,
-                            textAnchor: 'middle',
-                            position: 'right',
-                            offsetX: 80, // Position 30px more to the right
-                            offsetY: 0
-                        }
-                    }]
+                    yaxis: annotations
                 },
                 yaxis: {
                     ...prevOptions.yaxis,
                     labels: {
                         ...prevOptions.yaxis.labels,
                         formatter: function(value, index) {
-                            // Hide label if it's too close to spot price
-                            if (Math.abs(value - spotPrice) / spotPrice < 0.02) {
+                            // Hide label if it's too close to spot price or floor price
+                            if ((spotPrice > 0 && Math.abs(value - spotPrice) / spotPrice < 0.02) ||
+                                (floorPrice > 0 && Math.abs(value - floorPrice) / floorPrice < 0.02)) {
                                 return '';
                             }
                             if (!value || isNaN(value)) return '0';
@@ -1275,7 +1336,7 @@ const Exchange: React.FC = () => {
                 }
             }));
         }
-    }, [spotPrice]);
+    }, [spotPrice, floorPrice]);
 
     const filteredTokens = tokens.filter(token => 
         token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -2755,7 +2816,7 @@ const Exchange: React.FC = () => {
                                                     transition="all 0.2s"
                                                 >
                                                     <Text color="white" fontSize="xs" whiteSpace="nowrap">
-                                                        ${formatNumber(token.marketCap)}
+                                                        ${formatNumber(Number(formatEther(`${totalSupply}`)) * spotPrice * monPrice)} 
                                                     </Text>
                                                 </Table.Cell>
                                             )}
@@ -2893,7 +2954,7 @@ const Exchange: React.FC = () => {
                                     <Text color="#888" fontSize="sm" mb={2}>Market Cap</Text>
                                     <Box>
                                         <Text color="white" fontSize="xl" fontWeight="bold">
-                                            ${formatNumber(selectedToken.marketCap)}
+                                            ${formatNumber(Number(formatEther(`${totalSupply}`)) * spotPrice * monPrice)}
                                         </Text>
                                     </Box>
                                 </Box>
