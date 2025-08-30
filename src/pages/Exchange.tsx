@@ -185,7 +185,8 @@ const Exchange: React.FC = () => {
     // Check WETH allowance for buying with WETH
     const { 
         allowance: wethAllowance, 
-        hasEnoughAllowance: hasEnoughWethAllowance 
+        hasEnoughAllowance: hasEnoughWethAllowance,
+        isMaxApproved: isMaxApprovedWeth
     } = useAllowance(
         selectedToken?.token1 || config.protocolAddresses.WMON,
         exchangeHelperAddress
@@ -2411,7 +2412,11 @@ const Exchange: React.FC = () => {
             
             // Check if we already have enough WETH allowance
             const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
-            if (hasEnoughWethAllowance(amountToApprove.toBigInt())) {
+            
+            // If approveMax is false but we have max approval, we need to re-approve for the exact amount
+            const needsExactApproval = !approveMax && isMaxApprovedWeth();
+            
+            if (hasEnoughWethAllowance(amountToApprove.toBigInt()) && !needsExactApproval) {
                 // Skip approval and directly buy
                 buyTokensWETH({
                     args: args
@@ -2508,7 +2513,11 @@ const Exchange: React.FC = () => {
         
         // Check if we already have enough allowance
         const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
-        if (hasEnoughAllowance(amountToApprove.toBigInt())) {
+        
+        // If approveMax is false but we have max approval, we need to re-approve for the exact amount
+        const needsExactApproval = !approveMax && isMaxApproved();
+        
+        if (hasEnoughAllowance(amountToApprove.toBigInt()) && !needsExactApproval) {
             // Skip approval and directly sell
             sellTokens({
                 args: args

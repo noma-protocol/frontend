@@ -7,3 +7,4 @@ trollbox-server/data/profiles.json
 /*.jpg
 /*.jpeg
 CLAUDE.md
+dist/
