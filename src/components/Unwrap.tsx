@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import {
     VStack,
     Box,
@@ -14,16 +14,16 @@ import {
     Grid
 } from '@chakra-ui/react';
 import {
-    DrawerRoot,
-    DrawerTrigger,
-    DrawerBackdrop,
-    DrawerContent,
-    DrawerCloseTrigger,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerBody,
-    DrawerActionTrigger,
-} from '../components/ui/drawer';
+    DialogRoot,
+    DialogTrigger,
+    DialogBackdrop,
+    DialogContent,
+    DialogCloseTrigger,
+    DialogHeader,
+    DialogTitle,
+    DialogBody,
+    DialogFooter,
+} from '../components/ui/dialog';
 import { ethers } from 'ethers';
 import { formatEther, parseEther } from "viem";
 import { commify } from '../utils';
@@ -41,6 +41,8 @@ type UnwrapProps = {
     fontSize?: string;
     token1Balance?: any;
     size?: string;
+    isOpen?: boolean;
+    setIsOpen?: (isOpen: boolean) => void;
 };
 
 const Unwrap = ({
@@ -54,8 +56,14 @@ const Unwrap = ({
     fontSize,
     buttonSize,
     token1Balance,
-    size="sm"
+    size="sm",
+    isOpen: controlledIsOpen,
+    setIsOpen: controlledSetIsOpen
 }) => {
+    // Use controlled state if provided, otherwise use local state
+    const [localIsOpen, setLocalIsOpen] = useState(false);
+    const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : localIsOpen;
+    const setIsOpen = controlledSetIsOpen || setLocalIsOpen;
 
     const handleUseMax = () => {
         if (token1Balance) {
@@ -66,8 +74,13 @@ const Unwrap = ({
     return (
         <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
             <Box>
-            <DrawerRoot>
-                <DrawerTrigger asChild>
+            <DialogRoot 
+                open={isOpen} 
+                onOpenChange={(e) => setIsOpen(e.open)}
+                placement="center"
+                size="md"
+            >
+                <DialogTrigger asChild>
                     <Button 
                         disabled={isUnwrapping}
                         border="1px solid"
@@ -77,7 +90,10 @@ const Unwrap = ({
                         ml={size == "lg" ? 0 : 2}
                         mt={size == "lg" ? 0 : 1}
                         w={buttonSize}
-                        onClick={() => setActionType('unwrap')}
+                        onClick={() => {
+                            setActionType('unwrap');
+                            setIsOpen(true);
+                        }}
                         color="white"
                         borderRadius={5}
                         _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
@@ -86,31 +102,33 @@ const Unwrap = ({
                             {isUnwrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Unwrap</Text>}
                         </Box>
                     </Button>
-                </DrawerTrigger>
-                <DrawerBackdrop backdropFilter="blur(4px)" bg="rgba(0, 0, 0, 0.6)" />
-                <DrawerContent 
+                </DialogTrigger>
+                <DialogBackdrop backdropFilter="blur(4px)" bg="rgba(0, 0, 0, 0.6)" />
+                <DialogContent 
                     bg="rgba(26, 26, 26, 0.95)"
                     backdropFilter="blur(20px)"
-                    borderLeft="1px solid rgba(74, 222, 128, 0.2)"
-                    boxShadow="-10px 0 30px rgba(0, 0, 0, 0.5)"
+                    border="1px solid rgba(74, 222, 128, 0.2)"
+                    boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
+                    maxW="500px"
+                    mx="auto"
                 >
                     <Box>
-                        <DrawerHeader 
+                        <DialogHeader 
                             borderBottom="1px solid rgba(255, 255, 255, 0.1)"
                             p={6}
                         >
                             <HStack justify="space-between" align="start">
                                 <Box>
                                     <HStack gap={1}>
-                                        <DrawerTitle>
+                                        <DialogTitle>
                                             <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
                                                 Unwrap WMON
                                             </Text>
-                                        </DrawerTitle>
+                                        </DialogTitle>
                                     </HStack>
                                 </Box>
                                 <Box>
-                                    <DrawerCloseTrigger asChild>
+                                    <DialogCloseTrigger asChild>
                                         <Button 
                                             variant="ghost" 
                                             size="sm" 
@@ -123,11 +141,11 @@ const Unwrap = ({
                                         >
                                             ×
                                         </Button>
-                                    </DrawerCloseTrigger>
+                                    </DialogCloseTrigger>
                                 </Box>
                             </HStack>
-                        </DrawerHeader>
-                        <DrawerBody p={6}>
+                        </DialogHeader>
+                        <DialogBody p={6}>
                             <VStack spacing={6} align="stretch">
                                 {/* Amount Input Section */}
                                 <Box>
@@ -226,28 +244,9 @@ const Unwrap = ({
                                 </Box>
 
                                 {/* Action Buttons */}
-                                <HStack spacing={3} mt="auto">
-                                    <DrawerActionTrigger asChild>
-                                        <Button 
-                                            variant="outline"
-                                            flex="1"
-                                            h="48px"
-                                            onClick={() => setWrapAmount('0')}
-                                            bg="transparent"
-                                            borderColor="rgba(255, 255, 255, 0.2)"
-                                            color="white"
-                                            fontSize="sm"
-                                            fontWeight="500"
-                                            _hover={{ 
-                                                bg: "rgba(255, 255, 255, 0.05)",
-                                                borderColor: "rgba(255, 255, 255, 0.3)"
-                                            }}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </DrawerActionTrigger>
+                                <Box mt="auto">
                                     <Button 
-                                        flex="1"
+                                        w="100%"
                                         h="48px"
                                         onClick={handleAction}
                                         bg="#4ade80"
@@ -264,15 +263,15 @@ const Unwrap = ({
                                     >
                                         {isUnwrapping ? <Spinner size="sm" /> : "Unwrap WMON"}
                                     </Button>
-                                </HStack>
+                                </Box>
                             </VStack>
-                        </DrawerBody>
+                        </DialogBody>
                     </Box>
-                </DrawerContent>
-            </DrawerRoot>
+                </DialogContent>
+            </DialogRoot>
             </Box>
         </Box>
     );
 };
 
-export default Unwrap;
+export default memo(Unwrap);

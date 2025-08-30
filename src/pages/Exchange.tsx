@@ -43,6 +43,7 @@ import { Tooltip } from "../components/ui/tooltip"
   
 import { useAccount, useBalance, useContractRead } from "wagmi";
 import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
+import { useAllowance } from "../hooks/useAllowance";
 import { isMobile } from "react-device-detect";
 import { Slider } from "../components/ui/slider"
 import {
@@ -61,6 +62,8 @@ import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
 import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress } from "../utils";
 import WalletSidebar from "../components/WalletSidebar";
+import StandaloneWrapModal from "../components/StandaloneWrapModal";
+import StandaloneUnwrapModal from "../components/StandaloneUnwrapModal";
 // import WalletNotConnected from '../components/WalletNotConnected';
 import { useToken } from "../contexts/TokenContext";
 
@@ -172,6 +175,21 @@ const Exchange: React.FC = () => {
     const [tradeAmount, setTradeAmount] = useState("");
     const [isBuying, setIsBuying] = useState(true);
     const [tradeHistoryTab, setTradeHistoryTab] = useState("all");
+    
+    // Check token allowance for selling
+    const { allowance, hasEnoughAllowance, isMaxApproved } = useAllowance(
+        selectedToken?.token0,
+        exchangeHelperAddress
+    );
+    
+    // Check WETH allowance for buying with WETH
+    const { 
+        allowance: wethAllowance, 
+        hasEnoughAllowance: hasEnoughWethAllowance 
+    } = useAllowance(
+        selectedToken?.token1 || config.protocolAddresses.WMON,
+        exchangeHelperAddress
+    );
     
     // Input validation function
     const validateAndSetTradeAmount = (value) => {
@@ -296,12 +314,22 @@ const Exchange: React.FC = () => {
     const [wethBalance, setWethBalance] = useState("0");
     const [useWeth, setUseWeth] = useState(false);
     const [useMax, setUseMax] = useState(false);
-    const [approveMax, setApproveMax] = useState(false);
+    const [approveMax, setApproveMax] = useState(() => {
+        // Load approveMax preference from localStorage
+        const stored = localStorage.getItem('noma_approve_max');
+        return stored === 'true';
+    });
     const [spotPrice, setSpotPrice] = useState(0);
     const [slippage, setSlippage] = useState("1");
     const [quote, setQuote] = useState("");
     const [priceImpact, setPriceImpact] = useState("0");
     const [showQuoteLoading, setShowQuoteLoading] = useState(false);
+    
+    // Handler to update approveMax and persist to localStorage
+    const handleApproveMaxChange = (value: boolean) => {
+        setApproveMax(value);
+        localStorage.setItem('noma_approve_max', value.toString());
+    };
     
     // Token data from blockchain
     const [tokens, setTokens] = useState([]);
@@ -324,7 +352,7 @@ const Exchange: React.FC = () => {
     useEffect(() => {
         const loadTradeHistory = () => {
             try {
-                const stored = localStorage.getItem('oikos_trade_history');
+                const stored = localStorage.getItem('noma_trade_history');
                 if (stored) {
                     const parsed = JSON.parse(stored);
                     // Convert time strings back to Date objects
@@ -351,7 +379,7 @@ const Exchange: React.FC = () => {
     useEffect(() => {
         if (tradeHistory.length > 0) {
             try {
-                localStorage.setItem('oikos_trade_history', JSON.stringify(tradeHistory));
+                localStorage.setItem('noma_trade_history', JSON.stringify(tradeHistory));
             } catch (error) {
                 console.error("Error saving trade history:", error);
             }
@@ -362,7 +390,7 @@ const Exchange: React.FC = () => {
     const clearTradeHistory = () => {
         setTradeHistory([]);
         processedTxHashes.clear();
-        localStorage.removeItem('oikos_trade_history');
+        localStorage.removeItem('noma_trade_history');
     };
     
     // Pagination helper functions
@@ -1269,6 +1297,8 @@ const Exchange: React.FC = () => {
     const [wrapAmount, setWrapAmount] = useState(0);
     const [isWrapping, setIsWrapping] = useState(false);
     const [isUnwrapping, setIsUnwrapping] = useState(false);
+    const [isWrapDrawerOpen, setIsWrapDrawerOpen] = useState(false);
+    const [isUnwrapDrawerOpen, setIsUnwrapDrawerOpen] = useState(false);
     
     // Fetch all deployers from factory contract
     const {
@@ -1823,10 +1853,18 @@ const Exchange: React.FC = () => {
         };
         
         fetchBalances();
-        const interval = setInterval(fetchBalances, 5000); // Refresh every 5 seconds
+        // Only set up interval if modals are not open
+        let interval: NodeJS.Timeout | null = null;
+        if (!isWrapDrawerOpen && !isUnwrapDrawerOpen) {
+            interval = setInterval(() => {
+                fetchBalances();
+            }, 10000); // Refresh every 10 seconds
+        }
         
-        return () => clearInterval(interval);
-    }, [address, selectedToken]);
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [address, selectedToken, isWrapDrawerOpen, isUnwrapDrawerOpen]);
     
     // Build swap path for quotes
     const [swapPath, setSwapPath] = useState("");
@@ -1924,12 +1962,10 @@ const Exchange: React.FC = () => {
         functionName: "deposit",
         value: parseEther(`${wrapAmount}`),
         onSuccess(data) {
-            setIsWrapping(false);
             toaster.create({
                 title: "Success",
                 description: `Wrapped ${wrapAmount} MON to WMON`,
             });
-            setWrapAmount(0);
             // Refresh balances after 2 seconds
             setTimeout(async () => {
                 const ethBal = await localProvider.getBalance(address);
@@ -1937,6 +1973,10 @@ const Exchange: React.FC = () => {
                 const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
                 const wethBal = await wethContract.balanceOf(address);
                 setWethBalance(formatEther(wethBal));
+                
+                // Reset states after balance update to keep drawer open longer
+                setIsWrapping(false);
+                setWrapAmount(0);
             }, 2000);
         },
         onError(error) {
@@ -1959,12 +1999,10 @@ const Exchange: React.FC = () => {
         functionName: "withdraw",
         args: [parseEther(`${wrapAmount}`)],
         onSuccess(data) {
-            setIsUnwrapping(false);
             toaster.create({
                 title: "Success",
                 description: `Unwrapped ${wrapAmount} WMON to MON`,
             });
-            setWrapAmount(0);
             // Refresh balances after 2 seconds
             setTimeout(async () => {
                 const ethBal = await localProvider.getBalance(address);
@@ -1972,6 +2010,10 @@ const Exchange: React.FC = () => {
                 const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
                 const wethBal = await wethContract.balanceOf(address);
                 setWethBalance(formatEther(wethBal));
+                
+                // Reset states after balance update to keep drawer open longer
+                setIsUnwrapping(false);
+                setWrapAmount(0);
             }, 2000);
         },
         onError(error) {
@@ -2366,12 +2408,23 @@ const Exchange: React.FC = () => {
             setBalanceBeforePurchase(safeParseEther(tokenBalance));
             setBalanceBeforeSale(safeParseEther(wethBalance));
             setBuyArgs(args);
-            approveWeth({
-                args: [
-                    exchangeHelperAddress,
-                    approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount)
-                ]
-            });
+            
+            // Check if we already have enough WETH allowance
+            const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
+            if (hasEnoughWethAllowance(amountToApprove.toBigInt())) {
+                // Skip approval and directly buy
+                buyTokensWETH({
+                    args: args
+                });
+            } else {
+                // Need approval first
+                approveWeth({
+                    args: [
+                        exchangeHelperAddress,
+                        amountToApprove
+                    ]
+                });
+            }
         } else {
             setBalanceBeforePurchase(safeParseEther(tokenBalance));
             setBalanceBeforeSale(safeParseEther(ethBalance));
@@ -2452,12 +2505,23 @@ const Exchange: React.FC = () => {
         setIsLoading(true);
         setIsLoadingExecuteTrade(true);
         setSellArgs(args);
-        approve({
-            args: [
-                exchangeHelperAddress,
-                approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount)
-            ]
-        });
+        
+        // Check if we already have enough allowance
+        const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
+        if (hasEnoughAllowance(amountToApprove.toBigInt())) {
+            // Skip approval and directly sell
+            sellTokens({
+                args: args
+            });
+        } else {
+            // Need approval first
+            approve({
+                args: [
+                    exchangeHelperAddress,
+                    amountToApprove
+                ]
+            });
+        }
     };
 
     // Update trade amount when useMax changes or when switching between buy/sell
@@ -3287,6 +3351,10 @@ const Exchange: React.FC = () => {
                             setIsUnwrapping={setIsUnwrapping}
                             wrapAmount={wrapAmount}
                             setWrapAmount={setWrapAmount}
+                            isWrapDrawerOpen={isWrapDrawerOpen}
+                            setIsWrapDrawerOpen={setIsWrapDrawerOpen}
+                            isUnwrapDrawerOpen={isUnwrapDrawerOpen}
+                            setIsUnwrapDrawerOpen={setIsUnwrapDrawerOpen}
                         />
                     
                     {/* Trading Panel */}
@@ -3550,7 +3618,7 @@ const Exchange: React.FC = () => {
                                     <Checkbox 
                                         size="sm" 
                                         checked={approveMax}
-                                        onCheckedChange={(e) => setApproveMax(e.checked)}
+                                        onCheckedChange={(e) => handleApproveMaxChange(e.checked)}
                                         colorPalette="green"
                                         display="inline-block"
                                         css={{
@@ -3579,7 +3647,7 @@ const Exchange: React.FC = () => {
                                         fontSize="xs" 
                                         color="#888" 
                                         cursor="pointer" 
-                                        onClick={() => setApproveMax(!approveMax)}
+                                        onClick={() => handleApproveMaxChange(!approveMax)}
                                         userSelect="none"
                                         display="inline-block"
                                         lineHeight="16px"
@@ -3892,7 +3960,7 @@ const Exchange: React.FC = () => {
                                             <Checkbox 
                                                 size="sm" 
                                                 checked={approveMax}
-                                                onCheckedChange={(e) => setApproveMax(e.checked)}
+                                                onCheckedChange={(e) => handleApproveMaxChange(e.checked)}
                                                 colorPalette="green"
                                                 display="inline-block"
                                                 css={{
@@ -3921,7 +3989,7 @@ const Exchange: React.FC = () => {
                                                 fontSize="xs" 
                                                 color="#888" 
                                                 cursor="pointer" 
-                                                onClick={() => setApproveMax(!approveMax)}
+                                                onClick={() => handleApproveMaxChange(!approveMax)}
                                                 userSelect="none"
                                                 display="inline-block"
                                                 lineHeight="16px"
@@ -4489,6 +4557,30 @@ const Exchange: React.FC = () => {
                     </DialogFooter>
                 </DialogContent>
             </DialogRoot>
+
+            {/* Standalone Modals */}
+            <StandaloneWrapModal
+                isOpen={isWrapDrawerOpen}
+                onClose={() => setIsWrapDrawerOpen(false)}
+                onWrap={(amount) => {
+                    setWrapAmount(parseFloat(amount));
+                    setIsWrapping(true);
+                    deposit();
+                }}
+                isWrapping={isWrapping}
+                bnbBalance={ethBalance}
+            />
+            <StandaloneUnwrapModal
+                isOpen={isUnwrapDrawerOpen}
+                onClose={() => setIsUnwrapDrawerOpen(false)}
+                onUnwrap={(amount) => {
+                    setWrapAmount(parseFloat(amount));
+                    setIsUnwrapping(true);
+                    withdraw();
+                }}
+                isUnwrapping={isUnwrapping}
+                wethBalance={wethBalance}
+            />
         </Container>
     );
 };

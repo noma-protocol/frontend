@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import {
     VStack,
     Box,
@@ -14,16 +14,16 @@ import {
     Grid
 } from '@chakra-ui/react';
 import {
-    DrawerRoot,
-    DrawerTrigger,
-    DrawerBackdrop,
-    DrawerContent,
-    DrawerCloseTrigger,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerBody,
-    DrawerActionTrigger,
-} from '../components/ui/drawer';
+    DialogRoot,
+    DialogTrigger,
+    DialogBackdrop,
+    DialogContent,
+    DialogCloseTrigger,
+    DialogHeader,
+    DialogTitle,
+    DialogBody,
+    DialogFooter,
+} from '../components/ui/dialog';
 import { ethers } from 'ethers';
 import { formatEther, parseEther } from "viem";
 import { commify } from '../utils';
@@ -43,6 +43,8 @@ type WrapProps = {
     fontSize?: string;
     bnbBalance?: any;
     size?: string;
+    isOpen?: boolean;
+    setIsOpen?: (isOpen: boolean) => void;
 };
 
 const Wrap = ({
@@ -57,8 +59,15 @@ const Wrap = ({
     fontSize,
     buttonSize,
     bnbBalance,
-    size = "sm"
+    size = "sm",
+    isOpen: controlledIsOpen,
+    setIsOpen: controlledSetIsOpen
 }) => {
+    // Use controlled state if provided, otherwise use local state
+    const [localIsOpen, setLocalIsOpen] = useState(false);
+    const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : localIsOpen;
+    const setIsOpen = controlledSetIsOpen || setLocalIsOpen;
+
 
     const handleUseMax = () => {
         if (bnbBalance) {
@@ -69,8 +78,13 @@ const Wrap = ({
     return (
         <Box p={2} textAlign="center" height="42px" display="flex" alignItems="center" justifyContent="center">
             <Box>
-            <DrawerRoot>
-                <DrawerTrigger asChild>
+            <DialogRoot 
+                open={isOpen} 
+                onOpenChange={(e) => setIsOpen(e.open)}
+                placement="center"
+                size="md"
+            >
+                <DialogTrigger asChild>
                     <Button 
                         disabled={isWrapping}
                         border="1px solid"
@@ -80,55 +94,42 @@ const Wrap = ({
                         ml={size == "lg" ? 0 : 2}
                         mt={size == "lg" ? 0 : 2}
                         w={buttonSize}
-                        onClick={() => setActionType('wrap')}
+                        onClick={() => {
+                            setActionType('wrap');
+                            setIsOpen(true);
+                        }}
                         color="white"
                         borderRadius={5}
                         _hover={{ bg: "#4ade80aa", borderColor: "#4ade80", color: "white" }}
                     >
                         <Box as="span">{isWrapping ? <Spinner size="sm" /> : <Text fontSize={fontSize}>Wrap</Text>}</Box>
                     </Button>
-                </DrawerTrigger>
-                <DrawerBackdrop backdropFilter="blur(4px)" bg="rgba(0, 0, 0, 0.6)" />
-                <DrawerContent 
+                </DialogTrigger>
+                <DialogBackdrop backdropFilter="blur(4px)" bg="rgba(0, 0, 0, 0.6)" />
+                <DialogContent 
                     bg="rgba(26, 26, 26, 0.95)"
                     backdropFilter="blur(20px)"
-                    borderLeft="1px solid rgba(74, 222, 128, 0.2)"
-                    boxShadow="-10px 0 30px rgba(0, 0, 0, 0.5)"
+                    border="1px solid rgba(74, 222, 128, 0.2)"
+                    boxShadow="0 10px 30px rgba(0, 0, 0, 0.5)"
+                    maxW="500px"
+                    mx="auto"
                 >
                     <Box>
-                        <DrawerHeader 
+                        <DialogHeader 
                             borderBottom="1px solid rgba(255, 255, 255, 0.1)"
                             p={6}
                         >
-                            <HStack justify="space-between" align="start">
-                                <Box>
-                                    <HStack gap={1}>
-                                        <DrawerTitle>
-                                            <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
-                                                Wrap MON
-                                            </Text>
-                                        </DrawerTitle>
-                                    </HStack>
-                                </Box>
-                                <Box>
-                                    <DrawerCloseTrigger asChild>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm" 
-                                            color="#888"
-                                            _hover={{ color: "white", bg: "rgba(255, 255, 255, 0.1)" }}
-                                            fontSize="xl"
-                                            w="32px"
-                                            h="32px"
-                                            borderRadius="full"
-                                        >
-                                            ×
-                                        </Button>
-                                    </DrawerCloseTrigger>
-                                </Box>
-                            </HStack>
-                        </DrawerHeader>
-                        <DrawerBody p={6}>
+                            <Box>
+                                <HStack gap={1}>
+                                    <DialogTitle>
+                                        <Text as="h3" color="white" fontSize="xl" fontWeight="bold">
+                                            Wrap MON
+                                        </Text>
+                                    </DialogTitle>
+                                </HStack>
+                            </Box>
+                        </DialogHeader>
+                        <DialogBody p={6}>
                             <VStack spacing={6} align="stretch">
                                 {/* Amount Input Section */}
                                 <Box>
@@ -227,28 +228,9 @@ const Wrap = ({
                                 </Box>
 
                                 {/* Action Buttons */}
-                                <HStack spacing={3} mt="auto">
-                                    <DrawerActionTrigger asChild>
-                                        <Button 
-                                            variant="outline"
-                                            flex="1"
-                                            h="48px"
-                                            onClick={() => setWrapAmount('0')}
-                                            bg="transparent"
-                                            borderColor="rgba(255, 255, 255, 0.2)"
-                                            color="white"
-                                            fontSize="sm"
-                                            fontWeight="500"
-                                            _hover={{ 
-                                                bg: "rgba(255, 255, 255, 0.05)",
-                                                borderColor: "rgba(255, 255, 255, 0.3)"
-                                            }}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </DrawerActionTrigger>
+                                <Box mt="auto">
                                     <Button 
-                                        flex="1"
+                                        w="100%"
                                         h="48px"
                                         onClick={handleAction}
                                         bg="#4ade80"
@@ -265,15 +247,15 @@ const Wrap = ({
                                     >
                                         {isWrapping ? <Spinner size="sm" /> : "Wrap MON"}
                                     </Button>
-                                </HStack>
+                                </Box>
                             </VStack>
-                        </DrawerBody>
+                        </DialogBody>
                     </Box>
-                </DrawerContent>
-            </DrawerRoot>
+                </DialogContent>
+            </DialogRoot>
             </Box>
         </Box>
     );
 };
 
-export default Wrap;
+export default memo(Wrap);

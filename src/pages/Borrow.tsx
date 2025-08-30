@@ -167,7 +167,7 @@ const Borrow = () => {
   useEffect(() => {
     const loadLoanHistory = () => {
       try {
-        const stored = localStorage.getItem('oikos_loan_history');
+        const stored = localStorage.getItem('noma_loan_history');
         console.log("Loading loan history from localStorage:", stored);
         if (stored) {
           const parsed = JSON.parse(stored);
@@ -196,7 +196,7 @@ const Borrow = () => {
   useEffect(() => {
     if (loanHistory.length > 0) {
       try {
-        localStorage.setItem('oikos_loan_history', JSON.stringify(loanHistory));
+        localStorage.setItem('noma_loan_history', JSON.stringify(loanHistory));
       } catch (error) {
         console.error("Error saving loan history:", error);
       }
@@ -564,7 +564,7 @@ const Borrow = () => {
                 const updated = [newLoan, ...prev.slice(0, 199)];
                 // Save immediately
                 try {
-                    localStorage.setItem('oikos_loan_history', JSON.stringify(updated));
+                    localStorage.setItem('noma_loan_history', JSON.stringify(updated));
                 } catch (error) {
                     console.error("Error saving loan history:", error);
                 }
@@ -618,7 +618,7 @@ const Borrow = () => {
                 const updated = [newLoan, ...prev.slice(0, 199)];
                 // Save immediately
                 try {
-                    localStorage.setItem('oikos_loan_history', JSON.stringify(updated));
+                    localStorage.setItem('noma_loan_history', JSON.stringify(updated));
                 } catch (error) {
                     console.error("Error saving loan history:", error);
                 }
@@ -677,7 +677,7 @@ const Borrow = () => {
                 console.log("Updated loan history:", updated);
                 // Save to localStorage immediately
                 try {
-                    localStorage.setItem('oikos_loan_history', JSON.stringify(updated));
+                    localStorage.setItem('noma_loan_history', JSON.stringify(updated));
                 } catch (error) {
                     console.error("Error saving loan history:", error);
                 }
@@ -953,7 +953,7 @@ const Borrow = () => {
                             >
                                 <HStack mb={4} align="center">
                                     <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color="white">
-                                        Vault Information
+                                        Market
                                     </Text>
                                 </HStack>
                                 
@@ -1259,7 +1259,7 @@ const Borrow = () => {
                                         top="0"
                                         right="0"
                                         w="200px"
-                                        h="200px"
+                                        h="150px"
                                         bg="rgba(74, 222, 128, 0.05)"
                                         borderRadius="full"
                                         filter="blur(80px)"
@@ -1283,10 +1283,12 @@ const Borrow = () => {
                                     <SimpleGrid columns={{ base: 1, md: 2 }} gap={{ base: 4, md: 6 }} mb={6}>
                                         <Box 
                                             bg="rgba(0, 0, 0, 0.3)" 
-                                            p={4} 
+                                            p={8} 
                                             borderRadius="lg"
                                             border="1px solid rgba(255, 255, 255, 0.05)"
                                         >
+                                            <SimpleGrid columns={2}>
+                                                <Box>
                                             <Text 
                                                 color="rgba(255, 255, 255, 0.6)" 
                                                 fontSize="xs" 
@@ -1298,6 +1300,7 @@ const Borrow = () => {
                                                 Collateral Amount
                                             </Text>
                                             <HStack align="baseline" spacing={3}>
+                                                <Box>
                                                 <Text 
                                                     color="white" 
                                                     fontSize={{ base: "lg", md: "xl" }} 
@@ -1306,112 +1309,127 @@ const Borrow = () => {
                                                     lineHeight="1"
                                                 >
                                                     {displayedCollateral}
-                                                </Text>
+                                                </Text>                                                    
+                                                </Box>
+                                                <Box>
                                                 <Text color="rgba(255, 255, 255, 0.5)" fontSize="sm" fontWeight="500">
-                                                    {token0Info.tokenSymbol}
-                                                </Text>
+                                                   {isTokenInfoLoading ? (
+                                                    <Box><Spinner size="sm" color="white" /></Box>
+                                                ) : (<>{token0Info.tokenSymbol}</>) }
+                                                </Text>                                                    
+                                                </Box>
                                             </HStack>
+                                                </Box>
+                                                <Box>
+                                                    <Text 
+                                                        color="rgba(255, 255, 255, 0.6)" 
+                                                        fontSize="xs" 
+                                                        fontWeight="600"
+                                                        letterSpacing="0.1em"
+                                                        textTransform="uppercase"
+                                                        mb={3}
+                                                    >
+                                                        Borrowed Amount
+                                                    </Text>
+                                                    <HStack align="baseline" spacing={3}>
+                                                        <Box>
+                                                            <Text 
+                                                                color="white" 
+                                                                fontSize={{ base: "lg", md: "xl" }} 
+                                                                fontWeight="700"
+                                                                letterSpacing="-0.02em"
+                                                                lineHeight="1"
+                                                            >
+                                                                {commify(formatEther(`${loanData.borrowAmount}`), 4)}
+                                                            </Text>                                                            
+                                                        </Box>
+                                                        <Box>
+                                                            <Text color="rgba(255, 255, 255, 0.5)" fontSize="sm" fontWeight="500">
+                                                            {isTokenInfoLoading ? (
+                                                                <Box><Spinner size="sm" color="white" /></Box>
+                                                            ) : (<>{token1Info.tokenSymbol}</>) }
+                                                            </Text>                                                              
+                                                        </Box>
+                                                    </HStack>
+                                                </Box>
+                                            </SimpleGrid>
                                         </Box>
                                         
                                         <Box 
                                             bg="rgba(0, 0, 0, 0.3)" 
-                                            p={4} 
+                                            p={8} 
                                             borderRadius="lg"
                                             border="1px solid rgba(255, 255, 255, 0.05)"
                                         >
-                                            <Text 
-                                                color="rgba(255, 255, 255, 0.6)" 
-                                                fontSize="xs" 
-                                                fontWeight="600"
-                                                letterSpacing="0.1em"
-                                                textTransform="uppercase"
-                                                mb={3}
-                                            >
-                                                Borrowed Amount
-                                            </Text>
-                                            <HStack align="baseline" spacing={3}>
-                                                <Text 
-                                                    color="white" 
-                                                    fontSize={{ base: "lg", md: "xl" }} 
-                                                    fontWeight="700"
-                                                    letterSpacing="-0.02em"
-                                                    lineHeight="1"
-                                                >
-                                                    {commify(formatEther(`${loanData.borrowAmount}`), 4)}
-                                                </Text>
-                                                <Text color="rgba(255, 255, 255, 0.5)" fontSize="sm" fontWeight="500">
-                                                    {token1Info.tokenSymbol}
-                                                </Text>
-                                            </HStack>
+                                            <SimpleGrid columns={2}>
+                                                <Box>
+                                                    <Text 
+                                                        color="rgba(255, 255, 255, 0.6)" 
+                                                        fontSize="xs" 
+                                                        fontWeight="600"
+                                                        letterSpacing="0.1em"
+                                                        textTransform="uppercase"
+                                                        mb={3}
+                                                    >
+                                                        Current LTV
+                                                    </Text>
+                                                    <HStack align="center" spacing={2}>
+                                                        <Box>
+                                                        <Text 
+                                                            color={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"} 
+                                                            fontSize={{ base: "lg", md: "xl" }} 
+                                                            fontWeight="700"
+                                                            letterSpacing="-0.02em"
+                                                            lineHeight="1"
+                                                        >
+                                                            {commifyDecimals(ltv, 2)}
+                                                        </Text>                                                            
+                                                        </Box>
+                                                        {/* <Box 
+                                                            w="8px" 
+                                                            h="8px" 
+                                                            borderRadius="full"
+                                                            bg={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"}
+                                                            animation={ltv > 80 ? "pulse 2s infinite" : "none"}
+                                                        /> */}
+                                                        <Box>
+                                                          
+                                                        </Box>
+                                                    </HStack>
+                                                </Box>
+                                                <Box>
+                                                    <Text 
+                                                        color="rgba(255, 255, 255, 0.6)" 
+                                                        fontSize="xs" 
+                                                        fontWeight="600"
+                                                        letterSpacing="0.1em"
+                                                        textTransform="uppercase"
+                                                        mb={3}
+                                                    >
+                                                        Expires In
+                                                    </Text>
+                                                    <HStack align="baseline" spacing={2}>
+                                                        <Box>
+                                                        <Text 
+                                                            color="white" 
+                                                            fontSize={{ base: "lg", md: "xl" }} 
+                                                            fontWeight="700"
+                                                            letterSpacing="-0.02em"
+                                                            lineHeight="1"
+                                                        >
+                                                            {getDaysLeft(`${loanData?.expires}`)}
+                                                        </Text>                                                            
+                                                        </Box>
+                                                        <Box>
+                                                        <Text color="rgba(255, 255, 255, 0.5)" fontSize="sm" fontWeight="500">
+                                                            days
+                                                        </Text>                                                            
+                                                        </Box>
+                                                    </HStack>
+                                                </Box>
+                                            </SimpleGrid>
                                         </Box>
-                                        
-                                        <Box 
-                                            bg="rgba(0, 0, 0, 0.3)" 
-                                            p={4} 
-                                            borderRadius="lg"
-                                            border="1px solid rgba(255, 255, 255, 0.05)"
-                                        >
-                                            <Text 
-                                                color="rgba(255, 255, 255, 0.6)" 
-                                                fontSize="xs" 
-                                                fontWeight="600"
-                                                letterSpacing="0.1em"
-                                                textTransform="uppercase"
-                                                mb={3}
-                                            >
-                                                Current LTV
-                                            </Text>
-                                            <HStack align="center" spacing={2}>
-                                                <Text 
-                                                    color={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"} 
-                                                    fontSize={{ base: "lg", md: "xl" }} 
-                                                    fontWeight="700"
-                                                    letterSpacing="-0.02em"
-                                                    lineHeight="1"
-                                                >
-                                                    {commifyDecimals(ltv, 2)}
-                                                </Text>
-                                                {/* <Box 
-                                                    w="8px" 
-                                                    h="8px" 
-                                                    borderRadius="full"
-                                                    bg={ltv > 80 ? "#ef4444" : ltv > 60 ? "#fbbf24" : "#4ade80"}
-                                                    animation={ltv > 80 ? "pulse 2s infinite" : "none"}
-                                                /> */}
-                                            </HStack>
-                                        </Box>
-                                        
-                                        <Box 
-                                            bg="rgba(0, 0, 0, 0.3)" 
-                                            p={4} 
-                                            borderRadius="lg"
-                                            border="1px solid rgba(255, 255, 255, 0.05)"
-                                        >
-                                            <Text 
-                                                color="rgba(255, 255, 255, 0.6)" 
-                                                fontSize="xs" 
-                                                fontWeight="600"
-                                                letterSpacing="0.1em"
-                                                textTransform="uppercase"
-                                                mb={3}
-                                            >
-                                                Expires In
-                                            </Text>
-                                            <HStack align="baseline" spacing={2}>
-                                                <Text 
-                                                    color="white" 
-                                                    fontSize={{ base: "lg", md: "xl" }} 
-                                                    fontWeight="700"
-                                                    letterSpacing="-0.02em"
-                                                    lineHeight="1"
-                                                >
-                                                    {getDaysLeft(`${loanData?.expires}`)}
-                                                </Text>
-                                                <Text color="rgba(255, 255, 255, 0.5)" fontSize="sm" fontWeight="500">
-                                                    days
-                                                </Text>
-                                            </HStack>
-                                        </Box>
+
                                     </SimpleGrid>
                                     
                                     <Box 
@@ -1796,7 +1814,7 @@ const Borrow = () => {
                             onClick={() => {
                                 setLoanHistory([]);
                                 processedTxHashes.clear();
-                                localStorage.removeItem('oikos_loan_history');
+                                localStorage.removeItem('noma_loan_history');
                                 setShowClearHistoryDialog(false);
                             }}
                         >

@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Text, VStack, HStack, Flex, Image } from "@chakra-ui/react";
+import React, { useState, useEffect, memo, useCallback } from 'react';
+import { Box, Text, VStack, HStack, Flex, Image, Button } from "@chakra-ui/react";
 import { formatEther } from 'viem';
 import { commify } from '../utils';
 import { useMonPrice } from '../contexts/MonPriceContext';
 import monadLogo from '../assets/images/monad.png';
 import wmonLogo from '../assets/images/monad.png';
 import placeholderLogoDark from '../assets/images/question_white.svg';
-import Wrap from './Wrap';
-import Unwrap from './Unwrap';
 import { ethers } from 'ethers';
 import { usePublicClient } from 'wagmi';
 
@@ -31,6 +29,10 @@ interface WalletSidebarProps {
     setIsUnwrapping?: (value: boolean) => void;
     wrapAmount?: number | string;
     setWrapAmount?: (value: number | string) => void;
+    isWrapDrawerOpen?: boolean;
+    setIsWrapDrawerOpen?: (value: boolean) => void;
+    isUnwrapDrawerOpen?: boolean;
+    setIsUnwrapDrawerOpen?: (value: boolean) => void;
 }
 
 const WalletSidebar: React.FC<WalletSidebarProps> = ({
@@ -47,7 +49,11 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
     setIsWrapping,
     setIsUnwrapping,
     wrapAmount = '',
-    setWrapAmount
+    setWrapAmount,
+    isWrapDrawerOpen = false,
+    setIsWrapDrawerOpen,
+    isUnwrapDrawerOpen = false,
+    setIsUnwrapDrawerOpen
 }) => {
     const [actionType, setActionType] = useState('');
     const [nomaSpotPrice, setNomaSpotPrice] = useState<number>(0);
@@ -118,7 +124,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
         return () => clearInterval(interval);
     }, [publicClient]);
 
-    const handleAction = () => {
+    const handleAction = useCallback(() => {
         if (wrapAmount === '' || wrapAmount === '0') return;
         
         if (actionType === 'wrap' && deposit && setIsWrapping) {
@@ -128,7 +134,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
             setIsUnwrapping(true);
             withdraw();
         }
-    };
+    }, [wrapAmount, actionType, deposit, withdraw, setIsWrapping, setIsUnwrapping]);
 
     // Intelligent USD formatting function
     const formatUsdValue = (value: number): string => {
@@ -234,33 +240,39 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 {/* Wrap/Unwrap Button */}
                 {(showWrapButton || showUnwrapButton) && (
                     <Box display="flex" alignItems="left" justifyContent="flex-start" mt={-2}>
-                        {showWrapButton && deposit && setWrapAmount && (
-                            <Wrap
-                                wrapAmount={String(wrapAmount)}
-                                isWrapping={isWrapping}
-                                setWrapAmount={setWrapAmount}
-                                handleAction={handleAction}
-                                setActionType={setActionType}
-                                actionType={actionType}
+                        {showWrapButton && setIsWrapDrawerOpen && (
+                            <Button
+                                size="sm"
                                 fontSize="xs"
-                                buttonSize="60px"
-                                bnbBalance={balance}
-                                size="lg"
-                            />
+                                w="60px"
+                                h="24px"
+                                bg="transparent"
+                                border="1px solid #4ade80"
+                                borderColor="#4ade80"
+                                color="white"
+                                borderRadius={5}
+                                _hover={{ bg: "#4ade80aa", borderColor: "#4ade80" }}
+                                onClick={() => setIsWrapDrawerOpen(true)}
+                            >
+                                Wrap
+                            </Button>
                         )}
-                        {showUnwrapButton && withdraw && setWrapAmount && (
-                            <Unwrap
-                                isUnwrapping={isUnwrapping}
-                                setWrapAmount={setWrapAmount}
-                                handleAction={handleAction}
-                                setActionType={setActionType}
-                                actionType={actionType}
+                        {showUnwrapButton && setIsUnwrapDrawerOpen && (
+                            <Button
+                                size="sm"
                                 fontSize="xs"
-                                buttonSize="60px"
-                                token1Balance={balance}
-                                wrapAmount={String(wrapAmount)}
-                                size="lg"
-                            />
+                                w="60px"
+                                h="24px"
+                                bg="transparent"
+                                border="1px solid #4ade80"
+                                borderColor="#4ade80"
+                                color="white"
+                                borderRadius={5}
+                                _hover={{ bg: "#4ade80aa", borderColor: "#4ade80" }}
+                                onClick={() => setIsUnwrapDrawerOpen(true)}
+                            >
+                                Unwrap
+                            </Button>
                         )}
                     </Box>
                 )}                

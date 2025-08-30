@@ -51,7 +51,7 @@ const LoanAddCollateralDirect = ({
             setLoanHistory(prev => {
                 const updated = [newLoan, ...prev.slice(0, 199)];
                 try {
-                    localStorage.setItem('oikos_loan_history', JSON.stringify(updated));
+                    localStorage.setItem('noma_loan_history', JSON.stringify(updated));
                 } catch (error) {
                     console.error("Error saving loan history:", error);
                 }
