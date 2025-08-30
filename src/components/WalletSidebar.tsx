@@ -218,8 +218,6 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 <Box 
                     w="24px" 
                     h="24px"
-                    bg="rgba(74, 222, 128, 0.1)"
-                    borderRadius="full"
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
