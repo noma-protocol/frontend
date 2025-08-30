@@ -1250,101 +1250,6 @@ const Exchange: React.FC = () => {
         }
     }, [imvData]);
 
-    // Update chart annotations when spot price or floor price changes
-    useEffect(() => {
-        if (spotPrice > 0 || floorPrice > 0) {
-            const annotations = [];
-            
-            // Add spot price annotation
-            if (spotPrice > 0) {
-                annotations.push({
-                    y: spotPrice,
-                    borderColor: '#4ade8040', // 40% opacity green
-                    strokeDashArray: 5,
-                    borderWidth: 2,
-                    label: {
-                        borderColor: '#4ade80',
-                        borderWidth: 1,
-                        borderRadius: 0,
-                        style: {
-                            color: '#000',
-                            background: '#4ade80',
-                            fontSize: '10px',
-                            fontWeight: 'bold',
-                            padding: {
-                                left: 5,
-                                right: 5,
-                                top: 2,
-                                bottom: 2
-                            }
-                        },
-                        text: `${spotPrice < 0.00001 ? spotPrice.toExponential(2) : spotPrice < 0.01 ? spotPrice.toFixed(6) : spotPrice.toFixed(4)}`,
-                        textAnchor: 'middle',
-                        position: 'right',
-                        offsetX: 80,
-                        offsetY: 0
-                    }
-                });
-            }
-            
-            // Add floor price (IMV) annotation
-            if (floorPrice > 0) {
-                annotations.push({
-                    y: floorPrice,
-                    borderColor: '#3b82f640', // 40% opacity blue
-                    strokeDashArray: 5,
-                    borderWidth: 2,
-                    label: {
-                        borderColor: '#3b82f6',
-                        borderWidth: 1,
-                        borderRadius: 0,
-                        style: {
-                            color: '#fff',
-                            background: '#3b82f6',
-                            fontSize: '10px',
-                            fontWeight: 'bold',
-                            padding: {
-                                left: 5,
-                                right: 5,
-                                top: 2,
-                                bottom: 2
-                            }
-                        },
-                        text: `IMV: ${floorPrice < 0.00001 ? floorPrice.toExponential(2) : floorPrice < 0.01 ? floorPrice.toFixed(6) : floorPrice.toFixed(4)}`,
-                        textAnchor: 'middle',
-                        position: 'right',
-                        offsetX: 80,
-                        offsetY: 0
-                    }
-                });
-            }
-            
-            console.log("Setting chart annotations:", annotations);
-            setChartOptions(prevOptions => ({
-                ...prevOptions,
-                annotations: {
-                    yaxis: annotations
-                },
-                yaxis: {
-                    ...prevOptions.yaxis,
-                    labels: {
-                        ...prevOptions.yaxis.labels,
-                        formatter: function(value, index) {
-                            // Hide label if it's too close to spot price or floor price
-                            if ((spotPrice > 0 && Math.abs(value - spotPrice) / spotPrice < 0.02) ||
-                                (floorPrice > 0 && Math.abs(value - floorPrice) / floorPrice < 0.02)) {
-                                return '';
-                            }
-                            if (!value || isNaN(value)) return '0';
-                            if (value < 0.00001) return value.toExponential(2);
-                            if (value < 0.01) return value.toFixed(6);
-                            return value.toFixed(2);
-                        }
-                    }
-                }
-            }));
-        }
-    }, [spotPrice, floorPrice]);
 
     const filteredTokens = tokens.filter(token => 
         token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -3082,7 +2987,69 @@ const Exchange: React.FC = () => {
                                 ) : chartSeries.length > 0 && chartSeries[0].data.length > 0 ? (
                                     <Box h="calc(100% - 60px)" minH="300px" w="100%">
                                         <ReactApexChart
-                                            options={chartOptions}
+                                            options={{
+                                                ...chartOptions,
+                                                annotations: {
+                                                    yaxis: [
+                                                        ...(spotPrice > 0 ? [{
+                                                            y: spotPrice,
+                                                            borderColor: '#4ade8040',
+                                                            strokeDashArray: 5,
+                                                            borderWidth: 2,
+                                                            label: {
+                                                                borderColor: '#4ade80',
+                                                                borderWidth: 1,
+                                                                borderRadius: 0,
+                                                                style: {
+                                                                    color: '#000',
+                                                                    background: '#4ade80',
+                                                                    fontSize: '10px',
+                                                                    fontWeight: 'bold',
+                                                                    padding: {
+                                                                        left: 5,
+                                                                        right: 5,
+                                                                        top: 2,
+                                                                        bottom: 2
+                                                                    }
+                                                                },
+                                                                text: `${spotPrice < 0.00001 ? spotPrice.toExponential(2) : spotPrice < 0.01 ? spotPrice.toFixed(6) : spotPrice.toFixed(4)}`,
+                                                                textAnchor: 'middle',
+                                                                position: 'right',
+                                                                offsetX: 80,
+                                                                offsetY: 0
+                                                            }
+                                                        }] : []),
+                                                        ...(floorPrice > 0 ? [{
+                                                            y: floorPrice,
+                                                            borderColor: '#3b82f640',
+                                                            strokeDashArray: 5,
+                                                            borderWidth: 2,
+                                                            label: {
+                                                                borderColor: '#3b82f6',
+                                                                borderWidth: 1,
+                                                                borderRadius: 0,
+                                                                style: {
+                                                                    color: '#fff',
+                                                                    background: '#3b82f6',
+                                                                    fontSize: '10px',
+                                                                    fontWeight: 'bold',
+                                                                    padding: {
+                                                                        left: 5,
+                                                                        right: 5,
+                                                                        top: 2,
+                                                                        bottom: 2
+                                                                    }
+                                                                },
+                                                                text: `IMV: ${floorPrice < 0.00001 ? floorPrice.toExponential(2) : floorPrice < 0.01 ? floorPrice.toFixed(6) : floorPrice.toFixed(4)}`,
+                                                                textAnchor: 'middle',
+                                                                position: 'right',
+                                                                offsetX: 80,
+                                                                offsetY: 0
+                                                            }
+                                                        }] : [])
+                                                    ]
+                                                }
+                                            }}
                                             series={chartSeries}
                                             type="candlestick"
                                             height="100%"
