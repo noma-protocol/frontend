@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
 import { ethers } from 'ethers';
-import ERC20Abi from '../assets/ERC20.json';
 import { zeroAddress } from 'viem';
 
 export const useAllowance = (
@@ -25,9 +24,13 @@ export const useAllowance = (
                 setIsLoading(true);
                 setError(null);
 
+                // Dynamically import ERC20 ABI to avoid initialization issues
+                const ERC20Artifact = await import('../assets/ERC20.json');
+                const ERC20Abi = ERC20Artifact.abi;
+
                 const allowanceResult = await publicClient.readContract({
                     address: tokenAddress as `0x${string}`,
-                    abi: ERC20Abi.abi,
+                    abi: ERC20Abi,
                     functionName: 'allowance',
                     args: [address, spenderAddress]
                 });
