@@ -285,8 +285,8 @@ class BlockchainMonitor {
         blockNumber: event.blockNumber
       };
       
-      // Broadcast to all connected clients
-      this.broadcastCallback(tradeAlert);
+      // Broadcasting disabled - only store transactions
+      // this.broadcastCallback(tradeAlert);
       
     } catch (error) {
       console.error('Error handling NOMA transfer:', error);
@@ -364,8 +364,8 @@ class BlockchainMonitor {
         transaction: transaction // Include full transaction data
       };
       
-      // Broadcast to all connected clients
-      this.broadcastCallback(tradeAlert);
+      // Broadcasting disabled - only store transactions
+      // this.broadcastCallback(tradeAlert);
       
     } catch (error) {
       console.error('Error handling DEX swap:', error);
