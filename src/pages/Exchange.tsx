@@ -1170,9 +1170,9 @@ const Exchange: React.FC = () => {
                     const vaultInfo = await vaultContract.getVaultInfo();
                     console.log("Vault info:", vaultInfo);
                     // The vault info is returned as an array/tuple
-                    // Order: [liquidityRatio, circulatingSupply, spotPriceX96, anchorCapacity, floorCapacity, token0, token1, newFloor]
+                    // Order appears to be: [liquidityRatio, circulatingSupply, spotPriceX96, anchorCapacity, floorCapacity, floorCapacity2?, token0, token1, newFloor]
                     const spotPriceFromContract = vaultInfo[2]; // spotPriceX96 is at index 2
-                    const floorPriceFromContract = vaultInfo[7]; // newFloor is at index 7
+                    const floorPriceFromContract = vaultInfo[8]; // newFloor is at index 8 (last element)
                     
                     console.log("Raw floor price from contract:", floorPriceFromContract);
                     
