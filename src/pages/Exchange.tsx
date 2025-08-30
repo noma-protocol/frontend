@@ -136,7 +136,7 @@ const addresses = config.chain == "local"
 
 const { environment, presaleContractAddress } = config;
 
-const FactoryArtifact = await import(`../assets/OikosFactory.json`);
+const FactoryArtifact = await import(`../assets/NomaFactory.json`);
 const FactoryAbi = FactoryArtifact.abi;
 const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 

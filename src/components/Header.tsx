@@ -26,8 +26,8 @@ import addressesBsc from "../assets/deployment.json";
 
 // Get contract addresses
 const addresses = config.chain == "local" ? addressesLocal : addressesBsc;
-import OikosFactoryArtifact from "../assets/OikosFactory.json";
-const OikosFactoryAbi = OikosFactoryArtifact.abi;
+import NomaFactoryArtifact from "../assets/NomaFactory.json";
+const NomaFactoryAbi = NomaFactoryArtifact.abi;
 const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 const { JsonRpcProvider } = ethers.providers;
 const localProvider = new JsonRpcProvider(
@@ -83,7 +83,7 @@ const Header: React.FC = () => {
     isError: isDeployersError,
   } = useContractRead({
     address: nomaFactoryAddress,
-    abi: OikosFactoryAbi,
+    abi: NomaFactoryAbi,
     functionName: "getDeployers",
     enabled: location.pathname === '/liquidity',
   });
@@ -94,7 +94,7 @@ const Header: React.FC = () => {
     if (location.pathname === '/liquidity' && deployersData && typeof deployersData !== "undefined") {
       const nomaFactoryContract = new ethers.Contract(
         nomaFactoryAddress,
-        OikosFactoryAbi,
+        NomaFactoryAbi,
         localProvider
       );
 

@@ -83,8 +83,8 @@ const IWETHAbi = IWETHArtifact.abi;
 const ERC20Artifact = await import(`../assets/ERC20.json`);
 const ERC20Abi = ERC20Artifact.abi;
 
-const OikosFactoryArtifact = await import(`../assets/OikosFactory.json`);
-const OikosFactoryAbi = OikosFactoryArtifact.abi;
+const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
+const NomaFactoryAbi = NomaFactoryArtifact.abi;
 
 const LendingVaultArtifact = await import(`../assets/LendingVault.json`);
 const LendingVaultAbi = LendingVaultArtifact.abi;
@@ -747,7 +747,7 @@ const Borrow = () => {
 
         const nomaFactoryContract = new ethers.Contract(
             nomaFactoryAddress,
-            OikosFactoryAbi,
+            NomaFactoryAbi,
             localProvider
         );
 

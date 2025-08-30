@@ -57,8 +57,8 @@ const localProvider = new JsonRpcProvider(
 );
 
 // Import the NomaFactory artifact and extract its ABI
-import OikosFactoryArtifact from "../assets/OikosFactory.json";
-const OikosFactoryAbi = OikosFactoryArtifact.abi;
+import NomaFactoryArtifact from "../assets/NomaFactory.json";
+const NomaFactoryAbi = NomaFactoryArtifact.abi;
 
 const uniswapV3FactoryABI = [
   "function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool)",
@@ -193,7 +193,7 @@ const Liquidity: React.FC = () => {
     isError: isAllVaultsError,
   } = useContractRead({
     address: nomaFactoryAddress,
-    abi: OikosFactoryAbi,
+    abi: NomaFactoryAbi,
     functionName: "getDeployers",
     enabled: selectedVault !== '',
   });
@@ -202,7 +202,7 @@ const Liquidity: React.FC = () => {
     if (typeof deployersData !== "undefined" && selectedVault) {
       const nomaFactoryContract = new ethers.Contract(
         nomaFactoryAddress,
-        OikosFactoryAbi,
+        NomaFactoryAbi,
         localProvider
       );
 

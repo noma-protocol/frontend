@@ -55,8 +55,8 @@ const tokenAddress = "0x614da16Af43A8Ad0b9F419Ab78d14D163DEa6488" //getContractA
 const ERC20Artifact = await import(`../assets/ERC20.json`);
 
 // Dynamically import the NomaFactory artifact and extract its ABI
-const OikosFactoryArtifact = await import(`../assets/OikosFactory.json`);
-const OikosFactoryAbi = OikosFactoryArtifact.abi;
+const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
+const NomaFactoryAbi = NomaFactoryArtifact.abi;
 
 const ERC20Abi = ERC20Artifact.abi;
 // NomaFactory contract address
