@@ -1961,7 +1961,6 @@ const Exchange: React.FC = () => {
         address: WETH_ADDRESS,
         abi: IWETHAbi,
         functionName: "deposit",
-        value: parseEther(`${wrapAmount}`),
         onSuccess(data) {
             toaster.create({
                 title: "Success",
@@ -1998,7 +1997,6 @@ const Exchange: React.FC = () => {
         address: WETH_ADDRESS,
         abi: IWETHAbi,
         functionName: "withdraw",
-        args: [parseEther(`${wrapAmount}`)],
         onSuccess(data) {
             toaster.create({
                 title: "Success",
@@ -3036,22 +3034,13 @@ const Exchange: React.FC = () => {
                                     <Flex justifyContent="space-between" alignItems="center" mb={4}>
                                         <Tabs.List flex={1}>
                                             <Tabs.Trigger 
-                                                value="all" 
-                                                flex={1}
-                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
-                                                color="#888"
-                                                fontWeight="600"
-                                            >
-                                                {isMobile ? "All" : "All Transactions"}
-                                            </Tabs.Trigger>
-                                            <Tabs.Trigger 
                                                 value="my" 
                                                 flex={1}
                                                 _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
                                                 color="#888"
                                                 fontWeight="600"
                                             >
-                                                {isMobile ? "My" : "My Transactions"}
+                                                {"History"}
                                             </Tabs.Trigger>
                                         </Tabs.List>
                                         {tradeHistory.length > 0 && (
@@ -4171,15 +4160,6 @@ const Exchange: React.FC = () => {
                                 <Tabs.Root value={tradeHistoryTab} onValueChange={(e) => setTradeHistoryTab(e.value)}>
                                     <Flex justifyContent="space-between" alignItems="center" mb={4}>
                                         <Tabs.List flex={1}>
-                                            <Tabs.Trigger 
-                                                value="all" 
-                                                flex={1}
-                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
-                                            color="#888"
-                                            fontWeight="600"
-                                        >
-                                            {isMobile ? "All" : "All Transactions"}
-                                        </Tabs.Trigger>
                                         <Tabs.Trigger 
                                             value="my" 
                                             flex={1}
@@ -4187,7 +4167,7 @@ const Exchange: React.FC = () => {
                                             color="#888"
                                             fontWeight="600"
                                         >
-                                            {isMobile ? "My" : "My Transactions"}
+                                            {"History"}
                                         </Tabs.Trigger>
                                     </Tabs.List>
                                     {tradeHistory.length > 0 && (
@@ -4574,7 +4554,9 @@ const Exchange: React.FC = () => {
                 onWrap={(amount) => {
                     setWrapAmount(parseFloat(amount));
                     setIsWrapping(true);
-                    deposit();
+                    deposit({
+                        value: parseEther(amount)
+                    });
                 }}
                 isWrapping={isWrapping}
                 bnbBalance={ethBalance}
@@ -4585,7 +4567,9 @@ const Exchange: React.FC = () => {
                 onUnwrap={(amount) => {
                     setWrapAmount(parseFloat(amount));
                     setIsUnwrapping(true);
-                    withdraw();
+                    withdraw({
+                        args: [parseEther(amount)]
+                    });
                 }}
                 isUnwrapping={isUnwrapping}
                 wethBalance={wethBalance}
