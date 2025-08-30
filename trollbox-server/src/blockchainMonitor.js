@@ -21,8 +21,9 @@ const UNISWAP_V3_POOL_ABI = [
 ];
 
 class BlockchainMonitor {
-  constructor(broadcastCallback) {
+  constructor(broadcastCallback, transactionStore = null) {
     this.broadcastCallback = broadcastCallback;
+    this.transactionStore = transactionStore;
     this.provider = null;
     this.nomaContract = null;
     this.dexPool = null;
@@ -302,18 +303,65 @@ class BlockchainMonitor {
       if (parseFloat(nomaAmount) < 10) return;
       
       const senderAddr = this.formatAddress(sender);
-      const action = amount0 > 0 ? 'sold' : 'bought';
+      const action = amount0 > 0 ? 'sell' : 'buy';
       const emoji = this.getTradeEmoji(parseFloat(nomaAmount));
+      
+      // Get transaction receipt for more details
+      let gasUsed = null;
+      let effectiveGasPrice = null;
+      try {
+        const receipt = await this.provider.getTransactionReceipt(event.transactionHash);
+        if (receipt) {
+          gasUsed = receipt.gasUsed.toString();
+          effectiveGasPrice = receipt.effectiveGasPrice?.toString();
+        }
+      } catch (err) {
+        console.error('Error fetching transaction receipt:', err);
+      }
+
+      // Calculate price from sqrtPriceX96
+      // sqrtPriceX96 = sqrt(price) * 2^96
+      const sqrtPrice = Number(sqrtPriceX96) / (2 ** 96);
+      const price = sqrtPrice * sqrtPrice;
+      
+      // Calculate USD value (assuming token1 is USD-pegged)
+      const usdAmount = parseFloat(nomaAmount) * price;
+      
+      // Create transaction record
+      const transaction = {
+        hash: event.transactionHash,
+        type: action,
+        sender: sender,
+        recipient: recipient,
+        amount: nomaAmount,
+        amountRaw: (amount0 > 0 ? amount0 : -amount0).toString(),
+        price: price,
+        amountUSD: usdAmount.toFixed(2),
+        tokenAddress: NOMA_TOKEN_ADDRESS,
+        tokenSymbol: 'NOMA',
+        poolAddress: DEX_POOL_ADDRESS,
+        blockNumber: event.blockNumber,
+        logIndex: event.logIndex,
+        gasUsed: gasUsed,
+        effectiveGasPrice: effectiveGasPrice,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Store transaction in database
+      if (this.transactionStore) {
+        this.transactionStore.addTransaction(transaction);
+      }
       
       // Create trade alert message
       const tradeAlert = {
         id: ethers.id(event.transactionHash + event.logIndex),
         type: 'tradeAlert',
-        content: `${senderAddr} just ${action} ${parseFloat(nomaAmount).toFixed(2)} NOMA ${emoji}`,
+        content: `${senderAddr} just ${action === 'buy' ? 'bought' : 'sold'} ${parseFloat(nomaAmount).toFixed(2)} NOMA ${emoji}`,
         username: 'System',
-        timestamp: new Date().toISOString(),
+        timestamp: transaction.timestamp,
         txHash: event.transactionHash,
-        blockNumber: event.blockNumber
+        blockNumber: event.blockNumber,
+        transaction: transaction // Include full transaction data
       };
       
       // Broadcast to all connected clients

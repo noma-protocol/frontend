@@ -14,6 +14,7 @@ const MESSAGES_FILE = join(DATA_DIR, 'messages.json');
 const USERNAMES_FILE = join(DATA_DIR, 'usernames.json');
 const PROFILES_FILE = join(DATA_DIR, 'profiles.json');
 const AUTH_FILE = join(DATA_DIR, 'auth.json');
+const TRANSACTIONS_FILE = join(DATA_DIR, 'transactions.json');
 const PORT = process.env.PORT || 9090;
 
 // Authentication message that users will sign
@@ -340,6 +341,151 @@ class ProfileStore {
   }
 }
 
+// Transaction store for tracking swap history
+class TransactionStore {
+  constructor() {
+    this.transactions = this.loadTransactions();
+    this.MAX_TRANSACTIONS = 10000; // Keep last 10000 transactions
+  }
+
+  loadTransactions() {
+    try {
+      if (existsSync(TRANSACTIONS_FILE)) {
+        const data = readFileSync(TRANSACTIONS_FILE, 'utf8');
+        return JSON.parse(data);
+      }
+    } catch (error) {
+      console.error('Error loading transactions:', error);
+    }
+    return [];
+  }
+
+  saveTransactions() {
+    try {
+      writeFileSync(TRANSACTIONS_FILE, JSON.stringify(this.transactions, null, 2));
+    } catch (error) {
+      console.error('Error saving transactions:', error);
+    }
+  }
+
+  addTransaction(transaction) {
+    // Check if transaction already exists (by hash)
+    const exists = this.transactions.some(tx => tx.hash === transaction.hash);
+    if (exists) return null;
+
+    // Add timestamp if not present
+    if (!transaction.timestamp) {
+      transaction.timestamp = new Date().toISOString();
+    }
+
+    // Add unique ID if not present
+    if (!transaction.id) {
+      transaction.id = uuidv4();
+    }
+
+    this.transactions.push(transaction);
+    
+    // Keep only the last MAX_TRANSACTIONS
+    if (this.transactions.length > this.MAX_TRANSACTIONS) {
+      this.transactions = this.transactions.slice(-this.MAX_TRANSACTIONS);
+    }
+    
+    this.saveTransactions();
+    return transaction;
+  }
+
+  getTransactions(options = {}) {
+    const { 
+      address = null, 
+      tokenAddress = null, 
+      limit = 100, 
+      offset = 0,
+      startTime = null,
+      endTime = null
+    } = options;
+
+    let filtered = [...this.transactions];
+
+    // Filter by address (sender or recipient)
+    if (address) {
+      const lowerAddress = address.toLowerCase();
+      filtered = filtered.filter(tx => 
+        tx.sender?.toLowerCase() === lowerAddress || 
+        tx.recipient?.toLowerCase() === lowerAddress
+      );
+    }
+
+    // Filter by token address
+    if (tokenAddress) {
+      filtered = filtered.filter(tx => 
+        tx.tokenAddress?.toLowerCase() === tokenAddress.toLowerCase()
+      );
+    }
+
+    // Filter by time range
+    if (startTime) {
+      filtered = filtered.filter(tx => new Date(tx.timestamp) >= new Date(startTime));
+    }
+    if (endTime) {
+      filtered = filtered.filter(tx => new Date(tx.timestamp) <= new Date(endTime));
+    }
+
+    // Sort by timestamp (newest first)
+    filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    // Apply pagination
+    const total = filtered.length;
+    const items = filtered.slice(offset, offset + limit);
+
+    return {
+      items,
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total
+    };
+  }
+
+  getTransactionByHash(hash) {
+    return this.transactions.find(tx => tx.hash === hash) || null;
+  }
+
+  getStats(address = null) {
+    let filtered = [...this.transactions];
+
+    if (address) {
+      const lowerAddress = address.toLowerCase();
+      filtered = filtered.filter(tx => 
+        tx.sender?.toLowerCase() === lowerAddress || 
+        tx.recipient?.toLowerCase() === lowerAddress
+      );
+    }
+
+    const stats = {
+      totalTransactions: filtered.length,
+      totalVolume: 0,
+      totalVolumeUSD: 0,
+      uniqueAddresses: new Set(),
+      buyCount: 0,
+      sellCount: 0
+    };
+
+    filtered.forEach(tx => {
+      if (tx.sender) stats.uniqueAddresses.add(tx.sender.toLowerCase());
+      if (tx.recipient) stats.uniqueAddresses.add(tx.recipient.toLowerCase());
+      
+      if (tx.amount) stats.totalVolume += parseFloat(tx.amount);
+      if (tx.amountUSD) stats.totalVolumeUSD += parseFloat(tx.amountUSD);
+      
+      if (tx.type === 'buy') stats.buyCount++;
+      if (tx.type === 'sell') stats.sellCount++;
+    });
+
+    stats.uniqueAddresses = stats.uniqueAddresses.size;
+    return stats;
+  }
+}
+
 // Rate limiting
 class RateLimiter {
   constructor() {
@@ -420,6 +566,7 @@ const messageStore = new MessageStore();
 const usernameStore = new UsernameStore();
 const profileStore = new ProfileStore();
 const authStore = new AuthStore();
+const transactionStore = new TransactionStore();
 const rateLimiter = new RateLimiter();
 
 // Kicked users tracking (address -> kick timestamp)
@@ -1084,6 +1231,64 @@ app.get('/api/profile/:address', (req, res) => {
   }
 });
 
+// API endpoint to get transaction history
+app.get('/api/transactions', (req, res) => {
+  try {
+    const { 
+      address, 
+      tokenAddress, 
+      limit = '100', 
+      offset = '0',
+      startTime,
+      endTime
+    } = req.query;
+
+    const options = {
+      address,
+      tokenAddress,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      startTime,
+      endTime
+    };
+
+    const result = transactionStore.getTransactions(options);
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    res.status(500).json({ error: 'Failed to fetch transactions' });
+  }
+});
+
+// API endpoint to get transaction by hash
+app.get('/api/transactions/:hash', (req, res) => {
+  try {
+    const { hash } = req.params;
+    const transaction = transactionStore.getTransactionByHash(hash);
+    
+    if (transaction) {
+      res.json(transaction);
+    } else {
+      res.status(404).json({ error: 'Transaction not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching transaction:', error);
+    res.status(500).json({ error: 'Failed to fetch transaction' });
+  }
+});
+
+// API endpoint to get trading statistics
+app.get('/api/stats', (req, res) => {
+  try {
+    const { address } = req.query;
+    const stats = transactionStore.getStats(address);
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
 // Start Express server
 const HTTP_PORT = process.env.HTTP_PORT || 9091;
 app.listen(HTTP_PORT, () => {
@@ -1094,7 +1299,7 @@ console.log(`Trollbox WebSocket server running on port ${PORT}`);
 
 // Initialize blockchain monitor
 if (process.env.ENABLE_BLOCKCHAIN_MONITOR === 'true') {
-  blockchainMonitor = new BlockchainMonitor(broadcastTradeAlert);
+  blockchainMonitor = new BlockchainMonitor(broadcastTradeAlert, transactionStore);
   blockchainMonitor.initialize().then((success) => {
     if (success) {
       console.log('Blockchain monitor initialized successfully');
