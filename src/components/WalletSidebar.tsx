@@ -90,7 +90,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 const price = Math.pow(sqrtPrice, 2);
                 
                 // WMON address
-                const WMON = "0x0F9768EACC8e107dF5B8883Fd542A01411eFe2a3";
+                const WMON = "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701";
                 
                 // Determine if we need to invert the price
                 // If token0 is WMON, then price is NOMA/WMON
@@ -98,14 +98,14 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 const isToken0Wmon = token0.toLowerCase() === WMON.toLowerCase();
                 const finalPrice = isToken0Wmon ? price : 1 / price;
                 
-                console.log('NOMA spot price from pool:', {
-                    token0,
-                    token1,
-                    sqrtPriceX96: sqrtPriceX96.toString(),
-                    price,
-                    isToken0Wmon,
-                    finalPrice
-                });
+                // console.log('NOMA spot price from pool:', {
+                //     token0,
+                //     token1,
+                //     sqrtPriceX96: sqrtPriceX96.toString(),
+                //     price,
+                //     isToken0Wmon,
+                //     finalPrice
+                // });
                 
                 if (!isNaN(finalPrice) && isFinite(finalPrice) && finalPrice > 0) {
                     setNomaSpotPrice(finalPrice);
