@@ -2412,9 +2412,9 @@ const Exchange: React.FC = () => {
             const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
             
             // If approveMax is false but we have max approval, we need to re-approve for the exact amount
-            const needsExactApproval = false; // !approveMax && isMaxApprovedWeth();
+            const needsExactApproval = !approveMax && isMaxApprovedWeth();
             
-            if (false) { // hasEnoughWethAllowance(amountToApprove.toBigInt()) && !needsExactApproval
+            if (hasEnoughWethAllowance(amountToApprove.toBigInt()) && !needsExactApproval) {
                 // Skip approval and directly buy
                 buyTokensWETH({
                     args: args
@@ -2513,9 +2513,9 @@ const Exchange: React.FC = () => {
         const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
         
         // If approveMax is false but we have max approval, we need to re-approve for the exact amount
-        const needsExactApproval = false; // !approveMax && isMaxApproved();
+        const needsExactApproval = !approveMax && isMaxApproved();
         
-        if (false) { // hasEnoughAllowance(amountToApprove.toBigInt()) && !needsExactApproval
+        if (hasEnoughAllowance(amountToApprove.toBigInt()) && !needsExactApproval) {
             // Skip approval and directly sell
             sellTokens({
                 args: args
@@ -3037,8 +3037,9 @@ const Exchange: React.FC = () => {
                                                 value="my" 
                                                 flex={1}
                                                 _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
-                                                color="#888"
+                                                color="white"
                                                 fontWeight="600"
+                                                disabled={true}                                      
                                             >
                                                 {"History"}
                                             </Tabs.Trigger>
@@ -4163,9 +4164,10 @@ const Exchange: React.FC = () => {
                                         <Tabs.Trigger 
                                             value="my" 
                                             flex={1}
-                                            _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                            // _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
                                             color="#888"
-                                            fontWeight="600"
+                                            fontWeight="600"     
+                                            disabled={true}                                      
                                         >
                                             {"History"}
                                         </Tabs.Trigger>
