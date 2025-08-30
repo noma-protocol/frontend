@@ -15,6 +15,7 @@ const USERNAMES_FILE = join(DATA_DIR, 'usernames.json');
 const PROFILES_FILE = join(DATA_DIR, 'profiles.json');
 const AUTH_FILE = join(DATA_DIR, 'auth.json');
 const TRANSACTIONS_FILE = join(DATA_DIR, 'transactions.json');
+const TOKENS_FILE = join(DATA_DIR, 'tokens.json');
 const PORT = process.env.PORT || 9090;
 
 // Authentication message that users will sign
@@ -486,6 +487,92 @@ class TransactionStore {
   }
 }
 
+// Token store for launchpad tokens
+class TokenStore {
+  constructor() {
+    this.tokens = this.loadTokens();
+  }
+
+  loadTokens() {
+    try {
+      if (existsSync(TOKENS_FILE)) {
+        const data = readFileSync(TOKENS_FILE, 'utf8');
+        return JSON.parse(data).tokens || [];
+      }
+    } catch (error) {
+      console.error('Error loading tokens:', error);
+    }
+    return [];
+  }
+
+  saveTokens() {
+    try {
+      writeFileSync(TOKENS_FILE, JSON.stringify({ tokens: this.tokens }, null, 2));
+    } catch (error) {
+      console.error('Error saving tokens:', error);
+    }
+  }
+
+  addToken(tokenData) {
+    // Add metadata
+    const newToken = {
+      ...tokenData,
+      id: uuidv4(),
+      timestamp: new Date().toISOString(),
+      status: 'pending'
+    };
+    
+    this.tokens.push(newToken);
+    this.saveTokens();
+    return newToken;
+  }
+
+  getTokens() {
+    return this.tokens;
+  }
+
+  getTokensByDeployer(deployerAddress) {
+    return this.tokens.filter(
+      token => token.deployerAddress?.toLowerCase() === deployerAddress.toLowerCase()
+    );
+  }
+
+  getTokenById(id) {
+    return this.tokens.find(token => token.id === id);
+  }
+
+  updateTokenStatus(id, status, transactionHash = null, contractAddress = null) {
+    const tokenIndex = this.tokens.findIndex(token => token.id === id);
+    
+    if (tokenIndex === -1) {
+      return null;
+    }
+    
+    this.tokens[tokenIndex] = {
+      ...this.tokens[tokenIndex],
+      status,
+      ...(transactionHash && { transactionHash }),
+      ...(contractAddress && { contractAddress }),
+      updatedAt: new Date().toISOString()
+    };
+    
+    this.saveTokens();
+    return this.tokens[tokenIndex];
+  }
+
+  getStats() {
+    return {
+      total: this.tokens.length,
+      pending: this.tokens.filter(t => t.status === 'pending').length,
+      success: this.tokens.filter(t => t.status === 'success').length,
+      failed: this.tokens.filter(t => t.status === 'failed').length,
+      lastDeployment: this.tokens.length > 0 
+        ? this.tokens[this.tokens.length - 1].timestamp 
+        : null
+    };
+  }
+}
+
 // Rate limiting
 class RateLimiter {
   constructor() {
@@ -567,6 +654,7 @@ const usernameStore = new UsernameStore();
 const profileStore = new ProfileStore();
 const authStore = new AuthStore();
 const transactionStore = new TransactionStore();
+const tokenStore = new TokenStore();
 const rateLimiter = new RateLimiter();
 
 // Kicked users tracking (address -> kick timestamp)
@@ -1286,6 +1374,110 @@ app.get('/api/stats', (req, res) => {
   } catch (error) {
     console.error('Error fetching stats:', error);
     res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
+// ===== LAUNCHPAD API ENDPOINTS =====
+
+// Get all tokens
+app.get('/api/tokens', (req, res) => {
+  try {
+    res.json({ tokens: tokenStore.getTokens() });
+  } catch (error) {
+    console.error('Error fetching tokens:', error);
+    res.status(500).json({ error: 'Failed to retrieve tokens' });
+  }
+});
+
+// Get tokens by deployer address
+app.get('/api/tokens/deployer/:address', (req, res) => {
+  try {
+    const { address } = req.params;
+    const tokens = tokenStore.getTokensByDeployer(address);
+    res.json({ tokens });
+  } catch (error) {
+    console.error('Error fetching tokens by deployer:', error);
+    res.status(500).json({ error: 'Failed to retrieve tokens' });
+  }
+});
+
+// Save new token
+app.post('/api/tokens', (req, res) => {
+  try {
+    const tokenData = req.body;
+    
+    // Validate required fields
+    const requiredFields = ['tokenName', 'tokenSymbol', 'tokenSupply', 'price', 'floorPrice'];
+    const missingFields = requiredFields.filter(field => !tokenData[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        error: 'Missing required fields', 
+        missingFields 
+      });
+    }
+    
+    const newToken = tokenStore.addToken(tokenData);
+    
+    res.status(201).json({ 
+      message: 'Token saved successfully', 
+      token: newToken 
+    });
+  } catch (error) {
+    console.error('Error saving token:', error);
+    res.status(500).json({ error: 'Failed to save token' });
+  }
+});
+
+// Update token status
+app.patch('/api/tokens/:id/status', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, transactionHash, contractAddress } = req.body;
+    
+    if (!status || !['success', 'failed'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status. Must be "success" or "failed"' });
+    }
+    
+    const updatedToken = tokenStore.updateTokenStatus(id, status, transactionHash, contractAddress);
+    
+    if (!updatedToken) {
+      return res.status(404).json({ error: 'Token not found' });
+    }
+    
+    res.json({ 
+      message: 'Token status updated successfully',
+      token: updatedToken
+    });
+  } catch (error) {
+    console.error('Error updating token status:', error);
+    res.status(500).json({ error: 'Failed to update token status' });
+  }
+});
+
+// Export tokens as JSON
+app.get('/api/tokens/export', (req, res) => {
+  try {
+    const data = { tokens: tokenStore.getTokens() };
+    const filename = `tokens_export_${new Date().toISOString().split('T')[0]}.json`;
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.json(data);
+  } catch (error) {
+    console.error('Error exporting tokens:', error);
+    res.status(500).json({ error: 'Failed to export tokens' });
+  }
+});
+
+// Get token statistics
+app.get('/api/tokens/stats', (req, res) => {
+  try {
+    const stats = tokenStore.getStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching token stats:', error);
+    res.status(500).json({ error: 'Failed to get statistics' });
   }
 });
 
