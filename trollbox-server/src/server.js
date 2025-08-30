@@ -694,9 +694,9 @@ function broadcast(message, excludeClient = null) {
   }
 }
 
-// Broadcast trade alert from blockchain monitor
+// Handle trade alert from blockchain monitor (broadcasting disabled)
 function broadcastTradeAlert(tradeData) {
-  // Store the trade alert as a message
+  // Store the trade alert as a message (for history)
   const tradeMessage = {
     ...tradeData,
     clientId: 'system',
@@ -704,8 +704,8 @@ function broadcastTradeAlert(tradeData) {
   };
   messageStore.addMessage(tradeMessage);
   
-  // Broadcast to all clients
-  broadcast(tradeData);
+  // Broadcasting disabled - trades are only stored, not sent to clients
+  // broadcast(tradeData);
 }
 
 // Broadcast user count update to all clients
