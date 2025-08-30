@@ -243,6 +243,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                     <Box display="flex" alignItems="left" justifyContent="flex-start" mt={1}>
                         {showWrapButton && setIsWrapDrawerOpen && (
                             <Button
+                                ml={2}
                                 size="sm"
                                 fontSize="xs"
                                 w="60px"
@@ -260,6 +261,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         )}
                         {showUnwrapButton && setIsUnwrapDrawerOpen && (
                             <Button
+                                ml={2}
                                 size="sm"
                                 fontSize="xs"
                                 w="60px"
