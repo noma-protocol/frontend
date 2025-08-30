@@ -617,7 +617,34 @@ const Exchange: React.FC = () => {
             }
         },
         annotations: {
-            yaxis: [] // Will be populated dynamically
+            yaxis: [{
+                y: 0, // This will be updated dynamically
+                borderColor: '#4ade8040', // 40% opacity
+                strokeDashArray: 5,
+                borderWidth: 2,
+                label: {
+                    borderColor: '#4ade80',
+                    borderWidth: 1,
+                    borderRadius: 0,
+                    style: {
+                        color: '#000',
+                        background: '#4ade80',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        padding: {
+                            left: 5,
+                            right: 5,
+                            top: 2,
+                            bottom: 2
+                        }
+                    },
+                    text: 'Spot Price',
+                    textAnchor: 'middle',
+                    position: 'right',
+                    offsetX: 73,
+                    offsetY: 0
+                }
+            }]
         }
     });
 
@@ -1249,6 +1276,45 @@ const Exchange: React.FC = () => {
             console.log("No IMV data available");
         }
     }, [imvData]);
+
+    // Update chart annotations when spot price changes
+    useEffect(() => {
+        if (spotPrice > 0) {
+            setChartOptions(prevOptions => ({
+                ...prevOptions,
+                annotations: {
+                    yaxis: [{
+                        y: spotPrice,
+                        borderColor: '#4ade8040', // 40% opacity
+                        strokeDashArray: 5,
+                        borderWidth: 2,
+                        label: {
+                            borderColor: '#4ade80',
+                            borderWidth: 1,
+                            borderRadius: 0,
+                            style: {
+                                color: '#000',
+                                background: '#4ade80',
+                                fontSize: '10px',
+                                fontWeight: 'bold',
+                                padding: {
+                                    left: 5,
+                                    right: 5,
+                                    top: 2,
+                                    bottom: 2
+                                }
+                            },
+                            text: `${spotPrice < 0.00001 ? spotPrice.toExponential(4) : spotPrice < 0.01 ? spotPrice.toFixed(8) : spotPrice.toFixed(6)}`,
+                            textAnchor: 'middle',
+                            position: 'right',
+                            offsetX: 73,
+                            offsetY: 0
+                        }
+                    }]
+                }
+            }));
+        }
+    }, [spotPrice]);
 
 
     const filteredTokens = tokens.filter(token => 
@@ -2870,15 +2936,28 @@ const Exchange: React.FC = () => {
                                             ${formatNumber(Number(formatEther(`${totalSupply}`)) * spotPrice * monPrice)}
                                         </Text>
                                     </Box>
+                                    <Box mt={2}>
+                                        <Text color="#888" fontSize="sm">
+                                            {formatNumber(Number(formatEther(`${totalSupply}`)) * spotPrice)} MON
+                                        </Text>                                       
+                                    </Box>
                                 </Box>
+
                                 
                                 <Box bg="#1a1a1a" p={4} borderRadius="lg">
-                                    <Text color="#888" fontSize="sm" mb={2}>Liquidity</Text>
+                                    <Text color="#888" fontSize="sm" mb={2}>IMV</Text>
                                     <Box>
                                         <Text color="white" fontSize="xl" fontWeight="bold">
-                                            ${formatNumber(selectedToken.liquidity)}
+                                            ${commify(floorPrice * monPrice, 6)}
                                         </Text>
                                     </Box>
+                                    <HStack spacing={2} flexWrap="wrap">
+                                        <Box mt={2}>
+                                            <Text color="#888" fontSize="xs">
+                                                {floorPrice > 0 ? commifyDecimals(floorPrice, 8) : commifyDecimals(selectedToken.price || 0, 8)} {selectedToken.symbol}/{token1Symbol}
+                                            </Text> 
+                                        </Box>
+                                    </HStack>
                                 </Box>
                             </SimpleGrid>
                             
@@ -2987,69 +3066,7 @@ const Exchange: React.FC = () => {
                                 ) : chartSeries.length > 0 && chartSeries[0].data.length > 0 ? (
                                     <Box h="calc(100% - 60px)" minH="300px" w="100%">
                                         <ReactApexChart
-                                            options={{
-                                                ...chartOptions,
-                                                annotations: {
-                                                    yaxis: [
-                                                        ...(spotPrice > 0 ? [{
-                                                            y: spotPrice,
-                                                            borderColor: '#4ade8040',
-                                                            strokeDashArray: 5,
-                                                            borderWidth: 2,
-                                                            label: {
-                                                                borderColor: '#4ade80',
-                                                                borderWidth: 1,
-                                                                borderRadius: 0,
-                                                                style: {
-                                                                    color: '#000',
-                                                                    background: '#4ade80',
-                                                                    fontSize: '10px',
-                                                                    fontWeight: 'bold',
-                                                                    padding: {
-                                                                        left: 5,
-                                                                        right: 5,
-                                                                        top: 2,
-                                                                        bottom: 2
-                                                                    }
-                                                                },
-                                                                text: `${spotPrice < 0.00001 ? spotPrice.toExponential(2) : spotPrice < 0.01 ? spotPrice.toFixed(6) : spotPrice.toFixed(4)}`,
-                                                                textAnchor: 'middle',
-                                                                position: 'right',
-                                                                offsetX: 80,
-                                                                offsetY: 0
-                                                            }
-                                                        }] : []),
-                                                        ...(floorPrice > 0 ? [{
-                                                            y: floorPrice,
-                                                            borderColor: '#3b82f640',
-                                                            strokeDashArray: 5,
-                                                            borderWidth: 2,
-                                                            label: {
-                                                                borderColor: '#3b82f6',
-                                                                borderWidth: 1,
-                                                                borderRadius: 0,
-                                                                style: {
-                                                                    color: '#fff',
-                                                                    background: '#3b82f6',
-                                                                    fontSize: '10px',
-                                                                    fontWeight: 'bold',
-                                                                    padding: {
-                                                                        left: 5,
-                                                                        right: 5,
-                                                                        top: 2,
-                                                                        bottom: 2
-                                                                    }
-                                                                },
-                                                                text: `IMV: ${floorPrice < 0.00001 ? floorPrice.toExponential(2) : floorPrice < 0.01 ? floorPrice.toFixed(6) : floorPrice.toFixed(4)}`,
-                                                                textAnchor: 'middle',
-                                                                position: 'right',
-                                                                offsetX: 80,
-                                                                offsetY: 0
-                                                            }
-                                                        }] : [])
-                                                    ]
-                                                }
-                                            }}
+                                            options={chartOptions}
                                             series={chartSeries}
                                             type="candlestick"
                                             height="100%"
