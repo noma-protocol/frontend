@@ -41,6 +41,7 @@ import addressesMonad from "../assets/deployment_monad.json";
 import addressesBsc   from "../assets/deployment.json";
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import { useMonPrice } from '../contexts/MonPriceContext';
 
 import ModelHelperArtifact from "../assets/ModelHelper.json";
 const ModelHelperAbi = ModelHelperArtifact.abi;
@@ -76,6 +77,8 @@ const feeTier = 3000;
 const Liquidity: React.FC = () => {
   const { address, isConnected } = useAccount();
   const location = useLocation();
+  const { monPrice, monPriceChange } = useMonPrice();
+
   const screenOrientation = useScreenOrientation();
   const isLandscape = screenOrientation.includes("landscape");
   const [vaultDescriptions, setVaultDescriptions] = useState([]);
@@ -127,51 +130,51 @@ const Liquidity: React.FC = () => {
     watch: true,
   });
 
-  useEffect(() => {
-    const fetchPrice = async () => {
-      try {
-        const cached = localStorage.getItem('bnb_usd_price');
-        const cacheTime = localStorage.getItem('bnb_usd_price_time');
+  // useEffect(() => {
+  //   const fetchPrice = async () => {
+  //     try {
+  //       const cached = localStorage.getItem('bnb_usd_price');
+  //       const cacheTime = localStorage.getItem('bnb_usd_price_time');
 
-        // Check if cache exists and is fresh (less than 5 minutes old)
-        if (cached && cacheTime && Date.now() - Number(cacheTime) < 5 * 60 * 1000) {
-          setPriceUSD(Number(cached).toFixed(11));
-          return;
-        }
+  //       // Check if cache exists and is fresh (less than 5 minutes old)
+  //       if (cached && cacheTime && Date.now() - Number(cacheTime) < 5 * 60 * 1000) {
+  //         setPriceUSD(Number(cached).toFixed(11));
+  //         return;
+  //       }
 
-        const url = 'https://api.coingecko.com/api/v3/simple/price';
+  //       const url = 'https://api.coingecko.com/api/v3/simple/price';
 
-        const params = {
-          ids: 'binancecoin',
-          vs_currencies: 'usd',
-        };
+  //       const params = {
+  //         ids: 'binancecoin',
+  //         vs_currencies: 'usd',
+  //       };
 
-        const headers = {
-          'x-cg-demo-api-key': process.env.VITE_CG_API_KEY,
-        };
+  //       const headers = {
+  //         'x-cg-demo-api-key': process.env.VITE_CG_API_KEY,
+  //       };
   
-        const response = await axios.get(url, { params, headers });
+  //       const response = await axios.get(url, { params, headers });
 
-        console.log(response)
-        console.log(response.data)
+  //       console.log(response)
+  //       console.log(response.data)
 
-        const freshPrice = response.data['binancecoin'].usd;
+  //       const freshPrice = response.data['binancecoin'].usd;
 
-        // // Save to state and cache
-        setPriceUSD(Number(freshPrice).toFixed(11));
+  //       // // Save to state and cache
+  //       setPriceUSD(Number(freshPrice).toFixed(11));
 
-        localStorage.setItem('bnb_usd_price', freshPrice);
-        localStorage.setItem('bnb_usd_price_time', Date.now().toString());
+  //       localStorage.setItem('bnb_usd_price', freshPrice);
+  //       localStorage.setItem('bnb_usd_price_time', Date.now().toString());
 
-      } catch (err) {
-        console.log('Error fetching BNB price:', err.message);
-        // Set a default price if fetch fails
-        setPriceUSD("600.00000000000"); // Default BNB price
-      }
-    };
+  //     } catch (err) {
+  //       console.log('Error fetching BNB price:', err.message);
+  //       // Set a default price if fetch fails
+  //       setPriceUSD("600.00000000000"); // Default BNB price
+  //     }
+  //   };
 
-    fetchPrice();
-  }, [spotPrice]);
+  //   fetchPrice();
+  // }, [spotPrice]);
 
   const fetchPoolAddress = async (token0: string, token1: string) => {
     const uniswapV3FactoryContract = new ethers.Contract(
@@ -442,7 +445,7 @@ const Liquidity: React.FC = () => {
                     isConnected={isConnected}
                     data={vaultData}
                     spotPrice={spotPrice}
-                    priceUSD={priceUSD}
+                    priceUSD={monPrice}
                     imvPrice={imv}
                     circulatingSupply={circulatingSupply}
                     liquidityRatio={liquidityRatio}

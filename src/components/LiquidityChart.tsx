@@ -34,7 +34,7 @@ return (
             <Box bg="#2a2a2a" p={4} borderRadius="lg">
               <Text color="#888" fontSize="xs" mb={0}>Spot Price</Text>
               <Text color="white" fontSize="lg" fontWeight="bold">
-                ${commifyDecimals(spotPrice * parseFloat(priceUSD), 4)}
+                ${commifyDecimals(spotPrice * parseFloat(priceUSD), 6)}
               </Text>
               <Text color="#4ade80" fontSize="xs">
                 {commifyDecimals(spotPrice, 8)} MON
@@ -64,7 +64,7 @@ return (
             <Box bg="#2a2a2a" p={4} borderRadius="lg">
               <Text color="#888" fontSize="xs" mb={0}>IMV Price</Text>
               <Text color="white" fontSize="lg" fontWeight="bold">
-                ${commifyDecimals(formatEther(imvPrice || 0) * parseFloat(priceUSD), 4)}
+                ${commifyDecimals(formatEther(imvPrice || 0) * parseFloat(priceUSD), 6)}
               </Text>
               <Text color="#4ade80" fontSize="xs">
                 Floor Protection
