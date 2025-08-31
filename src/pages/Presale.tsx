@@ -1046,13 +1046,14 @@ const Presale: React.FC = () => {
                       >
                         -
                       </Button></Box> */}
-                      <Box flex="1"><NumberInputRoot
+                      <Box flex="1">
+                      <NumberInputRoot
                         value={contributionAmount}
                         onChange={handleSetContributionAmount}
                         min={0.001}
                         max={5}
                         step={0.001}
-                        w="95%"
+                        w={isMobile ? "85%" : "95%"}
                       >
                         <NumberInputField 
                           placeholder="0.00"
@@ -1099,35 +1100,57 @@ const Presale: React.FC = () => {
                   </Box>
                   
                   <SimpleGrid columns={2} gap={4} pt={2} w={"100%"}>
-                    <Box w="95%">
+                    <Box w="95%" alignItems={"left"}>
                         <HStack>
-                          <Box mb={2} w="180px">
-                            <Text color="#888" fontSize="sm">You'll receive</Text>
-                            <Text color="white" fontSize="lg" fontWeight="500">
-                              {tokensPurchased}  
-                            </Text>  
-                          </Box>
-                          <Box mt={10}>
-                            <Text color="white" fontSize="lg" fontWeight="500" >
+                          <Box mb={2} w="180px" alignItems={"left"} >
+                            <VStack>
+                              <Box ml={"-50px"}>
+                                <Text color="#888" fontSize={isMobile ? "xs" : "sm"}>You'll receive</Text>                             
+                              </Box>
+                              <Box>
+
+                              <SimpleGrid columns={2} w="100%" gap={2}>
+                              <Box w="120px">
+                              <Text color="white"   fontSize={isMobile ? "sm" : "lg"} fontWeight="500">
+                                {formatNumberPrecise(tokensPurchased, 2)}  
+                              </Text> 
+                              </Box>
+                              <Box>
+                            <Text color="white" fontSize={isMobile ? "sm" : "lg"} fontWeight="500" >
                                {tokenSymbol}
-                            </Text>  
+                            </Text> 
+                              </Box>
+                              </SimpleGrid>                                  
+                              </Box>
+                            </VStack>
                           </Box>
                         </HStack>
                     </Box>
-                    <Box w="95%" >
+                    <Box w="125%" >
                         <HStack>
-                          <Box mb={2} w="180px">
-                            <Text color="#888" fontSize="sm">Price per token</Text>
-                            <Text color="white" fontSize="lg" fontWeight="500">
-                              {initialPrice}  
-                            </Text>  
-                          </Box>
-                          <Box mt={10}>
-                            <Text color="white" fontSize="lg" fontWeight="500" >
+                          <Box mb={2} w="180px" alignItems={"left"} >
+                            <VStack>
+                              <Box ml={isMobile ? "-110px" : "-90px"}>
+                                <Text color="#888" fontSize={isMobile ? "xs" : "sm"}>Price per token</Text>                             
+                              </Box>
+                              <Box w="220px">
+
+                              <SimpleGrid columns={2} w="100%" gap={2}>
+                              <Box w="160px">
+                              <Text color="white"   fontSize={isMobile ? "sm" : "lg"} fontWeight="500">
+                                {formatNumberPrecise(initialPrice, 5)}  
+                              </Text> 
+                              </Box>
+                              <Box >
+                            <Text color="white" fontSize={isMobile ? "sm" : "lg"} fontWeight="500" >
                                MON
-                            </Text>  
+                            </Text> 
+                              </Box>
+                              </SimpleGrid>                                  
+                              </Box>
+                            </VStack>
                           </Box>
-                        </HStack>                      
+                        </HStack>                                         
                     </Box>
                   </SimpleGrid>
                   
