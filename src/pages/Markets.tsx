@@ -685,6 +685,14 @@ const Markets: React.FC = () => {
                                   bg={vault.finalized ? "rgba(74, 222, 128, 0.1)" : vault.expired ? "rgba(239, 68, 68, 0.1)" : "rgba(251, 191, 36, 0.1)"}
                                   border="1px solid"
                                   borderColor={vault.finalized ? "#4ade80" : vault.expired ? "#ef4444" : "#fbbf24"}
+                                  transition="all 0.2s"
+                                  cursor="pointer"
+                                  _hover={{
+                                    bg: vault.finalized ? "rgba(74, 222, 128, 0.2)" : vault.expired ? "rgba(239, 68, 68, 0.2)" : "rgba(251, 191, 36, 0.2)",
+                                    borderColor: vault.finalized ? "#5ee88f" : vault.expired ? "#f56565" : "#fccf3f",
+                                    transform: "translateY(-1px)",
+                                    boxShadow: vault.finalized ? "0 4px 12px rgba(74, 222, 128, 0.3)" : vault.expired ? "0 4px 12px rgba(239, 68, 68, 0.3)" : "0 4px 12px rgba(251, 191, 36, 0.3)"
+                                  }}
                                 >
                                   <Text 
                                     color={vault.finalized ? "#4ade80" : vault.expired ? "#ef4444" : "#fbbf24"} 

@@ -544,11 +544,17 @@ const Presale: React.FC = () => {
 
   // Initialize contribution amount to min contribution when it's loaded
   useEffect(() => {
-    if (minContribution && contributionAmount === "0") {
-      const minContribInEther = formatEther(`${minContribution}`);
-      setContributionAmount(Number(minContribInEther).toFixed(4));
+    if (minContribution && maxContribution) {
+      const minContribInEther = Number(formatEther(`${minContribution}`));
+      const maxContribInEther = Number(formatEther(`${maxContribution}`));
+      const currentAmount = parseFloat(contributionAmount) || 0;
+      
+      // If current amount is outside valid range, set to min
+      if (currentAmount < minContribInEther || currentAmount > maxContribInEther) {
+        setContributionAmount(minContribInEther.toFixed(4));
+      }
     }
-  }, [minContribution]);
+  }, [minContribution, maxContribution]);
 
   useEffect(() => {
     const totalRaisedNum = parseFloat(totalRaised) || 0;
@@ -1075,15 +1081,20 @@ const Presale: React.FC = () => {
                         </HStack>
                       </Box>
                     </HStack>
-                    <Slider 
-                      value={[Math.max(0, parseFloat(contributionAmount) || 0)]}
-                      onValueChange={(e) => setContributionAmount(e.value[0].toFixed(4))}
-                      min={Math.max(0, Number(formatEther(`${minContribution || 1}`)))}
-                      max={Math.max(1, Number(formatEther(`${maxContribution || 10}`)))}
-                      step={0.001}
-                      mt={4}
-                      defaultValue={[0]}
-                    />
+                    {minContribution && maxContribution ? (
+                      <Slider 
+                        value={[Math.max(0, parseFloat(contributionAmount) || 0)]}
+                        onValueChange={(e) => setContributionAmount(e.value[0].toFixed(4))}
+                        min={Number(formatEther(`${minContribution}`))}
+                        max={Number(formatEther(`${maxContribution}`))}
+                        step={0.001}
+                        mt={4}
+                      />
+                    ) : (
+                      <Box h="40px" display="flex" alignItems="center" justifyContent="center">
+                        <Spinner size="sm" color="#4ade80" />
+                      </Box>
+                    )}
                   </Box>
                   
                   <SimpleGrid columns={2} gap={4} pt={2} w={"100%"}>
