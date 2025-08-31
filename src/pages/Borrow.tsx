@@ -1645,6 +1645,7 @@ const Borrow = () => {
                                                 >
                                                     {/* Badge */}
                                                     <GridItem>
+                                                        <Box>
                                                         <Badge
                                                             colorPalette={
                                                                 loan.type === "borrow" ? "blue" : 
@@ -1655,25 +1656,30 @@ const Borrow = () => {
                                                             size="sm"
                                                         >
                                                             {loan.type === "add_collateral" ? "ADD COLL" : loan.type.toUpperCase()}
-                                                        </Badge>
+                                                        </Badge>                                                        </Box>
                                                     </GridItem>
+                                                    <Box>
                                                     {/* Amount */}
                                                     <Text color="white" fontWeight="bold">
                                                         {loan.type === "borrow" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
                                                         {loan.type === "repay" && `${loan.amount.toFixed(4)} ${token1Info?.tokenSymbol || "WMON"}`}
                                                         {loan.type === "roll" && `Extended loan`}
                                                         {loan.type === "add_collateral" && `${loan.amount.toFixed(4)} ${token0Info?.tokenSymbol || "TOKEN"}`}
-                                                    </Text>
+                                                    </Text>                                                        
+                                                    </Box>
                                                     
                                                     {/* Details (or spacer) - hide on mobile */}
+                                                    <Box>
                                                     <Text color="#666" fontSize="xs" display={{ base: "none", md: "block" }}>
                                                         {loan.type === "borrow" && `${loan.duration || 0}d • ${loan.collateral?.toFixed(2) || "0"} ${token0Info?.tokenSymbol || "TOKEN"}`}
                                                         {loan.type === "repay" && `Fully repaid`}
                                                         {loan.type === "roll" && `Extended to ${loan.duration || 0}d`}
                                                         {loan.type === "add_collateral" && `Added collateral`}
-                                                    </Text>
+                                                    </Text>                                                        
+                                                    </Box>
                                                     
                                                     {/* Transaction Hash - hide on mobile */}
+                                                    <Box>
                                                     <Text 
                                                         color="#4ade80" 
                                                         fontSize="xs"
@@ -1689,8 +1695,9 @@ const Borrow = () => {
                                                         }}
                                                     >
                                                         {loan.shortTxHash}
-                                                    </Text>
-                                                    
+                                                    </Text>                                                        
+                                                    </Box>
+                                                    <Box>
                                                     {/* Time - always visible */}
                                                     <Text color="#888" fontSize="xs" textAlign={{ base: "left", md: "right" }} minW="25px">
                                                         {Math.floor((Date.now() - loan.time.getTime()) / 60000) < 60
@@ -1700,6 +1707,7 @@ const Borrow = () => {
                                                             : `${Math.floor((Date.now() - loan.time.getTime()) / 86400000)}d`
                                                         }
                                                     </Text>
+                                                    </Box>
                                                 </SimpleGrid>
                                             ))}
                                         </VStack>
