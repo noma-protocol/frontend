@@ -33,6 +33,7 @@ import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import { commify, commifyDecimals, generateBytes32String, getContractAddress, generateReferralCode, formatNumberPrecise } from "../utils";
 import Logo from "../assets/images/noma.png";
 import { ethers } from "ethers"; // Import ethers.js
+import WalletSidebar from "../components/WalletSidebar";
 import { ProgressLabel, ProgressBar, ProgressRoot, ProgressValueText } from "../components/ui/progress"
 import PresaleDetails from "../components/PresaleDetails";
 import usePresaleContract from '../hooks/usePresaleContract';
@@ -1273,65 +1274,13 @@ const Presale: React.FC = () => {
             
             {/* Wallet Balance Box on Mobile */}
             {isMobile && (
-              <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%" mt={4}>
-                <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
-                  Wallet
-                </Text>
-                
-                <VStack align="stretch" gap={3}>
-                  {/* MON Balance */}
-                  <Box>
-                    <Flex justifyContent="space-between" alignItems="center">
-                      <HStack>
-                        <Box w="20px" h="20px">
-                          <Image
-                            src={monadLogo}
-                            alt="MON"
-                            w="20px"
-                            h="20px"
-                          />
-                        </Box>
-                        <Box>
-                          <Text color="#888" fontSize="sm">MON</Text>
-                        </Box>
-                      </HStack>
-                      <Box>
-                        <Text color="white" fontWeight="bold">
-                          {monBalance ? parseFloat(formatEther(monBalance.value)).toFixed(4) : "0.0000"}
-                        </Text>
-                      </Box>
-                    </Flex>
-                    <Text color="#666" fontSize="xs" textAlign="right">
-                      ≈ ${monBalance ? (parseFloat(formatEther(monBalance.value)) * 50).toFixed(2) : "0.00"}
-                    </Text>
-                  </Box>
-                  
-                  {/* Token Balance if user has tokens */}
-                  {tokenBalance && parseFloat(formatEther(tokenBalance)) > 0 && (
-                    <Box>
-                      <Flex justifyContent="space-between" alignItems="center">
-                        <HStack>
-                          <Box w="20px" h="20px">
-                            <Image
-                              src={tokenLogo}
-                              alt={tokenSymbol}
-                              w="20px"
-                              h="20px"
-                            />
-                          </Box>
-                          <Box>
-                            <Text color="#888" fontSize="sm">{tokenSymbol}</Text>
-                          </Box>
-                        </HStack>
-                        <Box>
-                          <Text color="white" fontWeight="bold">
-                            {parseFloat(formatEther(tokenBalance)).toFixed(4)}
-                          </Text>
-                        </Box>
-                      </Flex>
-                    </Box>
-                  )}
-                </VStack>
+              <Box mt={4}>
+                <WalletSidebar
+                  ethBalance={monBalance?.value || BigInt(0)}
+                  selectedToken={tokenSymbol}
+                  selectedTokenBalance={tokenBalance}
+                  address={address}
+                />
               </Box>
             )}
           </Box>
@@ -1341,66 +1290,12 @@ const Presale: React.FC = () => {
             <Box w="300px">
               <VStack gap={4}>
                 {/* Wallet Balance Box */}
-                <Box bg="#1a1a1a" borderRadius="lg" p={4} w="100%">
-                  <Text color="white" fontSize="lg" fontWeight="bold" mb={3}>
-                    Wallet
-                  </Text>
-                  
-                  <VStack align="stretch" gap={3}>
-                    {/* MON Balance */}
-                    <Box>
-                      <Flex justifyContent="space-between" alignItems="center">
-                        <HStack>
-                          <Box w="20px" h="20px">
-                            <Image
-                              src={monadLogo}
-                              alt="MON"
-                              w="20px"
-                              h="20px"
-                            />
-                          </Box>
-                          <Box>
-                            <Text color="#888" fontSize="sm">MON</Text>
-                          </Box>
-                        </HStack>
-                        <Box>
-                          <Text color="white" fontWeight="bold">
-                            {monBalance ? parseFloat(formatEther(monBalance.value)).toFixed(4) : "0.0000"}
-                          </Text>
-                        </Box>
-                      </Flex>
-                      <Text color="#666" fontSize="xs" textAlign="right">
-                        ≈ ${monBalance ? (parseFloat(formatEther(monBalance.value)) * 50).toFixed(2) : "0.00"}
-                      </Text>
-                    </Box>
-                    
-                    {/* Token Balance if user has tokens */}
-                    {tokenBalance && parseFloat(formatEther(tokenBalance)) > 0 && (
-                      <Box>
-                        <Flex justifyContent="space-between" alignItems="center">
-                          <HStack>
-                            <Box w="20px" h="20px">
-                              <Image
-                                src={tokenLogo}
-                                alt={tokenSymbol}
-                                w="20px"
-                                h="20px"
-                              />
-                            </Box>
-                            <Box>
-                              <Text color="#888" fontSize="sm">{tokenSymbol}</Text>
-                            </Box>
-                          </HStack>
-                          <Box>
-                            <Text color="white" fontWeight="bold">
-                              {parseFloat(formatEther(tokenBalance)).toFixed(4)}
-                            </Text>
-                          </Box>
-                        </Flex>
-                      </Box>
-                    )}
-                  </VStack>
-                </Box>
+                <WalletSidebar
+                  ethBalance={monBalance?.value || BigInt(0)}
+                  selectedToken={tokenSymbol}
+                  selectedTokenBalance={tokenBalance}
+                  address={address}
+                />
                 
                 {/* Presale Details Box */}
                 {/* {(() => {
