@@ -451,6 +451,7 @@ const Borrow = () => {
         ],
         onSuccess(data) {
             console.log("Approval successful, transaction hash:", data.hash);
+            console.log(`Extra collateral is ${extraCollateral}`)
             addCollateral();
         },
         onError(error) {
@@ -908,6 +909,7 @@ const Borrow = () => {
     }
 
     const handleSetExtraCollateral = (value) => {
+        console.log(`Setting extra collateral to ${value}`)
         setExtraCollateral(value);
         setCollateral(value);
         // setIsAdding(true);
@@ -1588,7 +1590,7 @@ const Borrow = () => {
                                     <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color="white">
                                         Loan History
                                     </Text>
-                                    {console.log("Rendering loan history, length:", loanHistory.length)}
+                                    {/* {console.log("Rendering loan history, length:", loanHistory.length)} */}
                                     {loanHistory.length > 0 && (
                                         <Button
                                             mb={5}

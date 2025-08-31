@@ -92,12 +92,12 @@ const StandaloneAddCollateralModal: React.FC<StandaloneAddCollateralModalProps> 
     const displayCollateral = extraCollateral ? (extraCollateral >= 1000000 ? formatNumberPrecise(extraCollateral, 5) : commify(extraCollateral, 4)) : "0";
 
     // Reset amount when modal closes
-    useEffect(() => {
-        if (!isOpen) {
-            handleSetCollateral('0');
-            handleSetExtraCollateral('0');
-        }
-    }, [isOpen]);
+    // useEffect(() => {
+    //     if (!isOpen) {
+    //         handleSetCollateral('0');
+    //         handleSetExtraCollateral('0');
+    //     }
+    // }, [isOpen]);
 
     if (!modalRoot || !isOpen) return null;
 
