@@ -843,7 +843,7 @@ const Stake = () => {
                         {/* Stake History Box */}
                         {stakeHistory.length > 0 && (
                             <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
-                                <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Stake History</Text>
+                                <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>History</Text>
                                 <VStack align="stretch" spacing={0}>
                                     {stakeHistory
                                         .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)

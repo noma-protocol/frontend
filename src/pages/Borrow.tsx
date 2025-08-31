@@ -1588,7 +1588,7 @@ const Borrow = () => {
                         <Box bg="#1a1a1a" borderRadius="lg" p={{ base: 4, md: 6 }}>
                                 <Flex justify="space-between" align="center" mb={4} flexWrap="wrap" gap={2}>
                                     <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color="white">
-                                        Loan History
+                                        History
                                     </Text>
                                     {/* {console.log("Rendering loan history, length:", loanHistory.length)} */}
                                     {loanHistory.length > 0 && (

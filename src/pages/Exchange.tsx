@@ -2469,11 +2469,24 @@ const Exchange: React.FC = () => {
             
             // Check if we already have enough WETH allowance
             const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
+            const currentAllowance = wethAllowance || BigInt(0);
+            const requiredAmount = safeParseEther(tradeAmount).toBigInt();
             
-            // If approveMax is false but we have max approval, we need to re-approve for the exact amount
-            const needsExactApproval = !approveMax && isMaxApprovedWeth();
+            // Skip approval if:
+            // 1. We have max approval and approveMax is true, OR
+            // 2. We have enough allowance for the current transaction
+            const hasMaxApproval = isMaxApprovedWeth();
+            const skipApproval = (approveMax && hasMaxApproval) || (!approveMax && currentAllowance >= requiredAmount);
             
-            if (hasEnoughWethAllowance(amountToApprove.toBigInt()) && !needsExactApproval) {
+            console.log("Buy WETH approval check:", {
+                approveMax,
+                hasMaxApproval,
+                currentAllowance: currentAllowance.toString(),
+                requiredAmount: requiredAmount.toString(),
+                skipApproval
+            });
+            
+            if (skipApproval) {
                 // Skip approval and directly buy
                 buyTokensWETH({
                     args: args
@@ -2570,11 +2583,24 @@ const Exchange: React.FC = () => {
         
         // Check if we already have enough allowance
         const amountToApprove = approveMax ? ethers.constants.MaxUint256 : safeParseEther(tradeAmount);
+        const currentAllowance = allowance || BigInt(0);
+        const requiredAmount = safeParseEther(tradeAmount).toBigInt();
         
-        // If approveMax is false but we have max approval, we need to re-approve for the exact amount
-        const needsExactApproval = !approveMax && isMaxApproved();
+        // Skip approval if:
+        // 1. We have max approval and approveMax is true, OR
+        // 2. We have enough allowance for the current transaction
+        const hasMaxApproval = isMaxApproved();
+        const skipApproval = (approveMax && hasMaxApproval) || (!approveMax && currentAllowance >= requiredAmount);
         
-        if (hasEnoughAllowance(amountToApprove.toBigInt()) && !needsExactApproval) {
+        console.log("Sell token approval check:", {
+            approveMax,
+            hasMaxApproval,
+            currentAllowance: currentAllowance.toString(),
+            requiredAmount: requiredAmount.toString(),
+            skipApproval
+        });
+        
+        if (skipApproval) {
             // Skip approval and directly sell
             sellTokens({
                 args: args

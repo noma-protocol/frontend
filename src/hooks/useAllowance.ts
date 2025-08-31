@@ -36,6 +36,7 @@ export const useAllowance = (
                 });
 
                 setAllowance(allowanceResult as bigint);
+                console.log(`Allowance for ${tokenAddress} to ${spenderAddress}:`, allowanceResult.toString());
             } catch (err) {
                 console.error('Error fetching allowance:', err);
                 setError(err as Error);
@@ -46,6 +47,11 @@ export const useAllowance = (
         };
 
         fetchAllowance();
+        
+        // Poll for allowance updates every 5 seconds
+        const interval = setInterval(fetchAllowance, 5000);
+        
+        return () => clearInterval(interval);
     }, [tokenAddress, spenderAddress, address, publicClient]);
 
     const hasEnoughAllowance = (amount: bigint): boolean => {
