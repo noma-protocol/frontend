@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { commify, commifyDecimals, commifyPatched, tickToPrice } from "../utils.tsx";
+import { commify, commifyDecimals, commifyPatched, formatNumberPrecise, tickToPrice } from "../utils.tsx";
 import {ethers} from 'ethers';
 import {
   Container,
@@ -54,7 +54,10 @@ return (
             <Box bg="#2a2a2a" p={4} borderRadius="lg">
               <Text color="#888" fontSize="xs" mb={0}>Circulating Supply</Text>
               <Text color="white" fontSize="lg" fontWeight="bold">
-                {commify(formatEther(circulatingSupply), 0)}
+                {Number(formatEther(circulatingSupply)) < 1000000 ? 
+                  commify(formatEther(circulatingSupply), 0) : 
+                  formatNumberPrecise(formatEther(circulatingSupply))
+                }
               </Text>
               <Text color="#4ade80" fontSize="xs">
                 {tokenSymbol || 'Tokens'}
