@@ -98,14 +98,15 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
       <DialogRoot>
       <DialogTrigger asChild >
         <Button
+          disabled={true}
           variant="outline"
-          size="sm"
+          size="xs"
           fontSize={["xs", "sm", "md"]}
           borderColor="#4ade80"
           color="#4ade80"
           width={{base: "80px", md: "100px"}}
         >
-          Details
+          <Text fontSize={"xs"}>Details</Text>
         </Button>
       </DialogTrigger>
       <DialogContent marginTop="20%">
