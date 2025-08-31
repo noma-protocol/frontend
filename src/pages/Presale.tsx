@@ -30,7 +30,7 @@ import {
 import { Toaster, toaster } from "../components/ui/toaster"
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
-import { commify, commifyDecimals, generateBytes32String, getContractAddress, generateReferralCode } from "../utils";
+import { commify, commifyDecimals, generateBytes32String, getContractAddress, generateReferralCode, formatNumberPrecise } from "../utils";
 import Logo from "../assets/images/noma.png";
 import { ethers } from "ethers"; // Import ethers.js
 import { ProgressLabel, ProgressBar, ProgressRoot, ProgressValueText } from "../components/ui/progress"
@@ -43,6 +43,7 @@ import placeholderLogo from "../assets/images/question_white.svg";
 import monadLogo from "../assets/images/monad.png";
 
 import config from '../config'; 
+import { tokenApi } from '../services/tokenApi';
 
 import addressesLocal   from "../assets/deployment.json";
 import addressesBsc   from "../assets/deployment.json";
@@ -85,7 +86,7 @@ const Presale: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState("00:00:00"); // Example default
 
   const [allowance, setAllowance] = useState(0);
-  const [contributionAmount, setContributionAmount] = useState("");
+  const [contributionAmount, setContributionAmount] = useState("0");
   const [tokensPurchased, setTokensPurchased] = useState("0");
   const [targetDate, setTargetDate] = useState(""); // 24 hours from now
 
@@ -95,6 +96,9 @@ const Presale: React.FC = () => {
   const [progress, setProgress] = useState(null);
   const [progressSc, setProgressSc] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [tokenLogo, setTokenLogo] = useState<string>(placeholderLogo);
+  const [tokenDescription, setTokenDescription] = useState<string>("");
+  const [tokenSupply, setTokenSupply] = useState<string>("");
   
   const presaleUrl = `${environment == "development" ? 
     `http://localhost:5173/presale?a=${contractAddress}r=${referralCode}`:
@@ -482,6 +486,70 @@ const Presale: React.FC = () => {
     }
   });
 
+  // Fetch token logo from API
+  useEffect(() => {
+    const fetchTokenLogo = async () => {
+      if (!tokenSymbol) {
+        console.log("Token symbol not yet loaded");
+        return;
+      }
+      
+      console.log(`Fetching logo for token: ${tokenSymbol}`);
+      
+      // Remove "p-" prefix from presale tokens to match the base token
+      const baseTokenSymbol = tokenSymbol.startsWith("p-") 
+        ? tokenSymbol.substring(2) 
+        : tokenSymbol;
+      
+      console.log(`Looking for base token: ${baseTokenSymbol}`);
+      
+      try {
+        const response = await tokenApi.getTokens();
+        console.log("API response:", response);
+        
+        const token = response.tokens.find(t => t.tokenSymbol === baseTokenSymbol);
+        console.log(`Found token:`, token);
+        
+        if (token) {
+          // Use logoUrl if available, otherwise fall back to logoPreview
+          const logoSource = token.logoUrl || token.logoPreview;
+          if (logoSource) {
+            setTokenLogo(logoSource);
+            console.log(`Set logo for ${tokenSymbol}: ${logoSource}`);
+          } else {
+            console.log(`No logo found for ${baseTokenSymbol}`);
+          }
+          
+          // Also set the token description
+          if (token.tokenDescription) {
+            setTokenDescription(token.tokenDescription);
+            console.log(`Set description for ${tokenSymbol}: ${token.tokenDescription}`);
+          }
+          
+          // Also set the token supply
+          if (token.tokenSupply) {
+            setTokenSupply(token.tokenSupply);
+            console.log(`Set supply for ${tokenSymbol}: ${token.tokenSupply}`);
+          }
+        } else {
+          console.log(`Token ${baseTokenSymbol} not found in API response`);
+        }
+      } catch (error) {
+        console.error("Failed to fetch token logo:", error);
+      }
+    };
+    
+    fetchTokenLogo();
+  }, [tokenSymbol]);
+
+  // Initialize contribution amount to min contribution when it's loaded
+  useEffect(() => {
+    if (minContribution && contributionAmount === "0") {
+      const minContribInEther = formatEther(`${minContribution}`);
+      setContributionAmount(Number(minContribInEther).toFixed(4));
+    }
+  }, [minContribution]);
+
   useEffect(() => {
     const totalRaisedNum = parseFloat(totalRaised) || 0;
     const hardCapNum = parseFloat(hardCap) || 1; // Avoid division by zero
@@ -788,11 +856,21 @@ const Presale: React.FC = () => {
                 </HStack>
                 <HStack justify="space-between">
                   <Box>
+                    <Text color="#888" fontSize="sm">Total Supply</Text>
+                  </Box>
+                  <Box>
+                    <Text color="white" fontSize="sm" fontWeight="500">
+                      {tokenSupply ? formatNumberPrecise(tokenSupply, 4) : "Loading..."}
+                    </Text>
+                  </Box>
+                </HStack>
+                <HStack justify="space-between">
+                  <Box>
                     <Text color="#888" fontSize="sm">Status</Text>
                   </Box>
                   <Box>
                     <Text 
-                      color={finalized ? "#4ade80" : hasExpired ? "#ef4444" : "#888"} 
+                      color={finalized ? "#4ade80" : hasExpired ? "#ef4444" : "#4ade80"} 
                       fontSize="sm" 
                       fontWeight="500"
                     >
@@ -892,8 +970,8 @@ const Presale: React.FC = () => {
                 {/* Token Logo - Left Side */}
                 <Box minW="150px">
                   <Box
-                    w="120px"
-                    h="120px"
+                    w="130px"
+                    h="130px"
                     bg="#0a0a0a"
                     borderRadius="full"
                     border="2px solid #2a2a2a"
@@ -910,10 +988,10 @@ const Presale: React.FC = () => {
                       bgGradient="linear(to-br, #4ade8040, transparent)"
                     />
                     <Image
-                      src={placeholderLogo}
+                      src={tokenLogo}
                       alt={tokenSymbol}
-                      w="60px"
-                      h="60px"
+                      w="80px"
+                      h="80px"
                     />
                   </Box>
                 </Box>
@@ -933,8 +1011,7 @@ const Presale: React.FC = () => {
                     
                     {/* Token Description */}
                     <Text color="#888" fontSize="md" lineHeight="1.6">
-                      Join the presale for {tokenName || "this token"} and be part of an innovative DeFi ecosystem 
-                      with automated liquidity protection and price floor mechanisms.
+                      {tokenDescription || `Join the presale for ${tokenName || "this token"} and be part of an innovative DeFi ecosystem with automated liquidity protection and price floor mechanisms.`}
                     </Text>
                   </VStack>
                 </Box>
@@ -993,33 +1070,52 @@ const Presale: React.FC = () => {
                       </Button></Box> */}
                       <Box w="80px" textAlign="center" ml={-10}>
                         <HStack>
-                          <Box><Image src={monadLogo} w="25px" h="25px" /></Box>
+                          <Box><Image src={monadLogo} w="40px" h="40px" /></Box>
                           <Box><Text color="white" fontWeight="500">MON</Text></Box>
                         </HStack>
                       </Box>
                     </HStack>
                     <Slider 
-                      value={[parseFloat(contributionAmount) || 0]}
+                      value={[Math.max(0, parseFloat(contributionAmount) || 0)]}
                       onValueChange={(e) => setContributionAmount(e.value[0].toFixed(4))}
-                      min={0}
-                      max={5}
+                      min={Math.max(0, Number(formatEther(`${minContribution || 1}`)))}
+                      max={Math.max(1, Number(formatEther(`${maxContribution || 10}`)))}
                       step={0.001}
                       mt={4}
+                      defaultValue={[0]}
                     />
                   </Box>
                   
-                  <SimpleGrid columns={2} gap={4} pt={2}>
-                    <Box>
-                      <Text color="#888" fontSize="sm">You'll receive</Text>
-                      <Text color="white" fontSize="lg" fontWeight="500">
-                        {tokensPurchased} {tokenSymbol}
-                      </Text>
+                  <SimpleGrid columns={2} gap={4} pt={2} w={"100%"}>
+                    <Box w="95%">
+                        <HStack>
+                          <Box mb={2} w="180px">
+                            <Text color="#888" fontSize="sm">You'll receive</Text>
+                            <Text color="white" fontSize="lg" fontWeight="500">
+                              {tokensPurchased}  
+                            </Text>  
+                          </Box>
+                          <Box mt={10}>
+                            <Text color="white" fontSize="lg" fontWeight="500" >
+                               {tokenSymbol}
+                            </Text>  
+                          </Box>
+                        </HStack>
                     </Box>
-                    <Box>
-                      <Text color="#888" fontSize="sm">Price per token</Text>
-                      <Text color="white" fontSize="lg" fontWeight="500">
-                        {initialPrice} MON
-                      </Text>
+                    <Box w="95%" >
+                        <HStack>
+                          <Box mb={2} w="180px">
+                            <Text color="#888" fontSize="sm">Price per token</Text>
+                            <Text color="white" fontSize="lg" fontWeight="500">
+                              {initialPrice}  
+                            </Text>  
+                          </Box>
+                          <Box mt={10}>
+                            <Text color="white" fontSize="lg" fontWeight="500" >
+                               MON
+                            </Text>  
+                          </Box>
+                        </HStack>                      
                     </Box>
                   </SimpleGrid>
                   
@@ -1206,7 +1302,7 @@ const Presale: React.FC = () => {
                         <HStack>
                           <Box w="20px" h="20px">
                             <Image
-                              src={placeholderLogo}
+                              src={tokenLogo}
                               alt={tokenSymbol}
                               w="20px"
                               h="20px"
@@ -1274,7 +1370,7 @@ const Presale: React.FC = () => {
                           <HStack>
                             <Box w="20px" h="20px">
                               <Image
-                                src={placeholderLogo}
+                                src={tokenLogo}
                                 alt={tokenSymbol}
                                 w="20px"
                                 h="20px"

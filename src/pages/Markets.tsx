@@ -79,6 +79,7 @@ const Markets: React.FC = () => {
   const [isAllVaultsLoading, setIsAllVaultsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tokenProtocols, setTokenProtocols] = useState<{ [symbol: string]: string }>({});
+  const [tokenLogos, setTokenLogos] = useState<{ [symbol: string]: string }>({});
 
   const [modalFocus, setModalFocus] = useState<boolean>(false);
 
@@ -115,18 +116,27 @@ const Markets: React.FC = () => {
       try {
         const response = await tokenApi.getTokens();
         const protocols: { [symbol: string]: string } = {};
+        const logos: { [symbol: string]: string } = {};
         
-        // Build a map of token symbols to their protocols
+        // Build maps for token symbols to their protocols and logos
         response.tokens.forEach(token => {
-          if (token.tokenSymbol && token.selectedProtocol) {
-            protocols[token.tokenSymbol] = token.selectedProtocol;
-            console.log(`Mapping ${token.tokenSymbol} to ${token.selectedProtocol}`);
+          if (token.tokenSymbol) {
+            if (token.selectedProtocol) {
+              protocols[token.tokenSymbol] = token.selectedProtocol;
+            }
+            // Use logoUrl if available, otherwise fall back to logoPreview
+            const logoSource = token.logoUrl || token.logoPreview;
+            if (logoSource) {
+              logos[token.tokenSymbol] = logoSource;
+            }
+            console.log(`Mapping ${token.tokenSymbol} - Protocol: ${token.selectedProtocol}, Logo: ${logoSource}`);
           }
         });
         
         setTokenProtocols(protocols);
+        setTokenLogos(logos);
         console.log("Token protocols loaded:", protocols);
-        console.log("NOMA protocol:", protocols["NOMA"]);
+        console.log("Token logos loaded:", logos);
       } catch (error) {
         console.error("Failed to fetch token protocols:", error);
       }
@@ -582,7 +592,8 @@ const Markets: React.FC = () => {
                   </Box>
                   {vaultsDataArray?.map((vault, index) => {
                     const protocol = tokenProtocols[vault.tokenSymbol] || "pancakeswap";
-                    console.log("Vault info:", vault.tokenSymbol, vault.vault, "Protocol:", protocol)
+                    const tokenLogo = tokenLogos[vault.tokenSymbol] || (vault.tokenSymbol === "NOMA" ? nomaLogo : placeholderLogo);
+                    console.log("Vault info:", vault.tokenSymbol, vault.vault, "Protocol:", protocol, "Logo:", tokenLogo)
                     console.log({ vault })
 
                     let hasPresale;
@@ -623,9 +634,9 @@ const Markets: React.FC = () => {
                           <HStack spacing={2}>
                             <Box>
                               <Image
-                                w="20px"
-                                h="20px"
-                                src={vault.tokenSymbol == "NOMA" ? nomaLogo : placeholderLogo}
+                                w="30px"
+                                h="30px"
+                                src={tokenLogo}
                                 alt="token logo"
                               />
                             </Box>
@@ -639,8 +650,8 @@ const Markets: React.FC = () => {
                             <HStack spacing={2}>
                               <Box>
                                 <Image
-                                  w="20px"
-                                  h="20px"
+                                  w="30px"
+                                  h="30px"
                                   src={getReserveAssetLogo(getReserveAssetLabel(vault.token1))}
                                   alt="reserve asset logo"
                                 />
@@ -652,9 +663,10 @@ const Markets: React.FC = () => {
                           </Box>
 
                           {/* Protocol */}
-                          <Box display={isMobile ? "none" : "flex"} justifyContent="flex-start">
+                          <Box display={isMobile ? "none" : "flex"} justifyContent="flex-start" mt={-1}>
                             <Image
-                              w="60px"
+                              ml={-3}
+                              w="80px"
                               h="auto"
                               src={protocol === "uniswap" ? uniswapLogo : pancakeLogo}
                               alt="protocol logo"
@@ -669,7 +681,7 @@ const Markets: React.FC = () => {
                                 <Box
                                   px={3}
                                   py={1}
-                                  borderRadius="full"
+                                  // borderRadius="full"
                                   bg={vault.finalized ? "rgba(74, 222, 128, 0.1)" : vault.expired ? "rgba(239, 68, 68, 0.1)" : "rgba(251, 191, 36, 0.1)"}
                                   border="1px solid"
                                   borderColor={vault.finalized ? "#4ade80" : vault.expired ? "#ef4444" : "#fbbf24"}

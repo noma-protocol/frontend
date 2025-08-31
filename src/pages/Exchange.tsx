@@ -45,6 +45,7 @@ import { useAccount, useBalance, useContractRead } from "wagmi";
 import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
 import { useAllowance } from "../hooks/useAllowance";
 import { isMobile } from "react-device-detect";
+import { tokenApi } from '../services/tokenApi';
 import { Slider } from "../components/ui/slider"
 import {
   StatRoot,
@@ -1377,6 +1378,18 @@ const Exchange: React.FC = () => {
                     return;
                 }
                 
+                // Fetch deployed tokens from API
+                let deployedTokenSymbols = new Set();
+                try {
+                    const response = await tokenApi.getTokens();
+                    const deployedTokens = response.tokens.filter(token => token.status === 'deployed');
+                    deployedTokenSymbols = new Set(deployedTokens.map(token => token.tokenSymbol));
+                    console.log('Deployed tokens:', Array.from(deployedTokenSymbols));
+                } catch (error) {
+                    console.error('Failed to fetch deployed tokens:', error);
+                    // Continue without filtering if API fails
+                }
+                
                 const nomaFactoryContract = new ethers.Contract(
                     nomaFactoryAddress,
                     FactoryAbi,
@@ -1443,7 +1456,13 @@ const Exchange: React.FC = () => {
                 );
                 
                 const flattenedVaults = allVaultDescriptions.flat().filter(Boolean);
-                setVaultDescriptions(flattenedVaults);
+                
+                // Filter vaults to only include deployed tokens
+                const deployedVaults = deployedTokenSymbols.size > 0 
+                    ? flattenedVaults.filter(vault => deployedTokenSymbols.has(vault.tokenSymbol))
+                    : flattenedVaults; // Show all if API fails
+                
+                setVaultDescriptions(deployedVaults);
                 
                 // Fetch price stats from API with default 24h interval
                 let priceStats = null;
@@ -1454,7 +1473,7 @@ const Exchange: React.FC = () => {
                 }
                 
                 // Convert vault descriptions to token format for display
-                const tokenList = flattenedVaults.map((vault, index) => {
+                const tokenList = deployedVaults.map((vault, index) => {
                     // Use API percentage change for NOMA token, random for others
                     const isNoma = vault.tokenSymbol === 'NOMA' || vault.tokenSymbol === 'noma';
                     const change24h = isNoma && priceStats?.percentageChange !== undefined 
