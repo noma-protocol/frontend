@@ -3277,76 +3277,101 @@ const Exchange: React.FC = () => {
                                     <Tabs.Content value="all">
                                         <VStack gap={2} align="stretch">
                                                 {getPaginatedData(tradeHistory, currentPage, itemsPerPage).map((trade) => (
-                                                    <Flex
+                                                    <HStack
                                                         key={trade.id}
                                                         p={2}
                                                         bg="#2a2a2a"
                                                         borderRadius="md"
                                                         cursor="pointer"
                                                         _hover={{ bg: "#333" }}
+                                                        gap={3}
                                                         alignItems="center"
-                                                        gap={isMobile ? 2 : 4}
-                                                        flexWrap={isMobile ? "wrap" : "nowrap"}
+                                                        justifyContent="space-between"
+                                                        w="100%"
                                                     >
-                                                        <Box>
+                                                        {/* Trade Type Badge */}
+                                                        <Box w="50px">
                                                             <Badge
                                                                 colorPalette={trade.type === "buy" ? "green" : "red"}
                                                                 size="sm"
-                                                                minW="45px"
+                                                                w="45px"
                                                                 textAlign="center"
+                                                                display="block"
                                                             >
                                                                 {trade.type.toUpperCase()}
                                                             </Badge>
                                                         </Box>
                                                         
-                                                        <HStack flex="1" gap={4}  w={"15%"}>
-                                                            <Box>
-                                                                <Text color="white" fontWeight="bold" minW="60px">
-                                                                    {trade.token}
-                                                                </Text>
-                                                            </Box>
-                                                            <Box>
-                                                                <Text color="#888" fontSize="sm">
-                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON
-                                                                </Text>
-                                                            </Box>
-                                                        </HStack>
+                                                        {/* Token Symbol */}
+                                                        <Box w="60px">
+                                                            <Text color="white" fontWeight="bold">
+                                                                {trade.token}
+                                                            </Text>
+                                                        </Box>
                                                         
-                                                        <Box border={"1px solid green"}>
-                                                            <HStack>
-                                                                <Box border="1px solid">
-                                                                    <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
-                                                                        {trade.total.toFixed(4)} MON {monPrice > 0 }
-                                                                    </Text>                                                                    
+                                                        {/* Trade Details */}
+                                                        <Box flex="1">
+                                                            <Box 
+                                                                px={3}
+                                                                py={1}
+                                                                w="100%"
+                                                            >
+                                                                <Text color="#888" fontSize="sm" isTruncated>
+                                                                    {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)}
+                                                                </Text>
+                                                            </Box>
+                                                        </Box>
+                                                        
+                                                        {/* MON Value */}
+                                                        <Box w="200px">
+                                                            <HStack
+                                                                px={3}
+                                                                py={1}
+                                                                justifyContent="space-between"
+                                                                spacing={2}
+                                                                w="100%"
+                                                            >
+                                                                <Box>
+                                                                    <Text color="white" fontWeight="bold">
+                                                                        {trade.total.toFixed(4)}
+                                                                    </Text>
                                                                 </Box>
                                                                 <Box>
-                                                                    <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
-                                                                      {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${(trade.total * monPrice).toFixed(2)})</Text>}
-                                                                    </Text>                                                                    
+                                                                    <Text color="white" fontSize="sm">
+                                                                        MON
+                                                                    </Text>
                                                                 </Box>
+                                                                {monPrice > 0 && (
+                                                                    <Box>
+                                                                        <Text color="#888" fontSize="xs">
+                                                                            (${(trade.total * monPrice).toFixed(2)})
+                                                                        </Text>
+                                                                    </Box>
+                                                                )}
                                                             </HStack>
                                                         </Box>
                                                         
-                                                        <Box>
+                                                        {/* TX Hash */}
+                                                        <Box w="100px">
                                                             <Text 
                                                                 color="#4ade80" 
                                                                 fontSize="xs"
                                                                 cursor="pointer"
                                                                 _hover={{ textDecoration: "underline" }}
                                                                 onClick={() => window.open(`https://monadexplorer.com/tx/${trade.fullTxHash}`, "_blank")}
-                                                                minW="100px"
-                                                                textAlign="right"
+                                                                textAlign="center"
                                                             >
                                                                 {trade.txHash}
                                                             </Text>
                                                         </Box>
                                                         
-                                                        <Box>
-                                                            <Text color="#888" fontSize="xs" minW="60px" textAlign="right">
+                                                        {/* Time */}
+                                                        <Box w="80px">
+                                                            <Text color="#888" fontSize="xs" textAlign="right">
                                                                 {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
                                                             </Text>
                                                         </Box>
-                                                    </Flex>
+                                                    </HStack>
                                                 ))}
                                             </VStack>
                                             
@@ -3409,71 +3434,103 @@ const Exchange: React.FC = () => {
                                                         return myTrades.length > 0 ? (
                                                             <>
                                                                 {paginatedMyTrades.map((trade) => (
-                                                                    <Flex
+                                                                    <HStack
                                                                         key={trade.id}
                                                                         p={2}
                                                                         bg="#2a2a2a"
                                                                         borderRadius="md"
                                                                         cursor="pointer"
                                                                         _hover={{ bg: "#333" }}
+                                                                        gap={3}
                                                                         alignItems="center"
-                                                                        gap={4}
+                                                                        justifyContent="space-between"
+                                                                        w="100%"
                                                                     >
-                                                            <Box>
-                                                                <Badge
-                                                                    colorPalette={trade.type === "buy" ? "green" : "red"}
-                                                                    size="sm"
-                                                                    minW="45px"
-                                                                    textAlign="center"
-                                                                >
-                                                                    {trade.type.toUpperCase()}
-                                                                </Badge>
-                                                            </Box>
-                                                            
-                                                            <HStack flex="1" gap={4}>
-                                                                <Box>
-                                                                    <Text color="white" fontWeight="bold" minW="60px">
-                                                                        {trade.token}
-                                                                    </Text>
-                                                                </Box>
-                                                                <Box>
-                                                                    <Text color="#888" fontSize="sm">
-                                                                        {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)} MON
-                                                                    </Text>
-                                                                </Box>
-                                                            </HStack>
-                                                            
-                                                            <Box>
-                                                                <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
-                                                                    {trade.total.toFixed(4)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${(trade.total * monPrice).toFixed(2)})</Text>}
-                                                                </Text>
-                                                            </Box>
-                                                            
-                                                            <Box>
-                                                                <Text 
-                                                                    color="#4ade80" 
-                                                                    fontSize="xs"
-                                                                    cursor="pointer"
-                                                                    _hover={{ textDecoration: "underline" }}
-                                                                    onClick={() => {
-                                                                        const explorerUrl = config.chain === "monad" 
-                                                                            ? `https://monadexplorer.com/tx/${trade.fullTxHash || trade.txHash}`
-                                                                            : `https://bscscan.com/tx/${trade.fullTxHash || trade.txHash}`;
-                                                                        window.open(explorerUrl, "_blank");
-                                                                    }}
-                                                                    minW="100px"
-                                                                    textAlign="right"
-                                                                >
-                                                                    {trade.txHash}
-                                                                </Text>
-                                                            </Box>
-                                                            
-                                                            <Box>
-                                                                <Text color="#888" fontSize="xs" minW="60px" textAlign="right">
-                                                                    {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
-                                                                </Text>
-                                                            </Box>
-                                                        </Flex>
+                                                                        {/* Trade Type Badge */}
+                                                                        <Box w="50px">
+                                                                            <Badge
+                                                                                colorPalette={trade.type === "buy" ? "green" : "red"}
+                                                                                size="sm"
+                                                                                w="45px"
+                                                                                textAlign="center"
+                                                                                display="block"
+                                                                            >
+                                                                                {trade.type.toUpperCase()}
+                                                                            </Badge>
+                                                                        </Box>
+                                                                        
+                                                                        {/* Token Symbol */}
+                                                                        <Box w="60px">
+                                                                            <Text color="white" fontWeight="bold">
+                                                                                {trade.token}
+                                                                            </Text>
+                                                                        </Box>
+                                                                        
+                                                                        {/* Trade Details */}
+                                                                        <Box 
+                                                                            flex="1"
+                                                                            px={3}
+                                                                            py={1}
+                                                                        >
+                                                                            <Text color="#888" fontSize="sm" isTruncated>
+                                                                                {trade.amount.toLocaleString()} {trade.token} @ {formatPrice(trade.price)}
+                                                                            </Text>
+                                                                        </Box>
+                                                                        
+                                                                        {/* MON Value */}
+                                                                        <Box w="200px">
+                                                                            <HStack
+                                                                                px={3}
+                                                                                py={1}
+                                                                                justifyContent="space-between"
+                                                                                spacing={2}
+                                                                            >
+                                                                                <Box>
+                                                                                    <Text color="white" fontWeight="bold">
+                                                                                        {trade.total.toFixed(4)}
+                                                                                    </Text>
+                                                                                </Box>
+                                                                                <Box>
+                                                                                    <Text color="white" fontSize="sm">
+                                                                                        MON
+                                                                                    </Text>
+                                                                                </Box>
+                                                                                {monPrice > 0 && (
+                                                                                    <Box>
+                                                                                        <Text color="#888" fontSize="xs">
+                                                                                            (${(trade.total * monPrice).toFixed(2)})
+                                                                                        </Text>
+                                                                                    </Box>
+                                                                                )}
+                                                                            </HStack>
+                                                                        </Box>
+                                                                        
+                                                                        {/* TX Hash */}
+                                                                        <Box w="100px">
+                                                                            <Text 
+                                                                                color="#4ade80" 
+                                                                                fontSize="xs"
+                                                                                cursor="pointer"
+                                                                                _hover={{ textDecoration: "underline" }}
+                                                                                onClick={() => {
+                                                                                    const explorerUrl = config.chain === "monad" 
+                                                                                        ? `https://monadexplorer.com/tx/${trade.fullTxHash || trade.txHash}`
+                                                                                        : `https://bscscan.com/tx/${trade.fullTxHash || trade.txHash}`;
+                                                                                    window.open(explorerUrl, "_blank");
+                                                                                }}
+                                                                                textAlign="center"
+                                                                            >
+                                                                                {trade.txHash}
+                                                                            </Text>
+                                                                        </Box>
+                                                                        
+                                                                        {/* Time */}
+                                                                        <Box w="80px">
+                                                                            <Text color="#888" fontSize="xs" textAlign="right">
+                                                                                {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                                            </Text>
+                                                                        </Box>
+                                                                    </HStack>
                                                                     ))}
                                                                     
                                                                     {/* Pagination Controls for My Transactions */}
