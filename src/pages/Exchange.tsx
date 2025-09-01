@@ -61,7 +61,7 @@ import { Toaster, toaster } from "../components/ui/toaster"
 
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
-import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress } from "../utils";
+import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress, generateReferralCode } from "../utils";
 import WalletSidebar from "../components/WalletSidebar";
 import StandaloneWrapModal from "../components/StandaloneWrapModal";
 import StandaloneUnwrapModal from "../components/StandaloneUnwrapModal";
@@ -187,6 +187,14 @@ const Exchange: React.FC = () => {
     const [tradeAmount, setTradeAmount] = useState("");
     const [isBuying, setIsBuying] = useState(true);
     const [tradeHistoryTab, setTradeHistoryTab] = useState("all");
+    
+    // Parse referral code from URL
+    const [searchParams] = useSearchParams();
+    const urlReferralCode = searchParams.get("r") || "";
+    
+    // Referral state
+    const [referralCode, setReferralCode] = useState("");
+    const [referredBy, setReferredBy] = useState<string | null>(null);
     
     // Check token allowance for selling
     const { allowance, hasEnoughAllowance, isMaxApproved } = useAllowance(
@@ -400,6 +408,36 @@ const Exchange: React.FC = () => {
         loadTradeHistory();
     }, []);
     
+    // Handle referral code from URL
+    useEffect(() => {
+        if (urlReferralCode && address) {
+            // Check if user is already referred
+            const existingReferral = localStorage.getItem(`noma_referred_by_${address}`);
+            
+            if (!existingReferral) {
+                // Store referral code for this address
+                localStorage.setItem(`noma_referred_by_${address}`, urlReferralCode);
+                setReferredBy(urlReferralCode);
+                console.log(`User ${address} referred by code: ${urlReferralCode}`);
+            } else {
+                // User already has a referrer
+                setReferredBy(existingReferral);
+            }
+        } else if (address) {
+            // Check for existing referral
+            const existingReferral = localStorage.getItem(`noma_referred_by_${address}`);
+            if (existingReferral) {
+                setReferredBy(existingReferral);
+            }
+        }
+        
+        // Generate referral code for current user
+        if (address) {
+            const code = generateReferralCode(address);
+            setReferralCode(code?.slice(0, 8) || ""); // Use first 8 chars of hash
+        }
+    }, [urlReferralCode, address]);
+    
     // Save trade history to local storage whenever it changes
     useEffect(() => {
         if (tradeHistory.length > 0) {
@@ -416,6 +454,46 @@ const Exchange: React.FC = () => {
         setTradeHistory([]);
         processedTxHashes.clear();
         localStorage.removeItem('noma_trade_history');
+    };
+    
+    // Function to track referral trade
+    const trackReferralTrade = async (tradeData: {
+        type: 'buy' | 'sell';
+        tokenAddress: string;
+        tokenSymbol: string;
+        volumeETH: string;
+        volumeUSD: number;
+        txHash: string;
+    }) => {
+        if (!referredBy || !address) return;
+        
+        try {
+            // For now, we'll store referral trades locally
+            // In production, this would be sent to the backend API
+            const referralTrades = JSON.parse(localStorage.getItem('noma_referral_trades') || '[]');
+            
+            const newTrade = {
+                id: Date.now() + Math.random(),
+                refereeAddress: address,
+                referrerCode: referredBy,
+                ...tradeData,
+                timestamp: new Date().toISOString()
+            };
+            
+            referralTrades.push(newTrade);
+            localStorage.setItem('noma_referral_trades', JSON.stringify(referralTrades));
+            
+            console.log('Referral trade tracked:', newTrade);
+            
+            // TODO: Send to backend API
+            // await fetch('/api/referral/track-trade', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(newTrade)
+            // });
+        } catch (error) {
+            console.error('Error tracking referral trade:', error);
+        }
     };
     
     // Pagination helper functions
@@ -2118,6 +2196,26 @@ const Exchange: React.FC = () => {
                 setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
             }
             
+            // Track referral trade
+            trackReferralTrade({
+                type: 'buy',
+                tokenAddress: selectedToken?.token0 || '',
+                tokenSymbol: selectedToken?.symbol || '',
+                volumeETH: ethAmount.toString(),
+                volumeUSD: ethAmount * (monPrice || 0),
+                txHash: data.hash
+            });
+            
+            // Track referral trade
+            trackReferralTrade({
+                type: 'buy',
+                tokenAddress: selectedToken?.token0 || '',
+                tokenSymbol: selectedToken?.symbol || '',
+                volumeETH: ethAmount.toString(),
+                volumeUSD: ethAmount * (monPrice || 0),
+                txHash: data.hash
+            });
+            
             setTimeout(() => {
                 const fetchBalances = async () => {
                     if (!selectedToken) return;
@@ -2207,6 +2305,16 @@ const Exchange: React.FC = () => {
                 setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
             }
             
+            // Track referral trade
+            trackReferralTrade({
+                type: 'buy',
+                tokenAddress: selectedToken?.token0 || '',
+                tokenSymbol: selectedToken?.symbol || '',
+                volumeETH: ethAmount.toString(),
+                volumeUSD: ethAmount * (monPrice || 0),
+                txHash: data.hash
+            });
+            
             setTimeout(() => {
                 const fetchBalances = async () => {
                     if (!selectedToken) return;
@@ -2290,6 +2398,16 @@ const Exchange: React.FC = () => {
                 processedTxHashes.add(data.hash);
                 setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
             }
+            
+            // Track referral trade
+            trackReferralTrade({
+                type: 'sell',
+                tokenAddress: selectedToken?.token0 || '',
+                tokenSymbol: selectedToken?.symbol || '',
+                volumeETH: ethAmount.toString(),
+                volumeUSD: ethAmount * (monPrice || 0),
+                txHash: data.hash
+            });
             
             setTimeout(() => {
                 const fetchBalances = async () => {
@@ -3453,6 +3571,54 @@ const Exchange: React.FC = () => {
                             isUnwrapDrawerOpen={isUnwrapDrawerOpen}
                             setIsUnwrapDrawerOpen={setIsUnwrapDrawerOpen}
                         />
+                        
+                        {/* Referral Box */}
+                        {referralCode && (
+                            <Box 
+                                bg="rgba(26, 26, 26, 0.8)"
+                                backdropFilter="blur(10px)"
+                                borderRadius="lg" 
+                                p={4} 
+                                w="100%"
+                                border="1px solid rgba(255, 255, 255, 0.1)"
+                                boxShadow="0 4px 12px rgba(0, 0, 0, 0.3)"
+                            >
+                                <Text fontSize="md" fontWeight="bold" color="white" mb={2}>Your Referral Link</Text>
+                                <HStack>
+                                    <Box 
+                                        flex={1}
+                                        bg="#2a2a2a"
+                                        p={2}
+                                        borderRadius="md"
+                                        fontSize="xs"
+                                        color="#888"
+                                        wordBreak="break-all"
+                                    >
+                                        {`${window.location.origin}?r=${referralCode}`}
+                                    </Box>
+                                    <Button
+                                        size="sm"
+                                        bg="#4ade80"
+                                        color="black"
+                                        _hover={{ bg: "#22c55e" }}
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(`${window.location.origin}?r=${referralCode}`);
+                                            toaster.create({
+                                                title: "Copied!",
+                                                description: "Referral link copied to clipboard",
+                                            });
+                                        }}
+                                    >
+                                        Copy
+                                    </Button>
+                                </HStack>
+                                {referredBy && (
+                                    <Text mt={2} fontSize="xs" color="#4ade80">
+                                        You were referred by: {referredBy.slice(0, 6)}...
+                                    </Text>
+                                )}
+                            </Box>
+                        )}
                     
                     {/* Trading Panel */}
                     <Box 
