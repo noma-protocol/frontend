@@ -3299,7 +3299,7 @@ const Exchange: React.FC = () => {
                                                             </Badge>
                                                         </Box>
                                                         
-                                                        <HStack flex="1" gap={4}>
+                                                        <HStack flex="1" gap={4}  w={"15%"}>
                                                             <Box>
                                                                 <Text color="white" fontWeight="bold" minW="60px">
                                                                     {trade.token}
@@ -3312,10 +3312,19 @@ const Exchange: React.FC = () => {
                                                             </Box>
                                                         </HStack>
                                                         
-                                                        <Box>
-                                                            <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
-                                                                {trade.total.toFixed(4)} MON {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${(trade.total * monPrice).toFixed(2)})</Text>}
-                                                            </Text>
+                                                        <Box border={"1px solid green"}>
+                                                            <HStack>
+                                                                <Box border="1px solid">
+                                                                    <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
+                                                                        {trade.total.toFixed(4)} MON {monPrice > 0 }
+                                                                    </Text>                                                                    
+                                                                </Box>
+                                                                <Box>
+                                                                    <Text color="white" fontWeight="bold" minW="80px" textAlign="right">
+                                                                      {monPrice > 0 && <Text as="span" fontSize="xs" color="#888">(${(trade.total * monPrice).toFixed(2)})</Text>}
+                                                                    </Text>                                                                    
+                                                                </Box>
+                                                            </HStack>
                                                         </Box>
                                                         
                                                         <Box>
@@ -3571,54 +3580,6 @@ const Exchange: React.FC = () => {
                             isUnwrapDrawerOpen={isUnwrapDrawerOpen}
                             setIsUnwrapDrawerOpen={setIsUnwrapDrawerOpen}
                         />
-                        
-                        {/* Referral Box */}
-                        {referralCode && (
-                            <Box 
-                                bg="rgba(26, 26, 26, 0.8)"
-                                backdropFilter="blur(10px)"
-                                borderRadius="lg" 
-                                p={4} 
-                                w="100%"
-                                border="1px solid rgba(255, 255, 255, 0.1)"
-                                boxShadow="0 4px 12px rgba(0, 0, 0, 0.3)"
-                            >
-                                <Text fontSize="md" fontWeight="bold" color="white" mb={2}>Your Referral Link</Text>
-                                <HStack>
-                                    <Box 
-                                        flex={1}
-                                        bg="#2a2a2a"
-                                        p={2}
-                                        borderRadius="md"
-                                        fontSize="xs"
-                                        color="#888"
-                                        wordBreak="break-all"
-                                    >
-                                        {`${window.location.origin}?r=${referralCode}`}
-                                    </Box>
-                                    <Button
-                                        size="sm"
-                                        bg="#4ade80"
-                                        color="black"
-                                        _hover={{ bg: "#22c55e" }}
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(`${window.location.origin}?r=${referralCode}`);
-                                            toaster.create({
-                                                title: "Copied!",
-                                                description: "Referral link copied to clipboard",
-                                            });
-                                        }}
-                                    >
-                                        Copy
-                                    </Button>
-                                </HStack>
-                                {referredBy && (
-                                    <Text mt={2} fontSize="xs" color="#4ade80">
-                                        You were referred by: {referredBy.slice(0, 6)}...
-                                    </Text>
-                                )}
-                            </Box>
-                        )}
                     
                     {/* Trading Panel */}
                     <Box 
