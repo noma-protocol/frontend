@@ -264,7 +264,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
                     </Text>
                   </HStack>
                 </Box>
-                <Box>
+                {/* <Box>
                   <Button
                     size="xs"
                     variant="ghost"
@@ -274,7 +274,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
                   >
                     Copy Code
                   </Button>                  
-                </Box>
+                </Box> */}
               </VStack>
             </Box>
 

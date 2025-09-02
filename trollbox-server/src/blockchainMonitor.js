@@ -268,6 +268,58 @@ class BlockchainMonitor {
       const amount = ethers.formatEther(value);
       if (parseFloat(amount) < 1) return;
       
+      // Check if this is a trade with the DEX pool
+      const isDexTrade = (from.toLowerCase() === DEX_POOL_ADDRESS.toLowerCase() || 
+                         to.toLowerCase() === DEX_POOL_ADDRESS.toLowerCase());
+      
+      if (isDexTrade && this.referralStore) {
+        // Determine trade type and trader address
+        const isSell = to.toLowerCase() === DEX_POOL_ADDRESS.toLowerCase();
+        const traderAddress = isSell ? from : to;
+        const tradeType = isSell ? 'sell' : 'buy';
+        
+        // Get transaction receipt for more details
+        let gasUsed = null;
+        let effectiveGasPrice = null;
+        try {
+          const receipt = await this.provider.getTransactionReceipt(event.transactionHash);
+          if (receipt) {
+            gasUsed = receipt.gasUsed.toString();
+            effectiveGasPrice = receipt.effectiveGasPrice?.toString();
+          }
+        } catch (err) {
+          console.error('Error fetching transaction receipt:', err);
+        }
+        
+        // Create transaction record for referral tracking
+        const transaction = {
+          hash: event.transactionHash,
+          type: tradeType,
+          sender: from,
+          recipient: to,
+          amount: amount,
+          amountRaw: value.toString(),
+          price: 0, // Price would need to be calculated from pool state
+          amountUSD: '0', // Would need price oracle
+          tokenAddress: NOMA_TOKEN_ADDRESS,
+          tokenSymbol: 'NOMA',
+          poolAddress: DEX_POOL_ADDRESS,
+          blockNumber: event.blockNumber,
+          logIndex: event.logIndex,
+          gasUsed: gasUsed,
+          effectiveGasPrice: effectiveGasPrice,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Store transaction
+        if (this.transactionStore) {
+          this.transactionStore.addTransaction(transaction);
+        }
+        
+        // Track referral volume
+        await this.trackReferralVolume(transaction);
+      }
+      
       // Format addresses for display
       const fromAddr = this.formatAddress(from);
       const toAddr = this.formatAddress(to);
