@@ -89,6 +89,7 @@ const Presale: React.FC = () => {
   const [allowance, setAllowance] = useState(0);
   const [contributionAmount, setContributionAmount] = useState("0");
   const [tokensPurchased, setTokensPurchased] = useState("0");
+  const [contributionError, setContributionError] = useState("");
   const [targetDate, setTargetDate] = useState(""); // 24 hours from now
 
   const [referralCode, setReferralCode] = useState('');
@@ -550,12 +551,20 @@ const Presale: React.FC = () => {
       const maxContribInEther = Number(formatEther(`${maxContribution}`));
       const currentAmount = parseFloat(contributionAmount) || 0;
       
-      // If current amount is outside valid range, set to min
-      if (currentAmount < minContribInEther || currentAmount > maxContribInEther) {
-        setContributionAmount(minContribInEther.toFixed(4));
+      // Check if current amount is valid
+      if (contributionAmount && currentAmount > 0) {
+        if (currentAmount < minContribInEther) {
+          setContributionError(`Minimum contribution is ${minContribInEther} MON`);
+        } else if (currentAmount > maxContribInEther) {
+          setContributionError(`Maximum contribution is ${maxContribInEther} MON`);
+        } else {
+          setContributionError("");
+        }
+      } else {
+        setContributionError("");
       }
     }
-  }, [minContribution, maxContribution]);
+  }, [minContribution, maxContribution, contributionAmount]);
 
   useEffect(() => {
     const totalRaisedNum = parseFloat(totalRaised) || 0;
@@ -780,7 +789,26 @@ const Presale: React.FC = () => {
 
         // Check if it's a valid number
         if (!isNaN(parsedValue) && parsedValue >= 0) {
-          setContributionAmount(normalizedValue);
+          // Get min/max values from contract
+          const minContribInEther = minContribution ? Number(formatEther(`${minContribution}`)) : 0.001;
+          const maxContribInEther = maxContribution ? Number(formatEther(`${maxContribution}`)) : 5;
+          
+          // Enforce min/max limits
+          if (parsedValue < minContribInEther) {
+            // For values below min, allow typing single digit or decimal point
+            // This prevents blocking users from typing values like "0.1" when min is 0.01
+            if (normalizedValue.length <= 1 || normalizedValue === "0.") {
+              setContributionAmount(normalizedValue);
+            }
+            return;
+          }
+          
+          if (parsedValue > maxContribInEther) {
+            // Cap at max value
+            setContributionAmount(maxContribInEther.toString());
+          } else {
+            setContributionAmount(normalizedValue);
+          }
         }
       }
     }
@@ -1050,8 +1078,8 @@ const Presale: React.FC = () => {
                       <NumberInputRoot
                         value={contributionAmount}
                         onChange={handleSetContributionAmount}
-                        min={0.001}
-                        max={5}
+                        min={minContribution ? Number(formatEther(`${minContribution}`)) : 0.001}
+                        max={maxContribution ? Number(formatEther(`${maxContribution}`)) : 5}
                         step={0.001}
                         w={isMobile ? "85%" : "95%"}
                       >
@@ -1083,6 +1111,14 @@ const Presale: React.FC = () => {
                         </HStack>
                       </Box>
                     </HStack>
+                    
+                    {/* Error message */}
+                    {contributionError && (
+                      <Text fontSize="xs" color="#ef4444" mt={2}>
+                        {contributionError}
+                      </Text>
+                    )}
+                    
                     {minContribution && maxContribution ? (
                       <Slider 
                         value={[Math.max(0, parseFloat(contributionAmount) || 0)]}
@@ -1162,7 +1198,7 @@ const Presale: React.FC = () => {
                     fontWeight="600"
                     onClick={handleClickDeposit}
                     isLoading={contributing}
-                    isDisabled={!contributionAmount || parseFloat(contributionAmount) <= 0 || contributing}
+                    isDisabled={!contributionAmount || parseFloat(contributionAmount) <= 0 || contributing || !!contributionError}
                     _hover={{ bg: "#22c55e" }}
                   >
                     Contribute
