@@ -506,7 +506,7 @@ const Exchange: React.FC = () => {
         };
         
         handleReferral();
-    }, [urlReferralCode, urlReferrerAddress, address]);
+    }, [urlReferralCode, address]);
     
     // Save trade history to local storage whenever it changes
     useEffect(() => {

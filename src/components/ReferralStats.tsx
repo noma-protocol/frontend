@@ -45,7 +45,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
       
       // Generate referral link with only the code
       const baseUrl = window.location.origin;
-      const link = `${baseUrl}/exchange?r=${code}`;
+      const link = `${baseUrl}/?r=${code}`;
       setReferralLink(link);
       
       // Register the code with the backend
