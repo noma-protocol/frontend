@@ -121,7 +121,7 @@ const TrollBox: React.FC = () => {
   const ADMIN_ADDRESSES = ['0xcC91EB5D1AB2D577a64ACD71F0AA9C5cAf35D111'];
   const isAdmin = address && ADMIN_ADDRESSES.includes(address);
   
-  // Use the WebSocket hook
+  // Use the WebSocket hook with autoConnect=false
   const { 
     messages, 
     connected, 
@@ -133,11 +133,12 @@ const TrollBox: React.FC = () => {
     sendMessage, 
     authenticate,
     changeUsername,
+    connect,
     disconnect,
     reconnect,
     clearAuth,
     error 
-  } = useTrollbox();
+  } = useTrollbox('wss://trollbox-ws.noma.money', false);
   
   // Add authentication timeout
   useEffect(() => {
@@ -1663,7 +1664,7 @@ const TrollBox: React.FC = () => {
                 bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
                 color="black"
                 fontWeight="600"
-                onClick={reconnect}
+                onClick={connect}
                 _hover={{ 
                   bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
                   transform: 'translateY(-1px)',
@@ -2342,7 +2343,7 @@ const TrollBox: React.FC = () => {
                     bg="linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
                     color="black"
                     fontWeight="600"
-                    onClick={reconnect}
+                    onClick={connect}
                     _hover={{ 
                       bg: "linear-gradient(135deg, #3fd873 0%, #1cb350 100%)",
                       transform: 'translateY(-1px)',

@@ -1251,9 +1251,11 @@ const Presale: React.FC = () => {
                 <VStack align="stretch" gap={3}>
                   <HStack justify="space-between">
                     <Box><Text color="#888" fontSize="sm">Users referred</Text></Box>
-                    <Box><Text color="white" fontSize="sm" fontWeight="500">
-                      {referralCount || 0}
-                    </Text></Box>
+                    <Box>
+                      <Text color="white" fontSize="sm" fontWeight="500">
+                        {referralCount || 0}
+                      </Text>
+                    </Box>
                   </HStack>
                   <HStack justify="space-between">
                     <Box><Text color="#888" fontSize="sm">Earned</Text></Box>

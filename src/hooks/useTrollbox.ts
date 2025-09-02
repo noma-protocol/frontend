@@ -30,6 +30,7 @@ interface UseTrollboxReturn {
   sendMessage: (content: string, username?: string, replyTo?: { id: string; username: string; content: string }, commandData?: any) => void;
   authenticate: (address: string, username?: string) => void;
   changeUsername: (username: string) => void;
+  connect: () => void;
   disconnect: () => void;
   reconnect: () => void;
   clearAuth: (address?: string) => void;
@@ -40,7 +41,7 @@ interface UseTrollboxReturn {
 const AUTH_STORAGE_KEY = 'trollbox_auth';
 const AUTH_MESSAGE_PREFIX = 'Sign this message to authenticate with the Noma Trollbox\n\nTimestamp: ';
 
-export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): UseTrollboxReturn => {
+export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money', autoConnect: boolean = false): UseTrollboxReturn => {
   const { signMessageAsync } = useSignMessage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [connected, setConnected] = useState(false);
@@ -50,6 +51,7 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [userCount, setUserCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [shouldConnect, setShouldConnect] = useState(autoConnect);
 
   useEffect(() => {
     console.log('useTrollbox effect running');
@@ -232,12 +234,15 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     // Add listener
     globalTrollbox.addListener(handleMessage);
     
-    // Debounce connection to prevent multiple rapid calls
-    connectTimeout = setTimeout(() => {
-      if (mounted) {
-        globalTrollbox.connect(wsUrl);
-      }
-    }, 100);
+    // Only connect if shouldConnect is true
+    if (shouldConnect) {
+      // Debounce connection to prevent multiple rapid calls
+      connectTimeout = setTimeout(() => {
+        if (mounted) {
+          globalTrollbox.connect(wsUrl);
+        }
+      }, 100);
+    }
 
     // Cleanup
     return () => {
@@ -245,7 +250,7 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
       clearTimeout(connectTimeout);
       globalTrollbox.removeListener(handleMessage);
     };
-  }, [wsUrl]);
+  }, [wsUrl, shouldConnect]);
   
   const sendMessage = useCallback((content: string, username: string = 'Anonymous', replyTo?: { id: string; username: string; content: string }, commandData?: any) => {
     const trimmedContent = content.trim();
@@ -395,7 +400,15 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     setMessages([]);
   }, []);
   
+  const connect = useCallback(() => {
+    setShouldConnect(true);
+    if (!connected) {
+      globalTrollbox.connect(wsUrl);
+    }
+  }, [wsUrl, connected]);
+
   const reconnect = useCallback(() => {
+    setShouldConnect(true);
     globalTrollbox.connect(wsUrl);
   }, [wsUrl]);
   
@@ -428,6 +441,7 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Use
     sendMessage, 
     authenticate,
     changeUsername,
+    connect,
     disconnect,
     reconnect,
     clearAuth,

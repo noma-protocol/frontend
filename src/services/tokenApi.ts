@@ -53,9 +53,10 @@ export const tokenApi = {
   },
 
   // Get all tokens
-  async getTokens(): Promise<{ tokens: TokenResponse[] }> {
+  async getTokens(options?: { includeAll?: boolean }): Promise<{ tokens: TokenResponse[] }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/tokens`);
+      const queryParams = options?.includeAll ? '?includeAll=true' : '';
+      const response = await fetch(`${API_BASE_URL}/tokens${queryParams}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

@@ -1382,7 +1382,11 @@ app.get('/api/stats', (req, res) => {
 // Get all tokens
 app.get('/api/tokens', (req, res) => {
   try {
-    res.json({ tokens: tokenStore.getTokens() });
+    const allTokens = tokenStore.getTokens();
+    // Filter only deployed tokens by default unless explicitly requested
+    const includeAll = req.query.includeAll === 'true';
+    const tokens = includeAll ? allTokens : allTokens.filter(token => token.status === 'deployed');
+    res.json({ tokens });
   } catch (error) {
     console.error('Error fetching tokens:', error);
     res.status(500).json({ error: 'Failed to retrieve tokens' });

@@ -123,6 +123,7 @@ import placeholderLogo from "../assets/images/question_white.svg";
 import wethLogo from "../assets/images/weth.svg";
 import monadLogo from "../assets/images/monad.png";
 import TrollBox from "../components/TrollBox";
+import { ReferralStats } from "../components/ReferralStats";
 import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
@@ -460,6 +461,7 @@ const Exchange: React.FC = () => {
     const trackReferralTrade = async (tradeData: {
         type: 'buy' | 'sell';
         tokenAddress: string;
+        tokenName: string;
         tokenSymbol: string;
         volumeETH: string;
         volumeUSD: number;
@@ -474,10 +476,16 @@ const Exchange: React.FC = () => {
             
             const newTrade = {
                 id: Date.now() + Math.random(),
-                refereeAddress: address,
-                referrerCode: referredBy,
-                ...tradeData,
-                timestamp: new Date().toISOString()
+                userAddress: address,
+                referralCode: referredBy,
+                type: tradeData.type,
+                tokenAddress: tradeData.tokenAddress,
+                tokenName: tradeData.tokenName,
+                tokenSymbol: tradeData.tokenSymbol,
+                volumeETH: tradeData.volumeETH,
+                volumeUSD: tradeData.volumeUSD.toString(),
+                txHash: tradeData.txHash,
+                timestamp: Date.now()
             };
             
             referralTrades.push(newTrade);
@@ -1397,8 +1405,10 @@ const Exchange: React.FC = () => {
 
 
     const filteredTokens = tokens.filter(token => 
-        token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        token.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+        (token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        token.symbol.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        // Additional safety check - only show tokens that were in deployedVaults
+        vaultDescriptions.some(vault => vault.tokenSymbol === token.symbol)
     );
     
     // Fetch pool address from Uniswap V3 Factory
@@ -1456,13 +1466,20 @@ const Exchange: React.FC = () => {
                     return;
                 }
                 
-                // Fetch deployed tokens from API
+                // Fetch deployed tokens from API (API now returns only deployed tokens by default)
                 let deployedTokenSymbols = new Set();
+                let deployedTokensMap = new Map();
                 try {
                     const response = await tokenApi.getTokens();
-                    const deployedTokens = response.tokens.filter(token => token.status === 'deployed');
+                    // API already filters for deployed tokens
+                    const deployedTokens = response.tokens;
                     deployedTokenSymbols = new Set(deployedTokens.map(token => token.tokenSymbol));
-                    console.log('Deployed tokens:', Array.from(deployedTokenSymbols));
+                    // Create a map for quick lookup
+                    deployedTokens.forEach(token => {
+                        deployedTokensMap.set(token.tokenSymbol, token);
+                    });
+                    console.log('Deployed tokens from API:', deployedTokens.length, 'tokens');
+                    console.log('Token symbols:', Array.from(deployedTokenSymbols));
                 } catch (error) {
                     console.error('Failed to fetch deployed tokens:', error);
                     // Continue without filtering if API fails
@@ -1537,8 +1554,15 @@ const Exchange: React.FC = () => {
                 
                 // Filter vaults to only include deployed tokens
                 const deployedVaults = deployedTokenSymbols.size > 0 
-                    ? flattenedVaults.filter(vault => deployedTokenSymbols.has(vault.tokenSymbol))
-                    : flattenedVaults; // Show all if API fails
+                    ? flattenedVaults.filter(vault => {
+                        // Check if token is in the deployed tokens set
+                        const isDeployed = deployedTokenSymbols.has(vault.tokenSymbol);
+                        if (!isDeployed) {
+                            console.log(`Filtering out non-deployed token: ${vault.tokenSymbol}`);
+                        }
+                        return isDeployed;
+                    })
+                    : [] // If API fails, show no tokens rather than risk showing non-deployed ones
                 
                 setVaultDescriptions(deployedVaults);
                 
@@ -1551,6 +1575,7 @@ const Exchange: React.FC = () => {
                 }
                 
                 // Convert vault descriptions to token format for display
+                console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
                 const tokenList = deployedVaults.map((vault, index) => {
                     // Use API percentage change for NOMA token, random for others
                     const isNoma = vault.tokenSymbol === 'NOMA' || vault.tokenSymbol === 'noma';
@@ -2200,16 +2225,7 @@ const Exchange: React.FC = () => {
             trackReferralTrade({
                 type: 'buy',
                 tokenAddress: selectedToken?.token0 || '',
-                tokenSymbol: selectedToken?.symbol || '',
-                volumeETH: ethAmount.toString(),
-                volumeUSD: ethAmount * (monPrice || 0),
-                txHash: data.hash
-            });
-            
-            // Track referral trade
-            trackReferralTrade({
-                type: 'buy',
-                tokenAddress: selectedToken?.token0 || '',
+                tokenName: selectedToken?.name || '',
                 tokenSymbol: selectedToken?.symbol || '',
                 volumeETH: ethAmount.toString(),
                 volumeUSD: ethAmount * (monPrice || 0),
@@ -2309,6 +2325,7 @@ const Exchange: React.FC = () => {
             trackReferralTrade({
                 type: 'buy',
                 tokenAddress: selectedToken?.token0 || '',
+                tokenName: selectedToken?.name || '',
                 tokenSymbol: selectedToken?.symbol || '',
                 volumeETH: ethAmount.toString(),
                 volumeUSD: ethAmount * (monPrice || 0),
@@ -2403,6 +2420,7 @@ const Exchange: React.FC = () => {
             trackReferralTrade({
                 type: 'sell',
                 tokenAddress: selectedToken?.token0 || '',
+                tokenName: selectedToken?.name || '',
                 tokenSymbol: selectedToken?.symbol || '',
                 volumeETH: ethAmount.toString(),
                 volumeUSD: ethAmount * (monPrice || 0),
@@ -2973,6 +2991,11 @@ const Exchange: React.FC = () => {
                     {/* Troll Box */}
                     <Box flexShrink={0}>
                         <TrollBox />
+                    </Box>
+                    
+                    {/* Referral Stats */}
+                    <Box flexShrink={0} mt={4}>
+                        <ReferralStats />
                     </Box>
                 </Box>
                 

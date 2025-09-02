@@ -114,7 +114,7 @@ const Markets: React.FC = () => {
   useEffect(() => {
     const fetchTokens = async () => {
       try {
-        const response = await tokenApi.getTokens();
+        const response = await tokenApi.getTokens({ includeAll: true });
         const protocols: { [symbol: string]: string } = {};
         const logos: { [symbol: string]: string } = {};
         
