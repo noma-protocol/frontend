@@ -124,6 +124,7 @@ import wethLogo from "../assets/images/weth.svg";
 import monadLogo from "../assets/images/monad.png";
 import TrollBox from "../components/TrollBox";
 import { ReferralStats } from "../components/ReferralStats";
+import { referralApi } from "../services/referralApi";
 import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
@@ -218,6 +219,17 @@ const Exchange: React.FC = () => {
         // Remove any non-numeric characters except decimal point
         const cleanedValue = value.replace(/[^0-9.]/g, '');
         
+        // Limit total input length to prevent UI issues (20 chars before decimal + . + 18 chars after)
+        if (cleanedValue.length > 39) {
+            toaster.create({
+                title: "Invalid Input",
+                description: "Number too large",
+                status: "error",
+                duration: 2000
+            });
+            return;
+        }
+        
         // Ensure only one decimal point
         const parts = cleanedValue.split('.');
         if (parts.length > 2) {
@@ -228,6 +240,17 @@ const Exchange: React.FC = () => {
                 duration: 2000
             });
             return; // Invalid input, don't update
+        }
+        
+        // Limit integer part to 20 digits to prevent UI overflow
+        if (parts[0].length > 20) {
+            toaster.create({
+                title: "Invalid Input",
+                description: "Number too large (max 20 digits)",
+                status: "error",
+                duration: 2000
+            });
+            return;
         }
         
         // Limit decimal places to 18 (ETH precision)
@@ -261,6 +284,20 @@ const Exchange: React.FC = () => {
                 duration: 2000
             });
             return;
+        }
+        
+        // Check if the number is within JavaScript's safe number range
+        if (cleanedValue !== '' && cleanedValue !== '.') {
+            const numValue = parseFloat(cleanedValue);
+            if (numValue > Number.MAX_SAFE_INTEGER) {
+                toaster.create({
+                    title: "Invalid Input",
+                    description: "Number exceeds maximum safe value",
+                    status: "error",
+                    duration: 2000
+                });
+                return;
+            }
         }
         
         setTradeAmount(cleanedValue);
@@ -411,33 +448,65 @@ const Exchange: React.FC = () => {
     
     // Handle referral code from URL
     useEffect(() => {
-        if (urlReferralCode && address) {
-            // Check if user is already referred
-            const existingReferral = localStorage.getItem(`noma_referred_by_${address}`);
+        const handleReferral = async () => {
+            if (urlReferralCode && address) {
+                try {
+                    // Check if user is already referred via API
+                    const referralStatus = await referralApi.checkReferral(address);
+                    
+                    if (referralStatus.referred) {
+                        // User is already referred
+                        setReferredBy(referralStatus.referralCode || '');
+                        console.log(`User already referred by: ${referralStatus.referralCode}`);
+                    } else {
+                        // Register new referral using only the code
+                        await referralApi.registerReferral({
+                            referralCode: urlReferralCode,
+                            referrerAddress: '', // Will be resolved by backend
+                            referredAddress: address
+                        });
+                        
+                        setReferredBy(urlReferralCode);
+                        console.log(`User ${address} referred by code: ${urlReferralCode}`);
+                        
+                        // Also keep localStorage as backup
+                        localStorage.setItem(`noma_referred_by_${address}`, urlReferralCode);
+                    }
+                } catch (error) {
+                    console.error('Error handling referral:', error);
+                    // Fallback to localStorage
+                    const existingReferral = localStorage.getItem(`noma_referred_by_${address}`);
+                    if (existingReferral) {
+                        setReferredBy(existingReferral);
+                    }
+                }
+            } else if (address) {
+                // Check for existing referral
+                try {
+                    const referralStatus = await referralApi.checkReferral(address);
+                    if (referralStatus.referred) {
+                        setReferredBy(referralStatus.referralCode || '');
+                    } else {
+                        // Fallback to localStorage
+                        const existingReferral = localStorage.getItem(`noma_referred_by_${address}`);
+                        if (existingReferral) {
+                            setReferredBy(existingReferral);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking referral:', error);
+                }
+            }
             
-            if (!existingReferral) {
-                // Store referral code for this address
-                localStorage.setItem(`noma_referred_by_${address}`, urlReferralCode);
-                setReferredBy(urlReferralCode);
-                console.log(`User ${address} referred by code: ${urlReferralCode}`);
-            } else {
-                // User already has a referrer
-                setReferredBy(existingReferral);
+            // Generate referral code for current user
+            if (address) {
+                const code = generateReferralCode(address);
+                setReferralCode(code?.slice(0, 8) || ""); // Use first 8 chars of hash
             }
-        } else if (address) {
-            // Check for existing referral
-            const existingReferral = localStorage.getItem(`noma_referred_by_${address}`);
-            if (existingReferral) {
-                setReferredBy(existingReferral);
-            }
-        }
+        };
         
-        // Generate referral code for current user
-        if (address) {
-            const code = generateReferralCode(address);
-            setReferralCode(code?.slice(0, 8) || ""); // Use first 8 chars of hash
-        }
-    }, [urlReferralCode, address]);
+        handleReferral();
+    }, [urlReferralCode, urlReferrerAddress, address]);
     
     // Save trade history to local storage whenever it changes
     useEffect(() => {
@@ -470,10 +539,23 @@ const Exchange: React.FC = () => {
         if (!referredBy || !address) return;
         
         try {
-            // For now, we'll store referral trades locally
-            // In production, this would be sent to the backend API
-            const referralTrades = JSON.parse(localStorage.getItem('noma_referral_trades') || '[]');
+            // Track trade via API
+            await referralApi.trackTrade({
+                userAddress: address,
+                referralCode: referredBy,
+                type: tradeData.type,
+                tokenAddress: tradeData.tokenAddress,
+                tokenName: tradeData.tokenName,
+                tokenSymbol: tradeData.tokenSymbol,
+                volumeETH: tradeData.volumeETH,
+                volumeUSD: tradeData.volumeUSD.toString(),
+                txHash: tradeData.txHash
+            });
             
+            console.log('Referral trade tracked via API');
+            
+            // Also store locally as backup
+            const referralTrades = JSON.parse(localStorage.getItem('noma_referral_trades') || '[]');
             const newTrade = {
                 id: Date.now() + Math.random(),
                 userAddress: address,
@@ -490,17 +572,30 @@ const Exchange: React.FC = () => {
             
             referralTrades.push(newTrade);
             localStorage.setItem('noma_referral_trades', JSON.stringify(referralTrades));
-            
-            console.log('Referral trade tracked:', newTrade);
-            
-            // TODO: Send to backend API
-            // await fetch('/api/referral/track-trade', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(newTrade)
-            // });
         } catch (error) {
             console.error('Error tracking referral trade:', error);
+            // If API fails, still try to save locally
+            try {
+                const referralTrades = JSON.parse(localStorage.getItem('noma_referral_trades') || '[]');
+                const newTrade = {
+                    id: Date.now() + Math.random(),
+                    userAddress: address,
+                    referralCode: referredBy,
+                    type: tradeData.type,
+                    tokenAddress: tradeData.tokenAddress,
+                    tokenName: tradeData.tokenName,
+                    tokenSymbol: tradeData.tokenSymbol,
+                    volumeETH: tradeData.volumeETH,
+                    volumeUSD: tradeData.volumeUSD.toString(),
+                    txHash: tradeData.txHash,
+                    timestamp: Date.now()
+                };
+                
+                referralTrades.push(newTrade);
+                localStorage.setItem('noma_referral_trades', JSON.stringify(referralTrades));
+            } catch (localError) {
+                console.error('Error saving referral trade locally:', localError);
+            }
         }
     };
     
@@ -3876,14 +3971,33 @@ const Exchange: React.FC = () => {
                                 size="lg"
                                 _placeholder={{ color: "#666" }}
                                 mt={-2}
+                                css={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                }}
                             />
                             <Box h="20px" mt={1} display="flex" alignItems="center">
                                 {showQuoteLoading ? (
                                     <Spinner size="xs" color="#4ade80" />
                                 ) : quote ? (
-                                    <Text color="#666" fontSize="xs">
-                                        You will {isBuying ? "receive" : "pay"} ≈ {quote} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
-                                    </Text>
+                                    <HStack>
+                                        <Box w="80px">
+                                             <Text color="#666" fontSize="xs">
+                                                Receiving
+                                             </Text>
+                                        </Box>
+                                        <Box w="120px">
+                                            <Text color="#666" fontSize="xs">
+                                               ≈ {quote}
+                                            </Text>
+                                        </Box>
+                                        <Box>
+                                            <Text color="#666" fontSize="xs">
+                                                {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
+                                            </Text>
+                                        </Box>
+                                    </HStack>
                                 ) : null}
                             </Box>
                         </Box>
@@ -4218,6 +4332,11 @@ const Exchange: React.FC = () => {
                                         size="lg"
                                         _placeholder={{ color: "#666" }}
                                         mt={-2}
+                                        css={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}
                                     />
                                     <Box h="20px" mt={1} display="flex" alignItems="center">
                                         {showQuoteLoading ? (

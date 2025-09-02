@@ -6,6 +6,7 @@ import { generateReferralCode } from '../utils';
 import { toaster } from './ui/toaster';
 import { Tooltip } from './ui/tooltip';
 import { isMobile } from "react-device-detect";
+import { referralApi } from '../services/referralApi';
 
 interface ReferralStatsProps {
   isExpanded?: boolean;
@@ -42,47 +43,33 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
       const code = generateReferralCode(address);
       setReferralCode(code);
       
-      // Generate referral link
+      // Generate referral link with only the code
       const baseUrl = window.location.origin;
       const link = `${baseUrl}/exchange?r=${code}`;
       setReferralLink(link);
+      
+      // Register the code with the backend
+      referralApi.registerCode(code, address).catch(error => {
+        console.error('Failed to register referral code:', error);
+      });
       
       // Load referral stats from localStorage
       loadReferralStats();
     }
   }, [address]);
 
-  const loadReferralStats = () => {
+  const loadReferralStats = async () => {
     setIsLoading(true);
     try {
-      // Get all referral trades from localStorage
-      const tradesData = localStorage.getItem('noma_referral_trades');
-      const allTrades = tradesData ? JSON.parse(tradesData) : [];
-      
-      // Filter trades for this referral code
-      const myReferralCode = address ? generateReferralCode(address) : '';
-      const myReferralTrades = allTrades.filter((trade: any) => 
-        trade.referralCode === myReferralCode
-      );
-      
-      // Get unique referred addresses
-      const uniqueAddresses = new Set(myReferralTrades.map((trade: any) => trade.userAddress));
-      
-      // Calculate totals
-      let totalVolumeETH = 0;
-      let totalVolumeUSD = 0;
-      
-      myReferralTrades.forEach((trade: any) => {
-        totalVolumeETH += parseFloat(trade.volumeETH || '0');
-        totalVolumeUSD += parseFloat(trade.volumeUSD || '0');
-      });
+      // Fetch stats from API
+      const stats = await referralApi.getReferralStats(address);
       
       // Estimate commission (assuming 1% referral fee)
       const commissionRate = 0.01;
-      const estimatedCommission = totalVolumeETH * commissionRate;
+      const estimatedCommission = stats.totalVolumeETH * commissionRate;
       
       // Get recent trades (last 5)
-      const recentTrades = myReferralTrades
+      const recentTrades = stats.trades
         .sort((a: any, b: any) => b.timestamp - a.timestamp)
         .slice(0, 5)
         .map((trade: any) => ({
@@ -97,14 +84,62 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
         }));
       
       setReferralStats({
-        totalReferred: uniqueAddresses.size,
-        totalVolumeETH,
-        totalVolumeUSD,
+        totalReferred: stats.totalReferred,
+        totalVolumeETH: stats.totalVolumeETH,
+        totalVolumeUSD: stats.totalVolumeUSD,
         estimatedCommission,
         recentTrades
       });
     } catch (error) {
       console.error('Error loading referral stats:', error);
+      
+      // Fallback to localStorage if API fails
+      try {
+        const tradesData = localStorage.getItem('noma_referral_trades');
+        const allTrades = tradesData ? JSON.parse(tradesData) : [];
+        
+        const myReferralCode = address ? generateReferralCode(address) : '';
+        const myReferralTrades = allTrades.filter((trade: any) => 
+          trade.referralCode === myReferralCode
+        );
+        
+        const uniqueAddresses = new Set(myReferralTrades.map((trade: any) => trade.userAddress));
+        
+        let totalVolumeETH = 0;
+        let totalVolumeUSD = 0;
+        
+        myReferralTrades.forEach((trade: any) => {
+          totalVolumeETH += parseFloat(trade.volumeETH || '0');
+          totalVolumeUSD += parseFloat(trade.volumeUSD || '0');
+        });
+        
+        const commissionRate = 0.01;
+        const estimatedCommission = totalVolumeETH * commissionRate;
+        
+        const recentTrades = myReferralTrades
+          .sort((a: any, b: any) => b.timestamp - a.timestamp)
+          .slice(0, 5)
+          .map((trade: any) => ({
+            type: trade.type,
+            tokenName: trade.tokenName,
+            tokenSymbol: trade.tokenSymbol,
+            volumeETH: trade.volumeETH,
+            volumeUSD: trade.volumeUSD,
+            timestamp: trade.timestamp,
+            txHash: trade.txHash,
+            referredAddress: trade.userAddress
+          }));
+        
+        setReferralStats({
+          totalReferred: uniqueAddresses.size,
+          totalVolumeETH,
+          totalVolumeUSD,
+          estimatedCommission,
+          recentTrades
+        });
+      } catch (localError) {
+        console.error('Error loading from localStorage:', localError);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -210,6 +245,16 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
               </HStack>
             </Box>
             <Box>
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  color="#ff9500"
+                  onClick={() => copyToClipboard(referralLink, 'Referral link')}
+                  _hover={{ bg: 'rgba(255, 149, 0, 0.1)' }}
+                >
+                  Copy
+                </Button>                   
+            </Box>
             <Box>
               <VStack alignItems={"left"} textAlign={"left"}>
                 <Box>
@@ -233,7 +278,6 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
               </VStack>
             </Box>
 
-            </Box>
           </VStack>
  
 
@@ -297,7 +341,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
               </Box>
               <Box>
                 <Text fontSize="xs" color="#888">
-                  {formatNumber(referralStats.totalVolumeETH, 4)} ETH
+                  {formatNumber(referralStats.totalVolumeETH, 4)} MON
                 </Text>                   
               </Box>
             </VStack>
@@ -317,7 +361,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
                   <Text fontSize="xs" color="#888">Est. Commission</Text>
                 </HStack>
                 <Text fontSize="xl" fontWeight="bold" color="#4ade80">
-                  {formatNumber(referralStats.estimatedCommission, 4)} ETH
+                  {formatNumber(referralStats.estimatedCommission, 4)} MON
                 </Text>
                 <Text fontSize="xs" color="#888">
                   1% of volume

@@ -16,6 +16,9 @@ const PROFILES_FILE = join(DATA_DIR, 'profiles.json');
 const AUTH_FILE = join(DATA_DIR, 'auth.json');
 const TRANSACTIONS_FILE = join(DATA_DIR, 'transactions.json');
 const TOKENS_FILE = join(DATA_DIR, 'tokens.json');
+const REFERRALS_FILE = join(DATA_DIR, 'referrals.json');
+const REFERRAL_TRADES_FILE = join(DATA_DIR, 'referral_trades.json');
+const REFERRAL_CODES_FILE = join(DATA_DIR, 'referral_codes.json');
 const PORT = process.env.PORT || 9090;
 
 // Authentication message that users will sign
@@ -648,6 +651,178 @@ class RateLimiter {
   }
 }
 
+// Referral store for managing referral relationships and trades
+class ReferralStore {
+  constructor() {
+    this.referrals = this.loadReferrals();
+    this.trades = this.loadTrades();
+    this.codes = this.loadCodes();
+  }
+
+  loadReferrals() {
+    try {
+      if (existsSync(REFERRALS_FILE)) {
+        const data = readFileSync(REFERRALS_FILE, 'utf8');
+        return JSON.parse(data);
+      }
+    } catch (error) {
+      console.error('Error loading referrals:', error);
+    }
+    return {};
+  }
+
+  loadTrades() {
+    try {
+      if (existsSync(REFERRAL_TRADES_FILE)) {
+        const data = readFileSync(REFERRAL_TRADES_FILE, 'utf8');
+        return JSON.parse(data);
+      }
+    } catch (error) {
+      console.error('Error loading referral trades:', error);
+    }
+    return [];
+  }
+
+  loadCodes() {
+    try {
+      if (existsSync(REFERRAL_CODES_FILE)) {
+        const data = readFileSync(REFERRAL_CODES_FILE, 'utf8');
+        return JSON.parse(data);
+      }
+    } catch (error) {
+      console.error('Error loading referral codes:', error);
+    }
+    return {};
+  }
+
+  saveReferrals() {
+    try {
+      writeFileSync(REFERRALS_FILE, JSON.stringify(this.referrals, null, 2));
+    } catch (error) {
+      console.error('Error saving referrals:', error);
+    }
+  }
+
+  saveTrades() {
+    try {
+      writeFileSync(REFERRAL_TRADES_FILE, JSON.stringify(this.trades, null, 2));
+    } catch (error) {
+      console.error('Error saving referral trades:', error);
+    }
+  }
+
+  saveCodes() {
+    try {
+      writeFileSync(REFERRAL_CODES_FILE, JSON.stringify(this.codes, null, 2));
+    } catch (error) {
+      console.error('Error saving referral codes:', error);
+    }
+  }
+
+  // Register a referral code for an address
+  registerCode(code, address) {
+    const normalizedAddress = address.toLowerCase();
+    
+    // Check if code already exists and matches the address
+    if (this.codes[code] && this.codes[code] !== normalizedAddress) {
+      console.error(`Code ${code} already registered to different address`);
+      return false;
+    }
+    
+    // Register the code
+    this.codes[code] = normalizedAddress;
+    this.saveCodes();
+    return true;
+  }
+
+  // Get address from referral code
+  getAddressByCode(code) {
+    return this.codes[code] || null;
+  }
+
+  // Add a referred user to a referral code
+  addReferral(referralCode, referrerAddress, referredAddress) {
+    const key = `${referralCode}:${referrerAddress.toLowerCase()}`;
+    
+    if (!this.referrals[key]) {
+      this.referrals[key] = [];
+    }
+    
+    // Check if already referred
+    const normalizedReferredAddress = referredAddress.toLowerCase();
+    if (!this.referrals[key].includes(normalizedReferredAddress)) {
+      this.referrals[key].push(normalizedReferredAddress);
+      this.saveReferrals();
+      return true;
+    }
+    
+    return false; // Already referred
+  }
+
+  // Get referral stats for an address
+  getReferralStats(address) {
+    const normalizedAddress = address.toLowerCase();
+    const stats = {
+      totalReferred: 0,
+      referredUsers: [],
+      totalVolumeETH: 0,
+      totalVolumeUSD: 0,
+      trades: []
+    };
+
+    // Find all referral keys for this address
+    Object.keys(this.referrals).forEach(key => {
+      if (key.toLowerCase().endsWith(`:${normalizedAddress}`)) {
+        const referredUsers = this.referrals[key] || [];
+        stats.totalReferred += referredUsers.length;
+        stats.referredUsers = stats.referredUsers.concat(referredUsers);
+      }
+    });
+
+    // Calculate volume from trades
+    this.trades.forEach(trade => {
+      if (trade.referrerAddress && trade.referrerAddress.toLowerCase() === normalizedAddress) {
+        stats.totalVolumeETH += parseFloat(trade.volumeETH || 0);
+        stats.totalVolumeUSD += parseFloat(trade.volumeUSD || 0);
+        stats.trades.push(trade);
+      }
+    });
+
+    return stats;
+  }
+
+  // Track a trade made by a referred user
+  trackTrade(tradeData) {
+    const trade = {
+      id: uuidv4(),
+      timestamp: Date.now(),
+      ...tradeData
+    };
+    
+    this.trades.push(trade);
+    
+    // Keep only last 10000 trades
+    if (this.trades.length > 10000) {
+      this.trades = this.trades.slice(-10000);
+    }
+    
+    this.saveTrades();
+    return trade;
+  }
+
+  // Check if a user was referred by a specific code
+  wasReferredBy(referralCode, referrerAddress, userAddress) {
+    const key = `${referralCode}:${referrerAddress.toLowerCase()}`;
+    const referredUsers = this.referrals[key] || [];
+    return referredUsers.includes(userAddress.toLowerCase());
+  }
+
+  // Get all referral data (for export/debugging)
+  getAllReferrals() {
+    return this.referrals;
+  }
+}
+
 // Initialize components
 const messageStore = new MessageStore();
 const usernameStore = new UsernameStore();
@@ -655,6 +830,7 @@ const profileStore = new ProfileStore();
 const authStore = new AuthStore();
 const transactionStore = new TransactionStore();
 const tokenStore = new TokenStore();
+const referralStore = new ReferralStore();
 const rateLimiter = new RateLimiter();
 
 // Kicked users tracking (address -> kick timestamp)
@@ -1485,6 +1661,188 @@ app.get('/api/tokens/stats', (req, res) => {
   }
 });
 
+// ===== REFERRAL API ENDPOINTS =====
+
+// Register a referral (when user connects with referral code)
+app.post('/api/referrals/register', (req, res) => {
+  try {
+    const { referralCode, referredAddress } = req.body;
+    
+    if (!referralCode || !referredAddress) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // Get referrer address from code
+    const referrerAddress = referralStore.getAddressByCode(referralCode);
+    
+    if (!referrerAddress) {
+      return res.status(400).json({ error: 'Invalid referral code' });
+    }
+    
+    // Check if already referred
+    const key = `${referralCode}:${referrerAddress}`;
+    const existingReferrals = referralStore.referrals[key] || [];
+    
+    if (existingReferrals.includes(referredAddress.toLowerCase())) {
+      return res.status(400).json({ error: 'User already referred' });
+    }
+    
+    // Add the referral
+    const added = referralStore.addReferral(referralCode, referrerAddress, referredAddress);
+    
+    if (added) {
+      res.json({ 
+        success: true, 
+        message: 'Referral registered successfully',
+        referralKey: key,
+        referrerAddress
+      });
+    } else {
+      res.status(400).json({ error: 'Failed to register referral' });
+    }
+  } catch (error) {
+    console.error('Error registering referral:', error);
+    res.status(500).json({ error: 'Failed to register referral' });
+  }
+});
+
+// Track a referral trade
+app.post('/api/referrals/track-trade', (req, res) => {
+  try {
+    const tradeData = req.body;
+    
+    if (!tradeData.userAddress || !tradeData.referralCode || !tradeData.volumeETH) {
+      return res.status(400).json({ error: 'Missing required trade data' });
+    }
+    
+    // Find the referrer for this trade
+    let referrerAddress = null;
+    Object.keys(referralStore.referrals).forEach(key => {
+      const [code, address] = key.split(':');
+      if (code === tradeData.referralCode) {
+        const referredUsers = referralStore.referrals[key] || [];
+        if (referredUsers.includes(tradeData.userAddress.toLowerCase())) {
+          referrerAddress = address;
+        }
+      }
+    });
+    
+    if (!referrerAddress) {
+      return res.status(400).json({ error: 'No referral relationship found' });
+    }
+    
+    // Add referrer address to trade data
+    const trade = referralStore.trackTrade({
+      ...tradeData,
+      referrerAddress
+    });
+    
+    res.json({ 
+      success: true, 
+      trade,
+      message: 'Trade tracked successfully'
+    });
+  } catch (error) {
+    console.error('Error tracking trade:', error);
+    res.status(500).json({ error: 'Failed to track trade' });
+  }
+});
+
+// Get referral stats for an address
+app.get('/api/referrals/stats/:address', (req, res) => {
+  try {
+    const { address } = req.params;
+    const stats = referralStore.getReferralStats(address);
+    
+    res.json({
+      address,
+      ...stats
+    });
+  } catch (error) {
+    console.error('Error fetching referral stats:', error);
+    res.status(500).json({ error: 'Failed to get referral stats' });
+  }
+});
+
+// Check if a user was referred
+app.get('/api/referrals/check/:userAddress', (req, res) => {
+  try {
+    const { userAddress } = req.params;
+    const normalizedAddress = userAddress.toLowerCase();
+    
+    let referralInfo = null;
+    
+    // Search through all referrals to find if user was referred
+    Object.keys(referralStore.referrals).forEach(key => {
+      const referredUsers = referralStore.referrals[key] || [];
+      if (referredUsers.includes(normalizedAddress)) {
+        const [code, referrerAddress] = key.split(':');
+        referralInfo = {
+          referralCode: code,
+          referrerAddress,
+          referredAddress: userAddress
+        };
+      }
+    });
+    
+    if (referralInfo) {
+      res.json({ referred: true, ...referralInfo });
+    } else {
+      res.json({ referred: false });
+    }
+  } catch (error) {
+    console.error('Error checking referral:', error);
+    res.status(500).json({ error: 'Failed to check referral status' });
+  }
+});
+
+// Get all referrals for a referral code (admin/debug endpoint)
+app.get('/api/referrals/code/:code/:address', (req, res) => {
+  try {
+    const { code, address } = req.params;
+    const key = `${code}:${address.toLowerCase()}`;
+    const referredUsers = referralStore.referrals[key] || [];
+    
+    res.json({
+      referralCode: code,
+      referrerAddress: address,
+      referredUsers,
+      count: referredUsers.length
+    });
+  } catch (error) {
+    console.error('Error fetching referrals by code:', error);
+    res.status(500).json({ error: 'Failed to get referrals' });
+  }
+});
+
+// Register a referral code for a user (when they generate their code)
+app.post('/api/referrals/register-code', (req, res) => {
+  try {
+    const { code, address } = req.body;
+    
+    if (!code || !address) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // Register the code-to-address mapping
+    const registered = referralStore.registerCode(code, address);
+    
+    if (registered) {
+      res.json({ 
+        success: true, 
+        message: 'Referral code registered successfully',
+        code,
+        address
+      });
+    } else {
+      res.status(400).json({ error: 'Code already registered to a different address' });
+    }
+  } catch (error) {
+    console.error('Error registering referral code:', error);
+    res.status(500).json({ error: 'Failed to register referral code' });
+  }
+});
+
 // Start Express server
 const HTTP_PORT = process.env.HTTP_PORT || 9091;
 app.listen(HTTP_PORT, () => {
@@ -1495,7 +1853,7 @@ console.log(`Trollbox WebSocket server running on port ${PORT}`);
 
 // Initialize blockchain monitor
 if (process.env.ENABLE_BLOCKCHAIN_MONITOR === 'true') {
-  blockchainMonitor = new BlockchainMonitor(broadcastTradeAlert, transactionStore);
+  blockchainMonitor = new BlockchainMonitor(broadcastTradeAlert, transactionStore, referralStore);
   blockchainMonitor.initialize().then((success) => {
     if (success) {
       console.log('Blockchain monitor initialized successfully');

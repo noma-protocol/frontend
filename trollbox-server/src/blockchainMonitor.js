@@ -21,9 +21,10 @@ const UNISWAP_V3_POOL_ABI = [
 ];
 
 class BlockchainMonitor {
-  constructor(broadcastCallback, transactionStore = null) {
+  constructor(broadcastCallback, transactionStore = null, referralStore = null) {
     this.broadcastCallback = broadcastCallback;
     this.transactionStore = transactionStore;
+    this.referralStore = referralStore;
     this.provider = null;
     this.nomaContract = null;
     this.dexPool = null;
@@ -352,6 +353,11 @@ class BlockchainMonitor {
         this.transactionStore.addTransaction(transaction);
       }
       
+      // Track referral volume if applicable
+      if (this.referralStore) {
+        await this.trackReferralVolume(transaction);
+      }
+      
       // Create trade alert message
       const tradeAlert = {
         id: ethers.id(event.transactionHash + event.logIndex),
@@ -369,6 +375,54 @@ class BlockchainMonitor {
       
     } catch (error) {
       console.error('Error handling DEX swap:', error);
+    }
+  }
+
+  async trackReferralVolume(transaction) {
+    try {
+      // Get the trader address (sender for sells, recipient for buys)
+      const traderAddress = transaction.type === 'sell' ? transaction.sender : transaction.recipient;
+      
+      // Check if this trader was referred
+      const normalizedAddress = traderAddress.toLowerCase();
+      let referralInfo = null;
+      
+      // Search through all referrals to find if user was referred
+      Object.keys(this.referralStore.referrals).forEach(key => {
+        const referredUsers = this.referralStore.referrals[key] || [];
+        if (referredUsers.includes(normalizedAddress)) {
+          const [code, referrerAddress] = key.split(':');
+          referralInfo = {
+            referralCode: code,
+            referrerAddress,
+            referredAddress: traderAddress
+          };
+        }
+      });
+      
+      if (referralInfo) {
+        // Track the trade volume for this referral
+        const tradeData = {
+          userAddress: traderAddress,
+          referralCode: referralInfo.referralCode,
+          referrerAddress: referralInfo.referrerAddress,
+          type: transaction.type,
+          tokenAddress: transaction.tokenAddress,
+          tokenName: 'NOMA',
+          tokenSymbol: transaction.tokenSymbol,
+          volumeETH: transaction.amount,
+          volumeUSD: transaction.amountUSD,
+          txHash: transaction.hash,
+          timestamp: Date.now()
+        };
+        
+        // Add trade to referral store
+        this.referralStore.trackTrade(tradeData);
+        
+        console.log(`Tracked referral trade: ${traderAddress} ${transaction.type} ${transaction.amount} NOMA (referrer: ${referralInfo.referrerAddress})`);
+      }
+    } catch (error) {
+      console.error('Error tracking referral volume:', error);
     }
   }
 
