@@ -723,21 +723,51 @@ class ReferralStore {
   registerCode(code, address) {
     const normalizedAddress = address.toLowerCase();
     
+    // Handle both short (8 char) and legacy (66 char) formats
+    const normalizedCode = code.startsWith('0x') ? code : `0x${code}`;
+    
     // Check if code already exists and matches the address
+    if (this.codes[normalizedCode] && this.codes[normalizedCode] !== normalizedAddress) {
+      console.error(`Code ${normalizedCode} already registered to different address`);
+      return false;
+    }
+    
+    // Also check without 0x prefix for short codes
     if (this.codes[code] && this.codes[code] !== normalizedAddress) {
       console.error(`Code ${code} already registered to different address`);
       return false;
     }
     
-    // Register the code
-    this.codes[code] = normalizedAddress;
+    // Register both formats for flexibility
+    this.codes[normalizedCode] = normalizedAddress;
+    if (!code.startsWith('0x')) {
+      this.codes[code] = normalizedAddress;
+    }
+    
     this.saveCodes();
     return true;
   }
 
   // Get address from referral code
   getAddressByCode(code) {
-    return this.codes[code] || null;
+    // Try the code as-is first
+    if (this.codes[code]) {
+      return this.codes[code];
+    }
+    
+    // Try with 0x prefix
+    const withPrefix = code.startsWith('0x') ? code : `0x${code}`;
+    if (this.codes[withPrefix]) {
+      return this.codes[withPrefix];
+    }
+    
+    // Try without 0x prefix
+    const withoutPrefix = code.startsWith('0x') ? code.slice(2) : code;
+    if (this.codes[withoutPrefix]) {
+      return this.codes[withoutPrefix];
+    }
+    
+    return null;
   }
 
   // Add a referred user to a referral code
