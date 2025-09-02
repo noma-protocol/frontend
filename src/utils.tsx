@@ -235,6 +235,17 @@ export function generateReferralCode(userAddress) {
   return shortCode;
 }
 
+// Generate the bytes32 referral code for smart contract interaction
+export function generateReferralCodeBytes32(userAddress) {
+  console.debug("generateReferralCodeBytes32", userAddress);
+  if (userAddress == "" || typeof userAddress !== "string" ) return;
+
+  // For smart contract, we need the full keccak256 hash as bytes32
+  const hash = ethers.utils.keccak256(userAddress);
+  
+  return hash; // This is already a bytes32 hex string with 0x prefix
+}
+
 // Legacy function for backwards compatibility with existing codes
 export function generateReferralCodeLegacy(userAddress) {
   console.debug("generateReferralCodeLegacy", userAddress);
