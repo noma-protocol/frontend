@@ -226,6 +226,21 @@ export function generateReferralCode(userAddress) {
   if (userAddress == "" || typeof userAddress !== "string" ) return;
 
   // 1) Compute keccak256 of the address (packed)
+  const hash = ethers.utils.keccak256(userAddress);
+  
+  // 2) Take first 8 characters of the hash (after 0x) for a short, unique code
+  // This gives us 4 bytes = 8 hex chars, which is ~4.3 billion unique values
+  const shortCode = hash.slice(2, 10);
+  
+  return shortCode;
+}
+
+// Legacy function for backwards compatibility with existing codes
+export function generateReferralCodeLegacy(userAddress) {
+  console.debug("generateReferralCodeLegacy", userAddress);
+  if (userAddress == "" || typeof userAddress !== "string" ) return;
+
+  // 1) Compute keccak256 of the address (packed)
   //    ethers.utils.keccak256 expects a bytes‐like value, so we can pass the address directly.
   const hash = ethers.utils.keccak256(userAddress);
   // `hash` is a 0x‐prefixed 64‐hex‐char string (32 bytes)
