@@ -528,9 +528,9 @@ const Launchpad: React.FC = () => {
 
     const durationChoices = createListCollection({
         items: [
-            { label: "3 days", value: Number((86400 * 30)).toString()} ,
-            { label: "7 days", value: Number((86400 * 30)).toString()} ,
-            { label: "14 days", value: Number((86400 * 30)).toString()} ,
+            { label: "3 days", value: Number((86400 * 3)).toString()} ,
+            { label: "7 days", value: Number((86400 * 7)).toString()} ,
+            { label: "14 days", value: Number((86400 * 14)).toString()} ,
             { label: "30 days", value: Number((86400 * 30)).toString()} ,
             { label: "60 days", value: Number((86400 * 60)).toString()} ,
             { label: "90 days", value: Number((86400 * 90)).toString()},

@@ -1582,6 +1582,9 @@ const Exchange: React.FC = () => {
                     const response = await tokenApi.getTokens();
                     // API already filters for deployed tokens
                     const deployedTokens = response.tokens;
+                    console.log('[EXCHANGE] API Response tokens:', deployedTokens);
+                    console.log('[EXCHANGE] Token statuses:', deployedTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
+                    
                     deployedTokenSymbols = new Set(deployedTokens.map(token => token.tokenSymbol));
                     // Create a map for quick lookup
                     deployedTokens.forEach(token => {
@@ -1662,12 +1665,19 @@ const Exchange: React.FC = () => {
                 const flattenedVaults = allVaultDescriptions.flat().filter(Boolean);
                 
                 // Filter vaults to only include deployed tokens
+                console.log('[EXCHANGE] deployedTokenSymbols size:', deployedTokenSymbols.size);
+                console.log('[EXCHANGE] deployedTokenSymbols:', Array.from(deployedTokenSymbols));
+                console.log('[EXCHANGE] flattenedVaults count:', flattenedVaults.length);
+                console.log('[EXCHANGE] vault symbols:', flattenedVaults.map(v => v.tokenSymbol));
+                
                 const deployedVaults = deployedTokenSymbols.size > 0 
                     ? flattenedVaults.filter(vault => {
                         // Check if token is in the deployed tokens set
                         const isDeployed = deployedTokenSymbols.has(vault.tokenSymbol);
                         if (!isDeployed) {
-                            console.log(`Filtering out non-deployed token: ${vault.tokenSymbol}`);
+                            console.log(`[EXCHANGE] Filtering out non-deployed token: ${vault.tokenSymbol}`);
+                        } else {
+                            console.log(`[EXCHANGE] Including deployed token: ${vault.tokenSymbol}`);
                         }
                         return isDeployed;
                     })
@@ -1692,6 +1702,10 @@ const Exchange: React.FC = () => {
                         ? priceStats.percentageChange 
                         : (Math.random() - 0.5) * 20; // Random change between -10% and +10%
                     
+                    // Get logo URL from deployedTokensMap
+                    const tokenData = deployedTokensMap.get(vault.tokenSymbol);
+                    const logoUrl = tokenData?.logoUrl || tokenData?.logoPreview || null;
+                    
                     return {
                         id: index + 1,
                         name: vault.tokenName,
@@ -1707,7 +1721,8 @@ const Exchange: React.FC = () => {
                         token1: vault.token1,
                         vault: vault.vault,
                         poolAddress: vault.poolAddress,
-                        spotPrice: vault.spotPrice // Keep the raw spot price
+                        spotPrice: vault.spotPrice, // Keep the raw spot price
+                        logoUrl: logoUrl // Add logo URL
                     };
                 });
                 
@@ -3030,10 +3045,13 @@ const Exchange: React.FC = () => {
                                                     <HStack gap={isMobile ? 1 : 2}>
                                                         <Box w={isMobile ? "16px" : "20px"} h={isMobile ? "16px" : "20px"}>
                                                             <Image
-                                                                src={placeholderLogo}
+                                                                src={token.logoUrl || placeholderLogo}
                                                                 alt={token.symbol}
                                                                 w={isMobile ? "16px" : "20px"}
                                                                 h={isMobile ? "16px" : "20px"}
+                                                                onError={(e) => {
+                                                                    e.currentTarget.src = placeholderLogo;
+                                                                }}
                                                             />
                                                         </Box>
                                                         <Box>
@@ -3130,7 +3148,15 @@ const Exchange: React.FC = () => {
                         >
                             <HStack>
                                 <Box>
-                                    <Image src={placeholderLogo} alt={selectedToken.symbol} w="24px" h="24px" />
+                                    <Image 
+                                        src={selectedToken.logoUrl || placeholderLogo} 
+                                        alt={selectedToken.symbol} 
+                                        w="24px" 
+                                        h="24px"
+                                        onError={(e) => {
+                                            e.currentTarget.src = placeholderLogo;
+                                        }}
+                                    />
                                 </Box>
                                 <Box>
                                     <Text color="white" fontWeight="bold">{selectedToken.symbol}</Text>
@@ -3990,6 +4016,7 @@ const Exchange: React.FC = () => {
                                 size="lg"
                                 _placeholder={{ color: "#666" }}
                                 mt={-2}
+                                h="35px"
                                 css={{
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
@@ -4555,10 +4582,13 @@ const Exchange: React.FC = () => {
                                                 <HStack>
                                                     <Box w="20px" h="20px">
                                                         <Image
-                                                            src={placeholderLogo}
+                                                            src={selectedToken.logoUrl || placeholderLogo}
                                                             alt={selectedToken.symbol}
                                                             w="20px"
                                                             h="20px"
+                                                            onError={(e) => {
+                                                                e.currentTarget.src = placeholderLogo;
+                                                            }}
                                                         />
                                                     </Box>
                                                     <Box>

@@ -211,7 +211,8 @@ const UpcomingPresales: React.FC = () => {
             
             if (hasPresale) {
               console.log(`Calling fetchPresaleDetails for ${vaultDescriptionData[1]}...`);
-              const [isFinalized, hasExpired, presaleData] = await fetchPresaleDetails({
+              const [isFinalized, hasExpired, presaleData] = 
+              await fetchPresaleDetails({
                 presaleContract: vaultDescriptionData[7],
               });
               
@@ -219,7 +220,8 @@ const UpcomingPresales: React.FC = () => {
 
               // Only show presales that are in progress
               if (!isFinalized && !hasExpired && presaleData) {
-                upcomingPresales.push({
+                upcomingPresales
+                .push({
                   tokenSymbol: vaultDescriptionData[1],
                   tokenName: vaultDescriptionData[2],
                   presaleContract: vaultDescriptionData[7],
@@ -296,70 +298,73 @@ const UpcomingPresales: React.FC = () => {
         </Text>
       ) : (
         <VStack align="stretch" gap={3} w="100%">
-          {presales.map((presale, index) => (
-            <Link
-              key={index}
-              href={`/presale?a=${presale.presaleContract}`}
-              target="_blank"
-              _hover={{ textDecoration: "none" }}
-              display="block"
-              w="100%"
-            >
-              <Box
-                bg="#2a2a2a"
-                p={3}
-                borderRadius="md"
-                _hover={{ bg: "#333" }}
-                transition="all 0.2s"
-                cursor="pointer"
+          {presales.map((presale, index) => {
+            console.log({ presale })
+            return (
+              <Link
+                key={index}
+                href={`/presale?a=${presale.presaleContract}`}
+                target="_blank"
+                _hover={{ textDecoration: "none" }}
+                display="block"
+                w="100%"
               >
-                <Box>
-                  <HStack justifyContent="space-between" mb={1}>
-                    <Box>
-                    <HStack spacing={2}>
+                <Box
+                  bg="#2a2a2a"
+                  p={3}
+                  borderRadius="md"
+                  _hover={{ bg: "#333" }}
+                  transition="all 0.2s"
+                  cursor="pointer"
+                >
+                  <Box>
+                    <HStack justifyContent="space-between" mb={1}>
                       <Box>
-                      <Image 
-                        src={tokenLogos[presale.tokenSymbol] || (presale.tokenSymbol === "NOMA" ? nomaLogo : placeholderLogo)} 
-                        alt={presale.tokenSymbol} 
-                        w="20px" 
-                        h="20px" 
-                        borderRadius="full"
-                      />                        
+                      <HStack spacing={2}>
+                        <Box>
+                        <Image 
+                          src={tokenLogos[presale.tokenSymbol] || (presale.tokenSymbol === "NOMA" ? nomaLogo : placeholderLogo)} 
+                          alt={presale.tokenSymbol} 
+                          w="20px" 
+                          h="20px" 
+                          borderRadius="full"
+                        />                        
+                        </Box>
+                        <Box>
+                        <Text color="white" fontWeight="600">
+                          {presale.tokenSymbol}
+                        </Text>                        
+                        </Box>                    
+                      </HStack>                      
                       </Box>
                       <Box>
-                      <Text color="white" fontWeight="600">
-                        {presale.tokenSymbol}
-                      </Text>                        
-                      </Box>                    
-                    </HStack>                      
+                        <Text color="#4ade80" fontSize="sm" fontWeight="600">
+                          {presale.progress.toFixed(1)}%
+                        </Text>                      
+                      </Box>
+                    </HStack>
+                  </Box>
+                  <VStack alignItems={"left"} textAlign={"left"}>
+                    <Box mt={"10px"}>
+                      <Text color="gray" fontSize="xs">
+                        In Progress
+                      </Text>                  
+                    </Box>                
+                    <Box w="90%">
+                      <ProgressRoot mt={"-5px"} value={Number(`10`)} max={100} size="sm" >
+                        <ProgressBar bg="white" />
+                      </ProgressRoot>                    
                     </Box>
                     <Box>
-                      <Text color="#4ade80" fontSize="sm" fontWeight="600">
-                        {presale.progress.toFixed(1)}%
-                      </Text>                      
-                    </Box>
-                  </HStack>
+                      <Text color="#888" fontSize="xs" mt={"-5px"}>
+                        {formatEther(presale.totalRaised)} / {formatEther(presale.hardCap)} MON
+                      </Text>                     
+                    </Box>               
+                  </VStack>
                 </Box>
-                <VStack alignItems={"left"} textAlign={"left"}>
-                  <Box mt={"10px"}>
-                    <Text color="white" fontSize="xs">
-                      In Progress
-                    </Text>                  
-                  </Box>                
-                  <Box w="90%">
-                    <ProgressRoot mt={"-5px"} value={isNaN(presale.progress) ? 0 : presale.progress} size="sm" >
-                      <ProgressBar bg="white" />
-                    </ProgressRoot>                    
-                  </Box>
-                  <Box>
-                    <Text color="#888" fontSize="xs" mt={"-5px"}>
-                      {formatEther(presale.totalRaised)} / {formatEther(presale.hardCap)} MON
-                    </Text>                     
-                  </Box>               
-                </VStack>
-              </Box>
-            </Link>
-          ))}
+              </Link>
+            )
+          })}
         </VStack>
       )}
     </Box>
