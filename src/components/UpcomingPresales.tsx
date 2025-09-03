@@ -342,13 +342,13 @@ const UpcomingPresales: React.FC = () => {
                 </Box>
                 <VStack alignItems={"left"} textAlign={"left"}>
                   <Box mt={"10px"}>
-                    <Text color="#4ade80" fontSize="xs">
+                    <Text color="white" fontSize="xs">
                       In Progress
                     </Text>                  
                   </Box>                
                   <Box w="90%">
                     <ProgressRoot mt={"-5px"} value={isNaN(presale.progress) ? 0 : presale.progress} size="sm" >
-                      <ProgressBar bg="#4ade80" />
+                      <ProgressBar bg="white" />
                     </ProgressRoot>                    
                   </Box>
                   <Box>
