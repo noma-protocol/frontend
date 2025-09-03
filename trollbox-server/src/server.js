@@ -1709,6 +1709,11 @@ app.post('/api/referrals/register', (req, res) => {
       return res.status(400).json({ error: 'Invalid referral code' });
     }
     
+    // Check for self-referral
+    if (referrerAddress.toLowerCase() === referredAddress.toLowerCase()) {
+      return res.status(400).json({ error: 'Cannot use your own referral code' });
+    }
+    
     // Check if already referred
     const key = `${referralCode}:${referrerAddress}`;
     const existingReferrals = referralStore.referrals[key] || [];

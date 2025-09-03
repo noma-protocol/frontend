@@ -459,6 +459,19 @@ const Exchange: React.FC = () => {
                         setReferredBy(referralStatus.referralCode || '');
                         console.log(`User already referred by: ${referralStatus.referralCode}`);
                     } else {
+                        // Check if user is trying to use their own referral code
+                        const ownCode = generateReferralCode(address);
+                        if (urlReferralCode === ownCode || urlReferralCode === `0x${ownCode}`) {
+                            console.warn('Cannot use your own referral code');
+                            toaster.create({
+                                title: "Invalid Referral",
+                                description: "You cannot use your own referral code",
+                                status: "warning",
+                                duration: 3000,
+                            });
+                            return;
+                        }
+                        
                         // Register new referral using only the code
                         await referralApi.registerReferral({
                             referralCode: urlReferralCode,

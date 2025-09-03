@@ -260,7 +260,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
                 <Box>
                   <HStack mt={2} spacing={4}>
                     <Text fontSize="xs" color="#888">
-                      Referral Code: <Text as="span" color="#ff9500" fontFamily="monospace">{referralCode.slice(0, 15) + "..."}</Text>
+                      Referral Code: <Text as="span" color="#ff9500" fontFamily="monospace">{referralCode}</Text>
                     </Text>
                   </HStack>
                 </Box>
