@@ -723,8 +723,13 @@ class ReferralStore {
   registerCode(code, address) {
     const normalizedAddress = address.toLowerCase();
     
-    // Handle both short (8 char) and legacy (66 char) formats
-    const normalizedCode = code.startsWith('0x') ? code : `0x${code}`;
+    // Normalize code format - always store without 0x prefix for short codes
+    let normalizedCode;
+    if (code.length <= 10) { // Short code (8 chars + optional 0x)
+      normalizedCode = code.startsWith('0x') ? code.slice(2) : code;
+    } else { // Legacy long code - keep 0x prefix
+      normalizedCode = code.startsWith('0x') ? code : `0x${code}`;
+    }
     
     // Check if code already exists and matches the address
     if (this.codes[normalizedCode] && this.codes[normalizedCode] !== normalizedAddress) {
@@ -732,42 +737,23 @@ class ReferralStore {
       return false;
     }
     
-    // Also check without 0x prefix for short codes
-    if (this.codes[code] && this.codes[code] !== normalizedAddress) {
-      console.error(`Code ${code} already registered to different address`);
-      return false;
-    }
-    
-    // Register both formats for flexibility
+    // Register the code in canonical format only
     this.codes[normalizedCode] = normalizedAddress;
-    if (!code.startsWith('0x')) {
-      this.codes[code] = normalizedAddress;
-    }
-    
     this.saveCodes();
     return true;
   }
 
   // Get address from referral code
   getAddressByCode(code) {
-    // Try the code as-is first
-    if (this.codes[code]) {
-      return this.codes[code];
+    // Normalize code format
+    let normalizedCode;
+    if (code.length <= 10) { // Short code (8 chars + optional 0x)
+      normalizedCode = code.startsWith('0x') ? code.slice(2) : code;
+    } else { // Legacy long code
+      normalizedCode = code.startsWith('0x') ? code : `0x${code}`;
     }
     
-    // Try with 0x prefix
-    const withPrefix = code.startsWith('0x') ? code : `0x${code}`;
-    if (this.codes[withPrefix]) {
-      return this.codes[withPrefix];
-    }
-    
-    // Try without 0x prefix
-    const withoutPrefix = code.startsWith('0x') ? code.slice(2) : code;
-    if (this.codes[withoutPrefix]) {
-      return this.codes[withoutPrefix];
-    }
-    
-    return null;
+    return this.codes[normalizedCode] || null;
   }
 
   // Add a referred user to a referral code
