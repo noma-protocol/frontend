@@ -663,12 +663,18 @@ class ReferralStore {
     try {
       if (existsSync(REFERRALS_FILE)) {
         const data = readFileSync(REFERRALS_FILE, 'utf8');
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        
+        // Initialize new structure if needed
+        if (!parsed.referred_users) parsed.referred_users = {};
+        if (!parsed.referrers) parsed.referrers = {};
+        
+        return parsed;
       }
     } catch (error) {
       console.error('Error loading referrals:', error);
     }
-    return {};
+    return { referred_users: {}, referrers: {} };
   }
 
   loadTrades() {
@@ -756,23 +762,39 @@ class ReferralStore {
     return this.codes[normalizedCode] || null;
   }
 
+
   // Add a referred user to a referral code
   addReferral(referralCode, referrerAddress, referredAddress) {
-    const key = `${referralCode}:${referrerAddress.toLowerCase()}`;
-    
-    if (!this.referrals[key]) {
-      this.referrals[key] = [];
-    }
-    
-    // Check if already referred
+    const normalizedReferrerAddress = referrerAddress.toLowerCase();
     const normalizedReferredAddress = referredAddress.toLowerCase();
-    if (!this.referrals[key].includes(normalizedReferredAddress)) {
-      this.referrals[key].push(normalizedReferredAddress);
-      this.saveReferrals();
-      return true;
+    
+    // Check if the referred user is already referred by someone
+    if (this.referrals.referred_users[normalizedReferredAddress]) {
+      console.log(`User ${referredAddress} is already referred by ${this.referrals.referred_users[normalizedReferredAddress].referrer}`);
+      return false;
     }
     
-    return false; // Already referred
+    // Add to referred_users
+    this.referrals.referred_users[normalizedReferredAddress] = {
+      referrer: normalizedReferrerAddress,
+      referralCode: referralCode,
+      timestamp: Date.now()
+    };
+    
+    // Add to referrers list
+    if (!this.referrals.referrers[normalizedReferrerAddress]) {
+      this.referrals.referrers[normalizedReferrerAddress] = {
+        code: referralCode,
+        referred: []
+      };
+    }
+    
+    if (!this.referrals.referrers[normalizedReferrerAddress].referred.includes(normalizedReferredAddress)) {
+      this.referrals.referrers[normalizedReferrerAddress].referred.push(normalizedReferredAddress);
+    }
+    
+    this.saveReferrals();
+    return true;
   }
 
   // Get referral stats for an address
@@ -786,14 +808,12 @@ class ReferralStore {
       trades: []
     };
 
-    // Find all referral keys for this address
-    Object.keys(this.referrals).forEach(key => {
-      if (key.toLowerCase().endsWith(`:${normalizedAddress}`)) {
-        const referredUsers = this.referrals[key] || [];
-        stats.totalReferred += referredUsers.length;
-        stats.referredUsers = stats.referredUsers.concat(referredUsers);
-      }
-    });
+    // Get referrer data
+    const referrerData = this.referrals.referrers[normalizedAddress];
+    if (referrerData) {
+      stats.totalReferred = referrerData.referred.length;
+      stats.referredUsers = referrerData.referred;
+    }
 
     // Calculate volume from trades
     this.trades.forEach(trade => {
@@ -1791,23 +1811,16 @@ app.get('/api/referrals/check/:userAddress', (req, res) => {
     const { userAddress } = req.params;
     const normalizedAddress = userAddress.toLowerCase();
     
-    let referralInfo = null;
+    // Check if user was referred using new structure
+    const referredUserData = referralStore.referrals.referred_users[normalizedAddress];
     
-    // Search through all referrals to find if user was referred
-    Object.keys(referralStore.referrals).forEach(key => {
-      const referredUsers = referralStore.referrals[key] || [];
-      if (referredUsers.includes(normalizedAddress)) {
-        const [code, referrerAddress] = key.split(':');
-        referralInfo = {
-          referralCode: code,
-          referrerAddress,
-          referredAddress: userAddress
-        };
-      }
-    });
-    
-    if (referralInfo) {
-      res.json({ referred: true, ...referralInfo });
+    if (referredUserData) {
+      res.json({ 
+        referred: true, 
+        referralCode: referredUserData.referralCode,
+        referrerAddress: referredUserData.referrer,
+        referredAddress: userAddress
+      });
     } else {
       res.json({ referred: false });
     }

@@ -439,18 +439,15 @@ class BlockchainMonitor {
       const normalizedAddress = traderAddress.toLowerCase();
       let referralInfo = null;
       
-      // Search through all referrals to find if user was referred
-      Object.keys(this.referralStore.referrals).forEach(key => {
-        const referredUsers = this.referralStore.referrals[key] || [];
-        if (referredUsers.includes(normalizedAddress)) {
-          const [code, referrerAddress] = key.split(':');
-          referralInfo = {
-            referralCode: code,
-            referrerAddress,
-            referredAddress: traderAddress
-          };
-        }
-      });
+      // Check if user was referred using new structure
+      const referredUserData = this.referralStore.referrals.referred_users[normalizedAddress];
+      if (referredUserData) {
+        referralInfo = {
+          referralCode: referredUserData.referralCode,
+          referrerAddress: referredUserData.referrer,
+          referredAddress: traderAddress
+        };
+      }
       
       if (referralInfo) {
         // Track the trade volume for this referral
