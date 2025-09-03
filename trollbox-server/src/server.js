@@ -53,6 +53,16 @@ class MessageStore {
 
   saveMessages() {
     try {
+      // Clean up transfer messages before saving
+      this.messages = this.messages.filter(msg => {
+        if (msg.type !== 'tradeAlert') return true;
+        if (msg.transaction && msg.transaction.eventName) return true;
+        if (msg.content && msg.content.includes(' sent ') && msg.content.includes(' NOMA to ')) {
+          return false;
+        }
+        return true;
+      });
+      
       writeFileSync(MESSAGES_FILE, JSON.stringify(this.messages, null, 2));
     } catch (error) {
       console.error('Error saving messages:', error);
@@ -72,7 +82,24 @@ class MessageStore {
   }
 
   getRecentMessages(limit = 50) {
-    return this.messages.slice(-limit);
+    // Filter out simple transfer messages (not from ExchangeHelper)
+    const filteredMessages = this.messages.filter(msg => {
+      // Keep all non-trade messages
+      if (msg.type !== 'tradeAlert') return true;
+      
+      // For trade alerts, only keep those from ExchangeHelper
+      if (msg.transaction && msg.transaction.eventName) return true;
+      
+      // Filter out simple transfer messages
+      if (msg.content && msg.content.includes(' sent ') && msg.content.includes(' NOMA to ')) {
+        console.log('[MESSAGE FILTER] Filtering out transfer message:', msg.content);
+        return false;
+      }
+      
+      return true;
+    });
+    
+    return filteredMessages.slice(-limit);
   }
 }
 
@@ -908,13 +935,21 @@ function broadcast(message, excludeClient = null) {
 
 // Handle trade alert from blockchain monitor (broadcasting disabled)
 function broadcastTradeAlert(tradeData) {
-  // Store the trade alert as a message (for history)
-  const tradeMessage = {
-    ...tradeData,
-    clientId: 'system',
-    address: 'system'
-  };
-  messageStore.addMessage(tradeMessage);
+  console.log('[TRADE ALERT] Received trade alert:', tradeData.type, tradeData.content);
+  
+  // Only store actual ExchangeHelper trades, not simple transfers
+  if (tradeData.transaction && tradeData.transaction.eventName) {
+    console.log('[TRADE ALERT] Storing ExchangeHelper trade');
+    // Store the trade alert as a message (for history)
+    const tradeMessage = {
+      ...tradeData,
+      clientId: 'system',
+      address: 'system'
+    };
+    messageStore.addMessage(tradeMessage);
+  } else {
+    console.log('[TRADE ALERT] Ignoring non-ExchangeHelper event');
+  }
   
   // Broadcasting disabled - trades are only stored, not sent to clients
   // broadcast(tradeData);
@@ -1886,17 +1921,24 @@ app.listen(HTTP_PORT, () => {
 console.log(`Trollbox WebSocket server running on port ${PORT}`);
 
 // Initialize blockchain monitor
+console.log('=== BLOCKCHAIN MONITOR SETUP ===');
+console.log('ENABLE_BLOCKCHAIN_MONITOR env var:', process.env.ENABLE_BLOCKCHAIN_MONITOR);
+console.log('All env vars:', Object.keys(process.env).filter(k => k.includes('BLOCKCHAIN') || k.includes('MONAD') || k.includes('DEX')));
+
 if (process.env.ENABLE_BLOCKCHAIN_MONITOR === 'true') {
+  console.log('Creating blockchain monitor instance...');
   blockchainMonitor = new BlockchainMonitor(broadcastTradeAlert, transactionStore, referralStore);
   blockchainMonitor.initialize().then((success) => {
     if (success) {
-      console.log('Blockchain monitor initialized successfully');
+      console.log('✅ Blockchain monitor initialized successfully');
     } else {
-      console.log('Blockchain monitor initialization failed, will retry...');
+      console.log('❌ Blockchain monitor initialization failed, will retry...');
     }
+  }).catch(error => {
+    console.error('❌ Blockchain monitor initialization error:', error);
   });
 } else {
-  console.log('Blockchain monitor disabled. Set ENABLE_BLOCKCHAIN_MONITOR=true to enable.');
+  console.log('⚠️  Blockchain monitor disabled. Set ENABLE_BLOCKCHAIN_MONITOR=true to enable.');
 }
 
 // Cleanup on exit

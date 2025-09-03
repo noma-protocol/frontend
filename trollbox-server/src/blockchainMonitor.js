@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 const MONAD_RPC_URL = process.env.MONAD_RPC_URL || 'https://rpc.ankr.com/monad_testnet';
 const NOMA_TOKEN_ADDRESS = process.env.NOMA_TOKEN_ADDRESS || '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701'; // Replace with actual NOMA token address
 const DEX_POOL_ADDRESS = process.env.DEX_POOL_ADDRESS || '0xBb7EfF3E685c6564F2F09DD90b6C05754E3BDAC0'; // Replace with actual DEX pool address
+const EXCHANGE_HELPER_ADDRESS = process.env.EXCHANGE_HELPER_ADDRESS || '0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e';
 
 // ERC20 ABI for Transfer events
 const ERC20_ABI = [
@@ -18,6 +19,14 @@ const UNISWAP_V2_PAIR_ABI = [
 // Uniswap V3 Pool ABI for Swap events
 const UNISWAP_V3_POOL_ABI = [
   'event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)'
+];
+
+// ExchangeHelper ABI for trade events
+const EXCHANGE_HELPER_ABI = [
+  'event BoughtTokensETH(address who, uint256 amount)',
+  'event BoughtTokensWETH(address who, uint256 amount)',
+  'event SoldTokensETH(address who, uint256 amount)',
+  'event SoldTokensWETH(address who, uint256 amount)'
 ];
 
 class BlockchainMonitor {
@@ -40,17 +49,29 @@ class BlockchainMonitor {
 
   async initialize() {
     try {
-      console.log('Initializing blockchain monitor...');
+      console.log('=== BLOCKCHAIN MONITOR INITIALIZATION ===');
+      console.log('RPC URL:', MONAD_RPC_URL);
+      console.log('NOMA Token Address:', NOMA_TOKEN_ADDRESS);
+      console.log('DEX Pool Address:', DEX_POOL_ADDRESS);
+      console.log('ExchangeHelper Address:', EXCHANGE_HELPER_ADDRESS);
+      console.log('Has Referral Store:', !!this.referralStore);
+      console.log('Has Transaction Store:', !!this.transactionStore);
       
       // Create provider with automatic reconnection
       this.provider = new ethers.JsonRpcProvider(MONAD_RPC_URL);
       
       // Wait for provider to be ready
-      await this.provider.getNetwork();
-      console.log('Connected to Monad network');
+      const network = await this.provider.getNetwork();
+      console.log('Connected to network:', network.name, 'chainId:', network.chainId);
       
       // Create contract instances
       this.nomaContract = new ethers.Contract(NOMA_TOKEN_ADDRESS, ERC20_ABI, this.provider);
+      
+      // Create ExchangeHelper contract for monitoring trades
+      if (EXCHANGE_HELPER_ADDRESS && EXCHANGE_HELPER_ADDRESS !== '0x0000000000000000000000000000000000000000') {
+        this.exchangeHelper = new ethers.Contract(EXCHANGE_HELPER_ADDRESS, EXCHANGE_HELPER_ABI, this.provider);
+        console.log('ExchangeHelper contract created');
+      }
       
       // Only monitor DEX pool if address is provided
       if (DEX_POOL_ADDRESS && DEX_POOL_ADDRESS !== '0x0000000000000000000000000000000000000000') {
@@ -118,11 +139,15 @@ class BlockchainMonitor {
     
     try {
       const currentBlock = await this.provider.getBlockNumber();
+      console.log(`[POLL] Current block: ${currentBlock}, Last processed: ${this.lastProcessedBlock}`);
       
       if (currentBlock > this.lastProcessedBlock) {
+        console.log(`[POLL] Processing blocks ${this.lastProcessedBlock + 1} to ${currentBlock}`);
         // Process events from lastProcessedBlock + 1 to currentBlock
         await this.processBlockRange(this.lastProcessedBlock + 1, currentBlock);
         this.lastProcessedBlock = currentBlock;
+      } else {
+        console.log('[POLL] No new blocks to process');
       }
       
       // Schedule next poll
@@ -131,7 +156,7 @@ class BlockchainMonitor {
       }, this.pollingInterval);
       
     } catch (error) {
-      console.error('Error in polling cycle:', error);
+      console.error('[POLL ERROR] Error in polling cycle:', error);
       
       // Retry after a delay
       this.pollingTimer = setTimeout(() => {
@@ -152,10 +177,18 @@ class BlockchainMonitor {
     if (this.dexPool) {
       await this.processDexSwaps(fromBlock, toBlock);
     }
+    
+    // Process ExchangeHelper trades
+    if (this.exchangeHelper) {
+      await this.processExchangeHelperTrades(fromBlock, toBlock);
+    }
   }
 
   async processNomaTransfers(fromBlock, toBlock) {
     try {
+      console.log('[NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper');
+      return; // Disable transfer tracking - only track actual trades
+      
       // Create filter for Transfer events
       const transferFilter = {
         address: NOMA_TOKEN_ADDRESS,
@@ -211,6 +244,7 @@ class BlockchainMonitor {
 
   async processDexSwaps(fromBlock, toBlock) {
     try {
+      console.log(`[DEX SWAPS] Searching for swaps in DEX pool: ${DEX_POOL_ADDRESS}`);
       // Create filter for Swap events (Uniswap V3)
       const swapFilter = {
         address: DEX_POOL_ADDRESS,
@@ -219,8 +253,9 @@ class BlockchainMonitor {
         toBlock: '0x' + toBlock.toString(16)
       };
       
+      console.log('[DEX SWAPS] Filter:', JSON.stringify(swapFilter, null, 2));
       const logs = await this.provider.getLogs(swapFilter);
-      console.log(`Found ${logs.length} DEX swap events in blocks ${fromBlock}-${toBlock}`);
+      console.log(`[DEX SWAPS] Found ${logs.length} DEX swap events in blocks ${fromBlock}-${toBlock}`);
       
       for (const log of logs) {
         // Skip if already processed
@@ -259,6 +294,73 @@ class BlockchainMonitor {
       }
     } catch (error) {
       console.error('Error processing DEX swaps:', error);
+    }
+  }
+
+  async processExchangeHelperTrades(fromBlock, toBlock) {
+    try {
+      console.log(`[EXCHANGE HELPER] Searching for trades in ExchangeHelper: ${EXCHANGE_HELPER_ADDRESS}`);
+      
+      // Create filters for all ExchangeHelper events
+      const eventTopics = [
+        ethers.id('BoughtTokensETH(address,uint256)'),
+        ethers.id('BoughtTokensWETH(address,uint256)'),
+        ethers.id('SoldTokensETH(address,uint256)'),
+        ethers.id('SoldTokensWETH(address,uint256)')
+      ];
+      
+      let allLogs = [];
+      
+      // Query each event type separately
+      for (const topic of eventTopics) {
+        const filter = {
+          address: EXCHANGE_HELPER_ADDRESS,
+          topics: [topic],
+          fromBlock: '0x' + fromBlock.toString(16),
+          toBlock: '0x' + toBlock.toString(16)
+        };
+        
+        console.log('[EXCHANGE HELPER] Searching for event:', topic.substring(0, 20) + '...');
+        const logs = await this.provider.getLogs(filter);
+        console.log(`[EXCHANGE HELPER] Found ${logs.length} events`);
+        allLogs = allLogs.concat(logs);
+      }
+      
+      console.log(`[EXCHANGE HELPER] Total found ${allLogs.length} trade events`);
+      
+      for (const log of allLogs) {
+        // Skip if already processed
+        if (this.processedTxHashes.has(log.transactionHash)) continue;
+        
+        try {
+          // Parse the log
+          const parsedLog = this.exchangeHelper.interface.parseLog({
+            topics: log.topics,
+            data: log.data
+          });
+          
+          if (!parsedLog) continue;
+          
+          // Process the trade
+          await this.handleExchangeHelperTrade(
+            parsedLog.name,
+            parsedLog.args.who || parsedLog.args[0],
+            parsedLog.args.amount || parsedLog.args[1],
+            {
+              transactionHash: log.transactionHash,
+              blockNumber: log.blockNumber,
+              logIndex: log.logIndex
+            }
+          );
+          
+          // Mark as processed
+          this.processedTxHashes.add(log.transactionHash);
+        } catch (logError) {
+          console.error('[EXCHANGE HELPER] Error parsing trade log:', logError, log);
+        }
+      }
+    } catch (error) {
+      console.error('[EXCHANGE HELPER] Error processing trades:', error);
     }
   }
 
@@ -327,6 +429,8 @@ class BlockchainMonitor {
       // Determine the type of transaction
       let emoji = this.getTradeEmoji(parseFloat(amount));
       
+      // Disable trade alerts for simple transfers - only track actual DEX trades
+      /*
       // Create trade alert message
       const tradeAlert = {
         id: ethers.id(event.transactionHash + event.logIndex),
@@ -340,6 +444,7 @@ class BlockchainMonitor {
       
       // Broadcasting disabled - only store transactions
       // this.broadcastCallback(tradeAlert);
+      */
       
     } catch (error) {
       console.error('Error handling NOMA transfer:', error);
@@ -348,17 +453,29 @@ class BlockchainMonitor {
 
   async handleDexSwap(sender, recipient, amount0, amount1, sqrtPriceX96, liquidity, tick, event) {
     try {
+      console.log('[HANDLE SWAP] Processing swap event:', {
+        sender,
+        recipient,
+        amount0: amount0.toString(),
+        amount1: amount1.toString(),
+        txHash: event.transactionHash
+      });
+      
       // Determine which token is NOMA (usually token0 or token1)
       // For now, assume NOMA is token0
       const nomaAmount = ethers.formatEther(amount0 > 0 ? amount0 : -amount0);
+      console.log(`[HANDLE SWAP] NOMA amount: ${nomaAmount}`);
       
       // Skip small trades
-      if (parseFloat(nomaAmount) < 10) return;
+      if (parseFloat(nomaAmount) < 10) {
+        console.log('[HANDLE SWAP] Skipping small trade (< 10 NOMA)');
+        return;
+      }
       
       // Get the actual transaction to find the real trader address
       const tx = await this.provider.getTransaction(event.transactionHash);
       if (!tx) {
-        console.error('Could not fetch transaction:', event.transactionHash);
+        console.error('[HANDLE SWAP] Could not fetch transaction:', event.transactionHash);
         return;
       }
       
@@ -367,7 +484,7 @@ class BlockchainMonitor {
       const action = amount0 > 0 ? 'sell' : 'buy';
       const emoji = this.getTradeEmoji(parseFloat(nomaAmount));
       
-      console.log(`DEX Swap detected: ${traderAddress} ${action} ${nomaAmount} NOMA (tx: ${event.transactionHash})`);
+      console.log(`[HANDLE SWAP] DEX Swap detected: ${traderAddress} ${action} ${nomaAmount} NOMA (tx: ${event.transactionHash})`);
       
       // Get transaction receipt for more details
       let gasUsed = null;
@@ -446,11 +563,24 @@ class BlockchainMonitor {
 
   async trackReferralVolume(transaction) {
     try {
+      console.log('[REFERRAL] Tracking referral volume for transaction:', {
+        type: transaction.type,
+        traderAddress: transaction.traderAddress,
+        sender: transaction.sender,
+        recipient: transaction.recipient,
+        volumeUSD: transaction.volumeUSD,
+        txHash: transaction.hash
+      });
+      
       // Get the trader address - use the actual trader address we stored
       const traderAddress = transaction.traderAddress || (transaction.type === 'sell' ? transaction.sender : transaction.recipient);
+      console.log('[REFERRAL] Trader address:', traderAddress);
       
       // Check if this trader was referred
       const normalizedAddress = traderAddress.toLowerCase();
+      console.log('[REFERRAL] Checking referral data for:', normalizedAddress);
+      console.log('[REFERRAL] Available referred users:', Object.keys(this.referralStore.referrals.referred_users || {}));
+      
       let referralInfo = null;
       
       // Check if user was referred using new structure
@@ -461,9 +591,13 @@ class BlockchainMonitor {
           referrerAddress: referredUserData.referrer,
           referredAddress: traderAddress
         };
+        console.log('[REFERRAL] Found referral info:', referralInfo);
+      } else {
+        console.log('[REFERRAL] No referral info found for trader');
       }
       
       if (referralInfo) {
+        console.log('[REFERRAL] Tracking trade for referral code:', referralInfo.referralCode);
         // Track the trade volume for this referral
         const tradeData = {
           userAddress: traderAddress,
@@ -492,6 +626,107 @@ class BlockchainMonitor {
   formatAddress(address) {
     // Format as 0xAbC123...7890
     return address.slice(0, 8) + '...' + address.slice(-4);
+  }
+
+  async handleExchangeHelperTrade(eventName, traderAddress, amount, event) {
+    try {
+      console.log('[HANDLE EXCHANGE HELPER] Processing trade event:', {
+        eventName,
+        trader: traderAddress,
+        amount: amount.toString(),
+        txHash: event.transactionHash
+      });
+      
+      // Format amount (assuming 18 decimals for NOMA)
+      const nomaAmount = ethers.formatEther(amount);
+      console.log(`[HANDLE EXCHANGE HELPER] NOMA amount: ${nomaAmount}`);
+      
+      // Skip small trades
+      if (parseFloat(nomaAmount) < 10) {
+        console.log('[HANDLE EXCHANGE HELPER] Skipping small trade (< 10 NOMA)');
+        return;
+      }
+      
+      // Determine trade type from event name
+      let action;
+      if (eventName.includes('Bought')) {
+        action = 'buy';
+      } else if (eventName.includes('Sold')) {
+        action = 'sell';
+      } else {
+        console.log('[HANDLE EXCHANGE HELPER] Unknown event type:', eventName);
+        return;
+      }
+      
+      const emoji = this.getTradeEmoji(parseFloat(nomaAmount));
+      console.log(`[HANDLE EXCHANGE HELPER] Trade detected: ${traderAddress} ${action} ${nomaAmount} NOMA (tx: ${event.transactionHash})`);
+      
+      // Get transaction receipt for more details
+      let gasUsed = null;
+      let effectiveGasPrice = null;
+      try {
+        const receipt = await this.provider.getTransactionReceipt(event.transactionHash);
+        if (receipt) {
+          gasUsed = receipt.gasUsed.toString();
+          effectiveGasPrice = receipt.effectiveGasPrice?.toString();
+        }
+      } catch (err) {
+        console.error('[HANDLE EXCHANGE HELPER] Error fetching transaction receipt:', err);
+      }
+      
+      // Get current timestamp
+      const block = await this.provider.getBlock(event.blockNumber);
+      const timestamp = new Date(block.timestamp * 1000).toISOString();
+      
+      // Create transaction record with the actual trader address
+      const transaction = {
+        hash: event.transactionHash,
+        type: action,
+        sender: action === 'sell' ? traderAddress : EXCHANGE_HELPER_ADDRESS,
+        recipient: action === 'buy' ? traderAddress : EXCHANGE_HELPER_ADDRESS,
+        traderAddress: traderAddress, // Store the actual trader address
+        amount: nomaAmount,
+        volumeNOMA: parseFloat(nomaAmount),
+        volumeETH: parseFloat(nomaAmount), // Simplified - would need price calculation
+        volumeUSD: 0, // Would need price oracle
+        tokenName: 'NOMA',
+        tokenSymbol: 'NOMA',
+        timestamp: timestamp,
+        blockNumber: event.blockNumber,
+        gasUsed,
+        effectiveGasPrice,
+        eventName: eventName
+      };
+      
+      // Store transaction if available
+      if (this.transactionStore) {
+        this.transactionStore.addTransaction(transaction);
+      }
+      
+      // Track referral volume if applicable
+      if (this.referralStore) {
+        await this.trackReferralVolume(transaction);
+      }
+      
+      // Create trade alert message with actual trader address
+      const traderAddr = this.formatAddress(traderAddress);
+      const tradeAlert = {
+        id: ethers.id(event.transactionHash + event.logIndex),
+        type: 'tradeAlert',
+        content: `${traderAddr} just ${action === 'buy' ? 'bought' : 'sold'} ${parseFloat(nomaAmount).toFixed(2)} NOMA ${emoji}`,
+        username: 'System',
+        timestamp: timestamp,
+        txHash: event.transactionHash,
+        blockNumber: event.blockNumber,
+        transaction: transaction
+      };
+      
+      // Broadcasting disabled - only store transactions
+      // this.broadcastCallback(tradeAlert);
+      
+    } catch (error) {
+      console.error('[HANDLE EXCHANGE HELPER] Error handling trade:', error);
+    }
   }
 
   getTradeEmoji(amount) {
