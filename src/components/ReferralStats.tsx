@@ -294,6 +294,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
             bg="rgba(0, 0, 0, 0.3)"
             borderRadius="md"
             p={3}
+           
             border="1px solid rgba(255, 149, 0, 0.1)"
             h={isMobile ? "auto" : "100px"}
           >
@@ -306,7 +307,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
               </Box>
             </HStack>
             <VStack textAlign={"left"} alignItems={"left"}>
-              <Box>
+              <Box >
                 <Text fontSize="xl" fontWeight="bold" color="white">
                   {referralStats.totalReferred}
                 </Text>                
