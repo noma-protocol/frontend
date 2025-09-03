@@ -18,6 +18,7 @@ import UserProfileModal from './UserProfileModal';
 import EmojiPicker from 'emoji-picker-react';
 import GifPicker from './GifPicker';
 import { toaster } from '../components/ui/toaster';
+import config from '../config';
 
 // Image component with fallback
 const ImageWithFallback: React.FC<{
@@ -138,7 +139,7 @@ const TrollBox: React.FC = () => {
     reconnect,
     clearAuth,
     error 
-  } = useTrollbox('wss://trollbox-ws.noma.money', false);
+  } = useTrollbox(config.WS_URL, false);
   
   // Add authentication timeout
   useEffect(() => {
