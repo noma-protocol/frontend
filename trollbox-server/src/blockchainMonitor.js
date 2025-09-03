@@ -355,9 +355,19 @@ class BlockchainMonitor {
       // Skip small trades
       if (parseFloat(nomaAmount) < 10) return;
       
-      const senderAddr = this.formatAddress(sender);
+      // Get the actual transaction to find the real trader address
+      const tx = await this.provider.getTransaction(event.transactionHash);
+      if (!tx) {
+        console.error('Could not fetch transaction:', event.transactionHash);
+        return;
+      }
+      
+      // The actual trader is tx.from (the account that initiated the transaction)
+      const traderAddress = tx.from;
       const action = amount0 > 0 ? 'sell' : 'buy';
       const emoji = this.getTradeEmoji(parseFloat(nomaAmount));
+      
+      console.log(`DEX Swap detected: ${traderAddress} ${action} ${nomaAmount} NOMA (tx: ${event.transactionHash})`);
       
       // Get transaction receipt for more details
       let gasUsed = null;
@@ -380,12 +390,15 @@ class BlockchainMonitor {
       // Calculate USD value (assuming token1 is USD-pegged)
       const usdAmount = parseFloat(nomaAmount) * price;
       
-      // Create transaction record
+      // Create transaction record with actual trader address
       const transaction = {
         hash: event.transactionHash,
         type: action,
-        sender: sender,
-        recipient: recipient,
+        sender: action === 'sell' ? traderAddress : DEX_POOL_ADDRESS,
+        recipient: action === 'buy' ? traderAddress : DEX_POOL_ADDRESS,
+        traderAddress: traderAddress, // Store the actual trader for referral tracking
+        routerSender: sender, // Original sender from event (router)
+        routerRecipient: recipient, // Original recipient from event (router)
         amount: nomaAmount,
         amountRaw: (amount0 > 0 ? amount0 : -amount0).toString(),
         price: price,
@@ -410,11 +423,12 @@ class BlockchainMonitor {
         await this.trackReferralVolume(transaction);
       }
       
-      // Create trade alert message
+      // Create trade alert message with actual trader address
+      const traderAddr = this.formatAddress(traderAddress);
       const tradeAlert = {
         id: ethers.id(event.transactionHash + event.logIndex),
         type: 'tradeAlert',
-        content: `${senderAddr} just ${action === 'buy' ? 'bought' : 'sold'} ${parseFloat(nomaAmount).toFixed(2)} NOMA ${emoji}`,
+        content: `${traderAddr} just ${action === 'buy' ? 'bought' : 'sold'} ${parseFloat(nomaAmount).toFixed(2)} NOMA ${emoji}`,
         username: 'System',
         timestamp: transaction.timestamp,
         txHash: event.transactionHash,
@@ -432,8 +446,8 @@ class BlockchainMonitor {
 
   async trackReferralVolume(transaction) {
     try {
-      // Get the trader address (sender for sells, recipient for buys)
-      const traderAddress = transaction.type === 'sell' ? transaction.sender : transaction.recipient;
+      // Get the trader address - use the actual trader address we stored
+      const traderAddress = transaction.traderAddress || (transaction.type === 'sell' ? transaction.sender : transaction.recipient);
       
       // Check if this trader was referred
       const normalizedAddress = traderAddress.toLowerCase();
