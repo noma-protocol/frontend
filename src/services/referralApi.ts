@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:9091/api';
+import config from '../config';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || config.API_URL;
 
 interface ReferralRegistration {
   referralCode: string;
