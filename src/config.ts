@@ -5,6 +5,16 @@ const feeTiers = [3000, 10000];
 
 const presaleContractAddress = "0x99b32151E3C0c8432c4c6C9b6F3213123e443F06";
 
+// API URL configuration based on environment
+const API_URL = environment === 'dev' 
+    ? 'http://localhost:9091/api' 
+    : 'https://trollbox.noma.money/api';
+
+// WebSocket URL configuration based on environment
+const WS_URL = environment === 'dev' 
+    ? 'ws://localhost:9090' 
+    : 'wss://trollbox-ws.noma.money';
+
 const protocolAddresses = {
     uniswapV3Factory: "0x961235a9020B05C44DF1026D956D1F4D78014276",
     pancakeV3Factory: "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865", // PancakeSwap V3 Factory
@@ -17,6 +27,8 @@ const protocolAddresses = {
 export default {
     chain,
     RPC_URL,
+    API_URL,
+    WS_URL,
     feeTiers,
     protocolAddresses,
     environment,
