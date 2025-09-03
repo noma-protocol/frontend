@@ -527,7 +527,15 @@ class TokenStore {
     try {
       if (existsSync(TOKENS_FILE)) {
         const data = readFileSync(TOKENS_FILE, 'utf8');
-        return JSON.parse(data).tokens || [];
+        const tokens = JSON.parse(data).tokens || [];
+        console.log('[TokenStore] Loaded tokens from file:', tokens.length);
+        console.log('[TokenStore] Token details:', tokens.map(t => ({
+          symbol: t.tokenSymbol,
+          status: t.status,
+          deployer: t.deployerAddress,
+          description: t.tokenDescription
+        })));
+        return tokens;
       }
     } catch (error) {
       console.error('Error loading tokens:', error);
@@ -1630,9 +1638,17 @@ app.get('/api/stats', (req, res) => {
 app.get('/api/tokens', (req, res) => {
   try {
     const allTokens = tokenStore.getTokens();
+    console.log('[API] Total tokens in store:', allTokens.length);
+    console.log('[API] Token statuses:', allTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
+    
     // Filter only deployed tokens by default unless explicitly requested
     const includeAll = req.query.includeAll === 'true';
+    console.log('[API] Include all tokens?', includeAll);
+    
     const tokens = includeAll ? allTokens : allTokens.filter(token => token.status === 'deployed');
+    console.log('[API] Filtered tokens count:', tokens.length);
+    console.log('[API] Returning tokens:', tokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
+    
     res.json({ tokens });
   } catch (error) {
     console.error('Error fetching tokens:', error);

@@ -72,7 +72,7 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
                 hasExpired,
                 currentTimestamp
             ] = await Promise.all([
-                PresaleContract.getTotalRaised(),
+                PresaleContract.totalRaised(),
                 PresaleContract.getParticipantCount(),
                 PresaleContract.finalized(),
                 PresaleContract.softCapReached(),

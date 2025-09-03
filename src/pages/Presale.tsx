@@ -506,8 +506,10 @@ const Presale: React.FC = () => {
       console.log(`Looking for base token: ${baseTokenSymbol}`);
       
       try {
-        const response = await tokenApi.getTokens();
+        // Use includeAll to get all tokens regardless of status
+        const response = await tokenApi.getTokens({ includeAll: true });
         console.log("API response:", response);
+        console.log("Tokens:", response.tokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
         
         const token = response.tokens.find(t => t.tokenSymbol === baseTokenSymbol);
         console.log(`Found token:`, token);
@@ -909,7 +911,7 @@ const Presale: React.FC = () => {
                       fontSize="sm" 
                       fontWeight="500"
                     >
-                      {finalized ? "Finalized" : hasExpired ? "Ended" : "Active"}
+                      {finalized ? "Finalized" : hasExpired ? "Ended" : softCapReached ? "Active (Soft Cap Reached)" : "Active"}
                     </Text>
                   </Box>
                 </HStack>
@@ -947,6 +949,11 @@ const Presale: React.FC = () => {
                       {totalRaised ? `${commify(totalRaised, 2)} MON` : "0 MON"}
                     </Text></Box>
                   </HStack>
+                  {softCapReached && (
+                    <Text color="#4ade80" fontSize="xs" fontWeight="medium" textAlign="center" mb={2}>
+                      ✓ Soft Cap Reached ({commify(softCap, 2)} MON)
+                    </Text>
+                  )}
                   <ProgressRoot value={timeLeft != "00:00:00:00" ? progress : progressSc} max={100}>
                     <ProgressBar bg="#2a2a2a">
                       <ProgressValueText color="white" fontSize="xs" />
@@ -980,18 +987,25 @@ const Presale: React.FC = () => {
             {deployer == address && !finalized && (
               <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
                 <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Admin Controls</Text>
+                {softCapReached && (
+                  <Text fontSize="sm" color="#4ade80" mb={2}>
+                    ✓ Soft cap reached - Presale can be finalized
+                  </Text>
+                )}
                 <Button 
                   w="100%"
                   h="40px"
-                  bg="#4ade80"
-                  color="black"
+                  bg={softCapReached ? "#4ade80" : "#666"}
+                  color={softCapReached ? "black" : "white"}
                   fontWeight="600"
                   onClick={handleClickFinalize}
                   isLoading={isLoading}
-                  isDisabled={finalized || hasExpired}
-                  _hover={{ bg: "#22c55e" }}
+                  isDisabled={finalized || (!softCapReached && !hasExpired)}
+                  _hover={{ bg: softCapReached ? "#22c55e" : "#777" }}
                 >
-                  Finalize Presale
+                  {!softCapReached && !hasExpired 
+                    ? "Finalize Presale (Soft cap not reached)" 
+                    : "Finalize Presale"}
                 </Button>
               </Box>
             )}
@@ -1027,6 +1041,10 @@ const Presale: React.FC = () => {
                       alt={tokenSymbol}
                       w="80px"
                       h="80px"
+                      onError={(e) => {
+                        console.log('[PRESALE] Image failed to load:', tokenLogo);
+                        e.currentTarget.src = placeholderLogo;
+                      }}
                     />
                   </Box>
                 </Box>
