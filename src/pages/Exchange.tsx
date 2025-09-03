@@ -65,6 +65,7 @@ import { unCommify, commify, commifyDecimals, generateBytes32String, getContract
 import WalletSidebar from "../components/WalletSidebar";
 import StandaloneWrapModal from "../components/StandaloneWrapModal";
 import StandaloneUnwrapModal from "../components/StandaloneUnwrapModal";
+import UpcomingPresales from "../components/UpcomingPresales";
 // import WalletNotConnected from '../components/WalletNotConnected';
 import { useToken } from "../contexts/TokenContext";
 
@@ -1457,11 +1458,11 @@ const Exchange: React.FC = () => {
             const formattedIMV = formatEther(imvData);
             const numericIMV = parseFloat(formattedIMV);
             
-            console.log("Formatted IMV:", formattedIMV, "Numeric:", numericIMV);
+            // console.log("Formatted IMV:", formattedIMV, "Numeric:", numericIMV);
             
             if (!isNaN(numericIMV) && isFinite(numericIMV) && numericIMV > 0) {
                 setFloorPrice(numericIMV);
-                console.log("Floor price (IMV) set to:", numericIMV);
+                // console.log("Floor price (IMV) set to:", numericIMV);
             } else {
                 setFloorPrice(0);
                 console.log("Invalid IMV value, floor price set to 0");
@@ -3096,8 +3097,13 @@ const Exchange: React.FC = () => {
                         </Box>
                     </Box>
                     
+                    {/* Upcoming Presales */}
+                    <Box flexShrink={0} w="100%">
+                        <UpcomingPresales />
+                    </Box>
+                    
                     {/* Troll Box */}
-                    <Box flexShrink={0}>
+                    <Box flexShrink={0} mt={4}>
                         <TrollBox />
                     </Box>
                     

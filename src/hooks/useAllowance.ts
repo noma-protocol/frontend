@@ -36,7 +36,7 @@ export const useAllowance = (
                 });
 
                 setAllowance(allowanceResult as bigint);
-                console.log(`Allowance for ${tokenAddress} to ${spenderAddress}:`, allowanceResult.toString());
+                // console.log(`Allowance for ${tokenAddress} to ${spenderAddress}:`, allowanceResult.toString());
             } catch (err) {
                 console.error('Error fetching allowance:', err);
                 setError(err as Error);
