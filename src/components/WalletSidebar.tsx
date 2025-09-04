@@ -200,12 +200,12 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
         return (
             <Box 
                 display="grid"
-                gridTemplateColumns={showWrapButton || showUnwrapButton ? "24px 40px 1fr 5px 70px" : "24px 50px 1fr 120px"}
-                gap="2px"
-                alignItems="start"
+                gridTemplateColumns={showWrapButton || showUnwrapButton ? "24px 1fr auto" : "24px 60px 1fr"}
+                gap="8px"
+                alignItems="center"
                 bg="rgba(255, 255, 255, 0.03)"
                 borderRadius="md"
-                p="6px 12px"
+                p="8px 12px"
                 border={`1px solid ${isSelected ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`}
                 transition="all 0.2s"
                 _hover={{
@@ -221,37 +221,32 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
-                    mb="15px"
                 >
                     <Image
                         src={logo}
                         alt={symbol}
-                        w="16px"
-                        h="16px"
-                        mt={1}
+                        w="20px"
+                        h="20px"
                     />
                 </Box>
                 
-                {/* Symbol */}
-                <Box mt={1}>
-                    <Text color="white" fontSize="sm" fontWeight="600">{symbol}</Text>
-                </Box>
-                {/* Wrap/Unwrap Button */}
-                {(showWrapButton || showUnwrapButton) && (
-                    <Box display="flex" alignItems="left" justifyContent="flex-start" mt={1}>
+                {/* Symbol and Button */}
+                <Box flex="1" display="flex" alignItems="center" gap={2}>
+                    <Box w="50px"><Text color="white" fontSize="sm" fontWeight="600">{symbol}</Text></Box>
+                    <Box w="60px">
                         {showWrapButton && setIsWrapDrawerOpen && (
                             <Button
-                                ml={2}
-                                size="sm"
+                                size="xs"
                                 fontSize="xs"
+                                h="22px"
                                 w="60px"
-                                h="24px"
+                                px={2}
                                 bg="transparent"
                                 border="1px solid #4ade80"
                                 borderColor="#4ade80"
-                                color="white"
-                                borderRadius={5}
-                                _hover={{ bg: "#4ade80aa", borderColor: "#4ade80" }}
+                                color="#4ade80"
+                                borderRadius={4}
+                                _hover={{ bg: "rgba(74, 222, 128, 0.1)", borderColor: "#4ade80" }}
                                 onClick={() => setIsWrapDrawerOpen(true)}
                             >
                                 Wrap
@@ -259,33 +254,31 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         )}
                         {showUnwrapButton && setIsUnwrapDrawerOpen && (
                             <Button
-                                ml={2}
-                                size="sm"
+                                size="xs"
                                 fontSize="xs"
+                                h="22px"
                                 w="60px"
-                                h="24px"
+                                px={2}
                                 bg="transparent"
                                 border="1px solid #4ade80"
                                 borderColor="#4ade80"
-                                color="white"
-                                borderRadius={5}
-                                _hover={{ bg: "#4ade80aa", borderColor: "#4ade80" }}
+                                color="#4ade80"
+                                borderRadius={4}
+                                _hover={{ bg: "rgba(74, 222, 128, 0.1)", borderColor: "#4ade80" }}
                                 onClick={() => setIsUnwrapDrawerOpen(true)}
                             >
                                 Unwrap
                             </Button>
                         )}
                     </Box>
-                )}                
-                {/* Spacer */}
-                <Box />
+                </Box>
                 
                 {/* Amounts */}
-                <Box textAlign="right" mt={1}>
+                <Box textAlign="right">
                     <Text color="white" fontWeight="bold" fontSize="sm" lineHeight="1.2">
                         {commify(balanceValue, 4)}
                     </Text>
-                    <Text color="#4ade80" fontSize="xs" lineHeight="1.2" whiteSpace="nowrap" mt={-2}>
+                    <Text color="#4ade80" fontSize="xs" lineHeight="1.2" whiteSpace="nowrap">
                         ≈ ${formatUsdValue(usdValue)}
                     </Text>
                 </Box>
@@ -294,10 +287,28 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
         );
     };
 
-    const totalValue = address && monPrice ? (
-        parseFloat(formatEther(ethBalanceValue)) * monPrice + 
-        (token1Info?.tokenSymbol === "WMON" ? parseFloat(formatEther(token1Info.balance || BigInt(0))) * monPrice : 0)
-    ) : 0;
+    const totalValue = address && monPrice ? (() => {
+        let total = parseFloat(formatEther(ethBalanceValue)) * monPrice;
+        
+        // Add WMON value
+        if (token1Info?.tokenSymbol === "WMON") {
+            total += parseFloat(formatEther(token1Info.balance || BigInt(0))) * monPrice;
+        } else if (token0Info?.tokenSymbol === "WMON") {
+            total += parseFloat(formatEther(token0Info.balance || BigInt(0))) * monPrice;
+        }
+        
+        // Add selected token value if it's NOMA and not already included
+        if (selectedToken === "NOMA" && selectedTokenBalance && 
+            selectedToken !== token0Info?.tokenSymbol && 
+            selectedToken !== token1Info?.tokenSymbol && 
+            nomaSpotPrice > 0) {
+            const nomaBalance = parseFloat(formatEther(selectedTokenBalance));
+            const nomaPrice = (1 / nomaSpotPrice) * monPrice;
+            total += nomaBalance * nomaPrice;
+        }
+        
+        return total;
+    })() : 0;
 
     return (
         <Box w="100%">
@@ -340,8 +351,10 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         />
                     )}
                     
-                    {/* Token1 Balance (if not WMON) */}
-                    {token1Info?.tokenSymbol && token1Info.tokenSymbol !== "WMON" && (
+                    {/* Token1 Balance (if not WMON and not the selected token) */}
+                    {token1Info?.tokenSymbol && 
+                     token1Info.tokenSymbol !== "WMON" && 
+                     token1Info.tokenSymbol !== selectedToken && (
                         <TokenBalanceCard 
                             symbol={token1Info.tokenSymbol}
                             balance={token1Info.balance}
@@ -349,12 +362,17 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                         />
                     )}
                     
-                    {/* Selected Token Balance (for Exchange page) */}
-                    {selectedToken && selectedTokenBalance && (
+                    {/* Selected Token Balance (for Exchange page) - only show if not already displayed */}
+                    {selectedToken && 
+                     selectedTokenBalance && 
+                     selectedToken !== "MON" && 
+                     selectedToken !== "WMON" && 
+                     selectedToken !== token0Info?.tokenSymbol && 
+                     selectedToken !== token1Info?.tokenSymbol && (
                         <TokenBalanceCard 
                             symbol={selectedToken}
                             balance={selectedTokenBalance}
-                            logo={selectedToken === "WMON" ? wmonLogo : placeholderLogoDark}
+                            logo={placeholderLogoDark}
                             isSelected={true}
                         />
                     )}
