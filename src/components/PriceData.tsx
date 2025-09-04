@@ -14,6 +14,14 @@ import {
 } from "./ui/select";
 const { formatEther } = ethers.utils;
 
+// Helper function to format numbers without scientific notation
+const formatNumberNoSci = (value: number, decimals: number = 8): string => {
+  // Handle very small numbers by using toFixed with sufficient decimals
+  const formatted = value.toFixed(decimals);
+  // Remove trailing zeros while keeping at least 2 decimals for readability
+  return formatted.replace(/(\.\d{2})\d*?0+$/, '$1').replace(/\.00$/, '.00');
+};
+
 // Set default font size for all ApexCharts
 if (typeof window !== "undefined") {
   window.ApexCharts?.exec?.(
@@ -97,7 +105,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const lastPrice = useRef<number | null>(null);
   const lastRefreshTime = useRef<number | null>(null);
-  const API_BASE_URL = "https://pricefeed.noma.money"; //"https://prices.oikos.cash"; // API base URL
+  const API_BASE_URL = import.meta.env.VITE_CHAIN === "local" ? "http://localhost:3001" : "https://pricefeed.noma.money"; // API base URL
 
   // Helper function to convert interval string to milliseconds
   const getIntervalMs = (interval: string): number => {
@@ -468,8 +476,11 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
 
   // Compute the minimum y value from your series data
   const computedMinY = series[0].data.length > 0
-    ? Math.min(...series[0].data.map((item: any) => item.y[2])) // Use the lowest 'low' value
+    ? Math.min(...series[0].data.map((item: any) => item.y[2])) * 0.95 // Use the lowest 'low' value with 5% padding
     : 0;
+  
+  // Ensure minimum is never negative
+  const safeMinY = Math.max(0, computedMinY);
 
   // Chart options for candlestick chart
   const chartOptions = {
@@ -506,14 +517,17 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       tickAmount: 6,
     },
     yaxis: {
+      min: safeMinY,
       tooltip: {
         enabled: true
       },
       labels: {
         formatter: (val: number) => {
-          // Format with appropriate precision and remove trailing zeros
+          // Format with appropriate precision and avoid scientific notation
           let formatted;
-          if (val < 0.0001) {
+          if (val < 0.000001) {
+            formatted = val.toFixed(8);
+          } else if (val < 0.0001) {
             formatted = val.toFixed(6);
           } else if (val < 0.01) {
             formatted = val.toFixed(4);
@@ -522,8 +536,13 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
           } else {
             formatted = val.toFixed(2);
           }
-          // Remove trailing zeros and unnecessary decimal point
-          return parseFloat(formatted).toString();
+          // Remove trailing zeros while keeping decimal notation
+          formatted = formatted.replace(/\.?0+$/, '');
+          // Ensure we have at least one decimal place for very small numbers
+          if (val < 0.01 && !formatted.includes('.')) {
+            formatted = val.toFixed(8).replace(/\.?0+$/, '');
+          }
+          return formatted;
         },
         offsetX: -10, // This will effectively move the labels left (negative X direction)
         style: {
@@ -998,20 +1017,20 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
               {isMobile ? (
               <VStack ml={-10} mt={-10}>
                 <Box mt={-4} mr={isMobile ? 2 : 0} ml={isMobile ? 7 : 0} textAlign={isMobile ? "right" : "left"} alignItems={isMobile ? "right" : "left"}>
-                    <Text fontSize={"xs"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
+                    <Text fontSize={"xs"}>IMV {formatNumberNoSci(Number(formatEther(`${imv || 0}`)), 8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
                 </Box>
                 <Box  mt={-2} ml={"35%"}>
-                  <Text fontSize={"xs"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
+                  <Text fontSize={"xs"}>(${formatNumberNoSci(Number(formatEther(`${imv || 0}`)) * priceUSD, 4)})</Text>
                 </Box>
               </VStack>
               ) : 
               <Box w="120%">
                 <HStack>
                   <Box mt={-3} mr={0} ml={10} w="95%" >
-                    <Text fontSize={"xs"}>IMV {Number(formatEther(`${imv || 0}`)).toFixed(8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
+                    <Text fontSize={"xs"}>IMV {formatNumberNoSci(Number(formatEther(`${imv || 0}`)), 8)} {isTokenInfoLoading ? <Spinner size="sm" /> : `${token1Symbol}/${token0Symbol}`} </Text>
                   </Box>
                   <Box  mt={-2} ml={2}>
-                    <Text fontSize={"xx-small"}>(${(Number(formatEther(`${imv || 0}`)) * priceUSD).toFixed(4)})</Text>
+                    <Text fontSize={"xx-small"}>(${formatNumberNoSci(Number(formatEther(`${imv || 0}`)) * priceUSD, 4)})</Text>
                   </Box>
                 </HStack>
               </Box>
