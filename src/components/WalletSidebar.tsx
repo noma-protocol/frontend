@@ -8,10 +8,13 @@ import wmonLogo from '../assets/images/monad.png';
 import placeholderLogoDark from '../assets/images/question_white.svg';
 import { ethers } from 'ethers';
 import { usePublicClient } from 'wagmi';
+import TransferModal from './TransferModal';
 
 interface TokenInfo {
     tokenSymbol?: string;
     balance?: bigint;
+    tokenAddress?: string;
+    decimals?: number;
 }
 
 interface WalletSidebarProps {
@@ -20,6 +23,7 @@ interface WalletSidebarProps {
     token1Info?: TokenInfo;
     selectedToken?: string;
     selectedTokenBalance?: bigint;
+    selectedTokenAddress?: string;
     address?: string;
     deposit?: () => void;
     withdraw?: () => void;
@@ -41,6 +45,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
     token1Info,
     selectedToken,
     selectedTokenBalance,
+    selectedTokenAddress,
     address,
     deposit,
     withdraw,
@@ -60,6 +65,23 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
     const ethBalanceValue = typeof ethBalance === 'string' ? BigInt(ethBalance) : ethBalance;
     const { monPrice } = useMonPrice();
     const publicClient = usePublicClient();
+    
+    // Transfer modal state
+    const [isTransferOpen, setIsTransferOpen] = useState(false);
+    const [transferTokenInfo, setTransferTokenInfo] = useState<{
+        address?: string;
+        symbol?: string;
+        decimals?: number;
+        logo?: string;
+    }>({});
+    
+    const onTransferOpen = () => setIsTransferOpen(true);
+    const onTransferClose = () => setIsTransferOpen(false);
+    
+    // Debug modal state
+    useEffect(() => {
+        console.log('Transfer modal state:', { isTransferOpen, transferTokenInfo });
+    }, [isTransferOpen, transferTokenInfo]);
     
     // Fetch NOMA spot price from Uniswap V3 pool
     useEffect(() => {
@@ -164,7 +186,10 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
         logo, 
         isSelected = false,
         showWrapButton = false,
-        showUnwrapButton = false 
+        showUnwrapButton = false,
+        tokenAddress,
+        decimals = 18,
+        showTransferButton = false
     }: { 
         symbol: string; 
         balance: bigint | undefined; 
@@ -172,6 +197,9 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
         isSelected?: boolean;
         showWrapButton?: boolean;
         showUnwrapButton?: boolean;
+        tokenAddress?: string;
+        decimals?: number;
+        showTransferButton?: boolean;
     }) => {
         const balanceValue = balance ? parseFloat(formatEther(balance)) : 0;
         
@@ -197,10 +225,21 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
             // Add other token prices here as needed
         }
 
+        const handleTransfer = () => {
+            console.log('Transfer button clicked', { tokenAddress, symbol, decimals });
+            setTransferTokenInfo({
+                address: tokenAddress,
+                symbol,
+                decimals,
+                logo
+            });
+            onTransferOpen();
+        };
+
         return (
             <Box 
                 display="grid"
-                gridTemplateColumns={showWrapButton || showUnwrapButton ? "24px 1fr auto" : "24px 60px 1fr"}
+                gridTemplateColumns={showWrapButton || showUnwrapButton || showTransferButton ? "24px 1fr auto" : "24px 60px 1fr"}
                 gap="8px"
                 alignItems="center"
                 bg="rgba(255, 255, 255, 0.03)"
@@ -231,7 +270,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 </Box>
                 
                 {/* Symbol and Button */}
-                <Box flex="1" display="flex" alignItems="center" gap={2}>
+                <Box flex="1" display="flex" alignItems="center" gap={2} mt={5} mb={5}>
                     <Box w="50px"><Text color="white" fontSize="sm" fontWeight="600">{symbol}</Text></Box>
                     <Box w="60px">
                         {showWrapButton && setIsWrapDrawerOpen && (
@@ -239,7 +278,8 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                                 size="xs"
                                 fontSize="xs"
                                 h="22px"
-                                w="60px"
+                                w="70px"
+                                ml={-5}
                                 px={2}
                                 bg="transparent"
                                 border="1px solid #4ade80"
@@ -257,7 +297,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                                 size="xs"
                                 fontSize="xs"
                                 h="22px"
-                                w="60px"
+                                w="70px"
                                 px={2}
                                 bg="transparent"
                                 border="1px solid #4ade80"
@@ -268,6 +308,24 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                                 onClick={() => setIsUnwrapDrawerOpen(true)}
                             >
                                 Unwrap
+                            </Button>
+                        )}
+                        {showTransferButton && tokenAddress && (
+                            <Button
+                                size="xs"
+                                fontSize="xs"
+                                h="22px"
+                                w="70px"
+                                px={2}
+                                bg="transparent"
+                                border="1px solid #4ade80"
+                                borderColor="#4ade80"
+                                color="#4ade80"
+                                borderRadius={4}
+                                _hover={{ bg: "rgba(74, 222, 128, 0.1)", borderColor: "#4ade80" }}
+                                onClick={handleTransfer}
+                            >
+                                Transfer
                             </Button>
                         )}
                     </Box>
@@ -337,6 +395,9 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                             symbol={token0Info.tokenSymbol}
                             balance={token0Info.balance}
                             logo={placeholderLogoDark}
+                            tokenAddress={token0Info.tokenAddress}
+                            decimals={token0Info.decimals}
+                            showTransferButton={true}
                         />
                     )}
                     
@@ -359,6 +420,9 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                             symbol={token1Info.tokenSymbol}
                             balance={token1Info.balance}
                             logo={placeholderLogoDark}
+                            tokenAddress={token1Info.tokenAddress}
+                            decimals={token1Info.decimals}
+                            showTransferButton={true}
                         />
                     )}
                     
@@ -374,6 +438,9 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                             balance={selectedTokenBalance}
                             logo={placeholderLogoDark}
                             isSelected={true}
+                            tokenAddress={selectedTokenAddress}
+                            decimals={18}
+                            showTransferButton={true}
                         />
                     )}
                     
@@ -396,6 +463,16 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                     </Flex>
                 </VStack>
             </Box>
+            
+            {/* Transfer Modal */}
+            <TransferModal
+                isOpen={isTransferOpen}
+                onClose={onTransferClose}
+                tokenAddress={transferTokenInfo.address}
+                tokenSymbol={transferTokenInfo.symbol}
+                tokenDecimals={transferTokenInfo.decimals}
+                tokenLogo={transferTokenInfo.logo}
+            />
         </Box>
     );
 };
