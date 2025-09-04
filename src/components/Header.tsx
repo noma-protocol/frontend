@@ -300,6 +300,7 @@ const Header: React.FC = () => {
             <Box display="flex" flexDirection="column" gap={1} alignItems="stretch">
           {/* Vault Selector - Only on Liquidity page */}
           {location.pathname === '/liquidity' && !isVaultsLoading && vaultsSelectData?.items?.length > 0 && (
+            <Box position="relative" overflow="hidden" borderRadius="md">
             <SelectRoot
               key={`vault-select-${vaultsSelectData.items.length}`}
               collection={vaultsSelectData}
@@ -311,15 +312,35 @@ const Header: React.FC = () => {
               <SelectTrigger
                 bg="#1a1a1a"
                 border="1px solid #2a2a2a"
-                h={isMobile ? "32px" : "38px"}
+                h="40px"
                 color="white"
                 _hover={{ 
                   bg: "#2a2a2a",
                   borderColor: "#3a3a3a" 
                 }}
                 _focus={{
-                  borderColor: "#2a2a2a",
+                  borderColor: "#3a3a3a",
+                  bg: "#1a1a1a",
                   outline: "none"
+                }}
+                transition="all 0.2s"
+                display="flex"
+                alignItems="center"
+                px={4}
+                css={{
+                  '& [data-part="trigger"]': {
+                    border: 'none !important',
+                    outline: 'none !important',
+                    boxShadow: 'none !important'
+                  },
+                  '& input, & select, & > div': {
+                    border: 'none !important',
+                    outline: 'none !important',
+                    boxShadow: 'none !important'
+                  },
+                  '&:focus-within': {
+                    borderColor: '#3a3a3a'
+                  }
                 }}
               >
                 <SelectValueText placeholder="Select vault" fontSize={isMobile ? "xs" : "sm"} />
@@ -328,6 +349,7 @@ const Header: React.FC = () => {
                 bg="#1a1a1a"
                 border="1px solid #2a2a2a"
                 borderRadius="md"
+                minW="200px"
               >
                 {vaultsSelectData.items.map((vaultData) => (
                   <SelectItem 
@@ -348,6 +370,7 @@ const Header: React.FC = () => {
                 ))}
               </SelectContent>
             </SelectRoot>
+            </Box>
           )}
 
           {/* Loading spinner for vaults */}
@@ -371,15 +394,35 @@ const Header: React.FC = () => {
             <SelectTrigger
               bg="#1a1a1a"
               border="1px solid #2a2a2a"
-              h={isMobile ? "32px" : "38px"}
+              h="40px"
               color="white"
               _hover={{ 
                 bg: "#2a2a2a",
                 borderColor: "#3a3a3a" 
               }}
               _focus={{
-                borderColor: "#2a2a2a",
+                borderColor: "#3a3a3a",
+                bg: "#1a1a1a",
                 outline: "none"
+              }}
+              transition="all 0.2s"
+              display="flex"
+              alignItems="center"
+              px={4}
+              css={{
+                '& [data-part="trigger"]': {
+                  border: 'none !important',
+                  outline: 'none !important',
+                  boxShadow: 'none !important'
+                },
+                '& input, & select, & > div': {
+                  border: 'none !important',
+                  outline: 'none !important',
+                  boxShadow: 'none !important'
+                },
+                '&:focus-within': {
+                  borderColor: '#3a3a3a'
+                }
               }}
             >
               <SelectValueText placeholder="Navigate" fontSize={isMobile ? "xs" : "sm"} />
@@ -389,6 +432,7 @@ const Header: React.FC = () => {
               border="1px solid #2a2a2a"
               borderRadius="md"
               boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
+              minW="180px"
             >
               {navigationItems.items.map((item) => (
                 <SelectItem
@@ -432,15 +476,35 @@ const Header: React.FC = () => {
                   <SelectTrigger
                     bg="#1a1a1a"
                     border="1px solid #2a2a2a"
-                    h={isMobile ? "32px" : "38px"}
+                    h="40px"
                     color="white"
                     _hover={{ 
                       bg: "#2a2a2a",
                       borderColor: "#3a3a3a" 
                     }}
                     _focus={{
-                      borderColor: "#2a2a2a",
+                      borderColor: "#3a3a3a",
+                      bg: "#1a1a1a",
                       outline: "none"
+                    }}
+                    transition="all 0.2s"
+                    display="flex"
+                    alignItems="center"
+                    px={4}
+                    css={{
+                      '& [data-part="trigger"]': {
+                        border: 'none !important',
+                        outline: 'none !important',
+                        boxShadow: 'none !important'
+                      },
+                      '& input, & select, & > div': {
+                        border: 'none !important',
+                        outline: 'none !important',
+                        boxShadow: 'none !important'
+                      },
+                      '&:focus-within': {
+                        borderColor: '#3a3a3a'
+                      }
                     }}
                   >
                     <SelectValueText placeholder="Select vault" fontSize={isMobile ? "xs" : "sm"} />
@@ -449,6 +513,7 @@ const Header: React.FC = () => {
                     bg="#1a1a1a"
                     border="1px solid #2a2a2a"
                     borderRadius="md"
+                    minW="200px"
                   >
                     {vaultsSelectData.items.map((vaultData) => (
                       <SelectItem 
@@ -492,15 +557,35 @@ const Header: React.FC = () => {
                 <SelectTrigger
                   bg="#1a1a1a"
                   border="1px solid #2a2a2a"
-                  h={isMobile ? "32px" : "38px"}
+                  h="40px"
                   color="white"
                   _hover={{ 
                     bg: "#2a2a2a",
                     borderColor: "#3a3a3a" 
                   }}
                   _focus={{
-                    borderColor: "#2a2a2a",
+                    borderColor: "#3a3a3a",
+                    bg: "#1a1a1a",
                     outline: "none"
+                  }}
+                  transition="all 0.2s"
+                  display="flex"
+                  alignItems="center"
+                  px={4}
+                  css={{
+                    '& [data-part="trigger"]': {
+                      border: 'none !important',
+                      outline: 'none !important',
+                      boxShadow: 'none !important'
+                    },
+                    '& input, & select, & > div': {
+                      border: 'none !important',
+                      outline: 'none !important',
+                      boxShadow: 'none !important'
+                    },
+                    '&:focus-within': {
+                      borderColor: '#3a3a3a'
+                    }
                   }}
                 >
                   <SelectValueText placeholder="Navigate" fontSize={isMobile ? "xs" : "sm"} />
@@ -510,6 +595,7 @@ const Header: React.FC = () => {
                   border="1px solid #2a2a2a"
                   borderRadius="md"
                   boxShadow="0 4px 12px rgba(0, 0, 0, 0.5)"
+                  minW="180px"
                 >
                   {navigationItems.items.map((item) => (
                     <SelectItem
