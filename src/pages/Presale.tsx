@@ -635,6 +635,12 @@ const Presale: React.FC = () => {
       return;
     }
 
+    // Don't run countdown if presale is finalized
+    if (finalized) {
+      setTimeLeft("00:00:00:00");
+      return;
+    }
+
     const targetTimestamp = new Date(targetDate).getTime();
 
     const interval = setInterval(() => {
@@ -662,7 +668,7 @@ const Presale: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [targetDate]);
+  }, [targetDate, finalized]);
   
 
 
@@ -975,21 +981,26 @@ const Presale: React.FC = () => {
                     <Text color="#888" fontSize="sm">Time Left</Text>
                   </Box>
                   <Box>
-                    <Text color={hasExpired ? "#ef4444" : "#4ade80"} fontSize="sm" fontWeight="500">
-                      {hasExpired ? "Ended" : timeLeft}
+                    <Text color={finalized ? "#4ade80" : hasExpired ? "#ef4444" : "#4ade80"} fontSize="sm" fontWeight="500">
+                      {finalized ? "Finalized" : hasExpired ? "Ended" : timeLeft}
                     </Text>
                   </Box>
                 </HStack>
               </VStack>
             </Box>
             
-            {/* Admin Controls */}
-            {deployer == address && !finalized && (
+            {/* Admin Controls - Only show when soft cap is reached or presale has ended */}
+            {deployer == address && !finalized && (softCapReached || hasExpired) && (
               <Box bg="#1a1a1a" borderRadius="lg" p={4} mt={4}>
                 <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Admin Controls</Text>
                 {softCapReached && (
                   <Text fontSize="sm" color="#4ade80" mb={2}>
                     ✓ Soft cap reached - Presale can be finalized
+                  </Text>
+                )}
+                {!softCapReached && hasExpired && (
+                  <Text fontSize="sm" color="#ef4444" mb={2}>
+                    ⚠ Presale ended - Soft cap not reached
                   </Text>
                 )}
                 <Button 

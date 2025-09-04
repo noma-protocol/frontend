@@ -2711,12 +2711,23 @@ const Exchange: React.FC = () => {
             spotPriceWei = parseEther("0.0000186"); // Default fallback
         }
 
-        const args = [
+        // Convert slippage percentage to basis points (e.g., 1% = 100 basis points)
+        const slippageTolerance = Math.floor(parseFloat(slippage) );
+        
+        // Different args for ETH vs WETH - buyTokensETH doesn't need amount parameter
+        const args = useWeth ? [
             poolInfo.poolAddress,
             spotPriceWei.toString(),
             safeParseEther(tradeAmount),
             address,
-            false
+            false,
+            slippageTolerance
+        ] : [
+            poolInfo.poolAddress,
+            spotPriceWei.toString(),
+            address,
+            false,
+            slippageTolerance
         ];
 
         setIsLoading(true);
@@ -2826,12 +2837,16 @@ const Exchange: React.FC = () => {
             spotPriceWei = parseEther("0.0000186"); // Default fallback
         }
 
+        // Convert slippage percentage to basis points (e.g., 1% = 100 basis points)
+        const slippageTolerance = Math.floor(parseFloat(slippage));
+        
         const args = [
             poolInfo.poolAddress,
             spotPriceWei.toString(),
             safeParseEther(tradeAmount),
             address,
-            false
+            false,
+            slippageTolerance
         ];
 
         setBalanceBeforePurchase(useWeth ? safeParseEther(wethBalance) : safeParseEther(ethBalance));
@@ -4065,18 +4080,83 @@ const Exchange: React.FC = () => {
                                 </Box>
                                 <Box>
                                     <Text color="white" fontSize="sm">
-                                        {quote || "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
+                                        {quote ? (parseFloat(quote) * (1 - parseFloat(slippage) / 100)).toFixed(6) : "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
                                     </Text>
                                 </Box>
                             </Flex>
-                            <Flex justifyContent="space-between" mb={2}>
+                            {/* <Flex justifyContent="space-between" mb={2}> */}
+                            <VStack alignItems={"left"} textAlign={"left"} mb={1} fontSize={"xs"}>
+                                <Box  mt={2}>
+                                    <Text color="#888" fontSize="sm">Slippage Tolerance</Text>
+                                </Box>   
+                                <Box>
+                                    <HStack gap={1}>
+                                        <Button
+                                            size="xs"
+                                            h="24px"
+                                            px={2}
+                                            bg={slippage === "0.1" ? "#4ade80" : "#2a2a2a"}
+                                            color={slippage === "0.1" ? "black" : "white"}
+                                            onClick={() => setSlippage("0.1")}
+                                            _hover={{ bg: slippage === "0.1" ? "#4ade80" : "#3a3a3a" }}
+                                        >
+                                            0.1%
+                                        </Button>
+                                        <Button
+                                            size="xs"
+                                            h="24px"
+                                            px={2}
+                                            bg={slippage === "0.5" ? "#4ade80" : "#2a2a2a"}
+                                            color={slippage === "0.5" ? "black" : "white"}
+                                            onClick={() => setSlippage("0.5")}
+                                            _hover={{ bg: slippage === "0.5" ? "#4ade80" : "#3a3a3a" }}
+                                        >
+                                            0.5%
+                                        </Button>
+                                        <Button
+                                            size="xs"
+                                            h="24px"
+                                            px={2}
+                                            bg={slippage === "1" ? "#4ade80" : "#2a2a2a"}
+                                            color={slippage === "1" ? "black" : "white"}
+                                            onClick={() => setSlippage("1")}
+                                            _hover={{ bg: slippage === "1" ? "#4ade80" : "#3a3a3a" }}
+                                        >
+                                            1%
+                                        </Button>
+                                        <Input
+                                            size="xs"
+                                            w="50px"
+                                            h="24px"
+                                            value={slippage}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/[^\d.]/g, '');
+                                                if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
+                                                    setSlippage(value);
+                                                }
+                                            }}
+                                            bg="#2a2a2a"
+                                            border="1px solid #444"
+                                            _focus={{ borderColor: "#4ade80" }}
+                                            placeholder="2%"
+                                            textAlign="right"
+                                        />
+                                    </HStack>
+                                </Box>                           
+                            </VStack>
+
+                            {/* </Flex> */}
+                            <Box mt={2}>
+                                <br />
+                            <Flex justifyContent="space-between" mb={2} mt={2}>
                                 <Box>
                                     <Text color="#888" fontSize="sm">Network Fee</Text>
                                 </Box>
                                 <Box>
                                     <Text color="white" fontSize="sm">~$0.12</Text>
                                 </Box>
-                            </Flex>
+                            </Flex>                                
+                            </Box>
                             <Flex justifyContent="space-between" alignItems="center">
                                 <Box display="inline-flex" alignItems="center" gap="6px">
                                     <Checkbox 
@@ -4414,6 +4494,66 @@ const Exchange: React.FC = () => {
                                             <Text color="white" fontSize="sm">
                                                 {quote || "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
                                             </Text>
+                                        </Box>
+                                    </Flex>
+                                    <Flex justifyContent="space-between" mb={2}>
+                                        <Box>
+                                            <Text color="#888" fontSize="sm">Slippage Tolerance</Text>
+                                        </Box>
+                                        <Box>
+                                            <HStack gap={1}>
+                                                <Button
+                                                    size="xs"
+                                                    h="24px"
+                                                    px={2}
+                                                    bg={slippage === "0.1" ? "#4ade80" : "#2a2a2a"}
+                                                    color={slippage === "0.1" ? "black" : "white"}
+                                                    onClick={() => setSlippage("0.1")}
+                                                    _hover={{ bg: slippage === "0.1" ? "#4ade80" : "#3a3a3a" }}
+                                                >
+                                                    0.1%
+                                                </Button>
+                                                <Button
+                                                    size="xs"
+                                                    h="24px"
+                                                    px={2}
+                                                    bg={slippage === "0.5" ? "#4ade80" : "#2a2a2a"}
+                                                    color={slippage === "0.5" ? "black" : "white"}
+                                                    onClick={() => setSlippage("0.5")}
+                                                    _hover={{ bg: slippage === "0.5" ? "#4ade80" : "#3a3a3a" }}
+                                                >
+                                                    0.5%
+                                                </Button>
+                                                <Button
+                                                    size="xs"
+                                                    h="24px"
+                                                    px={2}
+                                                    bg={slippage === "1" ? "#4ade80" : "#2a2a2a"}
+                                                    color={slippage === "1" ? "black" : "white"}
+                                                    onClick={() => setSlippage("1")}
+                                                    _hover={{ bg: slippage === "1" ? "#4ade80" : "#3a3a3a" }}
+                                                >
+                                                    1%
+                                                </Button>
+                                                <Input
+                                                    size="xs"
+                                                    w="50px"
+                                                    h="24px"
+                                                    value={slippage}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value.replace(/[^\d.]/g, '');
+                                                        if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
+                                                            setSlippage(value);
+                                                        }
+                                                    }}
+                                                    bg="#2a2a2a"
+                                                    border="1px solid #444"
+                                                    _focus={{ borderColor: "#4ade80" }}
+                                                    placeholder="1"
+                                                    textAlign="right"
+                                                />
+                                                <Text color="#888" fontSize="xs">%</Text>
+                                            </HStack>
                                         </Box>
                                     </Flex>
                                     <Flex justifyContent="space-between" mb={2}>
