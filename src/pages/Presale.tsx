@@ -432,17 +432,58 @@ const Presale: React.FC = () => {
     address: contractAddress,
     abi: PresaleAbi,
     functionName: "finalize",
-    onSuccess(data) {
+    onSuccess: async (data) => {
         console.log(`transaction successful: ${data.hash}`);
+        
+        // Get the pool address from the presale contract
+        try {
+          const { JsonRpcProvider } = ethers.providers;
+          const localProvider = new JsonRpcProvider(config.RPC_URL);
+          const presaleContract = new ethers.Contract(contractAddress, PresaleAbi, localProvider);
+          const poolAddress = await presaleContract.pool();
+          console.log('Pool address:', poolAddress);
+          
+          // Provision the price feed for this pool
+          const provisionPriceFeed = async () => {
+            try {
+              // Call the API to start tracking this pool
+              const API_BASE_URL = import.meta.env.VITE_CHAIN === "local" ? "http://localhost:3001" : "https://pricefeed.noma.money";
+              const response = await fetch(`${API_BASE_URL}/api/price/provision`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  poolAddress,
+                  tokenSymbol: tokenSymbol.startsWith("p-") ? tokenSymbol.substring(2) : tokenSymbol,
+                }),
+              });
+              
+              if (response.ok) {
+                console.log('Price feed provisioned successfully for pool:', poolAddress);
+              } else {
+                console.error('Failed to provision price feed:', await response.text());
+              }
+            } catch (error) {
+              console.error('Error provisioning price feed:', error);
+            }
+          };
+          
+          // Provision the price feed
+          await provisionPriceFeed();
+        } catch (error) {
+          console.error('Error getting pool address or provisioning feed:', error);
+        }
+        
         setIsLoading(false);
         fetchPresaleInfo();
         toaster.create({
           title: "Success",
-          description: "Presale finalized!",
+          description: "Presale finalized and price feed provisioned!",
         })
         setTimeout(() => {
           window.location.reload();
-        }, 4000); // 3000ms = 3 seconds      
+        }, 4000); // 4000ms = 4 seconds      
       },
       onError(error) {
         setIsLoading(false);

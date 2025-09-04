@@ -646,6 +646,12 @@ const Exchange: React.FC = () => {
     const [balanceBeforePurchase, setBalanceBeforePurchase] = useState(0);
     const [balanceBeforeSale, setBalanceBeforeSale] = useState(0);
     
+    // Calculate safe minimum Y value from chart data
+    const computedMinY = chartSeries.length > 0 && chartSeries[0].data && chartSeries[0].data.length > 0
+        ? Math.min(...chartSeries[0].data.map((item) => item.y[2])) * 0.95 // Use the lowest 'low' value with 5% padding
+        : 0;
+    const safeMinY = Math.max(0, computedMinY);
+    
     // Chart options with professional styling
     const [chartOptions, setChartOptions] = useState({
         chart: {
@@ -738,6 +744,8 @@ const Exchange: React.FC = () => {
         },
         yaxis: {
             opposite: true,
+            min: safeMinY,
+            forceNiceScale: true,
             labels: {
                 style: {
                     colors: '#4a4a4a',
@@ -746,7 +754,7 @@ const Exchange: React.FC = () => {
                 },
                 formatter: (value) => {
                     if (!value || isNaN(value)) return '0';
-                    if (value < 0.00001) return value.toExponential(2);
+                    if (value < 0.00001) return value.toFixed(8);
                     if (value < 0.01) return value.toFixed(6);
                     return value.toFixed(2);
                 }
@@ -795,7 +803,8 @@ const Exchange: React.FC = () => {
                     
                     const formatValue = (val) => {
                         if (!val || isNaN(val)) return '0';
-                        if (val < 0.00001) return val.toExponential(4);
+                        if (val < 0) return '0'; // Don't show negative values
+                        if (val < 0.00001) return val.toFixed(8);
                         if (val < 0.01) return val.toFixed(8);
                         return val.toFixed(4);
                     };
@@ -907,7 +916,7 @@ const Exchange: React.FC = () => {
         return data;
     };
     
-    const API_BASE_URL = "https://pricefeed.noma.money";
+    const API_BASE_URL = import.meta.env.VITE_CHAIN === "local" ? "http://localhost:3001" : "https://pricefeed.noma.money";
     
     // Map chart timeframe to API interval
     const mapTimeframeToApiInterval = (timeframe: string): string => {
@@ -979,6 +988,11 @@ const Exchange: React.FC = () => {
             url.searchParams.append('from_timestamp', from_timestamp.toString());
             url.searchParams.append('to_timestamp', to_timestamp.toString());
             url.searchParams.append('interval', interval);
+            
+            // Add pool address if available
+            if (poolInfo.poolAddress && poolInfo.poolAddress !== '0x0000000000000000000000000000000000000000') {
+                url.searchParams.append('poolAddress', poolInfo.poolAddress);
+            }
             
             const response = await fetch(url.toString());
             if (!response.ok) {
@@ -1473,6 +1487,22 @@ const Exchange: React.FC = () => {
         }
     }, [imvData]);
 
+    // Update chart y-axis min when chart data changes
+    useEffect(() => {
+        const newMinY = chartSeries.length > 0 && chartSeries[0].data && chartSeries[0].data.length > 0
+            ? Math.min(...chartSeries[0].data.map((item) => item.y[2])) * 0.95
+            : 0;
+        const newSafeMinY = Math.max(0, newMinY);
+        
+        setChartOptions(prevOptions => ({
+            ...prevOptions,
+            yaxis: {
+                ...prevOptions.yaxis,
+                min: newSafeMinY
+            }
+        }));
+    }, [chartSeries]);
+
     // Update chart annotations when spot price changes
     useEffect(() => {
         if (spotPrice > 0) {
@@ -1500,7 +1530,7 @@ const Exchange: React.FC = () => {
                                     bottom: 2
                                 }
                             },
-                            text: `${spotPrice < 0.00001 ? spotPrice.toExponential(4) : spotPrice < 0.01 ? spotPrice.toFixed(8) : spotPrice.toFixed(6)}`,
+                            text: `${spotPrice < 0.00001 ? spotPrice.toFixed(8) : spotPrice < 0.01 ? spotPrice.toFixed(8) : spotPrice.toFixed(6)}`,
                             textAnchor: 'middle',
                             position: 'right',
                             offsetX: 73,
@@ -1791,7 +1821,7 @@ const Exchange: React.FC = () => {
     
     const formatPrice = (price) => {
         if (price === 0) return '0.00';
-        if (price < 0.000001) return price.toExponential(2);
+        if (price < 0.000001) return price.toFixed(8);
         if (price < 0.01) return price.toFixed(6);
         if (price < 1) return price.toFixed(4);
         return commify(price, 2);
@@ -3254,7 +3284,7 @@ const Exchange: React.FC = () => {
                                                     </Text>
                                                 </Box>
                                                 <Box>
-                                                    <Text color="#888" fontSize="sm">
+                                                    <Text color="#888" fontSize="xs">
                                                         {commify(intervalVolume.toFixed(2), 2)} MON
                                                     </Text>
                                                 </Box>                                                
@@ -3278,7 +3308,7 @@ const Exchange: React.FC = () => {
                                         </Text>
                                     </Box>
                                     <Box mt={2}>
-                                        <Text color="#888" fontSize="sm">
+                                        <Text color="#888" fontSize="xs">
                                             {formatNumber(Number(formatEther(`${totalSupply}`)) * spotPrice)} MON
                                         </Text>                                       
                                     </Box>
@@ -3797,10 +3827,13 @@ const Exchange: React.FC = () => {
                             ethBalance={BigInt(Math.floor(parseFloat(ethBalance) * 1e18))}
                             token1Info={{
                                 tokenSymbol: "WMON",
-                                balance: BigInt(Math.floor(parseFloat(wethBalance) * 1e18))
+                                balance: BigInt(Math.floor(parseFloat(wethBalance) * 1e18)),
+                                tokenAddress: WETH_ADDRESS,
+                                decimals: 18
                             }}
                             selectedToken={selectedToken?.symbol}
                             selectedTokenBalance={BigInt(Math.floor(parseFloat(tokenBalance) * 1e18))}
+                            selectedTokenAddress={selectedToken?.token0}
                             address={address}
                             deposit={deposit}
                             withdraw={withdraw}
