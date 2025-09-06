@@ -35,6 +35,10 @@ type TradeControlsCardProps = {
     refreshParams: () => void;
     useWeth: boolean;
     setUseWeth: (useWeth: boolean) => void;
+    useMax?: boolean;
+    setUseMax?: (useMax: boolean) => void;
+    approveMax?: boolean;
+    setApproveMax?: (approveMax: boolean) => void;
 };
 
 const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
@@ -62,6 +66,10 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
     tradeMode,
     setTradeMode,
     quoteMax,
+    useMax = false,
+    setUseMax = () => {},
+    approveMax = false,
+    setApproveMax = () => {},
     ...props
 }) => {
 
@@ -86,6 +94,22 @@ const TradeControlsCard: React.FC<TradeControlsCardProps> = ({
                              Math.min(1, sliderMax / 10); // For larger balances, use 10% up to 1 max
   const [contributionAmount, setContributionAmount] = useState<number>(initialContribution);
   // Slider change handler – only update if token info is loaded.
+
+  // Effect to handle useMax changes
+  useEffect(() => {
+    if (useMax && !isTokenInfoLoading) {
+      if (tradeMode === "BUY") {
+        const maxAmount = useWeth == "1" ? Number(formatEther(`${token1Balance || 0}`)) : Number(formatEther(`${ethBalance || 0}`));
+        setAmountToBuy(maxAmount);
+        setContributionAmount(maxAmount);
+      } else {
+        const maxAmount = Number(formatEther(`${token0Balance || 0}`));
+        setAmountToSell(maxAmount);
+        setContributionAmount(maxAmount);
+      }
+      refreshParams();
+    }
+  }, [useMax, tradeMode, useWeth, token0Balance, token1Balance, ethBalance, isTokenInfoLoading]);
 
   const handleSliderChange = (e) => {
      if (isTokenInfoLoading || sliderMax === 0) return; // Prevent updates if still loading or no balance

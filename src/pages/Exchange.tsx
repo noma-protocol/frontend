@@ -2476,7 +2476,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+            const msg = error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+                        error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -2571,7 +2572,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+            const msg = error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+                        error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -2665,7 +2667,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false); 
-            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+            const msg = error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+                        error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("0xe450d38c") > -1 ? "Not enough balance" :
                         error.message.toString().indexOf("Amount must be greater than 0") > -1 ? "Invalid amount" :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
@@ -2790,18 +2793,21 @@ const Exchange: React.FC = () => {
             poolInfo.poolAddress,
             spotPriceWei.toString(),
             safeParseEther(tradeAmount),
+            safeParseEther(`${parseFloat(quote) * (1 - parseFloat(slippage) / 100)}`), // min amount out after slippage
             address,
             false,
             slippageTolerance
         ] : [
             poolInfo.poolAddress,
             spotPriceWei.toString(),
+            safeParseEther(`${parseFloat(quote) * (1 - parseFloat(slippage) / 100)}`), // min amount out after slippage
             address,
             false,
             slippageTolerance
         ];
-
+        
         console.log({ args} );
+
         setIsLoading(true);
         setIsLoadingExecuteTrade(true);
         
@@ -2916,6 +2922,7 @@ const Exchange: React.FC = () => {
             poolInfo.poolAddress,
             spotPriceWei.toString(),
             safeParseEther(tradeAmount),
+            safeParseEther(`${parseFloat(quote) * (1 - parseFloat(slippage) / 100)}`), // min amount out after slippage
             address,
             false,
             slippageTolerance
@@ -4155,10 +4162,10 @@ const Exchange: React.FC = () => {
                                 </Box>
                                 <Box>
                                     <Text color="white" fontSize="sm">
-                                        {quote ? (parseFloat(quote) * (1 - parseFloat(slippage) / 100)).toFixed(6) : "0"} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
+                                        {formatNumber(Number(quote ? (parseFloat(quote) * (1 - parseFloat(slippage) / 100)) : "0"))} {isBuying ? selectedToken?.symbol : (useWeth ? "WMON" : "MON")}
                                     </Text>
                                 </Box>
-                            </Flex>
+                            </Flex> 
                             {/* <Flex justifyContent="space-between" mb={2}> */}
                             <VStack alignItems={"left"} textAlign={"left"} mb={1} fontSize={"xs"}>
                                 <Box  mt={2}>
@@ -4205,10 +4212,23 @@ const Exchange: React.FC = () => {
                                             h="24px"
                                             value={slippage}
                                             onChange={(e) => {
-                                            const value = e.target.value.replace(/[^\d.]/g, '');
-                                            if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
+                                                const value = e.target.value;
+                                                // Allow typing any value while user is typing
                                                 setSlippage(value);
-                                            }
+                                            }}
+                                            onBlur={(e) => {
+                                                // Validate on blur (when user clicks away)
+                                                const value = e.target.value.replace(/[^\d.]/g, '');
+                                                const numValue = parseFloat(value);
+                                                if (value === '' || isNaN(numValue)) {
+                                                    setSlippage('0.5'); // Default to 0.5%
+                                                } else if (numValue > 50) {
+                                                    setSlippage('50');
+                                                } else if (numValue < 0) {
+                                                    setSlippage('0');
+                                                } else {
+                                                    setSlippage(value);
+                                                }
                                             }}
                                             bg="#2a2a2a"
                                             border="1px solid #444"
@@ -4617,10 +4637,23 @@ const Exchange: React.FC = () => {
                                                 h="24px"
                                                 value={slippage}
                                                 onChange={(e) => {
-                                                const value = e.target.value.replace(/[^\d.]/g, '');
-                                                if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
+                                                    const value = e.target.value;
+                                                    // Allow typing any value while user is typing
                                                     setSlippage(value);
-                                                }
+                                                }}
+                                                onBlur={(e) => {
+                                                    // Validate on blur (when user clicks away)
+                                                    const value = e.target.value.replace(/[^\d.]/g, '');
+                                                    const numValue = parseFloat(value);
+                                                    if (value === '' || isNaN(numValue)) {
+                                                        setSlippage('0.5'); // Default to 0.5%
+                                                    } else if (numValue > 50) {
+                                                        setSlippage('50');
+                                                    } else if (numValue < 0) {
+                                                        setSlippage('0');
+                                                    } else {
+                                                        setSlippage(value);
+                                                    }
                                                 }}
                                                 bg="#2a2a2a"
                                                 border="1px solid #444"
