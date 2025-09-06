@@ -228,9 +228,9 @@ export function generateReferralCode(userAddress) {
   // 1) Compute keccak256 of the address (packed)
   const hash = ethers.utils.keccak256(userAddress);
   
-  // 2) Take first 8 characters of the hash (after 0x) for a short, unique code
-  // This gives us 4 bytes = 8 hex chars, which is ~4.3 billion unique values
-  const shortCode = hash.slice(2, 10);
+  // 2) Take first 16 characters of the hash (after 0x) for a unique code
+  // This gives us 8 bytes = 16 hex chars, which is ~18.4 quintillion unique values
+  const shortCode = hash.slice(2, 18);
   
   return shortCode;
 }

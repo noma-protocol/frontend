@@ -2044,12 +2044,14 @@ const Launchpad: React.FC = () => {
                                 </Box>
                                 <Box>
                                 <VStack align={"left"}>
+                                    <HStack>
                                     <Box>
                                         <Text color="white" fontSize="sm" fontWeight="600" letterSpacing="0.02em">Deployment Fee: 1 MON</Text>
                                     </Box>
                                     <Box>
-                                        <Text color="#888" fontSize="xs">This fee helps maintain the protocol and prevent spam</Text>
+                                        <Text color="#888" fontSize="xs">&nbsp;(This fee helps maintain the protocol and prevent spam)</Text>
                                     </Box>
+                                    </HStack>
                                 </VStack>
                                 </Box>
                             </HStack>

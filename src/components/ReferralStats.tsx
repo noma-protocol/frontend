@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Box, VStack, HStack, Text, Button, Input, IconButton } from '@chakra-ui/react';
 import { FiCopy, FiUsers, FiDollarSign, FiTrendingUp, FiShare2, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
-import { generateReferralCode } from '../utils';
 import { toaster } from './ui/toaster';
 import { Tooltip } from './ui/tooltip';
 import { isMobile } from "react-device-detect";
 import { referralApi } from '../services/referralApi';
+import { useMonPrice } from '../contexts/MonPriceContext';
+import { formatEther } from 'viem';
+import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress, generateReferralCode } from "../utils";
 
 interface ReferralStatsProps {
   isExpanded?: boolean;
+  totalVolume?: number;
 }
 
 interface ReferralTrade {
@@ -23,8 +26,10 @@ interface ReferralTrade {
   referredAddress: string;
 }
 
-export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false }) => {
+export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume }) => {
   const { address } = useAccount();
+  const { monPrice } = useMonPrice();
+  
   const [referralCode, setReferralCode] = useState<string>('');
   const [referralLink, setReferralLink] = useState<string>('');
   const [referralStats, setReferralStats] = useState({
@@ -37,7 +42,8 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
   const [showDetails, setShowDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  console.log(`Total volume ${formatEther(`${totalVolume}`)} MON - monPrice is ${monPrice} USD`);
+  useEffect(() => { 
     if (address) {
       // Generate referral code
       const code = generateReferralCode(address);
@@ -337,7 +343,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
             <VStack alignItems={"left"} textAlign={"left"}>
               <Box>
                 <Text fontSize="xl" fontWeight="bold" color="white">
-                  ${formatNumber(referralStats.totalVolumeUSD, 0)}
+                  ${commify((Number(formatEther(`${totalVolume}`)) * monPrice), 0)}
                 </Text>             
               </Box>
               <Box>
