@@ -399,6 +399,7 @@ const Exchange: React.FC = () => {
     const [vaultDescriptions, setVaultDescriptions] = useState([]);
     const [token1Symbol, setToken1Symbol] = useState("ETH"); // Default to ETH
     const [priceUSD, setPriceUSD] = useState(0); // Price of token1 in USD
+    const [tokenProtocols, setTokenProtocols] = useState<{ [symbol: string]: string }>({});
     
     // Fetch IMV (Intrinsic Minimum Value) from ModelHelper contract
     const { data: imvData } = useContractRead({
@@ -1423,7 +1424,9 @@ const Exchange: React.FC = () => {
                 // Fetch pool address and token ordering
                 if (selectedToken.token0 && selectedToken.token1) {
                     try {
-                        const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1);
+                        // Determine protocol for this token
+                        const protocol = tokenProtocols[selectedToken.symbol] || "pancakeswap";
+                        const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1, protocol);
                         
                         // Get token0 and token1 from the pool to determine correct ordering
                         if (poolAddress && poolAddress !== zeroAddress) {
@@ -1551,17 +1554,25 @@ const Exchange: React.FC = () => {
     );
     
     // Fetch pool address from Uniswap V3 Factory
-    const fetchPoolAddress = async (token0, token1) => {
-        const uniswapV3FactoryContract = new ethers.Contract(
-            config.protocolAddresses.uniswapV3Factory,
-            uniswapV3FactoryABI,
-            localProvider
-        );
+    const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
+        // Select the appropriate factory based on protocol
+        const factoryAddress = protocol === "uniswap" 
+        ? config.protocolAddresses.uniswapV3Factory 
+        : config.protocolAddresses.pancakeV3Factory;
         
-        const poolAddress = await uniswapV3FactoryContract.getPool(token0, token1, feeTier);
+        const factoryContract = new ethers.Contract(
+        factoryAddress,
+        uniswapV3FactoryABI, // Same ABI for both Uniswap and PancakeSwap V3
+        localProvider
+        );
+        const feeTier = protocol === "uniswap" ? 3000 : 2500;
+
+        const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
+
+        console.log(`Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
         return poolAddress;
-    };
-    
+    }
+
     const WETH_ADDRESS = config.protocolAddresses.WMON;
     const [wrapAmount, setWrapAmount] = useState(0);
     const [isWrapping, setIsWrapping] = useState(false);
@@ -1580,6 +1591,30 @@ const Exchange: React.FC = () => {
         enabled: true, // Always fetch tokens, not just when connected
     });
     
+    // Fetch tokens and build protocol mapping
+    useEffect(() => {
+        const fetchTokenProtocols = async () => {
+            try {
+                const response = await tokenApi.getTokens({ includeAll: true });
+                const protocols: { [symbol: string]: string } = {};
+                
+                // Build map for token symbols to their protocols
+                response.tokens.forEach(token => {
+                    if (token.tokenSymbol && token.selectedProtocol) {
+                        protocols[token.tokenSymbol] = token.selectedProtocol;
+                    }
+                });
+                
+                setTokenProtocols(protocols);
+                console.log("Token protocols loaded:", protocols);
+            } catch (error) {
+                console.error("Failed to fetch token protocols:", error);
+            }
+        };
+        
+        fetchTokenProtocols();
+    }, []);
+
     // Fetch vault data and convert to token list
     useEffect(() => {
         const fetchVaults = async () => {
@@ -1664,6 +1699,10 @@ const Exchange: React.FC = () => {
                                             console.error("Error fetching vault spot price:", error);
                                         }
                                         
+                                        // Determine protocol for this token
+                                        const tokenSymbol = vaultDescriptionData[1];
+                                        const protocol = tokenProtocols[tokenSymbol] || "pancakeswap";
+                                        
                                         return {
                                             tokenName: vaultDescriptionData[0],
                                             tokenSymbol: vaultDescriptionData[1],
@@ -1675,7 +1714,8 @@ const Exchange: React.FC = () => {
                                             presaleContract: vaultDescriptionData[7],
                                             poolAddress: await fetchPoolAddress(
                                                 vaultDescriptionData[3], 
-                                                vaultDescriptionData[4]
+                                                vaultDescriptionData[4],
+                                                protocol
                                             ),
                                             spotPrice: spotPriceWei,
                                         };
@@ -1740,7 +1780,7 @@ const Exchange: React.FC = () => {
                         id: index + 1,
                         name: vault.tokenName,
                         symbol: vault.tokenSymbol,
-                        price: vault.spotPrice ? parseFloat(formatEther(vault.spotPrice)) : 0.0000186, // Use actual spot price
+                        price: vault.spotPrice ? (parseFloat(formatEther(vault.spotPrice)) || 0.0000186) : 0.0000186, // Use actual spot price with fallback
                         change24h: change24h,
                         volume24h: Math.floor(Math.random() * 1000000),
                         marketCap: Math.floor(Math.random() * 10000000),
@@ -1820,6 +1860,7 @@ const Exchange: React.FC = () => {
     }, [tokens.length]);
     
     const formatPrice = (price) => {
+        if (price == null || price === undefined || isNaN(price)) return '0.00';
         if (price === 0) return '0.00';
         if (price < 0.000001) return price.toFixed(8);
         if (price < 0.01) return price.toFixed(6);
@@ -2435,7 +2476,7 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation" :
+            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -2530,7 +2571,7 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation" :
+            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -2624,7 +2665,7 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false); 
-            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation" :
+            const msg = error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("0xe450d38c") > -1 ? "Not enough balance" :
                         error.message.toString().indexOf("Amount must be greater than 0") > -1 ? "Invalid amount" :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
@@ -2760,6 +2801,7 @@ const Exchange: React.FC = () => {
             slippageTolerance
         ];
 
+        console.log({ args} );
         setIsLoading(true);
         setIsLoadingExecuteTrade(true);
         
@@ -4120,14 +4162,14 @@ const Exchange: React.FC = () => {
                             {/* <Flex justifyContent="space-between" mb={2}> */}
                             <VStack alignItems={"left"} textAlign={"left"} mb={1} fontSize={"xs"}>
                                 <Box  mt={2}>
-                                    <Text color="#888" fontSize="sm">Slippage Tolerance</Text>
+                                    <Text color="#888" fontSize="sm">Max Slippage</Text>
                                 </Box>   
-                                <Box>
-                                    <HStack gap={1}>
+                                    <Box  w="100%" >
+                                        <HStack w="100%" gap={1}>
                                         <Button
+                                            flex="1"
                                             size="xs"
                                             h="24px"
-                                            px={2}
                                             bg={slippage === "0.1" ? "#4ade80" : "#2a2a2a"}
                                             color={slippage === "0.1" ? "black" : "white"}
                                             onClick={() => setSlippage("0.1")}
@@ -4136,9 +4178,9 @@ const Exchange: React.FC = () => {
                                             0.1%
                                         </Button>
                                         <Button
+                                            flex="1"
                                             size="xs"
                                             h="24px"
-                                            px={2}
                                             bg={slippage === "0.5" ? "#4ade80" : "#2a2a2a"}
                                             color={slippage === "0.5" ? "black" : "white"}
                                             onClick={() => setSlippage("0.5")}
@@ -4147,9 +4189,9 @@ const Exchange: React.FC = () => {
                                             0.5%
                                         </Button>
                                         <Button
+                                            flex="1"
                                             size="xs"
                                             h="24px"
-                                            px={2}
                                             bg={slippage === "1" ? "#4ade80" : "#2a2a2a"}
                                             color={slippage === "1" ? "black" : "white"}
                                             onClick={() => setSlippage("1")}
@@ -4158,24 +4200,25 @@ const Exchange: React.FC = () => {
                                             1%
                                         </Button>
                                         <Input
+                                            w="60px"
                                             size="xs"
-                                            w="50px"
                                             h="24px"
                                             value={slippage}
                                             onChange={(e) => {
-                                                const value = e.target.value.replace(/[^\d.]/g, '');
-                                                if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
-                                                    setSlippage(value);
-                                                }
+                                            const value = e.target.value.replace(/[^\d.]/g, '');
+                                            if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
+                                                setSlippage(value);
+                                            }
                                             }}
                                             bg="#2a2a2a"
                                             border="1px solid #444"
                                             _focus={{ borderColor: "#4ade80" }}
-                                            placeholder="2%"
+                                            placeholder="..."
                                             textAlign="right"
                                         />
-                                    </HStack>
-                                </Box>                           
+                                        </HStack>
+
+                                    </Box>                          
                             </VStack>
 
                             {/* </Flex> */}
@@ -4531,62 +4574,62 @@ const Exchange: React.FC = () => {
                                     </Flex>
                                     <Flex justifyContent="space-between" mb={2}>
                                         <Box>
-                                            <Text color="#888" fontSize="sm">Slippage Tolerance</Text>
+                                            <Text color="#888" fontSize="sm">Max Slippage</Text>
                                         </Box>
-                                        <Box>
-                                            <HStack gap={1}>
-                                                <Button
-                                                    size="xs"
-                                                    h="24px"
-                                                    px={2}
-                                                    bg={slippage === "0.1" ? "#4ade80" : "#2a2a2a"}
-                                                    color={slippage === "0.1" ? "black" : "white"}
-                                                    onClick={() => setSlippage("0.1")}
-                                                    _hover={{ bg: slippage === "0.1" ? "#4ade80" : "#3a3a3a" }}
-                                                >
-                                                    0.1%
-                                                </Button>
-                                                <Button
-                                                    size="xs"
-                                                    h="24px"
-                                                    px={2}
-                                                    bg={slippage === "0.5" ? "#4ade80" : "#2a2a2a"}
-                                                    color={slippage === "0.5" ? "black" : "white"}
-                                                    onClick={() => setSlippage("0.5")}
-                                                    _hover={{ bg: slippage === "0.5" ? "#4ade80" : "#3a3a3a" }}
-                                                >
-                                                    0.5%
-                                                </Button>
-                                                <Button
-                                                    size="xs"
-                                                    h="24px"
-                                                    px={2}
-                                                    bg={slippage === "1" ? "#4ade80" : "#2a2a2a"}
-                                                    color={slippage === "1" ? "black" : "white"}
-                                                    onClick={() => setSlippage("1")}
-                                                    _hover={{ bg: slippage === "1" ? "#4ade80" : "#3a3a3a" }}
-                                                >
-                                                    1%
-                                                </Button>
-                                                <Input
-                                                    size="xs"
-                                                    w="50px"
-                                                    h="24px"
-                                                    value={slippage}
-                                                    onChange={(e) => {
-                                                        const value = e.target.value.replace(/[^\d.]/g, '');
-                                                        if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
-                                                            setSlippage(value);
-                                                        }
-                                                    }}
-                                                    bg="#2a2a2a"
-                                                    border="1px solid #444"
-                                                    _focus={{ borderColor: "#4ade80" }}
-                                                    placeholder="1"
-                                                    textAlign="right"
-                                                />
-                                                <Text color="#888" fontSize="xs">%</Text>
+                                        <Box  w="100%" border="1px solid red">
+                                            <HStack w="100%" gap={1}>
+                                            <Button
+                                                flex="1"
+                                                size="xs"
+                                                h="24px"
+                                                bg={slippage === "0.1" ? "#4ade80" : "#2a2a2a"}
+                                                color={slippage === "0.1" ? "black" : "white"}
+                                                onClick={() => setSlippage("0.1")}
+                                                _hover={{ bg: slippage === "0.1" ? "#4ade80" : "#3a3a3a" }}
+                                            >
+                                                0.1%
+                                            </Button>
+                                            <Button
+                                                flex="1"
+                                                size="xs"
+                                                h="24px"
+                                                bg={slippage === "0.5" ? "#4ade80" : "#2a2a2a"}
+                                                color={slippage === "0.5" ? "black" : "white"}
+                                                onClick={() => setSlippage("0.5")}
+                                                _hover={{ bg: slippage === "0.5" ? "#4ade80" : "#3a3a3a" }}
+                                            >
+                                                0.5%
+                                            </Button>
+                                            <Button
+                                                flex="1"
+                                                size="xs"
+                                                h="24px"
+                                                bg={slippage === "1" ? "#4ade80" : "#2a2a2a"}
+                                                color={slippage === "1" ? "black" : "white"}
+                                                onClick={() => setSlippage("1")}
+                                                _hover={{ bg: slippage === "1" ? "#4ade80" : "#3a3a3a" }}
+                                            >
+                                                1%
+                                            </Button>
+                                            <Input
+                                                w="60px"
+                                                size="xs"
+                                                h="24px"
+                                                value={slippage}
+                                                onChange={(e) => {
+                                                const value = e.target.value.replace(/[^\d.]/g, '');
+                                                if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0 && parseFloat(value) <= 50)) {
+                                                    setSlippage(value);
+                                                }
+                                                }}
+                                                bg="#2a2a2a"
+                                                border="1px solid #444"
+                                                _focus={{ borderColor: "#4ade80" }}
+                                                placeholder="..."
+                                                textAlign="right"
+                                            />
                                             </HStack>
+
                                         </Box>
                                     </Flex>
                                     <Flex justifyContent="space-between" mb={2}>
