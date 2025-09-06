@@ -137,19 +137,20 @@ const Launchpad: React.FC = () => {
         args: [
             {
                 softCap: safeParseEther(softCap),
-                deadline: duration,
+                deadline: Math.floor(Date.now() / 1000) + parseInt(duration),
             },
             {
                 name: tokenName,
                 symbol: tokenSymbol,
-                decimals: tokenDecimals.toString(),
+                decimals: parseInt(tokenDecimals),
                 initialSupply: safeParseEther(tokenSupply),
                 maxTotalSupply: safeParseEther(tokenSupply),
                 IDOPrice: safeParseEther(price),
                 floorPrice: safeParseEther(floorPrice),
                 token1: token1,
-                feeTier: "3000",
-                presale: presale.toString()
+                feeTier: selectedProtocol === "uniswap" ? 3000 : 2500,
+                presale: parseInt(presale),
+                useUniswap: selectedProtocol === "uniswap",
             },
         ],
         value: safeParseEther(1), // 1 MON for deployment
@@ -473,24 +474,24 @@ const Launchpad: React.FC = () => {
        
        
     
-    const handleSelectAsset = (event) => {
-        // console.log("Selected Asset: ", event.target.value);
-        setToken1(event.target.value);
+    const handleSelectAsset = (details) => {
+        // console.log("Selected Asset: ", details.value[0]);
+        setToken1(details.value[0]);
     }
 
-    const handleSetPresale = (event) => {
-        console.log("Presale: ", event.target.value);
-        setPresale(event.target.value);
+    const handleSetPresale = (details) => {
+        console.log("Presale: ", details.value[0]);
+        setPresale(details.value[0]);
     }
 
-    const handleSetDuration = (event) => {
-        console.log("Duration: ", event.target.value);
-        setDuration(event.target.value);
+    const handleSetDuration = (details) => {
+        console.log("Duration: ", details.value[0]);
+        setDuration(details.value[0]);
     }
     
-    const handleSetCapView = (event) => {
-        console.log("Cap View: ", event.target.value);
-        setCapView(event.target.value);
+    const handleSetCapView = (details) => {
+        console.log("Cap View: ", details.value[0]);
+        setCapView(details.value[0]);
     }
 
     const handleSetSoftCap = (event) => {
@@ -591,19 +592,20 @@ const Launchpad: React.FC = () => {
         console.log( [
             {
                 softCap: safeParseEther(softCap),
-                deadline: duration,
+                deadline: Math.floor(Date.now() / 1000) + parseInt(duration),
             },
             {
             name: tokenName,
             symbol: tokenSymbol,
-            decimals: tokenDecimals.toString(),
-            totalSupply: safeParseEther(tokenSupply),
-            maxTotalSupply: parseEther(`${Math.floor(Number(tokenSupply) || 0)}`),
+            decimals: parseInt(tokenDecimals),
+            initialSupply: safeParseEther(tokenSupply),
+            maxTotalSupply: safeParseEther(tokenSupply),
             IDOPrice: safeParseEther(price),
             floorPrice: safeParseEther(floorPrice),
             token1: token1,
-            feeTier: "3000",
-            presale: presale.toString()
+            feeTier: 3000,
+            presale: parseInt(presale),
+            useUniswap: selectedProtocol === "uniswap"
             },
         ])
 
@@ -1000,7 +1002,7 @@ const Launchpad: React.FC = () => {
                                         </HStack>
                                         <SelectRoot
                                             collection={presaleChoices}
-                                            onChange={handleSetPresale}
+                                            onValueChange={handleSetPresale}
                                             defaultValue="0"
                                             value={presale}
                                         >
@@ -1245,7 +1247,7 @@ const Launchpad: React.FC = () => {
                                             <HStack w="100%">
                                                 <SelectRoot
                                                     collection={assets}
-                                                    onChange={handleSelectAsset}
+                                                    onValueChange={handleSelectAsset}
                                                     flex="1"
                                                 >
                                                     <SelectTrigger 
@@ -1324,7 +1326,7 @@ const Launchpad: React.FC = () => {
                                         })}
                                         value={[selectedProtocol]}
                                         defaultValue={["uniswap"]}
-                                        onChange={(e) => setSelectedProtocol(e.target.value)}
+                                        onValueChange={(details) => setSelectedProtocol(details.value[0])}
                                         flex="1"
                                     >
                                         <SelectTrigger
@@ -1436,7 +1438,11 @@ const Launchpad: React.FC = () => {
                                         <Text color="#888" fontSize="xs" mb={0}>Protocol</Text>
                                         <HStack mt={2}>
                                             <Box>
-                                                <Image src={uniswapLogo} w="45px" h="45px"  />
+                                                <Image 
+                                                src={selectedProtocol === "uniswap" ? uniswapLogo : pancakeLogo} 
+                                                w="45px" 
+                                                h="45px"  
+                                                />
                                             </Box>
                                             <Box>
                                             <Text color="white" fontSize="sm">
@@ -1516,7 +1522,7 @@ const Launchpad: React.FC = () => {
                                         </HStack>
                                         <SelectRoot
                                             collection={durationChoices}
-                                            onChange={handleSetDuration}
+                                            onValueChange={handleSetDuration}
                                             value={duration}
                                         >
                                             <SelectTrigger 
@@ -1675,7 +1681,7 @@ const Launchpad: React.FC = () => {
                                         collection={capViewChoices}
                                         defaultValue="softcap"
                                         value={capView}
-                                        onChange={handleSetCapView}
+                                        onValueChange={handleSetCapView}
                                         w="200px"
                                     >
                                         <SelectTrigger

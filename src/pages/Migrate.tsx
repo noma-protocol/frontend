@@ -159,7 +159,7 @@ const Migrate: React.FC = () => {
       onError(error) {
         setIsMigrating(false);
 
-        const msg = Number(error.message.toString().indexOf("TRANSFER_FAILED")) > -1 ? "Error with operation" :
+        const msg = Number(error.message.toString().indexOf("TRANSFER_FAILED")) > -1 ? "Error with operation. Try to increase slippage tolerance." :
         Number(error.message.toString().indexOf("NothingToWithdraw")) > -1 ? "Nothing to withdraw" :
         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
 

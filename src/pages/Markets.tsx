@@ -60,7 +60,6 @@ const uniswapV3FactoryABI = [
 
 // NomaFactory contract address
 const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
-const feeTier = 3000;
 
 const Markets: React.FC = () => {
   const { address, isConnected } = useAccount();
@@ -88,14 +87,21 @@ const Markets: React.FC = () => {
     // [config.protocolAddresses.WMON] : "WMON",
   };
 
-  const fetchPoolAddress = async (token0: string, token1: string) => {
-    const uniswapV3FactoryContract = new ethers.Contract(
-      config.protocolAddresses.uniswapV3Factory,
-      uniswapV3FactoryABI,
+  const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
+    // Select the appropriate factory based on protocol
+    console.log(`Protocol is ${protocol}`)
+    const factoryAddress = protocol === "uniswap" 
+      ? config.protocolAddresses.uniswapV3Factory 
+      : config.protocolAddresses.pancakeV3Factory;
+    
+    const factoryContract = new ethers.Contract(
+      factoryAddress,
+      uniswapV3FactoryABI, // Same ABI for both Uniswap and PancakeSwap V3
       localProvider
     );
+    const feeTier = protocol === "uniswap" ? 3000 : 2500;
 
-    const poolAddress = await uniswapV3FactoryContract.getPool(token0, token1, feeTier);
+    const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
 
     return poolAddress;
   }
@@ -302,6 +308,10 @@ const Markets: React.FC = () => {
                         // if (tokenSymbol != "OKS") {
                         //   return null; // Skip this vault
                         // }
+                        
+                        // Determine protocol for this token
+                        const protocol = tokenProtocols[tokenSymbol] || "pancakeswap";
+                        
                         const hasPresale = vaultDescriptionData[7] !== zeroAddress;
                         let isPresaleFinalized = false;
                         let expired = false;
@@ -331,7 +341,8 @@ const Markets: React.FC = () => {
                           expired: expired,
                           poolAddress: await fetchPoolAddress(
                             vaultDescriptionData[3], 
-                            vaultDescriptionData[4]
+                            vaultDescriptionData[4],
+                            protocol
                           ),
                         };
                       } catch (error) {
@@ -392,6 +403,10 @@ const Markets: React.FC = () => {
                     try {
                         const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
                         // console.log("Vault Description Data:", vaultDescriptionData);
+                        
+                        // Determine protocol for this token
+                        const tokenSymbol = vaultDescriptionData[1];
+                        const protocol = tokenProtocols[tokenSymbol] || "pancakeswap";
     
                         const hasPresale = vaultDescriptionData[7] !== zeroAddress;
                         let isPresaleFinalized = false;
@@ -421,7 +436,8 @@ const Markets: React.FC = () => {
                             expired: expired,
                             poolAddress: await fetchPoolAddress(
                                 vaultDescriptionData[3], 
-                                vaultDescriptionData[4]
+                                vaultDescriptionData[4],
+                                protocol
                             ),
                         };
                     } catch (error) {
@@ -665,8 +681,8 @@ const Markets: React.FC = () => {
                           {/* Protocol */}
                           <Box display={isMobile ? "none" : "flex"} justifyContent="flex-start" mt={-1}>
                             <Image
-                              ml={-3}
-                              w="80px"
+                              ml={protocol === "uniswap" ? -3 : 0}
+                              w={protocol === "uniswap" ? "80px" : "60px"}
                               h="auto"
                               src={protocol === "uniswap" ? uniswapLogo : pancakeLogo}
                               alt="protocol logo"
@@ -693,6 +709,9 @@ const Markets: React.FC = () => {
                                     transform: "translateY(-1px)",
                                     boxShadow: vault.finalized ? "0 4px 12px rgba(74, 222, 128, 0.3)" : vault.expired ? "0 4px 12px rgba(239, 68, 68, 0.3)" : "0 4px 12px rgba(251, 191, 36, 0.3)"
                                   }}
+                                  w="110px"
+                                  alignItems="center"
+                                  textAlign={"center"}
                                 >
                                   <Text 
                                     color={vault.finalized ? "#4ade80" : vault.expired ? "#ef4444" : "#fbbf24"} 

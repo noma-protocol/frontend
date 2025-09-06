@@ -1642,7 +1642,7 @@ app.get('/api/tokens', (req, res) => {
     console.log('[API] Token statuses:', allTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
     
     // Filter only deployed tokens by default unless explicitly requested
-    const includeAll = req.query.includeAll === 'true';
+    const includeAll = true; // req.query.includeAll === 'true';
     console.log('[API] Include all tokens?', includeAll);
     
     const tokens = includeAll ? allTokens : allTokens.filter(token => token.status === 'deployed');
@@ -1702,8 +1702,8 @@ app.patch('/api/tokens/:id/status', (req, res) => {
     const { id } = req.params;
     const { status, transactionHash, contractAddress } = req.body;
     
-    if (!status || !['success', 'failed'].includes(status)) {
-      return res.status(400).json({ error: 'Invalid status. Must be "success" or "failed"' });
+    if (!status || !['success', 'failed', 'deployed'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status. Must be "success", "failed", or "deployed"' });
     }
     
     const updatedToken = tokenStore.updateTokenStatus(id, status, transactionHash, contractAddress);
@@ -1719,6 +1719,26 @@ app.patch('/api/tokens/:id/status', (req, res) => {
   } catch (error) {
     console.error('Error updating token status:', error);
     res.status(500).json({ error: 'Failed to update token status' });
+  }
+});
+
+// Find tokens by symbol
+app.get('/api/tokens/by-symbol/:symbol', (req, res) => {
+  try {
+    const { symbol } = req.params;
+    const tokens = tokenStore.getTokens().filter(token => 
+      token.tokenSymbol === symbol || 
+      (token.tokenSymbol === `p-${symbol}`) // Also check for presale tokens
+    );
+    
+    if (tokens.length === 0) {
+      return res.status(404).json({ error: 'No tokens found with this symbol' });
+    }
+    
+    res.json({ tokens });
+  } catch (error) {
+    console.error('Error finding tokens by symbol:', error);
+    res.status(500).json({ error: 'Failed to find tokens' });
   }
 });
 
