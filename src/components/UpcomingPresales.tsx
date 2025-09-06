@@ -32,7 +32,7 @@ const NomaFactoryAbi = NomaFactoryArtifact.abi;
 
 // NomaFactory contract address
 const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
-console.log("Factory address:", oikosFactoryAddress, "Chain:", config.chain);
+// console.log("Factory address:", oikosFactoryAddress, "Chain:", config.chain);
 
 const UpcomingPresales: React.FC = () => {
   const [presales, setPresales] = useState<any[]>([]);
@@ -40,7 +40,7 @@ const UpcomingPresales: React.FC = () => {
   const [tokenLogos, setTokenLogos] = useState<{[key: string]: string}>({});
 
   const fetchPresaleDetails = async ({ presaleContract }) => {
-    console.log(`fetchPresaleDetails called for contract: ${presaleContract}`);
+    // console.log(`fetchPresaleDetails called for contract: ${presaleContract}`);
     
     if (presaleContract === zeroAddress) {
       return [false, false, null];
@@ -49,7 +49,7 @@ const UpcomingPresales: React.FC = () => {
     // Import Presale ABI
     const PresaleArtifact = await import(`../assets/Presale.json`);
     const PresaleAbi = PresaleArtifact.abi;
-    console.log(`Presale ABI loaded, creating contract instance...`);
+    // console.log(`Presale ABI loaded, creating contract instance...`);
 
     const presaleContractInstance = new ethers.Contract(
       presaleContract,
@@ -64,7 +64,7 @@ const UpcomingPresales: React.FC = () => {
       
       try {
         isFinalized = await presaleContractInstance.finalized();
-        console.log(`  - finalized() returned: ${isFinalized}`);
+        // console.log(`  - finalized() returned: ${isFinalized}`);
       } catch (e) {
         console.error(`  - Error calling finalized():`, e.message);
         isFinalized = true; // Default to true on error
@@ -72,7 +72,7 @@ const UpcomingPresales: React.FC = () => {
       
       try {
         hasExpired = await presaleContractInstance.hasExpired();
-        console.log(`  - hasExpired() returned: ${hasExpired}`);
+        // console.log(`  - hasExpired() returned: ${hasExpired}`);
       } catch (e) {
         console.error(`  - Error calling hasExpired():`, e.message);
         hasExpired = true; // Default to true on error
@@ -80,13 +80,13 @@ const UpcomingPresales: React.FC = () => {
       
       try {
         totalRaised = await presaleContractInstance.totalRaised();
-        console.log(`  - totalRaised() returned: ${totalRaised}`);
+        // console.log(`  - totalRaised() returned: ${totalRaised}`);
       } catch (e) {
         console.error(`  - Error calling totalRaised():`, e.message);
         // Try alternative method names
         try {
           totalRaised = await presaleContractInstance.totalDeposited();
-          console.log(`  - totalDeposited() returned: ${totalRaised}`);
+          // console.log(`  - totalDeposited() returned: ${totalRaised}`);
         } catch (e2) {
           console.error(`  - Error calling totalDeposited():`, e2.message);
           totalRaised = ethers.BigNumber.from(0);
@@ -95,7 +95,7 @@ const UpcomingPresales: React.FC = () => {
       
       try {
         hardCap = await presaleContractInstance.hardCap();
-        console.log(`  - hardCap() returned: ${hardCap}`);
+        // console.log(`  - hardCap() returned: ${hardCap}`);
       } catch (e) {
         console.error(`  - Error calling hardCap():`, e.message);
         hardCap = ethers.BigNumber.from(0);
@@ -108,26 +108,26 @@ const UpcomingPresales: React.FC = () => {
         const currentTime = Math.floor(Date.now() / 1000);
         timeLeft = Number(endTime) - currentTime;
         
-        console.log(`Presale contract ${presaleContract}:`);
-        console.log(`  - endTime: ${endTime} (${new Date(Number(endTime) * 1000).toLocaleString()})`);
-        console.log(`  - currentTime: ${currentTime}`);
-        console.log(`  - timeLeft: ${timeLeft} seconds (${Math.floor(timeLeft / 86400)} days)`);
+        // console.log(`Presale contract ${presaleContract}:`);
+        // console.log(`  - endTime: ${endTime} (${new Date(Number(endTime) * 1000).toLocaleString()})`);
+        // console.log(`  - currentTime: ${currentTime}`);
+        // console.log(`  - timeLeft: ${timeLeft} seconds (${Math.floor(timeLeft / 86400)} days)`);
       } catch (timeError) {
         // Try alternative method names
         try {
           endTime = await presaleContractInstance.deadline();
           const currentTime = Math.floor(Date.now() / 1000);
           timeLeft = Number(endTime) - currentTime;
-          console.log(`  - deadline: ${endTime} (${new Date(Number(endTime) * 1000).toLocaleString()})`);
-          console.log(`  - timeLeft: ${timeLeft} seconds (${Math.floor(timeLeft / 86400)} days)`);
+          // console.log(`  - deadline: ${endTime} (${new Date(Number(endTime) * 1000).toLocaleString()})`);
+          // console.log(`  - timeLeft: ${timeLeft} seconds (${Math.floor(timeLeft / 86400)} days)`);
         } catch (e2) {
           console.log(`Could not fetch endTime/deadline for ${presaleContract}`);
         }
       }
       
-      console.log(`  - finalized: ${isFinalized}`);
-      console.log(`  - hasExpired: ${hasExpired}`);
-      console.log(`  - totalRaised: ${formatEther(totalRaised)} / hardCap: ${formatEther(hardCap)}`);
+      // console.log(`  - finalized: ${isFinalized}`);
+      // console.log(`  - hasExpired: ${hasExpired}`);
+      // console.log(`  - totalRaised: ${formatEther(totalRaised)} / hardCap: ${formatEther(hardCap)}`);
 
       return [isFinalized, hasExpired, { totalRaised, hardCap }];
     } catch (error) {
@@ -140,9 +140,9 @@ const UpcomingPresales: React.FC = () => {
     // Fetch token logos
     const fetchTokenLogos = async () => {
       try {
-        console.log("Fetching token logos...");
+        // console.log("Fetching token logos...");
         const response = await tokenApi.getTokens({ includeAll: true });
-        console.log("Token API response:", response);
+        // console.log("Token API response:", response);
         const logos: {[key: string]: string} = {};
         
         response.tokens.forEach(token => {
@@ -156,7 +156,7 @@ const UpcomingPresales: React.FC = () => {
           }
         });
         
-        console.log("Final logos map:", logos);
+        // console.log("Final logos map:", logos);
         setTokenLogos(logos);
       } catch (error) {
         console.error("Error fetching token logos:", error);
@@ -167,7 +167,7 @@ const UpcomingPresales: React.FC = () => {
       console.log("Starting fetchUpcomingPresales...");
       try {
         setIsLoading(true);
-        console.log("Creating factory contract with address:", oikosFactoryAddress);
+        // console.log("Creating factory contract with address:", oikosFactoryAddress);
         
         const nomaFactoryContract = new ethers.Contract(
           oikosFactoryAddress,
@@ -175,23 +175,23 @@ const UpcomingPresales: React.FC = () => {
           localProvider
         );
 
-        console.log("Fetching deployers...");
+        // console.log("Fetching deployers...");
         let allVaults = [];
         try {
           const deployersData = await nomaFactoryContract.getDeployers();
-          console.log("Deployers:", deployersData);
+          // console.log("Deployers:", deployersData);
           
           // Get vaults for each deployer
           for (const deployer of deployersData) {
             const vaultsData = await nomaFactoryContract.getVaults(deployer);
-            console.log(`Vaults for deployer ${deployer}:`, vaultsData);
+            // console.log(`Vaults for deployer ${deployer}:`, vaultsData);
             allVaults = [...allVaults, ...vaultsData];
           }
         } catch (contractError) {
-          console.error("Error calling contract methods:", contractError.message || contractError);
-          console.error("Full error:", contractError);
-          console.log("Contract address:", oikosFactoryAddress);
-          console.log("Provider:", localProvider);
+          // console.error("Error calling contract methods:", contractError.message || contractError);
+          // console.error("Full error:", contractError);
+          // console.log("Contract address:", oikosFactoryAddress);
+          // console.log("Provider:", localProvider);
           setPresales([]);
           setIsLoading(false);
           return;
@@ -199,7 +199,7 @@ const UpcomingPresales: React.FC = () => {
 
         const upcomingPresales = [];
         
-        console.log("Total vaults to check:", allVaults.length);
+        // console.log("Total vaults to check:", allVaults.length);
 
         // Process each vault to find active presales
         for (const vault of allVaults) {
@@ -207,16 +207,16 @@ const UpcomingPresales: React.FC = () => {
             const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
             
             const hasPresale = vaultDescriptionData[7] !== zeroAddress;
-            console.log(`Vault ${vaultDescriptionData[1]}, hasPresale: ${hasPresale}, presaleContract: ${vaultDescriptionData[7]}`);
+            // console.log(`Vault ${vaultDescriptionData[1]}, hasPresale: ${hasPresale}, presaleContract: ${vaultDescriptionData[7]}`);
             
             if (hasPresale) {
-              console.log(`Calling fetchPresaleDetails for ${vaultDescriptionData[1]}...`);
+              // console.log(`Calling fetchPresaleDetails for ${vaultDescriptionData[1]}...`);
               const [isFinalized, hasExpired, presaleData] = 
               await fetchPresaleDetails({
                 presaleContract: vaultDescriptionData[7],
               });
               
-              console.log(`Presale ${vaultDescriptionData[1]}: finalized=${isFinalized}, expired=${hasExpired}`);
+              // console.log(`Presale ${vaultDescriptionData[1]}: finalized=${isFinalized}, expired=${hasExpired}`);
 
               // Only show presales that are in progress
               if (!isFinalized && !hasExpired && presaleData) {
@@ -241,7 +241,7 @@ const UpcomingPresales: React.FC = () => {
           }
         }
         
-        console.log("Found upcoming presales:", upcomingPresales.length, upcomingPresales);
+        // console.log("Found upcoming presales:", upcomingPresales.length, upcomingPresales);
         setPresales(upcomingPresales);
       } catch (error) {
         console.error("Error fetching upcoming presales:", error);
@@ -299,7 +299,6 @@ const UpcomingPresales: React.FC = () => {
       ) : (
         <VStack align="stretch" gap={3} w="100%">
           {presales.map((presale, index) => {
-            console.log({ presale })
             return (
               <Link
                 key={index}

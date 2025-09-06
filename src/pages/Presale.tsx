@@ -78,7 +78,7 @@ const Presale: React.FC = () => {
 
   useEffect(() => {
     if (contractAddress == "0x0000000000000000000000000000000000000000") {
-      window.location.href = "https://noma.money"
+      window.location.href = "https://app.noma.money"
     }
 
   }, [contractAddress]);
@@ -104,7 +104,7 @@ const Presale: React.FC = () => {
   
   const presaleUrl = `${environment == "development" ? 
     `http://localhost:5173/presale?a=${contractAddress}r=${referralCode}`:
-    "https://presale.noma.money"}/presale?a=${contractAddress}r=${referralCode}`;
+    "https://app.noma.money"}/presale?a=${contractAddress}r=${referralCode}`;
   
 
   const AddToMetaMaskButton = ({ contractAddress, tokenSymbol, tokenDecimals }) => {
@@ -471,6 +471,43 @@ const Presale: React.FC = () => {
           
           // Provision the price feed
           await provisionPriceFeed();
+          
+          // Update token status to 'deployed'
+          try {
+            // First find the token by symbol
+            const baseSymbol = tokenSymbol.startsWith("p-") ? tokenSymbol.substring(2) : tokenSymbol;
+            const findResponse = await fetch(`http://localhost:5001/api/tokens/by-symbol/${baseSymbol}`);
+            
+            if (findResponse.ok) {
+              const { tokens } = await findResponse.json();
+              
+              // Update status for the most recent token with this symbol
+              if (tokens.length > 0) {
+                const latestToken = tokens.sort((a, b) => 
+                  new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                )[0];
+                
+                const updateResponse = await fetch(`http://localhost:5001/api/tokens/${latestToken.id}/status`, {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    status: 'deployed',
+                    contractAddress: contractAddress // Store the presale contract address
+                  }),
+                });
+                
+                if (updateResponse.ok) {
+                  console.log('Token status updated to deployed');
+                } else {
+                  console.error('Failed to update token status:', await updateResponse.text());
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error updating token status:', error);
+          }
         } catch (error) {
           console.error('Error getting pool address or provisioning feed:', error);
         }
@@ -479,7 +516,7 @@ const Presale: React.FC = () => {
         fetchPresaleInfo();
         toaster.create({
           title: "Success",
-          description: "Presale finalized and price feed provisioned!",
+          description: "Presale finalized, price feed provisioned, and token deployed!",
         })
         setTimeout(() => {
           window.location.reload();
@@ -968,7 +1005,7 @@ const Presale: React.FC = () => {
                   </Box>
                   <Box>
                     <Text color="white" fontSize="sm" fontWeight="500">
-                      {minContribution ? `${formatEther(minContribution)} MON` : "Loading..."}
+                      {minContribution ? `${commify(formatEther(minContribution), 4)} MON` : "Loading..."}
                     </Text>
                   </Box>
                 </HStack>
@@ -978,7 +1015,7 @@ const Presale: React.FC = () => {
                   </Box>
                   <Box>
                     <Text color="white" fontSize="sm" fontWeight="500">
-                      {maxContribution ? `${formatEther(maxContribution)} MON` : "Loading..."}
+                      {maxContribution ? `${commify(formatEther(maxContribution), 4)} MON` : "Loading..."}
                     </Text>
                   </Box>
                 </HStack>
