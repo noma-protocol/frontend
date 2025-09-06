@@ -2,13 +2,13 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { ethers } from "ethers";
 const { JsonRpcProvider } = ethers.providers;
 
-import { generateBytes32String } from "../utils";
+import { generateBytes32String, generateReferralCodeBytes32 } from "../utils";
 import config from "../config";
 
 const { formatEther } = ethers.utils;
 
 const usePresaleContract = (network, userAddress, presaleContractAddress, referralCode) => {
-    
+    // console.log(`Got referral code: ${referralCode} for user ${userAddress} on network ${network} with presale contract ${presaleContractAddress}`);
     const [presaleData, setPresaleData] = useState({
         totalRaised: "0",
         participantCount: "0",
@@ -77,8 +77,8 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
                 PresaleContract.finalized(),
                 PresaleContract.softCapReached(),
                 PresaleContract.contributions(userAddress),
-                PresaleContract.getTotalReferredByCode(generateBytes32String(referralCode)),
-                PresaleContract.getReferralUserCount(generateBytes32String(referralCode)),
+                PresaleContract.getTotalReferredByCode(referralCode ? `0x${referralCode}` : "0x" + "00".repeat(8)),
+                PresaleContract.getReferralUserCount(referralCode ? `0x${referralCode}` : "0x" + "00".repeat(8)),
                 PresaleContract.getPresaleParams(),
                 PresaleContract.deployer(),
                 PresaleContract.getTimeLeft(),
@@ -87,7 +87,7 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
             ]);
 
 
-            console.log("presaleInfo array:", presaleInfo?.map(v => v?.toString()));
+            // console.log("presaleInfo array:", presaleInfo?.map(v => v?.toString()));
             
             console.log("usePresaleContract raw values:", {
                 contributions: contributions?.toString(),

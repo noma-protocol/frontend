@@ -149,7 +149,7 @@ const UpcomingPresales: React.FC = () => {
           if (token.tokenSymbol) {
             // Use logoUrl if available, otherwise fall back to logoPreview
             const logoSource = token.logoUrl || token.logoPreview;
-            console.log(`Token ${token.tokenSymbol}: logoUrl=${token.logoUrl}, logoPreview=${token.logoPreview?.substring(0, 50)}...`);
+            // console.log(`Token ${token.tokenSymbol}: logoUrl=${token.logoUrl}, logoPreview=${token.logoPreview?.substring(0, 50)}...`);
             if (logoSource) {
               logos[token.tokenSymbol] = logoSource;
             }
@@ -164,7 +164,7 @@ const UpcomingPresales: React.FC = () => {
     };
     
     const fetchUpcomingPresales = async () => {
-      console.log("Starting fetchUpcomingPresales...");
+      // console.log("Starting fetchUpcomingPresales...");
       try {
         setIsLoading(true);
         // console.log("Creating factory contract with address:", oikosFactoryAddress);

@@ -65,6 +65,7 @@ import { unCommify, commify, commifyDecimals, generateBytes32String, getContract
 import WalletSidebar from "../components/WalletSidebar";
 import StandaloneWrapModal from "../components/StandaloneWrapModal";
 import StandaloneUnwrapModal from "../components/StandaloneUnwrapModal";
+import StandaloneSlippageModal from "../components/StandaloneSlippageModal";
 import UpcomingPresales from "../components/UpcomingPresales";
 // import WalletNotConnected from '../components/WalletNotConnected';
 import { useToken } from "../contexts/TokenContext";
@@ -95,6 +96,10 @@ const safeParseEther = (value) => {
         return parseEther("0");
     }
 };
+
+// Import AuxVault ABI
+const AuxVaultArtifact = await import(`../assets/AuxVault.json`);
+const AuxVaultAbi = AuxVaultArtifact.abi;
 
 // Import Exchange Helper ABI
 const ExchangeHelperArtifact = await import(`../assets/ExchangeHelper.json`);
@@ -190,7 +195,7 @@ const Exchange: React.FC = () => {
     const [tradeAmount, setTradeAmount] = useState("");
     const [isBuying, setIsBuying] = useState(true);
     const [tradeHistoryTab, setTradeHistoryTab] = useState("all");
-    
+    const [totalVolume, setTotalVolume] = useState(0);
     // Parse referral code from URL
     const [searchParams] = useSearchParams();
     const urlReferralCode = searchParams.get("r") || "";
@@ -386,6 +391,7 @@ const Exchange: React.FC = () => {
     const [priceImpact, setPriceImpact] = useState("0");
     const [showQuoteLoading, setShowQuoteLoading] = useState(false);
     const [totalSupply, setTotalSupply] = useState("0");
+    const [isSlippageModalOpen, setIsSlippageModalOpen] = useState(false);
 
     // Handler to update approveMax and persist to localStorage
     const handleApproveMaxChange = (value: boolean) => {
@@ -421,6 +427,29 @@ const Exchange: React.FC = () => {
     const [myTxCurrentPage, setMyTxCurrentPage] = useState(1);
     const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false);
     
+    useEffect(() => {
+        const loadReferralStats = async () => {
+            if (address) {
+                try {
+                    const vaultContract = new ethers.Contract(
+                        selectedToken?.vault || zeroAddress,
+                        AuxVaultAbi,
+                        localProvider
+                    );
+
+                    const referralEntity = await vaultContract.getReferralEntity(address);
+
+                    setTotalVolume(parseFloat(referralEntity.totalReferred || "0"));
+                    console.log({ referralEntity}) 
+                    console.log(`Total referred for ${address} is ${formatEther(referralEntity.totalReferred)}`);
+                } catch (error) {
+                    console.error("Error fetching referral stats:", error);
+                }
+            }
+        };
+        loadReferralStats();
+    }, [address, selectedToken]);
+
     // Load trade history from local storage on mount
     useEffect(() => {
         const loadTradeHistory = () => {
@@ -516,7 +545,7 @@ const Exchange: React.FC = () => {
             // Generate referral code for current user
             if (address) {
                 const code = generateReferralCode(address);
-                setReferralCode(code?.slice(0, 8) || ""); // Use first 8 chars of hash
+                setReferralCode(code || ""); // Already returns 8 chars
             }
         };
         
@@ -1171,7 +1200,7 @@ const Exchange: React.FC = () => {
     useEffect(() => {
         if (!poolInfo.poolAddress || poolInfo.poolAddress === zeroAddress) return;
         
-        console.log("Setting up event listener for pool:", poolInfo.poolAddress);
+        // console.log("Setting up event listener for pool:", poolInfo.poolAddress);
         
         const poolContract = new ethers.Contract(
             poolInfo.poolAddress,
@@ -1191,7 +1220,7 @@ const Exchange: React.FC = () => {
                 const isToken0Weth = selectedToken?.token1?.toLowerCase() === config.protocolAddresses.WMON?.toLowerCase();
                 const finalPrice = isToken0Weth ? price : 1 / price;
                 
-                console.log("Price updated from pool event:", finalPrice);
+                // console.log("Price updated from pool event:", finalPrice);
                 
                 // Update the selected token's price
                 if (selectedToken) {
@@ -1235,7 +1264,7 @@ const Exchange: React.FC = () => {
         
         // Listen to Swap events
         const handleSwap = async (sender, recipient, amount0, amount1, sqrtPriceX96, liquidity, tick, event) => {
-            console.log("Swap event detected");
+            // console.log("Swap event detected");
             updatePriceFromSqrtPriceX96(sqrtPriceX96);
             
             // Add transaction to trade history
@@ -1353,7 +1382,7 @@ const Exchange: React.FC = () => {
         
         // Cleanup
         return () => {
-            console.log("Removing pool event listener");
+            // console.log("Removing pool event listener");
             poolContract.off("Swap", handleSwapWithTimeCheck);
         };
     }, [poolInfo.poolAddress, selectedToken?.id, selectedToken?.symbol]);
@@ -1471,7 +1500,7 @@ const Exchange: React.FC = () => {
     // Update floor price when IMV data changes
     useEffect(() => {
         if (imvData) {
-            console.log("Raw IMV data from contract:", imvData);
+            // console.log("Raw IMV data from contract:", imvData);
             const formattedIMV = formatEther(imvData);
             const numericIMV = parseFloat(formattedIMV);
             
@@ -1569,7 +1598,7 @@ const Exchange: React.FC = () => {
 
         const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
 
-        console.log(`Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
+        // console.log(`Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
         return poolAddress;
     }
 
@@ -1647,16 +1676,16 @@ const Exchange: React.FC = () => {
                     const response = await tokenApi.getTokens();
                     // API already filters for deployed tokens
                     const deployedTokens = response.tokens;
-                    console.log('[EXCHANGE] API Response tokens:', deployedTokens);
-                    console.log('[EXCHANGE] Token statuses:', deployedTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
+                    // console.log('[EXCHANGE] API Response tokens:', deployedTokens);
+                    // console.log('[EXCHANGE] Token statuses:', deployedTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
                     
                     deployedTokenSymbols = new Set(deployedTokens.map(token => token.tokenSymbol));
                     // Create a map for quick lookup
                     deployedTokens.forEach(token => {
                         deployedTokensMap.set(token.tokenSymbol, token);
                     });
-                    console.log('Deployed tokens from API:', deployedTokens.length, 'tokens');
-                    console.log('Token symbols:', Array.from(deployedTokenSymbols));
+                    // console.log('Deployed tokens from API:', deployedTokens.length, 'tokens');
+                    // console.log('Token symbols:', Array.from(deployedTokenSymbols));
                 } catch (error) {
                     console.error('Failed to fetch deployed tokens:', error);
                     // Continue without filtering if API fails
@@ -1735,19 +1764,19 @@ const Exchange: React.FC = () => {
                 const flattenedVaults = allVaultDescriptions.flat().filter(Boolean);
                 
                 // Filter vaults to only include deployed tokens
-                console.log('[EXCHANGE] deployedTokenSymbols size:', deployedTokenSymbols.size);
-                console.log('[EXCHANGE] deployedTokenSymbols:', Array.from(deployedTokenSymbols));
-                console.log('[EXCHANGE] flattenedVaults count:', flattenedVaults.length);
-                console.log('[EXCHANGE] vault symbols:', flattenedVaults.map(v => v.tokenSymbol));
+                // console.log('[EXCHANGE] deployedTokenSymbols size:', deployedTokenSymbols.size);
+                // console.log('[EXCHANGE] deployedTokenSymbols:', Array.from(deployedTokenSymbols));
+                // console.log('[EXCHANGE] flattenedVaults count:', flattenedVaults.length);
+                // console.log('[EXCHANGE] vault symbols:', flattenedVaults.map(v => v.tokenSymbol));
                 
                 const deployedVaults = deployedTokenSymbols.size > 0 
                     ? flattenedVaults.filter(vault => {
                         // Check if token is in the deployed tokens set
                         const isDeployed = deployedTokenSymbols.has(vault.tokenSymbol);
                         if (!isDeployed) {
-                            console.log(`[EXCHANGE] Filtering out non-deployed token: ${vault.tokenSymbol}`);
+                            // console.log(`[EXCHANGE] Filtering out non-deployed token: ${vault.tokenSymbol}`);
                         } else {
-                            console.log(`[EXCHANGE] Including deployed token: ${vault.tokenSymbol}`);
+                            // console.log(`[EXCHANGE] Including deployed token: ${vault.tokenSymbol}`);
                         }
                         return isDeployed;
                     })
@@ -1764,7 +1793,7 @@ const Exchange: React.FC = () => {
                 }
                 
                 // Convert vault descriptions to token format for display
-                console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
+                // console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
                 const tokenList = deployedVaults.map((vault, index) => {
                     // Use API percentage change for NOMA token, random for others
                     const isNoma = vault.tokenSymbol === 'NOMA' || vault.tokenSymbol === 'noma';
@@ -2796,14 +2825,16 @@ const Exchange: React.FC = () => {
             safeParseEther(`${parseFloat(quote) * (1 - parseFloat(slippage) / 100)}`), // min amount out after slippage
             address,
             false,
-            slippageTolerance
+            slippageTolerance,
+            urlReferralCode ? "0x" + urlReferralCode  :  "0x" + "00".repeat(8)
         ] : [
             poolInfo.poolAddress,
             spotPriceWei.toString(),
             safeParseEther(`${parseFloat(quote) * (1 - parseFloat(slippage) / 100)}`), // min amount out after slippage
             address,
             false,
-            slippageTolerance
+            slippageTolerance,
+            urlReferralCode ? "0x" + urlReferralCode  :  "0x" + "00".repeat(8)
         ];
         
         console.log({ args} );
@@ -2925,7 +2956,8 @@ const Exchange: React.FC = () => {
             safeParseEther(`${parseFloat(quote) * (1 - parseFloat(slippage) / 100)}`), // min amount out after slippage
             address,
             false,
-            slippageTolerance
+            slippageTolerance,
+            urlReferralCode ? "0x" + urlReferralCode  :  "0x" + "00".repeat(8)
         ];
 
         setBalanceBeforePurchase(useWeth ? safeParseEther(wethBalance) : safeParseEther(ethBalance));
@@ -3221,7 +3253,7 @@ const Exchange: React.FC = () => {
                     
                     {/* Referral Stats */}
                     <Box flexShrink={0} mt={4}>
-                        <ReferralStats />
+                        <ReferralStats totalVolume={totalVolume} />
                     </Box>
                 </Box>
                 
@@ -4206,36 +4238,18 @@ const Exchange: React.FC = () => {
                                         >
                                             1%
                                         </Button>
-                                        <Input
+                                        <Button
                                             w="60px"
                                             size="xs"
                                             h="24px"
-                                            value={slippage}
-                                            onChange={(e) => {
-                                                const value = e.target.value;
-                                                // Allow typing any value while user is typing
-                                                setSlippage(value);
-                                            }}
-                                            onBlur={(e) => {
-                                                // Validate on blur (when user clicks away)
-                                                const value = e.target.value.replace(/[^\d.]/g, '');
-                                                const numValue = parseFloat(value);
-                                                if (value === '' || isNaN(numValue)) {
-                                                    setSlippage('0.5'); // Default to 0.5%
-                                                } else if (numValue > 50) {
-                                                    setSlippage('50');
-                                                } else if (numValue < 0) {
-                                                    setSlippage('0');
-                                                } else {
-                                                    setSlippage(value);
-                                                }
-                                            }}
-                                            bg="#2a2a2a"
-                                            border="1px solid #444"
-                                            _focus={{ borderColor: "#4ade80" }}
-                                            placeholder="..."
-                                            textAlign="right"
-                                        />
+                                            bg={!["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#2a2a2a"}
+                                            color={!["0.1", "0.5", "1"].includes(slippage) ? "black" : "white"}
+                                            onClick={() => setIsSlippageModalOpen(true)}
+                                            _hover={{ bg: !["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#3a3a3a" }}
+                                            fontSize="xs"
+                                        >
+                                            {!["0.1", "0.5", "1"].includes(slippage) ? `${slippage}%` : "Custom"}
+                                        </Button>
                                         </HStack>
 
                                     </Box>                          
@@ -4592,11 +4606,12 @@ const Exchange: React.FC = () => {
                                             </Text>
                                         </Box>
                                     </Flex>
-                                    <Flex justifyContent="space-between" mb={2}>
+
+                                    <VStack textAlign={"left"} alignItems={"left"} mb={2}>
                                         <Box>
                                             <Text color="#888" fontSize="sm">Max Slippage</Text>
                                         </Box>
-                                        <Box  w="100%" border="1px solid red">
+                                        <Box  w="100%">
                                             <HStack w="100%" gap={1}>
                                             <Button
                                                 flex="1"
@@ -4631,40 +4646,22 @@ const Exchange: React.FC = () => {
                                             >
                                                 1%
                                             </Button>
-                                            <Input
+                                            <Button
                                                 w="60px"
                                                 size="xs"
                                                 h="24px"
-                                                value={slippage}
-                                                onChange={(e) => {
-                                                    const value = e.target.value;
-                                                    // Allow typing any value while user is typing
-                                                    setSlippage(value);
-                                                }}
-                                                onBlur={(e) => {
-                                                    // Validate on blur (when user clicks away)
-                                                    const value = e.target.value.replace(/[^\d.]/g, '');
-                                                    const numValue = parseFloat(value);
-                                                    if (value === '' || isNaN(numValue)) {
-                                                        setSlippage('0.5'); // Default to 0.5%
-                                                    } else if (numValue > 50) {
-                                                        setSlippage('50');
-                                                    } else if (numValue < 0) {
-                                                        setSlippage('0');
-                                                    } else {
-                                                        setSlippage(value);
-                                                    }
-                                                }}
-                                                bg="#2a2a2a"
-                                                border="1px solid #444"
-                                                _focus={{ borderColor: "#4ade80" }}
-                                                placeholder="..."
-                                                textAlign="right"
-                                            />
+                                                bg={!["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#2a2a2a"}
+                                                color={!["0.1", "0.5", "1"].includes(slippage) ? "black" : "white"}
+                                                onClick={() => setIsSlippageModalOpen(true)}
+                                                _hover={{ bg: !["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#3a3a3a" }}
+                                                fontSize="xs"
+                                            >
+                                                {!["0.1", "0.5", "1"].includes(slippage) ? `${slippage}%` : "Custom"}
+                                            </Button>
                                             </HStack>
 
                                         </Box>
-                                    </Flex>
+                                    </VStack>
                                     <Flex justifyContent="space-between" mb={2}>
                                         <Box>
                                             <Text color="#888" fontSize="sm">Network Fee</Text>
@@ -5297,6 +5294,15 @@ const Exchange: React.FC = () => {
                 }}
                 isUnwrapping={isUnwrapping}
                 wethBalance={wethBalance}
+            />
+            <StandaloneSlippageModal
+                isOpen={isSlippageModalOpen}
+                onClose={() => setIsSlippageModalOpen(false)}
+                currentSlippage={slippage}
+                onSetSlippage={(newSlippage) => {
+                    setSlippage(newSlippage);
+                    setIsSlippageModalOpen(false);
+                }}
             />
         </Container>
     );

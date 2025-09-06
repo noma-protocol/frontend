@@ -106,6 +106,8 @@ const Presale: React.FC = () => {
     `http://localhost:5173/presale?a=${contractAddress}r=${referralCode}`:
     "https://app.noma.money"}/presale?a=${contractAddress}r=${referralCode}`;
   
+  // const presaleUrl = `http://localhost:5173/presale?a=${contractAddress}&r=${generateReferralCode(address || "0x0")}`;
+  //   "https://app.noma.money"}/presale?a=${contractAddress}r=${referralCode}`;
 
   const AddToMetaMaskButton = ({ contractAddress, tokenSymbol, tokenDecimals }) => {
     const addTokenToMetaMask = async () => {
@@ -223,10 +225,10 @@ const Presale: React.FC = () => {
       }
     });
 
-    console.log("Contract reads:", {
-      tokenBalancePresale: tokenBalancePresale?.toString(),
-      contractAddress
-    });
+    // console.log("Contract reads:", {
+    //   tokenBalancePresale: tokenBalancePresale?.toString(),
+    //   contractAddress
+    // });
     
     // Removed duplicate presaleInfo read - using usePresaleContract instead
 
@@ -310,12 +312,13 @@ const Presale: React.FC = () => {
   usePresaleContract(
     "ganache",
     address,
+    contractAddress,
     urlReferralCode
   );
 
-   console.log("Raw contributions:", contributions);
+  //  console.log("Raw contributions:", contributions);
    // contributions is already a string from usePresaleContract, no need to format
-   console.log("Formatted contributions:", contributions);
+  //  console.log("Formatted contributions:", contributions);
     // console.log(`Contributions is ${contributions}`);
 
   //  console.log({ 
@@ -334,30 +337,30 @@ const Presale: React.FC = () => {
   });
   
   // Log balance data safely
-  if (monBalance) {
-    console.log("Balance data:", {
-      value: monBalance.value?.toString(),
-      formatted: monBalance.formatted,
-      symbol: monBalance.symbol,
-      decimals: monBalance.decimals
-    });
-  }
+  // if (monBalance) {
+  //   console.log("Balance data:", {
+  //     value: monBalance.value?.toString(),
+  //     formatted: monBalance.formatted,
+  //     symbol: monBalance.symbol,
+  //     decimals: monBalance.decimals
+  //   });
+  // }
 
   // Debug logging
-  console.log("Presale Debug:", {
-    initialPrice,
-    contributionAmount,
-    tokensPurchased,
-    contributions,
-    monBalance: monBalance?.value?.toString(),
-    totalReferred,
-    tokenBalance: tokenBalance?.toString(),
-    hardCap,
-    softCap,
-    totalRaised,
-    minContribution: minContribution?.toString(),
-    maxContribution: maxContribution?.toString()
-  });
+  // console.log("Presale Debug:", {
+  //   initialPrice,
+  //   contributionAmount,
+  //   tokensPurchased,
+  //   contributions,
+  //   monBalance: monBalance?.value?.toString(),
+  //   totalReferred,
+  //   tokenBalance: tokenBalance?.toString(),
+  //   hardCap,
+  //   softCap,
+  //   totalRaised,
+  //   minContribution: minContribution?.toString(),
+  //   maxContribution: maxContribution?.toString()
+  // });
 
   const presaleData = {
     isMobile,
@@ -371,24 +374,24 @@ const Presale: React.FC = () => {
   };
   
   // Log presaleData to check for problematic values
-  console.log("presaleData object:", JSON.stringify(presaleData, (key, value) => {
-    // Handle BigNumber objects
-    if (typeof value === 'object' && value !== null && value._isBigNumber) {
-      return value.toString();
-    }
-    // Handle BigInt values
-    if (typeof value === 'bigint') {
-      return value.toString();
-    }
-    // Handle objects with BigInt values
-    if (value && typeof value === 'object' && value.value && typeof value.value === 'bigint') {
-      return {
-        ...value,
-        value: value.value.toString()
-      };
-    }
-    return value;
-  }, 2));
+  // console.log("presaleData object:", JSON.stringify(presaleData, (key, value) => {
+  //   // Handle BigNumber objects
+  //   if (typeof value === 'object' && value !== null && value._isBigNumber) {
+  //     return value.toString();
+  //   }
+  //   // Handle BigInt values
+  //   if (typeof value === 'bigint') {
+  //     return value.toString();
+  //   }
+  //   // Handle objects with BigInt values
+  //   if (value && typeof value === 'object' && value.value && typeof value.value === 'bigint') {
+  //     return {
+  //       ...value,
+  //       value: value.value.toString()
+  //     };
+  //   }
+  //   return value;
+  // }, 2));
 
   const {
     isLoading: contributing,
@@ -397,7 +400,7 @@ const Presale: React.FC = () => {
     address: contractAddress,
     abi: PresaleAbi,
     functionName: "deposit",
-    args: [urlReferralCode ? generateBytes32String(urlReferralCode) : generateBytes32String("0")],
+    args: [urlReferralCode ? `0x${urlReferralCode}` : "0x" + "00".repeat(8)],
     value: contributionAmount && parseFloat(contributionAmount) > 0 ? parseEther(parseFloat(contributionAmount).toFixed(6)) : undefined,
     onSuccess(data) {
       console.log(`transaction successful: ${data.hash} referral code: ${urlReferralCode}`);
@@ -569,49 +572,49 @@ const Presale: React.FC = () => {
   // Fetch token logo from API
   useEffect(() => {
     const fetchTokenLogo = async () => {
-      if (!tokenSymbol) {
-        console.log("Token symbol not yet loaded");
-        return;
-      }
+      // if (!tokenSymbol) {
+      //   console.log("Token symbol not yet loaded");
+      //   return;
+      // }
       
-      console.log(`Fetching logo for token: ${tokenSymbol}`);
+      // console.log(`Fetching logo for token: ${tokenSymbol}`);
       
       // Remove "p-" prefix from presale tokens to match the base token
       const baseTokenSymbol = tokenSymbol.startsWith("p-") 
         ? tokenSymbol.substring(2) 
         : tokenSymbol;
       
-      console.log(`Looking for base token: ${baseTokenSymbol}`);
+      // console.log(`Looking for base token: ${baseTokenSymbol}`);
       
       try {
         // Use includeAll to get all tokens regardless of status
         const response = await tokenApi.getTokens({ includeAll: true });
-        console.log("API response:", response);
-        console.log("Tokens:", response.tokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
+        // console.log("API response:", response);
+        // console.log("Tokens:", response.tokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
         
         const token = response.tokens.find(t => t.tokenSymbol === baseTokenSymbol);
-        console.log(`Found token:`, token);
+        // console.log(`Found token:`, token);
         
         if (token) {
           // Use logoUrl if available, otherwise fall back to logoPreview
           const logoSource = token.logoUrl || token.logoPreview;
           if (logoSource) {
             setTokenLogo(logoSource);
-            console.log(`Set logo for ${tokenSymbol}: ${logoSource}`);
+            // console.log(`Set logo for ${tokenSymbol}: ${logoSource}`);
           } else {
-            console.log(`No logo found for ${baseTokenSymbol}`);
+            // console.log(`No logo found for ${baseTokenSymbol}`);
           }
           
           // Also set the token description
           if (token.tokenDescription) {
             setTokenDescription(token.tokenDescription);
-            console.log(`Set description for ${tokenSymbol}: ${token.tokenDescription}`);
+            // console.log(`Set description for ${tokenSymbol}: ${token.tokenDescription}`);
           }
           
           // Also set the token supply
           if (token.tokenSupply) {
             setTokenSupply(token.tokenSupply);
-            console.log(`Set supply for ${tokenSymbol}: ${token.tokenSupply}`);
+            // console.log(`Set supply for ${tokenSymbol}: ${token.tokenSupply}`);
           }
         } else {
           console.log(`Token ${baseTokenSymbol} not found in API response`);
