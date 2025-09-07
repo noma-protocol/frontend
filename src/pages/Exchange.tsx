@@ -133,15 +133,14 @@ import { ReferralStats } from "../components/ReferralStats";
 import { referralApi } from "../services/referralApi";
 import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
-import addressesMonad from "../assets/deployment_monad.json";
-import addressesBsc from "../assets/deployment.json";
+import addressesMonad from "../assets/deployment.json";
 import { FaArrowTrendUp, FaArrowTrendDown } from "react-icons/fa6";
 import { LuSearch } from "react-icons/lu";
 import { useMonPrice } from '../contexts/MonPriceContext';
 
 const addresses = config.chain == "local"
   ? addressesLocal
-  : addressesBsc;
+  : addressesMonad;
 
 const { environment, presaleContractAddress } = config;
 
@@ -170,14 +169,14 @@ import ReactApexChart from 'react-apexcharts';
 
 // Get ExchangeHelper address
 const exchangeHelperAddress = getContractAddress(
-    config.chain === "local" ? addressesLocal : addressesBsc, 
+    config.chain === "local" ? addressesLocal : addresses, 
     config.chain === "local" ? "1337" : "10143", 
     "Exchange"
 );
 
 // Get ModelHelper address
 const modelHelperAddress = getContractAddress(
-    config.chain === "local" ? addressesLocal : addressesBsc, 
+    config.chain === "local" ? addressesLocal : addresses, 
     config.chain === "local" ? "1337" : "10143", 
     "ModelHelper"
 );
@@ -436,7 +435,10 @@ const Exchange: React.FC = () => {
                         AuxVaultAbi,
                         localProvider
                     );
+                    console.log({ selectedToken });
+                    if (typeof selectedToken?.vault == "undefined") return;
 
+                    console.log(`Selected vault address is ${selectedToken?.vault}`);
                     const referralEntity = await vaultContract.getReferralEntity(address);
 
                     setTotalVolume(parseFloat(referralEntity.totalReferred || "0"));
@@ -1584,6 +1586,7 @@ const Exchange: React.FC = () => {
     
     // Fetch pool address from Uniswap V3 Factory
     const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
+        // protocol = "uniswap"
         // Select the appropriate factory based on protocol
         const factoryAddress = protocol === "uniswap" 
         ? config.protocolAddresses.uniswapV3Factory 
@@ -1598,7 +1601,7 @@ const Exchange: React.FC = () => {
 
         const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
 
-        // console.log(`Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
+        console.log(`Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
         return poolAddress;
     }
 
@@ -1635,7 +1638,7 @@ const Exchange: React.FC = () => {
                 });
                 
                 setTokenProtocols(protocols);
-                console.log("Token protocols loaded:", protocols);
+                // console.log("Token protocols loaded:", protocols);
             } catch (error) {
                 console.error("Failed to fetch token protocols:", error);
             }
@@ -4164,7 +4167,7 @@ const Exchange: React.FC = () => {
                                         </Box>
                                         <Box w="120px">
                                             <Text color="#666" fontSize="xs">
-                                               ≈ {quote}
+                                               ≈ {formatNumber(parseFloat(quote))}
                                             </Text>
                                         </Box>
                                         <Box>
