@@ -1111,10 +1111,14 @@ const Exchange: React.FC = () => {
                     }
                     
                     // Set volume based on selected interval
-                    if (priceStats.volume) {
+                    if (priceStats && priceStats.volume) {
                         const intervalKey = mapTimeframeToApiInterval(chartTimeframe);
                         const volume = priceStats.volume[intervalKey] || priceStats.volume['24h'] || 0;
+                        console.log('[Volume Debug] Pool:', poolInfo.poolAddress, 'API response:', priceStats, 'Selected interval:', intervalKey, 'Volume in MON:', volume);
                         setIntervalVolume(volume);
+                    } else {
+                        console.log('[Volume Debug] No volume data from API, setting to 0');
+                        setIntervalVolume(0);
                     }
                 }
                 
@@ -1841,11 +1845,11 @@ const Exchange: React.FC = () => {
                         symbol: vault.tokenSymbol,
                         price: vault.spotPrice ? (parseFloat(formatEther(vault.spotPrice)) || 0.0000186) : 0.0000186, // Use actual spot price with fallback
                         change24h: change24h,
-                        volume24h: Math.floor(Math.random() * 1000000),
-                        marketCap: Math.floor(Math.random() * 10000000),
-                        liquidity: Math.floor(Math.random() * 1000000),
-                        fdv: Math.floor(Math.random() * 10000000),
-                        holders: Math.floor(Math.random() * 10000),
+                        volume24h: 0, // Start with 0 volume for new pools
+                        marketCap: 0, // Should be calculated from price * circulating supply
+                        liquidity: 0, // Should be fetched from pool
+                        fdv: 0, // Should be calculated from price * total supply
+                        holders: 0, // Should be fetched from blockchain
                         token0: vault.token0,
                         token1: vault.token1,
                         vault: vault.vault,
