@@ -42,7 +42,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
   const [showDetails, setShowDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log(`Total volume ${formatEther(`${totalVolume}`)} MON - monPrice is ${monPrice} USD`);
+  // console.log(`Total volume ${formatEther(`${totalVolume}`)} MON - monPrice is ${monPrice} USD`);
   useEffect(() => { 
     if (address) {
       // Generate referral code

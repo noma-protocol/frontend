@@ -91,7 +91,7 @@ const TrollBox: React.FC = () => {
   const [authAttempts, setAuthAttempts] = useState(0);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [newMessage, setNewMessage] = useState('');
   const [username, setUsername] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
