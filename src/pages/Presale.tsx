@@ -103,8 +103,8 @@ const Presale: React.FC = () => {
   const [tokenSupply, setTokenSupply] = useState<string>("");
   
   const presaleUrl = `${environment == "development" ? 
-    `http://localhost:5173/presale?a=${contractAddress}r=${referralCode}`:
-    "https://app.noma.money"}/presale?a=${contractAddress}r=${referralCode}`;
+    `http://localhost:5173/presale?a=${contractAddress}r=${generateReferralCode(address || "0x0")}` : 
+    "https://app.noma.money"}/presale?a=${contractAddress}r=${generateReferralCode(address || "0x0")}`;
   
   // const presaleUrl = `http://localhost:5173/presale?a=${contractAddress}&r=${generateReferralCode(address || "0x0")}`;
   //   "https://app.noma.money"}/presale?a=${contractAddress}r=${referralCode}`;
@@ -1255,7 +1255,7 @@ const Presale: React.FC = () => {
                               </Box>
                               <Box>
 
-                              <SimpleGrid columns={2} w="100%" gap={2}>
+                              <SimpleGrid columns={2} w="100%" gap={2} ml={2}>
                               <Box w="120px">
                               <Text color="white"   fontSize={isMobile ? "sm" : "lg"} fontWeight="500">
                                 {formatNumberPrecise(tokensPurchased, 2)}  
@@ -1274,17 +1274,17 @@ const Presale: React.FC = () => {
                     </Box>
                     <Box w="125%" >
                         <HStack>
-                          <Box mb={2} w="180px" alignItems={"left"} >
+                          <Box mb={2} alignItems={"left"} >
                             <VStack>
                               <Box ml={isMobile ? "-110px" : "-90px"}>
                                 <Text color="#888" fontSize={isMobile ? "xs" : "sm"}>Price per token</Text>                             
                               </Box>
                               <Box w="220px">
 
-                              <SimpleGrid columns={2} w="100%" gap={2}>
-                              <Box w="160px">
+                              <SimpleGrid columns={2} w="140%" gap={2}>
+                              <Box w="420px">
                               <Text color="white"   fontSize={isMobile ? "sm" : "lg"} fontWeight="500">
-                                {formatNumberPrecise(initialPrice, 5)}  
+                                {formatNumberPrecise(initialPrice, 8)}  
                               </Text> 
                               </Box>
                               <Box >
