@@ -1095,6 +1095,14 @@ const Exchange: React.FC = () => {
             
             try {
                 console.log('[loadChartData] poolInfo:', poolInfo);
+                
+                // Skip API calls if no pool address is available
+                if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
+                    console.log('[loadChartData] Skipping API calls - no valid pool address');
+                    setIsChartLoading(false);
+                    return;
+                }
+                
                 // First try to fetch price stats for accurate percentage and volume based on selected interval
                 const priceStats = await fetchTokenPriceStats(chartTimeframe, poolInfo.poolAddress);
                 if (priceStats) {
@@ -1806,10 +1814,12 @@ const Exchange: React.FC = () => {
                 
                 // Fetch price stats from API with default 24h interval
                 let priceStats = null;
-                try {
-                    priceStats = await fetchTokenPriceStats("24h", poolInfo.poolAddress);
-                } catch (error) {
-                    console.error("Failed to fetch price stats:", error);
+                if (poolInfo.poolAddress && poolInfo.poolAddress !== '0x0000000000000000000000000000000000000000') {
+                    try {
+                        priceStats = await fetchTokenPriceStats("24h", poolInfo.poolAddress);
+                    } catch (error) {
+                        console.error("Failed to fetch price stats:", error);
+                    }
                 }
                 
                 // Convert vault descriptions to token format for display
@@ -1881,6 +1891,11 @@ const Exchange: React.FC = () => {
         if (tokens.length === 0) return;
         
         const updateTokenStats = async () => {
+            // Skip if no pool address is available
+            if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
+                return;
+            }
+            
             try {
                 const priceStats = await fetchTokenPriceStats("24h", poolInfo.poolAddress);
                 if (priceStats?.percentageChange !== undefined) {

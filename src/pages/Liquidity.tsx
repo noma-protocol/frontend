@@ -406,7 +406,7 @@ const Liquidity: React.FC = () => {
   
     if (selectedVault !== "") {
       fetchVaultInfo();
-      const intervalId = setInterval(fetchVaultInfo, 5000);
+      const intervalId = setInterval(fetchVaultInfo, 20000); // Reduced from 5s to 20s
   
       // Clear the interval when the component unmounts or when selectedVault changes
       return () => clearInterval(intervalId);

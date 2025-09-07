@@ -205,6 +205,12 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   // Fetch OHLC data from API
   const fetchOHLCData = async (timeframe: string) => {
     try {
+      // Skip API call if no pool address is available
+      if (!poolAddress || poolAddress === '0x0000000000000000000000000000000000000000') {
+        console.log('[PriceData fetchOHLCData] Skipping API call - no valid pool address');
+        return generateMockOHLCData(timeframe, token0Symbol, token1Symbol);
+      }
+      
       const { from_timestamp, to_timestamp, interval } = getTimeParams(timeframe, selectedGranularity);
       
       // Build the API URL with query parameters
@@ -212,14 +218,8 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       url.searchParams.append('from_timestamp', from_timestamp.toString());
       url.searchParams.append('to_timestamp', to_timestamp.toString());
       url.searchParams.append('interval', interval);
-      
-      // Add pool parameter if available
-      if (poolAddress && poolAddress !== '0x0000000000000000000000000000000000000000') {
-        url.searchParams.append('pool', poolAddress);
-        console.log('[PriceData fetchOHLCData] Adding pool parameter:', poolAddress);
-      } else {
-        console.log('[PriceData fetchOHLCData] No pool parameter provided or zero address, poolAddress:', poolAddress);
-      }
+      url.searchParams.append('pool', poolAddress);
+      console.log('[PriceData fetchOHLCData] Adding pool parameter:', poolAddress);
       
       console.log(`[Debug] Fetching OHLC data from: ${url.toString()}`);
       console.log(`[Debug] Time range: ${new Date(from_timestamp)} to ${new Date(to_timestamp)} (${((to_timestamp - from_timestamp) / (1000 * 60 * 60)).toFixed(1)} hours)`);
