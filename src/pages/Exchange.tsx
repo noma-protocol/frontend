@@ -972,6 +972,9 @@ const Exchange: React.FC = () => {
             // Add pool parameter if available
             if (pool && pool !== '0x0000000000000000000000000000000000000000') {
                 url.searchParams.append('pool', pool);
+                console.log('[fetchTokenPriceStats] Adding pool parameter:', pool);
+            } else {
+                console.log('[fetchTokenPriceStats] No pool parameter provided or zero address');
             }
             
             const response = await fetch(url.toString());
@@ -1020,7 +1023,7 @@ const Exchange: React.FC = () => {
     };
     
     // Fetch OHLC data from API
-    const fetchOHLCData = async (timeframe, granularity) => {
+    const fetchOHLCData = async (timeframe, granularity, pool?) => {
         try {
             const { from_timestamp, to_timestamp, interval } = getTimeParams(timeframe, granularity);
             
@@ -1030,9 +1033,14 @@ const Exchange: React.FC = () => {
             url.searchParams.append('interval', interval);
             
             // Add pool address if available
-            if (poolInfo.poolAddress && poolInfo.poolAddress !== '0x0000000000000000000000000000000000000000') {
-                url.searchParams.append('pool', poolInfo.poolAddress);
+            if (pool && pool !== '0x0000000000000000000000000000000000000000') {
+                url.searchParams.append('pool', pool);
+                console.log('[fetchOHLCData] Adding pool parameter:', pool);
+            } else {
+                console.log('[fetchOHLCData] No pool parameter provided or zero address');
             }
+            
+            console.log('[fetchOHLCData] Final URL:', url.toString());
             
             const response = await fetch(url.toString());
             if (!response.ok) {
@@ -1086,6 +1094,7 @@ const Exchange: React.FC = () => {
             setIsChartLoading(true);
             
             try {
+                console.log('[loadChartData] poolInfo:', poolInfo);
                 // First try to fetch price stats for accurate percentage and volume based on selected interval
                 const priceStats = await fetchTokenPriceStats(chartTimeframe, poolInfo.poolAddress);
                 if (priceStats) {
@@ -1101,7 +1110,7 @@ const Exchange: React.FC = () => {
                     }
                 }
                 
-                const ohlcData = await fetchOHLCData(chartTimeframe, chartGranularity);
+                const ohlcData = await fetchOHLCData(chartTimeframe, chartGranularity, poolInfo.poolAddress);
                 
                 // Validate data before setting
                 if (ohlcData && ohlcData.length > 0) {
