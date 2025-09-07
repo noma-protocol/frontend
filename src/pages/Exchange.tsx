@@ -963,10 +963,18 @@ const Exchange: React.FC = () => {
     };
     
     // Fetch token price stats including percentage change based on interval
-    const fetchTokenPriceStats = async (interval: string = "24h") => {
+    const fetchTokenPriceStats = async (interval: string = "24h", pool?: string) => {
         try {
             const apiInterval = mapTimeframeToApiInterval(interval);
-            const response = await fetch(`${API_BASE_URL}/api/stats?interval=${apiInterval}`);
+            const url = new URL(`${API_BASE_URL}/api/stats`);
+            url.searchParams.append('interval', apiInterval);
+            
+            // Add pool parameter if available
+            if (pool && pool !== '0x0000000000000000000000000000000000000000') {
+                url.searchParams.append('pool', pool);
+            }
+            
+            const response = await fetch(url.toString());
             if (!response.ok) {
                 throw new Error(`API error: ${response.status}`);
             }
@@ -1023,7 +1031,7 @@ const Exchange: React.FC = () => {
             
             // Add pool address if available
             if (poolInfo.poolAddress && poolInfo.poolAddress !== '0x0000000000000000000000000000000000000000') {
-                url.searchParams.append('poolAddress', poolInfo.poolAddress);
+                url.searchParams.append('pool', poolInfo.poolAddress);
             }
             
             const response = await fetch(url.toString());
@@ -1079,7 +1087,7 @@ const Exchange: React.FC = () => {
             
             try {
                 // First try to fetch price stats for accurate percentage and volume based on selected interval
-                const priceStats = await fetchTokenPriceStats(chartTimeframe);
+                const priceStats = await fetchTokenPriceStats(chartTimeframe, poolInfo.poolAddress);
                 if (priceStats) {
                     if (priceStats.percentageChange !== undefined) {
                         setPercentChange(priceStats.percentageChange);
@@ -1790,7 +1798,7 @@ const Exchange: React.FC = () => {
                 // Fetch price stats from API with default 24h interval
                 let priceStats = null;
                 try {
-                    priceStats = await fetchTokenPriceStats("24h");
+                    priceStats = await fetchTokenPriceStats("24h", poolInfo.poolAddress);
                 } catch (error) {
                     console.error("Failed to fetch price stats:", error);
                 }
@@ -1865,7 +1873,7 @@ const Exchange: React.FC = () => {
         
         const updateTokenStats = async () => {
             try {
-                const priceStats = await fetchTokenPriceStats("24h");
+                const priceStats = await fetchTokenPriceStats("24h", poolInfo.poolAddress);
                 if (priceStats?.percentageChange !== undefined) {
                     // Update NOMA token's 24h change
                     setTokens(prevTokens => 

@@ -213,6 +213,11 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       url.searchParams.append('to_timestamp', to_timestamp.toString());
       url.searchParams.append('interval', interval);
       
+      // Add pool parameter if available
+      if (poolAddress && poolAddress !== '0x0000000000000000000000000000000000000000') {
+        url.searchParams.append('pool', poolAddress);
+      }
+      
       console.log(`[Debug] Fetching OHLC data from: ${url.toString()}`);
       console.log(`[Debug] Time range: ${new Date(from_timestamp)} to ${new Date(to_timestamp)} (${((to_timestamp - from_timestamp) / (1000 * 60 * 60)).toFixed(1)} hours)`);
       console.log(`[Debug] Expected datapoints with ${interval} intervals: ~${Math.ceil((to_timestamp - from_timestamp) / getIntervalMs(interval))}`);
