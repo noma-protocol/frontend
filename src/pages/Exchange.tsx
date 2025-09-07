@@ -1114,7 +1114,6 @@ const Exchange: React.FC = () => {
                     if (priceStats.volume) {
                         const intervalKey = mapTimeframeToApiInterval(chartTimeframe);
                         const volume = priceStats.volume[intervalKey] || priceStats.volume['24h'] || 0;
-                        console.log('[Volume Debug] intervalKey:', intervalKey, 'volume:', volume, 'monPrice:', monPrice, 'USD value:', volume * monPrice);
                         setIntervalVolume(volume);
                     }
                 }
@@ -3393,16 +3392,16 @@ const Exchange: React.FC = () => {
                                     </Text>
                                     <Box>
                                         <VStack align="start" spacing={0}>
-                                            {intervalVolume > 0 ? (
+                                            {intervalVolume > 0 && monPrice > 0 ? (
                                                 <>
                                                 <Box>
                                                     <Text color="white" fontSize="xl" fontWeight="bold">
-                                                        ${formatNumber(intervalVolume)}
+                                                        ${formatNumber(intervalVolume * monPrice)}
                                                     </Text>
                                                 </Box>
                                                 <Box>
                                                     <Text color="#888" fontSize="xs">
-                                                        Volume (USD)
+                                                        {commify(intervalVolume.toFixed(2), 2)} MON
                                                     </Text>
                                                 </Box>                                                
                                                 </>
