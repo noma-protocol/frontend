@@ -103,8 +103,8 @@ const Presale: React.FC = () => {
   const [tokenSupply, setTokenSupply] = useState<string>("");
   
   const presaleUrl = `${environment == "development" ? 
-    `http://localhost:5173/presale?a=${contractAddress}r=${generateReferralCode(address || "0x0")}` : 
-    "https://app.noma.money"}/presale?a=${contractAddress}r=${generateReferralCode(address || "0x0")}`;
+    `http://localhost:5173/presale?a=${contractAddress}&r=${generateReferralCode(address || "0x0")}` : 
+    "https://app.noma.money"}/presale?a=${contractAddress}&r=${generateReferralCode(address || "0x0")}`;
   
   // const presaleUrl = `http://localhost:5173/presale?a=${contractAddress}&r=${generateReferralCode(address || "0x0")}`;
   //   "https://app.noma.money"}/presale?a=${contractAddress}r=${referralCode}`;
@@ -666,6 +666,8 @@ const Presale: React.FC = () => {
     const now = Date.now(); // Get the current timestamp in milliseconds
     const newTimestamp = now + Number(timeLeftInSeconds) * 1000; // Add 30 days in milliseconds
     const newDate = new Date(newTimestamp);
+    
+    console.log(`Time left in seconds ${timeLeftInSeconds}`)
 
     // console.log(newDate.toISOString()); // Outputs the new date in ISO format
     setTargetDate(newDate.toISOString());
