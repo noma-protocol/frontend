@@ -216,6 +216,9 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       // Add pool parameter if available
       if (poolAddress && poolAddress !== '0x0000000000000000000000000000000000000000') {
         url.searchParams.append('pool', poolAddress);
+        console.log('[PriceData fetchOHLCData] Adding pool parameter:', poolAddress);
+      } else {
+        console.log('[PriceData fetchOHLCData] No pool parameter provided or zero address, poolAddress:', poolAddress);
       }
       
       console.log(`[Debug] Fetching OHLC data from: ${url.toString()}`);
