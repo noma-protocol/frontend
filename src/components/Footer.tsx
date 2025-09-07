@@ -72,17 +72,20 @@ const Footer: React.FC = () => {
       borderTop="1px solid #1a1a1a"
       py={8}
     >
-      <Container maxW="container.xl" px={{ base: 4, md: 16 }}>
-        <SimpleGrid columns={{ base: 1, md: 4 }} spacing={8}>
+      <Container maxW="container.xl" px={{ base: 5, md: 16 }}>
+        <SimpleGrid columns={{ base: 1, md: 5 }} gap={12} w="90vw">
           {/* Logo Column */}
+          <Box>
           <VStack align="flex-start" spacing={4}>
             <Image src={Logo} alt="Noma Protocol" w="40px" h="40px" />
             <Text color="#666" fontSize="sm">
               © 2024 Noma Protocol
             </Text>
-          </VStack>
+          </VStack>            
+          </Box>
 
           {/* Resources Column */}
+          <Box w="25%">
           <VStack align="flex-start" spacing={3}>
             <Text color="white" fontWeight="600" mb={2}>Resources</Text>
             <Link 
@@ -116,7 +119,9 @@ const Footer: React.FC = () => {
             </Link>
           </VStack>
 
+          </Box>
           {/* Community Column */}
+          <Box w="25%">
           <VStack align="flex-start" spacing={3}>
             <Text color="white" fontWeight="600" mb={2}>Community</Text>
             <HStack spacing={4}>
@@ -157,11 +162,17 @@ const Footer: React.FC = () => {
                 <i className="fab fa-telegram" />
               </Link>
             </HStack>
-          </VStack>
+          </VStack>            
+          </Box>
+          <Box w="25%" >
 
+          </Box>
           {/* Add Token Column */}
+          <Box w="45%">
           <VStack align="flex-start" spacing={3}>
-            <Text color="white" fontWeight="600" mb={2}>Get Started</Text>
+            <Box>
+              <Text color="white" fontWeight="600" mb={2}>Get Started</Text>
+            </Box>
             <Button
               onClick={addTokenToMetaMask}
               size="sm"
@@ -178,7 +189,8 @@ const Footer: React.FC = () => {
             >
               Add NOMA to MetaMask
             </Button>
-          </VStack>
+          </VStack> 
+          </Box>             
         </SimpleGrid>
       </Container>
     </Box>
