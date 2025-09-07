@@ -48,8 +48,8 @@ export const useAllowance = (
 
         fetchAllowance();
         
-        // Poll for allowance updates every 5 seconds
-        const interval = setInterval(fetchAllowance, 5000);
+        // Poll for allowance updates every 15 seconds
+        const interval = setInterval(fetchAllowance, 15000);
         
         return () => clearInterval(interval);
     }, [tokenAddress, spenderAddress, address, publicClient]);

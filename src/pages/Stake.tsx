@@ -5,6 +5,7 @@ import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead } from "wagmi";
 import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
 import useScreenOrientation from '../hooks/useScreenOrientation';
+import { useVisibilityPolling } from "../hooks/useVisibilityPolling";
 import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import { Toaster, toaster } from "../components/ui/toaster";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
@@ -265,7 +266,7 @@ const Stake = () => {
         // Fetch immediately
         fetchEthBalance();
 
-        const interval = setInterval(fetchEthBalance, 3000);
+        const interval = setInterval(fetchEthBalance, 15000); // Reduced from 3s to 15s
 
         return () => clearInterval(interval);
     }, [address]);
@@ -333,7 +334,7 @@ const Stake = () => {
         // Initial fetch
         updateTokenInfo();
 
-        const interval = setInterval(updateTokenInfo, 3000);
+        const interval = setInterval(updateTokenInfo, 15000); // Reduced from 3s to 15s
 
         return () => clearInterval(interval);
     }, [token0, token1, address]);
