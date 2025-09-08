@@ -948,7 +948,7 @@ const Exchange: React.FC = () => {
         return data;
     };
     
-    const API_BASE_URL = import.meta.env.VITE_ENV === "dev" || import.meta.env.VITE_CHAIN === "local" ? "http://localhost:3001" : "https://pricefeed.noma.money";
+    const API_BASE_URL = import.meta.env.VITE_CHAIN === "local" ? "http://localhost:3001" : "https://pricefeed.noma.money";
     
     // Map chart timeframe to API interval
     const mapTimeframeToApiInterval = (timeframe: string): string => {
