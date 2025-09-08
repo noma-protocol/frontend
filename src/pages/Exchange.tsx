@@ -1708,16 +1708,16 @@ const Exchange: React.FC = () => {
                     const response = await tokenApi.getTokens();
                     // API already filters for deployed tokens
                     const deployedTokens = response.tokens;
-                    // console.log('[EXCHANGE] API Response tokens:', deployedTokens);
-                    // console.log('[EXCHANGE] Token statuses:', deployedTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
+                    console.log('[EXCHANGE] API Response tokens:', deployedTokens);
+                    console.log('[EXCHANGE] Token statuses:', deployedTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
                     
                     deployedTokenSymbols = new Set(deployedTokens.map(token => token.tokenSymbol));
                     // Create a map for quick lookup
                     deployedTokens.forEach(token => {
                         deployedTokensMap.set(token.tokenSymbol, token);
                     });
-                    // console.log('Deployed tokens from API:', deployedTokens.length, 'tokens');
-                    // console.log('Token symbols:', Array.from(deployedTokenSymbols));
+                    console.log('Deployed tokens from API:', deployedTokens.length, 'tokens');
+                    console.log('Token symbols:', Array.from(deployedTokenSymbols));
                 } catch (error) {
                     console.error('Failed to fetch deployed tokens:', error);
                     // Continue without filtering if API fails
@@ -1732,7 +1732,9 @@ const Exchange: React.FC = () => {
                 const allVaultDescriptions = await Promise.all(
                     deployersData.map(async (deployer) => {
                         try {
+                            console.log('[EXCHANGE] Fetching vaults for deployer:', deployer);
                             const vaultsData = await nomaFactoryContract.getVaults(deployer);
+                            console.log('[EXCHANGE] Vaults data:', vaultsData);
                             
                             if (!vaultsData || vaultsData.length === 0) {
                                 return [];
@@ -1796,24 +1798,25 @@ const Exchange: React.FC = () => {
                 const flattenedVaults = allVaultDescriptions.flat().filter(Boolean);
                 
                 // Filter vaults to only include deployed tokens
-                // console.log('[EXCHANGE] deployedTokenSymbols size:', deployedTokenSymbols.size);
-                // console.log('[EXCHANGE] deployedTokenSymbols:', Array.from(deployedTokenSymbols));
-                // console.log('[EXCHANGE] flattenedVaults count:', flattenedVaults.length);
-                // console.log('[EXCHANGE] vault symbols:', flattenedVaults.map(v => v.tokenSymbol));
+                console.log('[EXCHANGE] deployedTokenSymbols size:', deployedTokenSymbols.size);
+                console.log('[EXCHANGE] deployedTokenSymbols:', Array.from(deployedTokenSymbols));
+                console.log('[EXCHANGE] flattenedVaults count:', flattenedVaults.length);
+                console.log('[EXCHANGE] vault symbols:', flattenedVaults.map(v => v.tokenSymbol));
                 
                 const deployedVaults = deployedTokenSymbols.size > 0 
                     ? flattenedVaults.filter(vault => {
                         // Check if token is in the deployed tokens set
                         const isDeployed = deployedTokenSymbols.has(vault.tokenSymbol);
                         if (!isDeployed) {
-                            // console.log(`[EXCHANGE] Filtering out non-deployed token: ${vault.tokenSymbol}`);
+                            console.log(`[EXCHANGE] Filtering out non-deployed token: ${vault.tokenSymbol}`);
                         } else {
-                            // console.log(`[EXCHANGE] Including deployed token: ${vault.tokenSymbol}`);
+                            console.log(`[EXCHANGE] Including deployed token: ${vault.tokenSymbol}`);
                         }
                         return isDeployed;
                     })
                     : [] // If API fails, show no tokens rather than risk showing non-deployed ones
                 
+                console.log('[EXCHANGE] Final deployedVaults:', deployedVaults);
                 setVaultDescriptions(deployedVaults);
                 
                 // Fetch price stats from API with default 24h interval

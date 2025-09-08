@@ -1642,7 +1642,7 @@ app.get('/api/tokens', (req, res) => {
     console.log('[API] Token statuses:', allTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
     
     // Filter only deployed tokens by default unless explicitly requested
-    const includeAll = true; // req.query.includeAll === 'true';
+    const includeAll = req.query.includeAll === 'true';
     console.log('[API] Include all tokens?', includeAll);
     
     const tokens = includeAll ? allTokens : allTokens.filter(token => token.status === 'deployed');
