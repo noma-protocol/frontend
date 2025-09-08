@@ -137,7 +137,7 @@ const Launchpad: React.FC = () => {
         args: [
             {
                 softCap: safeParseEther(softCap),
-                deadline: Math.floor(Date.now() / 1000) + parseInt(duration),
+                deadline: duration,
             },
             {
                 name: tokenName,
@@ -592,7 +592,7 @@ const Launchpad: React.FC = () => {
         console.log( [
             {
                 softCap: safeParseEther(softCap),
-                deadline: Math.floor(Date.now() / 1000) + parseInt(duration),
+                deadline: duration,
             },
             {
             name: tokenName,
