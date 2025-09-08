@@ -13,6 +13,7 @@ import { unCommify, commify, commifyDecimals, generateBytes32String, getContract
 interface ReferralStatsProps {
   isExpanded?: boolean;
   totalVolume?: number;
+  token0Symbol?: string;
 }
 
 interface ReferralTrade {
