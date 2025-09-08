@@ -26,7 +26,7 @@ interface ReferralTrade {
   referredAddress: string;
 }
 
-export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume }) => {
+export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume, token0Symbol }) => {
   const { address } = useAccount();
   const { monPrice } = useMonPrice();
   
@@ -445,7 +445,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
           border="1px dashed rgba(255, 149, 0, 0.2)"
         >
           <Text fontSize="xs" color="#888">
-            Earn vNOMA on all trades made by users who sign up using your referral link. 
+            Earn v{token0Symbol} on all trades made by users who sign up using your referral link. 
             Share your link to start earning!
           </Text>
         </Box>
