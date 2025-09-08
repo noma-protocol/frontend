@@ -1484,8 +1484,8 @@ const Exchange: React.FC = () => {
                 // Fetch pool address and token ordering
                 if (selectedToken.token0 && selectedToken.token1) {
                     try {
-                        // Determine protocol for this token
-                        const protocol = tokenProtocols[selectedToken.symbol] || "pancakeswap";
+                        // Determine protocol for this token - use token's own protocol or default to uniswap
+                        const protocol = selectedToken.selectedProtocol || tokenProtocols[selectedToken.symbol] || "uniswap";
                         const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1, protocol);
                         
                         // Get token0 and token1 from the pool to determine correct ordering
@@ -1762,7 +1762,7 @@ const Exchange: React.FC = () => {
                                         
                                         // Determine protocol for this token
                                         const tokenSymbol = vaultDescriptionData[1];
-                                        const protocol = tokenProtocols[tokenSymbol] || "pancakeswap";
+                                        const protocol = tokenProtocols[tokenSymbol] || "uniswap";
                                         
                                         return {
                                             tokenName: vaultDescriptionData[0],
@@ -1855,7 +1855,8 @@ const Exchange: React.FC = () => {
                         vault: vault.vault,
                         poolAddress: vault.poolAddress,
                         spotPrice: vault.spotPrice, // Keep the raw spot price
-                        logoUrl: logoUrl // Add logo URL
+                        logoUrl: logoUrl, // Add logo URL
+                        selectedProtocol: tokenProtocols[vault.tokenSymbol] || "uniswap" // Add protocol with uniswap as default
                     };
                 });
                 
