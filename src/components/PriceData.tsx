@@ -526,12 +526,20 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       labels: {
         style: {
           colors: "#f8f8f8",
-          fontSize: '6px', // Try smaller font size for better compatibility
+          fontSize: '10px',
           fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         },
         datetimeUTC: false,
+        rotate: -45,
+        rotateAlways: true,
+        hideOverlappingLabels: true,
+        formatter: function(value, timestamp) {
+          const date = new Date(timestamp);
+          return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
       },
-      tickAmount: 6,
+      tickAmount: 4, // Reduced from 6 to show fewer labels
+      tickPlacement: 'between',
     },
     yaxis: {
       min: safeMinY,
