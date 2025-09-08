@@ -497,6 +497,15 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
       height: 350,
       animations: { enabled: true },
       toolbar: { show: false },
+      zoom: {
+        enabled: false
+      },
+      selection: {
+        enabled: false
+      },
+      pan: {
+        enabled: false
+      },
       background: "#222831",
       fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
       defaultLocale: 'en',
