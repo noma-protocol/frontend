@@ -391,6 +391,7 @@ const Exchange: React.FC = () => {
     const [showQuoteLoading, setShowQuoteLoading] = useState(false);
     const [totalSupply, setTotalSupply] = useState("0");
     const [isSlippageModalOpen, setIsSlippageModalOpen] = useState(false);
+    const [slippageAutoAdjusted, setSlippageAutoAdjusted] = useState(false);
 
     // Handler to update approveMax and persist to localStorage
     const handleApproveMaxChange = (value: boolean) => {
@@ -2383,6 +2384,42 @@ const Exchange: React.FC = () => {
         return () => clearTimeout(timer); // Cleanup timer
     }, [tradeAmount, selectedToken, isBuying, quoteData]);
     
+    // Dynamically adjust slippage based on price impact
+    useEffect(() => {
+        const impact = parseFloat(priceImpact);
+        if (isNaN(impact) || impact === 0) return;
+        
+        // Calculate recommended slippage based on price impact
+        let recommendedSlippage: number;
+        
+        if (impact <= 0.1) {
+            // Very low impact, use 0.1% preset
+            recommendedSlippage = 0.1;
+        } else if (impact <= 0.5) {
+            // Low impact, use 0.5% preset
+            recommendedSlippage = 0.5;
+        } else if (impact <= 1) {
+            // Moderate impact, use 1% preset
+            recommendedSlippage = 1.0;
+        } else {
+            // Higher impact, use custom value with small buffer
+            recommendedSlippage = impact + 0.5; // Add 0.5% buffer
+        }
+        
+        // Check if it's a preset value
+        const presetValues = [0.1, 0.5, 1];
+        const isPreset = presetValues.includes(recommendedSlippage);
+        
+        // Format slippage
+        const newSlippage = isPreset ? recommendedSlippage.toString() : recommendedSlippage.toFixed(1);
+        
+        // Update slippage
+        if (newSlippage !== slippage) {
+            setSlippage(newSlippage);
+            setSlippageAutoAdjusted(!isPreset); // Only mark as auto-adjusted if not a preset
+        }
+    }, [priceImpact]);
+    
     // Contract write hooks for WMON wrap/unwrap
     const {
         write: deposit
@@ -4254,7 +4291,10 @@ const Exchange: React.FC = () => {
                                             h="24px"
                                             bg={slippage === "0.1" ? "#4ade80" : "#2a2a2a"}
                                             color={slippage === "0.1" ? "black" : "white"}
-                                            onClick={() => setSlippage("0.1")}
+                                            onClick={() => {
+                                                setSlippage("0.1");
+                                                setSlippageAutoAdjusted(false);
+                                            }}
                                             _hover={{ bg: slippage === "0.1" ? "#4ade80" : "#3a3a3a" }}
                                         >
                                             0.1%
@@ -4265,7 +4305,10 @@ const Exchange: React.FC = () => {
                                             h="24px"
                                             bg={slippage === "0.5" ? "#4ade80" : "#2a2a2a"}
                                             color={slippage === "0.5" ? "black" : "white"}
-                                            onClick={() => setSlippage("0.5")}
+                                            onClick={() => {
+                                                setSlippage("0.5");
+                                                setSlippageAutoAdjusted(false);
+                                            }}
                                             _hover={{ bg: slippage === "0.5" ? "#4ade80" : "#3a3a3a" }}
                                         >
                                             0.5%
@@ -4276,7 +4319,10 @@ const Exchange: React.FC = () => {
                                             h="24px"
                                             bg={slippage === "1" ? "#4ade80" : "#2a2a2a"}
                                             color={slippage === "1" ? "black" : "white"}
-                                            onClick={() => setSlippage("1")}
+                                            onClick={() => {
+                                                setSlippage("1");
+                                                setSlippageAutoAdjusted(false);
+                                            }}
                                             _hover={{ bg: slippage === "1" ? "#4ade80" : "#3a3a3a" }}
                                         >
                                             1%
@@ -4285,13 +4331,17 @@ const Exchange: React.FC = () => {
                                             w="60px"
                                             size="xs"
                                             h="24px"
-                                            bg={!["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#2a2a2a"}
-                                            color={!["0.1", "0.5", "1"].includes(slippage) ? "black" : "white"}
-                                            onClick={() => setIsSlippageModalOpen(true)}
-                                            _hover={{ bg: !["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#3a3a3a" }}
+                                            bg={slippageAutoAdjusted ? "#ef4444" : (!["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#2a2a2a")}
+                                            color={slippageAutoAdjusted || !["0.1", "0.5", "1"].includes(slippage) ? "white" : "white"}
+                                            onClick={() => {
+                                                setIsSlippageModalOpen(true);
+                                                setSlippageAutoAdjusted(false);
+                                            }}
+                                            _hover={{ bg: slippageAutoAdjusted ? "#dc2626" : (!["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#3a3a3a") }}
                                             fontSize="xs"
+                                            title={slippageAutoAdjusted ? "Slippage auto-adjusted based on price impact" : ""}
                                         >
-                                            {!["0.1", "0.5", "1"].includes(slippage) ? `${slippage}%` : "Custom"}
+                                            {slippageAutoAdjusted ? `${slippage}%*` : (!["0.1", "0.5", "1"].includes(slippage) ? `${slippage}%` : "Custom")}
                                         </Button>
                                         </HStack>
 
@@ -4662,7 +4712,10 @@ const Exchange: React.FC = () => {
                                                 h="24px"
                                                 bg={slippage === "0.1" ? "#4ade80" : "#2a2a2a"}
                                                 color={slippage === "0.1" ? "black" : "white"}
-                                                onClick={() => setSlippage("0.1")}
+                                                onClick={() => {
+                                                setSlippage("0.1");
+                                                setSlippageAutoAdjusted(false);
+                                            }}
                                                 _hover={{ bg: slippage === "0.1" ? "#4ade80" : "#3a3a3a" }}
                                             >
                                                 0.1%
@@ -4673,7 +4726,10 @@ const Exchange: React.FC = () => {
                                                 h="24px"
                                                 bg={slippage === "0.5" ? "#4ade80" : "#2a2a2a"}
                                                 color={slippage === "0.5" ? "black" : "white"}
-                                                onClick={() => setSlippage("0.5")}
+                                                onClick={() => {
+                                                setSlippage("0.5");
+                                                setSlippageAutoAdjusted(false);
+                                            }}
                                                 _hover={{ bg: slippage === "0.5" ? "#4ade80" : "#3a3a3a" }}
                                             >
                                                 0.5%
@@ -4684,7 +4740,10 @@ const Exchange: React.FC = () => {
                                                 h="24px"
                                                 bg={slippage === "1" ? "#4ade80" : "#2a2a2a"}
                                                 color={slippage === "1" ? "black" : "white"}
-                                                onClick={() => setSlippage("1")}
+                                                onClick={() => {
+                                                setSlippage("1");
+                                                setSlippageAutoAdjusted(false);
+                                            }}
                                                 _hover={{ bg: slippage === "1" ? "#4ade80" : "#3a3a3a" }}
                                             >
                                                 1%
@@ -4693,13 +4752,17 @@ const Exchange: React.FC = () => {
                                                 w="60px"
                                                 size="xs"
                                                 h="24px"
-                                                bg={!["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#2a2a2a"}
-                                                color={!["0.1", "0.5", "1"].includes(slippage) ? "black" : "white"}
-                                                onClick={() => setIsSlippageModalOpen(true)}
-                                                _hover={{ bg: !["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#3a3a3a" }}
+                                                bg={slippageAutoAdjusted ? "#ef4444" : (!["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#2a2a2a")}
+                                                color={slippageAutoAdjusted || !["0.1", "0.5", "1"].includes(slippage) ? "white" : "white"}
+                                                onClick={() => {
+                                                    setIsSlippageModalOpen(true);
+                                                    setSlippageAutoAdjusted(false);
+                                                }}
+                                                _hover={{ bg: slippageAutoAdjusted ? "#dc2626" : (!["0.1", "0.5", "1"].includes(slippage) ? "#4ade80" : "#3a3a3a") }}
                                                 fontSize="xs"
+                                                title={slippageAutoAdjusted ? "Slippage auto-adjusted based on price impact" : ""}
                                             >
-                                                {!["0.1", "0.5", "1"].includes(slippage) ? `${slippage}%` : "Custom"}
+                                                {slippageAutoAdjusted ? `${slippage}%*` : (!["0.1", "0.5", "1"].includes(slippage) ? `${slippage}%` : "Custom")}
                                             </Button>
                                             </HStack>
 
@@ -5344,6 +5407,7 @@ const Exchange: React.FC = () => {
                 currentSlippage={slippage}
                 onSetSlippage={(newSlippage) => {
                     setSlippage(newSlippage);
+                    setSlippageAutoAdjusted(false);
                     setIsSlippageModalOpen(false);
                 }}
             />
