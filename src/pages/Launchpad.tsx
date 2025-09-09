@@ -158,18 +158,30 @@ const Launchpad: React.FC = () => {
         onSuccess: async (data) => {
         console.log(`transaction successful: ${data.hash}`);
         
-        // Update token status to success
-        const pendingTokenId = sessionStorage.getItem('pendingTokenId');
-        if (pendingTokenId) {
+        // Get pending token data and save to server
+        const pendingTokenDataStr = sessionStorage.getItem('pendingTokenData');
+        if (pendingTokenDataStr) {
             try {
+                const tokenData = JSON.parse(pendingTokenDataStr);
+                
+                // Save token with appropriate status
+                const savedToken = await tokenApi.saveToken(tokenData);
+                console.log('Token saved to server:', savedToken);
+                
+                // If no presale, update status to 'deployed' immediately
+                // Otherwise, it stays as 'success' until finalized
+                const finalStatus = tokenData.presale === "0" ? 'deployed' : 'success';
+                
                 await tokenApi.updateTokenStatus(
-                    pendingTokenId, 
-                    'success', 
+                    savedToken.id,
+                    finalStatus,
                     data.hash
                 );
-                sessionStorage.removeItem('pendingTokenId');
+                
+                console.log(`Token status updated to ${finalStatus}`);
+                sessionStorage.removeItem('pendingTokenData');
             } catch (error) {
-                console.error('Failed to update token status:', error);
+                console.error('Failed to save token data:', error);
             }
         }
 
@@ -188,16 +200,8 @@ const Launchpad: React.FC = () => {
                     error.message.indexOf("NotAuthorityError") > -1 ? "Permissionless deployment is disabled. Reach out on Discord." :
                     error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
         
-        // Update token status to failed
-        const pendingTokenId = sessionStorage.getItem('pendingTokenId');
-        if (pendingTokenId) {
-            try {
-                await tokenApi.updateTokenStatus(pendingTokenId, 'failed');
-                sessionStorage.removeItem('pendingTokenId');
-            } catch (err) {
-                console.error('Failed to update token status:', err);
-            }
-        }
+        // Clean up pending token data on error
+        sessionStorage.removeItem('pendingTokenData');
         
         toaster.create({
             title: "Error",
@@ -559,35 +563,27 @@ const Launchpad: React.FC = () => {
     }
 
     const handleClickDeploy = async () => {  
-        // Save token data to server
-        try {
-            const tokenData = {
-                tokenName,
-                tokenSymbol,
-                tokenDescription,
-                tokenDecimals,
-                tokenSupply,
-                logoUrl,
-                price,
-                floorPrice,
-                presalePrice,
-                token1,
-                selectedProtocol,
-                presale,
-                softCap,
-                duration,
-                deployerAddress: address
-            };
-            
-            const savedToken = await tokenApi.saveToken(tokenData);
-            console.log('Token saved to server:', savedToken);
-            
-            // Store token ID for later status update
-            sessionStorage.setItem('pendingTokenId', savedToken.id);
-        } catch (error) {
-            console.error('Failed to save token data:', error);
-            // Continue with deployment even if save fails
-        }
+        // Store token data for saving after successful transaction
+        const tokenData = {
+            tokenName,
+            tokenSymbol,
+            tokenDescription,
+            tokenDecimals,
+            tokenSupply,
+            logoUrl,
+            price,
+            floorPrice,
+            presalePrice,
+            token1,
+            selectedProtocol,
+            presale,
+            softCap,
+            duration,
+            deployerAddress: address
+        };
+        
+        // Store token data temporarily
+        sessionStorage.setItem('pendingTokenData', JSON.stringify(tokenData));
 
         console.log( [
             {
