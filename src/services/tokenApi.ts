@@ -115,6 +115,25 @@ export const tokenApi = {
     }
   },
 
+  // Get tokens by symbol
+  async getTokensBySymbol(symbol: string): Promise<{ tokens: TokenResponse[] }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/tokens/by-symbol/${symbol}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          return { tokens: [] };
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching tokens by symbol:', error);
+      throw error;
+    }
+  },
+
   // Get token statistics
   async getStats(): Promise<{
     total: number;

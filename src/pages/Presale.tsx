@@ -34,6 +34,7 @@ import { commify, commifyDecimals, generateBytes32String, getContractAddress, ge
 import Logo from "../assets/images/noma.png";
 import { ethers } from "ethers"; // Import ethers.js
 import WalletSidebar from "../components/WalletSidebar";
+import { tokenApi } from "../services/tokenApi";
 import { ProgressLabel, ProgressBar, ProgressRoot, ProgressValueText } from "../components/ui/progress"
 import PresaleDetails from "../components/PresaleDetails";
 import usePresaleContract from '../hooks/usePresaleContract';
@@ -488,39 +489,30 @@ const Presale: React.FC = () => {
           
           // Update token status to 'deployed'
           try {
-            // First find the token by symbol
+            // First find the token by symbol and deployer address
             const baseSymbol = tokenSymbol.startsWith("p-") ? tokenSymbol.substring(2) : tokenSymbol;
-            const findResponse = await fetch(`http://localhost:5001/api/tokens/by-symbol/${baseSymbol}`);
+            const response = await tokenApi.getTokensBySymbol(baseSymbol);
             
-            if (findResponse.ok) {
-              const { tokens } = await findResponse.json();
+            if (response && response.tokens && response.tokens.length > 0) {
+              // Find the token with matching presale contract address or deployer address
+              const matchingToken = response.tokens.find(token => 
+                token.deployerAddress?.toLowerCase() === deployer?.toLowerCase() ||
+                token.contractAddress?.toLowerCase() === contractAddress?.toLowerCase()
+              ) || response.tokens[0]; // Fallback to first token if no exact match
               
-              // Update status for the most recent token with this symbol
-              if (tokens.length > 0) {
-                const latestToken = tokens.sort((a, b) => 
-                  new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-                )[0];
-                
-                const updateResponse = await fetch(`http://localhost:5001/api/tokens/${latestToken.id}/status`, {
-                  method: 'PATCH',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    status: 'deployed',
-                    contractAddress: contractAddress // Store the presale contract address
-                  }),
-                });
-                
-                if (updateResponse.ok) {
-                  console.log('Token status updated to deployed');
-                } else {
-                  console.error('Failed to update token status:', await updateResponse.text());
-                }
+              if (matchingToken && matchingToken.status !== 'deployed') {
+                // Update status to deployed
+                await tokenApi.updateTokenStatus(
+                  matchingToken.id,
+                  'deployed',
+                  data.hash,
+                  contractAddress
+                );
+                console.log('Token status updated to deployed successfully');
               }
             }
           } catch (error) {
-            console.error('Error updating token status:', error);
+            console.error('Error updating token status to deployed:', error);
           }
         } catch (error) {
           console.error('Error getting pool address or provisioning feed:', error);
