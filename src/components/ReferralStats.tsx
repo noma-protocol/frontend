@@ -14,6 +14,7 @@ interface ReferralStatsProps {
   isExpanded?: boolean;
   totalVolume?: number;
   token0Symbol?: string;
+  tokenPriceUsd?: number;
 }
 
 interface ReferralTrade {
@@ -27,7 +28,9 @@ interface ReferralTrade {
   referredAddress: string;
 }
 
-export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume, token0Symbol }) => {
+export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume, token0Symbol, tokenPriceUsd }) => {
+  console.log(`Token price USD in ReferralStats: ${tokenPriceUsd}`);
+  
   const { address } = useAccount();
   const { monPrice } = useMonPrice();
   
@@ -344,12 +347,12 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
             <VStack alignItems={"left"} textAlign={"left"}>
               <Box>
                 <Text fontSize="xl" fontWeight="bold" color="white">
-                  ${commify((Number(formatEther(`${totalVolume}`)) * monPrice), 0)}
+                  ${commify((Number(formatEther(`${totalVolume}`)) * tokenPriceUsd), 0)}
                 </Text>             
               </Box>
               <Box>
                 <Text fontSize="xs" color="#888">
-                  {formatNumber(referralStats.totalVolumeETH, 4)} MON
+                  {formatNumber(referralStats.totalVolumeETH, 4)} {token0Symbol}
                 </Text>                   
               </Box>
             </VStack>
