@@ -1482,8 +1482,17 @@ const Exchange: React.FC = () => {
                     setSpotPrice(selectedToken.price || 0.0000186);
                 }
                 
-                // Fetch pool address and token ordering
-                if (selectedToken.token0 && selectedToken.token1) {
+                // Use pool address from token if available, otherwise fetch it
+                if (selectedToken.poolAddress) {
+                    // Token already has pool address from vault data
+                    console.log("Using pool address from token:", selectedToken.poolAddress);
+                    setPoolInfo({ 
+                        poolAddress: selectedToken.poolAddress,
+                        token0: selectedToken.token0,
+                        token1: selectedToken.token1
+                    });
+                } else if (selectedToken.token0 && selectedToken.token1) {
+                    // Fallback: fetch pool address if not available
                     try {
                         // Determine protocol for this token - use token's own protocol or default to uniswap
                         const protocol = selectedToken.selectedProtocol || tokenProtocols[selectedToken.symbol] || "uniswap";
@@ -3231,6 +3240,7 @@ const Exchange: React.FC = () => {
                                             cursor="pointer"
                                             onClick={() => {
                                                 console.log("Selected token:", token);
+                                                console.log("Token pool address:", token.poolAddress);
                                                 setSelectedToken(token);
                                                 if (isMobile) {
                                                     setIsTokenListCollapsed(true);

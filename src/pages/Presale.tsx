@@ -1011,7 +1011,7 @@ const Presale: React.FC = () => {
                       fontSize="sm" 
                       fontWeight="500"
                     >
-                      {finalized ? "Finalized" : hasExpired ? "Ended" : softCapReached ? "Active (Soft Cap Reached)" : "Active"}
+                      {finalized ? "Finalized" : hasExpired ? "Ended" : softCapReached ? "Active" : "Active"}
                     </Text>
                   </Box>
                 </HStack>
@@ -1054,7 +1054,7 @@ const Presale: React.FC = () => {
                       ✓ Soft Cap Reached ({commify(softCap, 2)} MON)
                     </Text>
                   )}
-                  <ProgressRoot value={timeLeft != "00:00:00:00" ? progress : progressSc} max={100}>
+                  <ProgressRoot value={timeLeft != "00:00:00:00" ? progress : progressSc} max={200}>
                     <ProgressBar bg="#2a2a2a">
                       <ProgressValueText color="white" fontSize="xs" />
                     </ProgressBar>
@@ -1089,7 +1089,7 @@ const Presale: React.FC = () => {
                 <Text fontSize="lg" fontWeight="bold" color="white" mb={3}>Admin Controls</Text>
                 {softCapReached && (
                   <Text fontSize="sm" color="#4ade80" mb={2}>
-                    ✓ Soft cap reached - Presale can be finalized
+                    ✓ Soft cap reached
                   </Text>
                 )}
                 {!softCapReached && hasExpired && (
