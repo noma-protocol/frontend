@@ -1927,7 +1927,7 @@ const Exchange: React.FC = () => {
         };
         
         fetchVaults();
-    }, [deployersData, tokenProtocols]);
+    }, [deployersData]);
     
     // Periodically update 24h change for tokens
     useEffect(() => {
