@@ -665,7 +665,7 @@ const Exchange: React.FC = () => {
     const [intervalVolume, setIntervalVolume] = useState(0); // Volume for selected interval
     const [chartSeries, setChartSeries] = useState([]);
     const [chartTimeframe, setChartTimeframe] = useState("24h");
-    const [chartGranularity, setChartGranularity] = useState("1h");
+    const [chartGranularity, setChartGranularity] = useState("30m");
     const [isChartLoading, setIsChartLoading] = useState(false);
     const [ethPriceUSD, setEthPriceUSD] = useState(3500); // Default ETH price
     const [chartUpdateTrigger, setChartUpdateTrigger] = useState(0); // Trigger chart updates
@@ -3531,12 +3531,12 @@ const Exchange: React.FC = () => {
                                                         }}
                                                         onClick={() => {
                                                             setChartTimeframe(tf);
-                                                            // Set default granularity based on timeframe
-                                                            if (tf === '15m') setChartGranularity('5m');
-                                                            else if (tf === '1h') setChartGranularity('15m');
-                                                            else if (tf === '24h') setChartGranularity('1h');
-                                                            else if (tf === '1w') setChartGranularity('6h');
-                                                            else if (tf === '1M') setChartGranularity('24h');
+                                                            // Set default granularity based on timeframe (smallest interval)
+                                                            if (tf === '15m') setChartGranularity('1m');
+                                                            else if (tf === '1h') setChartGranularity('5m');
+                                                            else if (tf === '24h') setChartGranularity('30m');
+                                                            else if (tf === '1w') setChartGranularity('1h');
+                                                            else if (tf === '1M') setChartGranularity('6h');
                                                         }}
                                                         fontSize="xs"
                                                         px={2}
