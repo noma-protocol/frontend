@@ -238,7 +238,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
               <Box>
                 <Input
                   h="30px"
-                  w="15vw"
+                  w={isMobile ? "320px" : "17vw"}
                   value={referralLink}
                   isReadOnly
                   bg="rgba(0, 0, 0, 0.3)"
