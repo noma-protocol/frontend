@@ -1482,47 +1482,59 @@ const Exchange: React.FC = () => {
                     setSpotPrice(selectedToken.price || 0.0000186);
                 }
                 
-                // Use pool address from token if available, otherwise fetch it
-                if (selectedToken.poolAddress) {
-                    // Token already has pool address from vault data
-                    console.log("Using pool address from token:", selectedToken.poolAddress);
-                    setPoolInfo({ 
-                        poolAddress: selectedToken.poolAddress,
-                        token0: selectedToken.token0,
-                        token1: selectedToken.token1
-                    });
-                } else if (selectedToken.token0 && selectedToken.token1) {
-                    // Fallback: fetch pool address if not available
+                // Check if we need to fetch pool address
+                if (selectedToken.token0 && selectedToken.token1) {
                     try {
                         // Determine protocol for this token - use token's own protocol or default to uniswap
                         const protocol = selectedToken.selectedProtocol || tokenProtocols[selectedToken.symbol] || "uniswap";
-                        const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1, protocol);
+                        console.log(`[TOKEN SELECTION] Token: ${selectedToken.symbol}, Protocol: ${protocol}`);
+                        console.log(`[TOKEN SELECTION] selectedToken.selectedProtocol:`, selectedToken.selectedProtocol);
+                        console.log(`[TOKEN SELECTION] tokenProtocols[${selectedToken.symbol}]:`, tokenProtocols[selectedToken.symbol]);
+                        console.log(`[TOKEN SELECTION] Full tokenProtocols:`, tokenProtocols);
+                        console.log(`[TOKEN SELECTION] Token0: ${selectedToken.token0}, Token1: ${selectedToken.token1}`);
                         
-                        // Get token0 and token1 from the pool to determine correct ordering
-                        if (poolAddress && poolAddress !== zeroAddress) {
-                            const poolContract = new ethers.Contract(
-                                poolAddress,
-                                uniswapV3PoolABI,
-                                localProvider
-                            );
-                            
-                            const [poolToken0, poolToken1] = await Promise.all([
-                                poolContract.token0(),
-                                poolContract.token1()
-                            ]);
-                            
+                        // Check if we have a valid pool address already
+                        if (selectedToken.poolAddress && selectedToken.poolAddress !== zeroAddress) {
+                            console.log(`[TOKEN SELECTION] Using existing pool address: ${selectedToken.poolAddress}`);
                             setPoolInfo({ 
-                                poolAddress, 
-                                token0: poolToken0,
-                                token1: poolToken1
+                                poolAddress: selectedToken.poolAddress,
+                                token0: selectedToken.token0,
+                                token1: selectedToken.token1
                             });
                         } else {
-                            setPoolInfo({ poolAddress });
+                            // Fetch pool address if not available or is zero address
+                            console.log(`[TOKEN SELECTION] Fetching new pool address...`);
+                            const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1, protocol);
+                            
+                            if (poolAddress && poolAddress !== zeroAddress) {
+                                const poolContract = new ethers.Contract(
+                                    poolAddress,
+                                    uniswapV3PoolABI,
+                                    localProvider
+                                );
+                                
+                                const [poolToken0, poolToken1] = await Promise.all([
+                                    poolContract.token0(),
+                                    poolContract.token1()
+                                ]);
+                                
+                                setPoolInfo({ 
+                                    poolAddress, 
+                                    token0: poolToken0,
+                                    token1: poolToken1
+                                });
+                                console.log(`[TOKEN SELECTION] Pool info updated with address: ${poolAddress}`);
+                            } else {
+                                console.log(`[TOKEN SELECTION] No valid pool found, pool address is: ${poolAddress}`);
+                                setPoolInfo({ poolAddress: poolAddress || null });
+                            }
                         }
                     } catch (error) {
-                        console.error("Error fetching pool info:", error);
+                        console.error("[TOKEN SELECTION] Error fetching pool info:", error);
                         setPoolInfo({ poolAddress: null });
                     }
+                } else {
+                    console.log("[TOKEN SELECTION] Missing token0 or token1, cannot fetch pool");
                 }
                 
                 // Set USD price for MON
@@ -1625,22 +1637,37 @@ const Exchange: React.FC = () => {
     
     // Fetch pool address from Uniswap V3 Factory
     const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
-        // protocol = "uniswap"
+        console.log(`[fetchPoolAddress] Called with:`, {
+            token0,
+            token1,
+            protocol,
+            defaultProtocol: "uniswap"
+        });
+        
         // Select the appropriate factory based on protocol
-        const factoryAddress = protocol === "uniswap" 
-        ? config.protocolAddresses.uniswapV3Factory 
-        : config.protocolAddresses.pancakeV3Factory;
+        // Handle both "pancakeswap" and "pancake" as PancakeSwap
+        const isPancakeSwap = protocol === "pancakeswap" || protocol === "pancake";
+        const factoryAddress = isPancakeSwap
+        ? config.protocolAddresses.pancakeV3Factory 
+        : config.protocolAddresses.uniswapV3Factory;
+        
+        console.log(`[fetchPoolAddress] Using protocol: ${protocol}, Factory: ${factoryAddress}`);
+        console.log(`[fetchPoolAddress] Available factories:`, {
+            uniswap: config.protocolAddresses.uniswapV3Factory,
+            pancake: config.protocolAddresses.pancakeV3Factory
+        });
         
         const factoryContract = new ethers.Contract(
         factoryAddress,
         uniswapV3FactoryABI, // Same ABI for both Uniswap and PancakeSwap V3
         localProvider
         );
-        const feeTier = protocol === "uniswap" ? 3000 : 2500;
+        const feeTier = isPancakeSwap ? 2500 : 3000;
+        console.log(`[fetchPoolAddress] Using fee tier: ${feeTier} for protocol: ${protocol} (isPancakeSwap: ${isPancakeSwap})`);
 
         const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
 
-        console.log(`Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
+        console.log(`[fetchPoolAddress] Result: Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
         return poolAddress;
     }
 
@@ -1662,29 +1689,7 @@ const Exchange: React.FC = () => {
         enabled: true, // Always fetch tokens, not just when connected
     });
     
-    // Fetch tokens and build protocol mapping
-    useEffect(() => {
-        const fetchTokenProtocols = async () => {
-            try {
-                const response = await tokenApi.getTokens({ includeAll: true });
-                const protocols: { [symbol: string]: string } = {};
-                
-                // Build map for token symbols to their protocols
-                response.tokens.forEach(token => {
-                    if (token.tokenSymbol && token.selectedProtocol) {
-                        protocols[token.tokenSymbol] = token.selectedProtocol;
-                    }
-                });
-                
-                setTokenProtocols(protocols);
-                // console.log("Token protocols loaded:", protocols);
-            } catch (error) {
-                console.error("Failed to fetch token protocols:", error);
-            }
-        };
-        
-        fetchTokenProtocols();
-    }, []);
+    // Token protocols will be loaded when deployed tokens are fetched
 
     // Fetch vault data and convert to token list
     useEffect(() => {
@@ -1698,6 +1703,8 @@ const Exchange: React.FC = () => {
                 if (!deployersData) {
                     return;
                 }
+                
+                console.log('[VAULT FETCH] Current tokenProtocols:', tokenProtocols);
                 
                 // If no deployers found, show empty state after minimum loading time
                 if (deployersData.length === 0) {
@@ -1722,10 +1729,17 @@ const Exchange: React.FC = () => {
                     console.log('[EXCHANGE] Token statuses:', deployedTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
                     
                     deployedTokenSymbols = new Set(deployedTokens.map(token => token.tokenSymbol));
-                    // Create a map for quick lookup
+                    // Create a map for quick lookup and update protocols
+                    const protocols: { [symbol: string]: string } = {};
                     deployedTokens.forEach(token => {
                         deployedTokensMap.set(token.tokenSymbol, token);
+                        if (token.tokenSymbol && token.selectedProtocol) {
+                            protocols[token.tokenSymbol] = token.selectedProtocol;
+                            console.log(`[EXCHANGE] Token protocol: ${token.tokenSymbol} -> ${token.selectedProtocol}`);
+                        }
                     });
+                    // Update token protocols from deployed tokens
+                    setTokenProtocols(protocols);
                     console.log('Deployed tokens from API:', deployedTokens.length, 'tokens');
                     console.log('Token symbols:', Array.from(deployedTokenSymbols));
                 } catch (error) {
@@ -1774,7 +1788,10 @@ const Exchange: React.FC = () => {
                                         
                                         // Determine protocol for this token
                                         const tokenSymbol = vaultDescriptionData[1];
-                                        const protocol = tokenProtocols[tokenSymbol] || "uniswap";
+                                        // Look up protocol from deployedTokensMap
+                                        const tokenData = deployedTokensMap.get(tokenSymbol);
+                                        const protocol = tokenData?.selectedProtocol || tokenProtocols[tokenSymbol] || "uniswap";
+                                        console.log(`[VAULT] Token ${tokenSymbol} protocol: ${protocol} (from deployedTokensMap: ${tokenData?.selectedProtocol}, from tokenProtocols: ${tokenProtocols[tokenSymbol]})`);
                                         
                                         return {
                                             tokenName: vaultDescriptionData[0],
@@ -1785,11 +1802,15 @@ const Exchange: React.FC = () => {
                                             deployer: vaultDescriptionData[5],
                                             vault: vaultDescriptionData[6],
                                             presaleContract: vaultDescriptionData[7],
-                                            poolAddress: await fetchPoolAddress(
-                                                vaultDescriptionData[3], 
-                                                vaultDescriptionData[4],
-                                                protocol
-                                            ),
+                                            poolAddress: await (async () => {
+                                                const pool = await fetchPoolAddress(
+                                                    vaultDescriptionData[3], 
+                                                    vaultDescriptionData[4],
+                                                    protocol
+                                                );
+                                                console.log(`[VAULT LOAD] Token ${vaultDescriptionData[1]}, Pool: ${pool}`);
+                                                return pool;
+                                            })(),
                                             spotPrice: spotPriceWei,
                                         };
                                     } catch (error) {
@@ -1840,7 +1861,8 @@ const Exchange: React.FC = () => {
                 }
                 
                 // Convert vault descriptions to token format for display
-                // console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
+                console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
+                console.log('Vault pool addresses:', deployedVaults.map(v => ({ symbol: v.tokenSymbol, poolAddress: v.poolAddress })));
                 const tokenList = deployedVaults.map((vault, index) => {
                     // Use API percentage change for NOMA token, random for others
                     const isNoma = vault.tokenSymbol === 'NOMA' || vault.tokenSymbol === 'noma';
@@ -1851,6 +1873,9 @@ const Exchange: React.FC = () => {
                     // Get logo URL from deployedTokensMap
                     const tokenData = deployedTokensMap.get(vault.tokenSymbol);
                     const logoUrl = tokenData?.logoUrl || tokenData?.logoPreview || null;
+                    
+                    const tokenProtocol = tokenProtocols[vault.tokenSymbol] || "uniswap";
+                    console.log(`[TOKEN LIST] Token ${vault.tokenSymbol} protocol: ${tokenProtocol}`);
                     
                     return {
                         id: index + 1,
@@ -1869,7 +1894,7 @@ const Exchange: React.FC = () => {
                         poolAddress: vault.poolAddress,
                         spotPrice: vault.spotPrice, // Keep the raw spot price
                         logoUrl: logoUrl, // Add logo URL
-                        selectedProtocol: tokenProtocols[vault.tokenSymbol] || "uniswap" // Add protocol with uniswap as default
+                        selectedProtocol: tokenProtocol // Add protocol with uniswap as default
                     };
                 });
                 
@@ -1902,7 +1927,7 @@ const Exchange: React.FC = () => {
         };
         
         fetchVaults();
-    }, [deployersData]);
+    }, [deployersData, tokenProtocols]);
     
     // Periodically update 24h change for tokens
     useEffect(() => {
@@ -3241,6 +3266,8 @@ const Exchange: React.FC = () => {
                                             onClick={() => {
                                                 console.log("Selected token:", token);
                                                 console.log("Token pool address:", token.poolAddress);
+                                                console.log("Token protocol:", token.selectedProtocol);
+                                                console.log("Full token object:", JSON.stringify(token, null, 2));
                                                 setSelectedToken(token);
                                                 if (isMobile) {
                                                     setIsTokenListCollapsed(true);
