@@ -1,0 +1,329 @@
+
+> trollbox-server@1.0.0 start
+> node src/server.js
+
+[TokenStore] Loaded tokens from file: 5
+[TokenStore] Token details: [
+  {
+    symbol: 'BUN',
+    status: 'deployed',
+    deployer: '0x5368bDd0F9BC14C223a67b95874842dD77250d08',
+    description: 'Craziest token on the Monad testnet, get it if you are a true supporter of decentralization and next-gen DeFi scaling!'
+  },
+  {
+    symbol: 'TEST',
+    status: 'failed',
+    deployer: '0x12e30FcC16B741a08cCf066074F0547F3ce79F32',
+    description: 'TEST'
+  },
+  {
+    symbol: 'xx',
+    status: 'success',
+    deployer: '0x98f2243e853afE7D8AC5Ddbc32Ba167E8B5f1bBd',
+    description: 'xxxxx'
+  },
+  {
+    symbol: 'xxx',
+    status: 'failed',
+    deployer: '0x12e30FcC16B741a08cCf066074F0547F3ce79F32',
+    description: 'xxx'
+  },
+  {
+    symbol: 'xxx',
+    status: 'success',
+    deployer: '0x98f2243e853afE7D8AC5Ddbc32Ba167E8B5f1bBd',
+    description: 'xxx'
+  }
+]
+Trollbox WebSocket server running on port 9090
+=== BLOCKCHAIN MONITOR SETUP ===
+ENABLE_BLOCKCHAIN_MONITOR env var: undefined
+All env vars: []
+⚠️  Blockchain monitor disabled. Set ENABLE_BLOCKCHAIN_MONITOR=true to enable.
+HTTP API server running on port 9091
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? false
+[API] Filtered tokens count: 1
+[API] Returning tokens: [ { symbol: 'BUN', status: 'deployed' } ]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? false
+[API] Filtered tokens count: 1
+[API] Returning tokens: [ { symbol: 'BUN', status: 'deployed' } ]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? false
+[API] Filtered tokens count: 1
+[API] Returning tokens: [ { symbol: 'BUN', status: 'deployed' } ]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? false
+[API] Filtered tokens count: 1
+[API] Returning tokens: [ { symbol: 'BUN', status: 'deployed' } ]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? false
+[API] Filtered tokens count: 1
+[API] Returning tokens: [ { symbol: 'BUN', status: 'deployed' } ]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? false
+[API] Filtered tokens count: 1
+[API] Returning tokens: [ { symbol: 'BUN', status: 'deployed' } ]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? false
+[API] Filtered tokens count: 1
+[API] Returning tokens: [ { symbol: 'BUN', status: 'deployed' } ]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? true
+[API] Filtered tokens count: 5
+[API] Returning tokens: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? false
+[API] Filtered tokens count: 1
+[API] Returning tokens: [ { symbol: 'BUN', status: 'deployed' } ]
+[API] Total tokens in store: 5
+[API] Token statuses: [
+  { symbol: 'BUN', status: 'deployed' },
+  { symbol: 'TEST', status: 'failed' },
+  { symbol: 'xx', status: 'success' },
+  { symbol: 'xxx', status: 'failed' },
+  { symbol: 'xxx', status: 'success' }
+]
+[API] Include all tokens? false
+[API] Filtered tokens count: 1
+[API] Returning tokens: [ { symbol: 'BUN', status: 'deployed' } ]

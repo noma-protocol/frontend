@@ -45,7 +45,6 @@ import placeholderLogo from "../assets/images/question_white.svg";
 import monadLogo from "../assets/images/monad.png";
 
 import config from '../config'; 
-import { tokenApi } from '../services/tokenApi';
 
 import addressesLocal   from "../assets/deployment.json";
 import addressesBsc   from "../assets/deployment.json";
