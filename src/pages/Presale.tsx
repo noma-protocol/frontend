@@ -71,9 +71,22 @@ const Presale: React.FC = () => {
    const { address, isConnected } = useAccount();
   // Parse the referral code from the URL
   const [searchParams] = useSearchParams();
-  const urlReferralCode = searchParams.get("r") || ""; // Fallback to empty string
+  const rawReferralCode = searchParams.get("r") || ""; // Fallback to empty string
   const contractAddress = searchParams.get("a") || ""; // Fallback to empty string
 
+  // Validate and format referral code to ensure it's valid hex
+  const validateReferralCode = (code: string): string => {
+    if (!code || code.length === 0) return "";
+    // Remove 0x prefix if present
+    const cleanCode = code.startsWith("0x") ? code.slice(2) : code;
+    // Check if it's valid hex
+    if (!/^[0-9a-fA-F]*$/.test(cleanCode)) return "";
+    // Ensure even length
+    if (cleanCode.length % 2 !== 0) return "";
+    return cleanCode;
+  };
+
+  const urlReferralCode = validateReferralCode(rawReferralCode);
   // console.log(`Referral code from URL: ${urlReferralCode}`);
 
   useEffect(() => {
@@ -103,11 +116,8 @@ const Presale: React.FC = () => {
   const [tokenSupply, setTokenSupply] = useState<string>("");
   
   const presaleUrl = `${environment == "development" ? 
-    `http://localhost:5173/presale?a=${contractAddress}&r=${generateReferralCode(address || "0x0")}` : 
-    "https://app.noma.money"}/presale?a=${contractAddress}&r=${generateReferralCode(address || "0x0")}`;
-  
-  // const presaleUrl = `http://localhost:5173/presale?a=${contractAddress}&r=${generateReferralCode(address || "0x0")}`;
-  //   "https://app.noma.money"}/presale?a=${contractAddress}r=${referralCode}`;
+    `http://localhost:5173/presale?a=${contractAddress}&r=${address ? generateReferralCode(address) : ""}` : 
+    "https://app.noma.money"}/presale?a=${contractAddress}&r=${address ? generateReferralCode(address) : ""}`;
 
   const AddToMetaMaskButton = ({ contractAddress, tokenSymbol, tokenDecimals }) => {
     const addTokenToMetaMask = async () => {
@@ -400,7 +410,8 @@ const Presale: React.FC = () => {
     address: contractAddress,
     abi: PresaleAbi,
     functionName: "deposit",
-    args: [urlReferralCode ? `0x${urlReferralCode}` : "0x" + "00".repeat(8)],
+    // Ensure valid hex data: use validated referral code or default to 8 zero bytes
+    args: [urlReferralCode && urlReferralCode.length > 0 ? `0x${urlReferralCode}` : "0x" + "00".repeat(8)],
     value: contributionAmount && parseFloat(contributionAmount) > 0 ? parseEther(parseFloat(contributionAmount).toFixed(6)) : undefined,
     onSuccess(data) {
       console.log(`transaction successful: ${data.hash} referral code: ${urlReferralCode}`);
