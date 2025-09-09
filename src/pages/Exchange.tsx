@@ -1096,6 +1096,8 @@ const Exchange: React.FC = () => {
             
             try {
                 console.log('[loadChartData] poolInfo:', poolInfo);
+                console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
+                console.log('[loadChartData] selectedToken:', selectedToken);
                 
                 // Skip API calls if no pool address is available
                 if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
@@ -1226,7 +1228,7 @@ const Exchange: React.FC = () => {
         
         return () => clearInterval(interval);
         
-    }, [selectedToken?.id, chartTimeframe, chartGranularity, token1Symbol, chartUpdateTrigger]);
+    }, [selectedToken?.id, chartTimeframe, chartGranularity, token1Symbol, chartUpdateTrigger, poolInfo.poolAddress]);
 
     // Listen to Uniswap pool events for real-time price updates
     useEffect(() => {
@@ -1482,8 +1484,19 @@ const Exchange: React.FC = () => {
                     setSpotPrice(selectedToken.price || 0.0000186);
                 }
                 
-                // Check if we need to fetch pool address
-                if (selectedToken.token0 && selectedToken.token1) {
+                // Use pool address from token if available, otherwise fetch it
+                if (selectedToken.poolAddress) {
+                    // Token already has pool address from vault data
+                    console.log("Using pool address from token:", selectedToken.poolAddress);
+                    console.log("Setting poolInfo with address:", selectedToken.poolAddress);
+                    setPoolInfo({ 
+                        poolAddress: selectedToken.poolAddress,
+                        token0: selectedToken.token0,
+                        token1: selectedToken.token1
+                    });
+                    console.log("poolInfo should now be updated");
+                } else if (selectedToken.token0 && selectedToken.token1) {
+                    // Fallback: fetch pool address if not available
                     try {
                         // Determine protocol for this token - use token's own protocol or default to uniswap
                         const protocol = selectedToken.selectedProtocol || tokenProtocols[selectedToken.symbol] || "uniswap";
@@ -1870,25 +1883,33 @@ const Exchange: React.FC = () => {
                         ? priceStats.percentageChange 
                         : (Math.random() - 0.5) * 20; // Random change between -10% and +10%
                     
-                    // Get logo URL from deployedTokensMap
+                    // Get logo URL and token supply from deployedTokensMap
                     const tokenData = deployedTokensMap.get(vault.tokenSymbol);
                     const logoUrl = tokenData?.logoUrl || tokenData?.logoPreview || null;
+                    const tokenSupply = tokenData?.tokenSupply || "0";
                     
                     const tokenProtocol = tokenProtocols[vault.tokenSymbol] || "uniswap";
                     console.log(`[TOKEN LIST] Token ${vault.tokenSymbol} protocol: ${tokenProtocol}`);
+                    
+                    // Calculate price and FDV
+                    const tokenPrice = vault.spotPrice ? (parseFloat(formatEther(vault.spotPrice)) || 0.0000186) : 0.0000186;
+                    const supplyInTokens = parseFloat(tokenSupply);
+                    const calculatedFdv = supplyInTokens * tokenPrice * monPrice;
+                    console.log(`[TOKEN LIST] ${vault.tokenSymbol} - Supply: ${tokenSupply}, Price: ${tokenPrice}, FDV: ${calculatedFdv}`);
                     
                     return {
                         id: index + 1,
                         name: vault.tokenName,
                         symbol: vault.tokenSymbol,
-                        price: vault.spotPrice ? (parseFloat(formatEther(vault.spotPrice)) || 0.0000186) : 0.0000186, // Use actual spot price with fallback
+                        price: tokenPrice,
                         change24h: change24h,
                         volume24h: 0, // Start with 0 volume for new pools
                         marketCap: 0, // Should be calculated from price * circulating supply
                         liquidity: 0, // Should be fetched from pool
-                        fdv: 0, // Should be calculated from price * total supply
+                        fdv: calculatedFdv,
                         holders: 0, // Should be fetched from blockchain
                         token0: vault.token0,
+                        tokenSupply: tokenSupply, // Store token supply for later use
                         token1: vault.token1,
                         vault: vault.vault,
                         poolAddress: vault.poolAddress,
@@ -3264,6 +3285,7 @@ const Exchange: React.FC = () => {
                                             key={token.id}
                                             cursor="pointer"
                                             onClick={() => {
+                                                console.log("=== TOKEN CLICK ===");
                                                 console.log("Selected token:", token);
                                                 console.log("Token pool address:", token.poolAddress);
                                                 console.log("Token protocol:", token.selectedProtocol);
@@ -3346,7 +3368,7 @@ const Exchange: React.FC = () => {
                                                     transition="all 0.2s"
                                                 >
                                                     <Text color="white" fontSize="xs" whiteSpace="nowrap">
-                                                        ${formatNumber(Number(formatEther(`${totalSupply}`)) * spotPrice * monPrice)} 
+                                                        ${formatNumber(token.fdv)} 
                                                     </Text>
                                                 </Table.Cell>
                                             )}
