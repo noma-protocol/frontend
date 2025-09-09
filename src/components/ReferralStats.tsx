@@ -30,10 +30,10 @@ interface ReferralTrade {
 
 export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume, token0Symbol, tokenPriceUsd }) => {
   console.log(`Token price USD in ReferralStats: ${tokenPriceUsd}`);
-  
+
   const { address } = useAccount();
   const { monPrice } = useMonPrice();
-  
+
   const [referralCode, setReferralCode] = useState<string>('');
   const [referralLink, setReferralLink] = useState<string>('');
   const [referralStats, setReferralStats] = useState({
@@ -100,6 +100,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
         estimatedCommission,
         recentTrades
       });
+
     } catch (error) {
       console.error('Error loading referral stats:', error);
       
@@ -347,7 +348,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
             <VStack alignItems={"left"} textAlign={"left"}>
               <Box>
                 <Text fontSize="xl" fontWeight="bold" color="white">
-                  ${commify((Number(formatEther(`${totalVolume}`)) * tokenPriceUsd), 0)}
+                  ${(Number(referralStats.totalVolumeETH) * (tokenPriceUsd * monPrice)).toFixed(2)}
                 </Text>             
               </Box>
               <Box>

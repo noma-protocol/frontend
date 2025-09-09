@@ -9,6 +9,7 @@ import placeholderLogoDark from '../assets/images/question_white.svg';
 import { ethers } from 'ethers';
 import { usePublicClient } from 'wagmi';
 import TransferModal from './TransferModal';
+import config from '../config';
 
 interface TokenInfo {
     tokenSymbol?: string;
@@ -77,7 +78,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
             try {
                 // NOMA/WMON pool address from the logs
                 const poolAddress = "0xBb7EfF3E685c6564F2F09DD90b6C05754E3BDAC0";
-                const provider = new ethers.providers.JsonRpcProvider(publicClient?.transport?.url || "https://testnet-rpc.monad.xyz");
+                const provider = new ethers.providers.JsonRpcProvider(publicClient?.transport?.url || config.RPC_URL);
                 
                 const poolABI = [
                     "function slot0() view returns (uint160 sqrtPriceX96, int24 tick, uint16 observationIndex, uint16 observationCardinality, uint16 observationCardinalityNext, uint8 feeProtocol, bool unlocked)",
