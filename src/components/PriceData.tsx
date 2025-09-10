@@ -105,7 +105,7 @@ const PriceData: React.FC<ExtendedPriceChartProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const lastPrice = useRef<number | null>(null);
   const lastRefreshTime = useRef<number | null>(null);
-  const API_BASE_URL = import.meta.env.VITE_CHAIN === "local" ? "http://localhost:3001" : "https://pricefeed.noma.money"; // API base URL
+  const API_BASE_URL = import.meta.env.VITE_ENV === "dev" ? "http://localhost:3001" : "https://pricefeed.noma.money"; // API base URL
 
   // Helper function to convert interval string to milliseconds
   const getIntervalMs = (interval: string): number => {

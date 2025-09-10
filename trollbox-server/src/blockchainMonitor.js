@@ -541,23 +541,35 @@ class BlockchainMonitor {
         txHash: event.transactionHash
       });
       
-      // Determine which token is NOMA based on pool configuration
-      let nomaAmount, isToken0NOMA;
-      if (poolConfig.token0.address.toLowerCase() === NOMA_TOKEN_ADDRESS.toLowerCase()) {
-        nomaAmount = ethers.formatEther(amount0 > 0 ? amount0 : -amount0);
-        isToken0NOMA = true;
-      } else if (poolConfig.token1.address.toLowerCase() === NOMA_TOKEN_ADDRESS.toLowerCase()) {
-        nomaAmount = ethers.formatEther(amount1 > 0 ? amount1 : -amount1);
-        isToken0NOMA = false;
+      // Determine trade amounts and direction
+      let amount0Formatted = ethers.formatUnits(amount0 > 0 ? amount0 : -amount0, poolConfig.token0.decimals);
+      let amount1Formatted = ethers.formatUnits(amount1 > 0 ? amount1 : -amount1, poolConfig.token1.decimals);
+      
+      // Determine which token was sold/bought based on amounts
+      let tokenSold, tokenBought, amountSold, amountBought;
+      if (amount0 < 0 && amount1 > 0) {
+        // Token0 was sold for token1
+        tokenSold = poolConfig.token0;
+        tokenBought = poolConfig.token1;
+        amountSold = amount0Formatted;
+        amountBought = amount1Formatted;
+      } else if (amount0 > 0 && amount1 < 0) {
+        // Token1 was sold for token0
+        tokenSold = poolConfig.token1;
+        tokenBought = poolConfig.token0;
+        amountSold = amount1Formatted;
+        amountBought = amount0Formatted;
       } else {
-        console.log('[HANDLE SWAP V3] Neither token is NOMA, skipping');
+        console.log('[HANDLE SWAP V3] Unexpected swap amounts, skipping');
         return;
       }
-      console.log(`[HANDLE SWAP V3] NOMA amount: ${nomaAmount} (isToken0: ${isToken0NOMA})`);
       
-      // Skip small trades
-      if (parseFloat(nomaAmount) < 10) {
-        console.log('[HANDLE SWAP] Skipping small trade (< 10 NOMA)');
+      console.log(`[HANDLE SWAP V3] ${amountSold} ${tokenSold.symbol} → ${amountBought} ${tokenBought.symbol}`);
+      
+      // Skip very small trades (less than $0.01 worth)
+      // For now, skip if amount is less than 0.01 of either token
+      if (parseFloat(amountSold) < 0.01 && parseFloat(amountBought) < 0.01) {
+        console.log('[HANDLE SWAP] Skipping small trade');
         return;
       }
       
@@ -570,10 +582,10 @@ class BlockchainMonitor {
       
       // The actual trader is tx.from (the account that initiated the transaction)
       const traderAddress = tx.from;
-      const action = isToken0NOMA ? (amount0 > 0 ? 'sell' : 'buy') : (amount1 > 0 ? 'sell' : 'buy');
-      const emoji = this.getTradeEmoji(parseFloat(nomaAmount));
+      const action = amount0 < 0 ? 'sell' : 'buy'; // Selling token0 or buying token0
+      const emoji = this.getTradeEmoji(parseFloat(amountSold));
       
-      console.log(`[HANDLE SWAP V3] DEX Swap detected on ${poolConfig.name}: ${traderAddress} ${action} ${nomaAmount} NOMA (tx: ${event.transactionHash})`);
+      console.log(`[HANDLE SWAP V3] DEX Swap detected on ${poolConfig.name}: ${traderAddress} swapped ${amountSold} ${tokenSold.symbol} for ${amountBought} ${tokenBought.symbol} (tx: ${event.transactionHash})`);
       
       // Get transaction receipt for more details
       let gasUsed = null;
@@ -591,10 +603,14 @@ class BlockchainMonitor {
       // Calculate price from sqrtPriceX96
       // sqrtPriceX96 = sqrt(price) * 2^96
       const sqrtPrice = Number(sqrtPriceX96) / (2 ** 96);
-      const price = sqrtPrice * sqrtPrice;
+      let price = sqrtPrice * sqrtPrice;
       
-      // Calculate USD value (assuming token1 is USD-pegged)
-      const usdAmount = parseFloat(nomaAmount) * price;
+      // Adjust price based on token decimals difference
+      const decimalsDiff = poolConfig.token1.decimals - poolConfig.token0.decimals;
+      price = price * (10 ** decimalsDiff);
+      
+      // Calculate USD value - for now assume token1 (WMON) = $1
+      const usdAmount = poolConfig.token1.symbol === 'WMON' ? parseFloat(amountBought) : parseFloat(amountSold);
       
       // Create transaction record with actual trader address
       const transaction = {
@@ -605,12 +621,12 @@ class BlockchainMonitor {
         traderAddress: traderAddress, // Store the actual trader for referral tracking
         routerSender: sender, // Original sender from event (router)
         routerRecipient: recipient, // Original recipient from event (router)
-        amount: nomaAmount,
-        amountRaw: (isToken0NOMA ? (amount0 > 0 ? amount0 : -amount0) : (amount1 > 0 ? amount1 : -amount1)).toString(),
+        amount: action === 'sell' ? amountSold : amountBought,
+        amountRaw: (action === 'sell' ? (amount0 < 0 ? -amount0 : -amount1) : (amount0 > 0 ? amount0 : amount1)).toString(),
         price: price,
         amountUSD: usdAmount.toFixed(2),
-        tokenAddress: NOMA_TOKEN_ADDRESS,
-        tokenSymbol: 'NOMA',
+        tokenAddress: poolConfig.token0.address, // Primary token (not WMON)
+        tokenSymbol: poolConfig.token0.symbol,
         poolAddress: event.poolAddress,
         poolName: poolConfig.name,
         protocol: poolConfig.protocol,
@@ -636,7 +652,7 @@ class BlockchainMonitor {
       const tradeAlert = {
         id: ethers.id(event.transactionHash + event.logIndex),
         type: 'tradeAlert',
-        content: `${traderAddr} just ${action === 'buy' ? 'bought' : 'sold'} ${parseFloat(nomaAmount).toFixed(2)} NOMA ${emoji}`,
+        content: `${traderAddr} swapped ${parseFloat(amountSold).toFixed(2)} ${tokenSold.symbol} for ${parseFloat(amountBought).toFixed(2)} ${tokenBought.symbol} ${emoji}`,
         username: 'System',
         timestamp: transaction.timestamp,
         txHash: event.transactionHash,

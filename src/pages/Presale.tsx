@@ -462,7 +462,7 @@ const Presale: React.FC = () => {
           const provisionPriceFeed = async () => {
             try {
               // Call the API to start tracking this pool
-              const API_BASE_URL = import.meta.env.VITE_CHAIN === "local" ? "http://localhost:3001" : "https://pricefeed.noma.money";
+              const API_BASE_URL = import.meta.env.VITE_ENV === "dev" ? "http://localhost:3001" : "https://pricefeed.noma.money";
               const response = await fetch(`${API_BASE_URL}/api/price/provision`, {
                 method: 'POST',
                 headers: {
