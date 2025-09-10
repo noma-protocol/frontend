@@ -1768,6 +1768,74 @@ app.get('/api/tokens/stats', (req, res) => {
   }
 });
 
+// ===== POOLS API ENDPOINTS =====
+
+import poolsApi from './poolsApi.js';
+
+// Get all pools
+app.get('/api/pools', (req, res) => {
+  try {
+    const poolsData = poolsApi.getPools();
+    res.json(poolsData);
+  } catch (error) {
+    console.error('Error fetching pools:', error);
+    res.status(500).json({ error: 'Failed to retrieve pools' });
+  }
+});
+
+// Add a new pool
+app.post('/api/pools', (req, res) => {
+  try {
+    const poolConfig = req.body;
+    
+    // Validate required fields
+    const requiredFields = ['name', 'address', 'protocol', 'version', 'token0', 'token1'];
+    const missingFields = requiredFields.filter(field => !poolConfig[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        error: 'Missing required fields', 
+        fields: missingFields 
+      });
+    }
+    
+    const pool = poolsApi.addPool(poolConfig);
+    res.json({ 
+      message: 'Pool added successfully', 
+      pool 
+    });
+  } catch (error) {
+    console.error('Error adding pool:', error);
+    res.status(500).json({ error: 'Failed to add pool' });
+  }
+});
+
+// Update pool status
+app.patch('/api/pools/:address/status', (req, res) => {
+  try {
+    const { address } = req.params;
+    const { enabled } = req.body;
+    
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({ error: 'enabled must be a boolean value' });
+    }
+    
+    const pool = poolsApi.updatePoolStatus(address, enabled);
+    
+    if (!pool) {
+      return res.status(404).json({ error: 'Pool not found' });
+    }
+    
+    res.json({ 
+      message: 'Pool status updated successfully', 
+      pool 
+    });
+  } catch (error) {
+    console.error('Error updating pool status:', error);
+    res.status(500).json({ error: 'Failed to update pool status' });
+  }
+});
+
 // ===== REFERRAL API ENDPOINTS =====
 
 // Register a referral (when user connects with referral code)

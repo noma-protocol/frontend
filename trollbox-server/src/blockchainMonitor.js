@@ -1,10 +1,39 @@
 import { ethers } from 'ethers';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration
 const MONAD_RPC_URL = process.env.MONAD_RPC_URL || 'https://rpc.ankr.com/monad_testnet';
 const NOMA_TOKEN_ADDRESS = process.env.NOMA_TOKEN_ADDRESS || '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701'; // Replace with actual NOMA token address
 const DEX_POOL_ADDRESS = process.env.DEX_POOL_ADDRESS || '0xBb7EfF3E685c6564F2F09DD90b6C05754E3BDAC0'; // Replace with actual DEX pool address
 const EXCHANGE_HELPER_ADDRESS = process.env.EXCHANGE_HELPER_ADDRESS || '0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e';
+
+// Load pools configuration
+const poolsConfigPath = path.join(__dirname, '../data/pools.json');
+let poolsConfig = { pools: [] };
+try {
+  const poolsData = fs.readFileSync(poolsConfigPath, 'utf8');
+  poolsConfig = JSON.parse(poolsData);
+  console.log(`Loaded ${poolsConfig.pools.length} pools from pools.json`);
+} catch (error) {
+  console.error('Error loading pools.json:', error);
+  // Fall back to environment variable pool if pools.json not found
+  if (DEX_POOL_ADDRESS && DEX_POOL_ADDRESS !== '0x0000000000000000000000000000000000000000') {
+    poolsConfig = {
+      pools: [{
+        name: 'Default Pool',
+        address: DEX_POOL_ADDRESS,
+        protocol: 'uniswap',
+        version: 'v3',
+        enabled: true
+      }]
+    };
+  }
+}
 
 // ERC20 ABI for Transfer events
 const ERC20_ABI = [
@@ -36,7 +65,8 @@ class BlockchainMonitor {
     this.referralStore = referralStore;
     this.provider = null;
     this.nomaContract = null;
-    this.dexPool = null;
+    this.dexPools = new Map(); // Map of pool address -> contract instance
+    this.poolsConfig = poolsConfig; // Store pools configuration
     this.monitoring = false;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
@@ -52,10 +82,10 @@ class BlockchainMonitor {
       console.log('=== BLOCKCHAIN MONITOR INITIALIZATION ===');
       console.log('RPC URL:', MONAD_RPC_URL);
       console.log('NOMA Token Address:', NOMA_TOKEN_ADDRESS);
-      console.log('DEX Pool Address:', DEX_POOL_ADDRESS);
       console.log('ExchangeHelper Address:', EXCHANGE_HELPER_ADDRESS);
       console.log('Has Referral Store:', !!this.referralStore);
       console.log('Has Transaction Store:', !!this.transactionStore);
+      console.log('Number of pools to monitor:', this.poolsConfig.pools.length);
       
       // Create provider with automatic reconnection
       this.provider = new ethers.JsonRpcProvider(MONAD_RPC_URL);
@@ -73,9 +103,18 @@ class BlockchainMonitor {
         console.log('ExchangeHelper contract created');
       }
       
-      // Only monitor DEX pool if address is provided
-      if (DEX_POOL_ADDRESS && DEX_POOL_ADDRESS !== '0x0000000000000000000000000000000000000000') {
-        this.dexPool = new ethers.Contract(DEX_POOL_ADDRESS, UNISWAP_V3_POOL_ABI, this.provider);
+      // Create contracts for all enabled pools
+      for (const pool of this.poolsConfig.pools) {
+        if (pool.enabled && pool.address && pool.address !== '0x0000000000000000000000000000000000000000') {
+          // Select appropriate ABI based on pool version
+          const poolABI = pool.version === 'v3' ? UNISWAP_V3_POOL_ABI : UNISWAP_V2_PAIR_ABI;
+          const poolContract = new ethers.Contract(pool.address, poolABI, this.provider);
+          this.dexPools.set(pool.address, {
+            contract: poolContract,
+            config: pool
+          });
+          console.log(`Created contract for pool ${pool.name} at ${pool.address} (${pool.protocol} ${pool.version})`);
+        }
       }
       
       // Start monitoring
@@ -173,8 +212,8 @@ class BlockchainMonitor {
       await this.processNomaTransfers(fromBlock, toBlock);
     }
     
-    // Process DEX swaps
-    if (this.dexPool) {
+    // Process DEX swaps for all pools
+    if (this.dexPools.size > 0) {
       await this.processDexSwaps(fromBlock, toBlock);
     }
     
@@ -244,52 +283,91 @@ class BlockchainMonitor {
 
   async processDexSwaps(fromBlock, toBlock) {
     try {
-      console.log(`[DEX SWAPS] Searching for swaps in DEX pool: ${DEX_POOL_ADDRESS}`);
-      // Create filter for Swap events (Uniswap V3)
-      const swapFilter = {
-        address: DEX_POOL_ADDRESS,
-        topics: [ethers.id('Swap(address,address,int256,int256,uint160,uint128,int24)')],
-        fromBlock: '0x' + fromBlock.toString(16),
-        toBlock: '0x' + toBlock.toString(16)
-      };
+      console.log(`[DEX SWAPS] Processing swaps for ${this.dexPools.size} pools`);
       
-      console.log('[DEX SWAPS] Filter:', JSON.stringify(swapFilter, null, 2));
-      const logs = await this.provider.getLogs(swapFilter);
-      console.log(`[DEX SWAPS] Found ${logs.length} DEX swap events in blocks ${fromBlock}-${toBlock}`);
-      
-      for (const log of logs) {
-        // Skip if already processed
-        if (this.processedTxHashes.has(log.transactionHash)) continue;
-        
+      // Process each pool
+      for (const [poolAddress, poolData] of this.dexPools) {
         try {
-          // Parse the log
-          const parsedLog = this.dexPool.interface.parseLog({
-            topics: log.topics,
-            data: log.data
-          });
+          console.log(`[DEX SWAPS] Searching for swaps in pool: ${poolData.config.name} (${poolAddress})`);
           
-          if (!parsedLog || parsedLog.name !== 'Swap') continue;
+          // Select appropriate event signature based on pool version
+          let eventSignature;
+          if (poolData.config.version === 'v3') {
+            eventSignature = 'Swap(address,address,int256,int256,uint160,uint128,int24)';
+          } else {
+            eventSignature = 'Swap(address,uint256,uint256,uint256,uint256,address)';
+          }
           
-          // Process the swap
-          await this.handleDexSwap(
-            parsedLog.args.sender || parsedLog.args[0],
-            parsedLog.args.recipient || parsedLog.args[1],
-            parsedLog.args.amount0 || parsedLog.args[2],
-            parsedLog.args.amount1 || parsedLog.args[3],
-            parsedLog.args.sqrtPriceX96 || parsedLog.args[4],
-            parsedLog.args.liquidity || parsedLog.args[5],
-            parsedLog.args.tick || parsedLog.args[6],
-            {
-              transactionHash: log.transactionHash,
-              blockNumber: log.blockNumber,
-              logIndex: log.logIndex
+          // Create filter for Swap events
+          const swapFilter = {
+            address: poolAddress,
+            topics: [ethers.id(eventSignature)],
+            fromBlock: '0x' + fromBlock.toString(16),
+            toBlock: '0x' + toBlock.toString(16)
+          };
+          
+          console.log(`[DEX SWAPS] Filter for ${poolData.config.name}:`, JSON.stringify(swapFilter, null, 2));
+          const logs = await this.provider.getLogs(swapFilter);
+          console.log(`[DEX SWAPS] Found ${logs.length} swap events in ${poolData.config.name} for blocks ${fromBlock}-${toBlock}`);
+          
+          for (const log of logs) {
+            // Skip if already processed
+            if (this.processedTxHashes.has(log.transactionHash)) continue;
+            
+            try {
+              // Parse the log
+              const parsedLog = poolData.contract.interface.parseLog({
+                topics: log.topics,
+                data: log.data
+              });
+              
+              if (!parsedLog || parsedLog.name !== 'Swap') continue;
+              
+              // Process the swap based on pool version
+              if (poolData.config.version === 'v3') {
+                await this.handleDexSwapV3(
+                  parsedLog.args.sender || parsedLog.args[0],
+                  parsedLog.args.recipient || parsedLog.args[1],
+                  parsedLog.args.amount0 || parsedLog.args[2],
+                  parsedLog.args.amount1 || parsedLog.args[3],
+                  parsedLog.args.sqrtPriceX96 || parsedLog.args[4],
+                  parsedLog.args.liquidity || parsedLog.args[5],
+                  parsedLog.args.tick || parsedLog.args[6],
+                  {
+                    transactionHash: log.transactionHash,
+                    blockNumber: log.blockNumber,
+                    logIndex: log.logIndex,
+                    poolAddress: poolAddress,
+                    poolConfig: poolData.config
+                  }
+                );
+              } else {
+                // Handle V2 swaps
+                await this.handleDexSwapV2(
+                  parsedLog.args.sender || parsedLog.args[0],
+                  parsedLog.args.amount0In || parsedLog.args[1],
+                  parsedLog.args.amount1In || parsedLog.args[2],
+                  parsedLog.args.amount0Out || parsedLog.args[3],
+                  parsedLog.args.amount1Out || parsedLog.args[4],
+                  parsedLog.args.to || parsedLog.args[5],
+                  {
+                    transactionHash: log.transactionHash,
+                    blockNumber: log.blockNumber,
+                    logIndex: log.logIndex,
+                    poolAddress: poolAddress,
+                    poolConfig: poolData.config
+                  }
+                );
+              }
+              
+              // Mark as processed
+              this.processedTxHashes.add(log.transactionHash);
+            } catch (logError) {
+              console.error(`Error parsing swap log for ${poolData.config.name}:`, logError, log);
             }
-          );
-          
-          // Mark as processed
-          this.processedTxHashes.add(log.transactionHash);
-        } catch (logError) {
-          console.error('Error parsing swap log:', logError, log);
+          }
+        } catch (poolError) {
+          console.error(`Error processing pool ${poolData.config.name}:`, poolError);
         }
       }
     } catch (error) {
@@ -451,9 +529,11 @@ class BlockchainMonitor {
     }
   }
 
-  async handleDexSwap(sender, recipient, amount0, amount1, sqrtPriceX96, liquidity, tick, event) {
+  async handleDexSwapV3(sender, recipient, amount0, amount1, sqrtPriceX96, liquidity, tick, event) {
     try {
-      console.log('[HANDLE SWAP] Processing swap event:', {
+      const poolConfig = event.poolConfig;
+      console.log('[HANDLE SWAP V3] Processing swap event:', {
+        pool: poolConfig.name,
         sender,
         recipient,
         amount0: amount0.toString(),
@@ -461,10 +541,19 @@ class BlockchainMonitor {
         txHash: event.transactionHash
       });
       
-      // Determine which token is NOMA (usually token0 or token1)
-      // For now, assume NOMA is token0
-      const nomaAmount = ethers.formatEther(amount0 > 0 ? amount0 : -amount0);
-      console.log(`[HANDLE SWAP] NOMA amount: ${nomaAmount}`);
+      // Determine which token is NOMA based on pool configuration
+      let nomaAmount, isToken0NOMA;
+      if (poolConfig.token0.address.toLowerCase() === NOMA_TOKEN_ADDRESS.toLowerCase()) {
+        nomaAmount = ethers.formatEther(amount0 > 0 ? amount0 : -amount0);
+        isToken0NOMA = true;
+      } else if (poolConfig.token1.address.toLowerCase() === NOMA_TOKEN_ADDRESS.toLowerCase()) {
+        nomaAmount = ethers.formatEther(amount1 > 0 ? amount1 : -amount1);
+        isToken0NOMA = false;
+      } else {
+        console.log('[HANDLE SWAP V3] Neither token is NOMA, skipping');
+        return;
+      }
+      console.log(`[HANDLE SWAP V3] NOMA amount: ${nomaAmount} (isToken0: ${isToken0NOMA})`);
       
       // Skip small trades
       if (parseFloat(nomaAmount) < 10) {
@@ -481,10 +570,10 @@ class BlockchainMonitor {
       
       // The actual trader is tx.from (the account that initiated the transaction)
       const traderAddress = tx.from;
-      const action = amount0 > 0 ? 'sell' : 'buy';
+      const action = isToken0NOMA ? (amount0 > 0 ? 'sell' : 'buy') : (amount1 > 0 ? 'sell' : 'buy');
       const emoji = this.getTradeEmoji(parseFloat(nomaAmount));
       
-      console.log(`[HANDLE SWAP] DEX Swap detected: ${traderAddress} ${action} ${nomaAmount} NOMA (tx: ${event.transactionHash})`);
+      console.log(`[HANDLE SWAP V3] DEX Swap detected on ${poolConfig.name}: ${traderAddress} ${action} ${nomaAmount} NOMA (tx: ${event.transactionHash})`);
       
       // Get transaction receipt for more details
       let gasUsed = null;
@@ -511,18 +600,20 @@ class BlockchainMonitor {
       const transaction = {
         hash: event.transactionHash,
         type: action,
-        sender: action === 'sell' ? traderAddress : DEX_POOL_ADDRESS,
-        recipient: action === 'buy' ? traderAddress : DEX_POOL_ADDRESS,
+        sender: action === 'sell' ? traderAddress : event.poolAddress,
+        recipient: action === 'buy' ? traderAddress : event.poolAddress,
         traderAddress: traderAddress, // Store the actual trader for referral tracking
         routerSender: sender, // Original sender from event (router)
         routerRecipient: recipient, // Original recipient from event (router)
         amount: nomaAmount,
-        amountRaw: (amount0 > 0 ? amount0 : -amount0).toString(),
+        amountRaw: (isToken0NOMA ? (amount0 > 0 ? amount0 : -amount0) : (amount1 > 0 ? amount1 : -amount1)).toString(),
         price: price,
         amountUSD: usdAmount.toFixed(2),
         tokenAddress: NOMA_TOKEN_ADDRESS,
         tokenSymbol: 'NOMA',
-        poolAddress: DEX_POOL_ADDRESS,
+        poolAddress: event.poolAddress,
+        poolName: poolConfig.name,
+        protocol: poolConfig.protocol,
         blockNumber: event.blockNumber,
         logIndex: event.logIndex,
         gasUsed: gasUsed,
@@ -626,6 +717,138 @@ class BlockchainMonitor {
   formatAddress(address) {
     // Format as 0xAbC123...7890
     return address.slice(0, 8) + '...' + address.slice(-4);
+  }
+
+  async handleDexSwapV2(sender, amount0In, amount1In, amount0Out, amount1Out, to, event) {
+    try {
+      const poolConfig = event.poolConfig;
+      console.log('[HANDLE SWAP V2] Processing swap event:', {
+        pool: poolConfig.name,
+        sender,
+        to,
+        amount0In: amount0In.toString(),
+        amount1In: amount1In.toString(),
+        amount0Out: amount0Out.toString(),
+        amount1Out: amount1Out.toString(),
+        txHash: event.transactionHash
+      });
+      
+      // Determine which token is NOMA and the trade direction
+      let nomaAmount, action, isToken0NOMA;
+      if (poolConfig.token0.address.toLowerCase() === NOMA_TOKEN_ADDRESS.toLowerCase()) {
+        isToken0NOMA = true;
+        if (amount0In > 0) {
+          // Selling NOMA
+          nomaAmount = ethers.formatEther(amount0In);
+          action = 'sell';
+        } else {
+          // Buying NOMA
+          nomaAmount = ethers.formatEther(amount0Out);
+          action = 'buy';
+        }
+      } else if (poolConfig.token1.address.toLowerCase() === NOMA_TOKEN_ADDRESS.toLowerCase()) {
+        isToken0NOMA = false;
+        if (amount1In > 0) {
+          // Selling NOMA
+          nomaAmount = ethers.formatEther(amount1In);
+          action = 'sell';
+        } else {
+          // Buying NOMA
+          nomaAmount = ethers.formatEther(amount1Out);
+          action = 'buy';
+        }
+      } else {
+        console.log('[HANDLE SWAP V2] Neither token is NOMA, skipping');
+        return;
+      }
+      
+      console.log(`[HANDLE SWAP V2] NOMA amount: ${nomaAmount}, action: ${action}`);
+      
+      // Skip small trades
+      if (parseFloat(nomaAmount) < 10) {
+        console.log('[HANDLE SWAP V2] Skipping small trade (< 10 NOMA)');
+        return;
+      }
+      
+      // Get the actual transaction to find the real trader address
+      const tx = await this.provider.getTransaction(event.transactionHash);
+      if (!tx) {
+        console.error('[HANDLE SWAP V2] Could not fetch transaction:', event.transactionHash);
+        return;
+      }
+      
+      const traderAddress = tx.from;
+      const emoji = this.getTradeEmoji(parseFloat(nomaAmount));
+      
+      console.log(`[HANDLE SWAP V2] DEX Swap detected on ${poolConfig.name}: ${traderAddress} ${action} ${nomaAmount} NOMA`);
+      
+      // Get transaction receipt
+      let gasUsed = null;
+      let effectiveGasPrice = null;
+      try {
+        const receipt = await this.provider.getTransactionReceipt(event.transactionHash);
+        if (receipt) {
+          gasUsed = receipt.gasUsed.toString();
+          effectiveGasPrice = receipt.effectiveGasPrice?.toString();
+        }
+      } catch (err) {
+        console.error('[HANDLE SWAP V2] Error fetching receipt:', err);
+      }
+      
+      // Create transaction record
+      const transaction = {
+        hash: event.transactionHash,
+        type: action,
+        sender: action === 'sell' ? traderAddress : event.poolAddress,
+        recipient: action === 'buy' ? traderAddress : event.poolAddress,
+        traderAddress: traderAddress,
+        amount: nomaAmount,
+        amountRaw: (isToken0NOMA ? 
+          (action === 'sell' ? amount0In : amount0Out) : 
+          (action === 'sell' ? amount1In : amount1Out)
+        ).toString(),
+        tokenAddress: NOMA_TOKEN_ADDRESS,
+        tokenSymbol: 'NOMA',
+        poolAddress: event.poolAddress,
+        poolName: poolConfig.name,
+        protocol: poolConfig.protocol,
+        poolVersion: 'v2',
+        blockNumber: event.blockNumber,
+        logIndex: event.logIndex,
+        gasUsed: gasUsed,
+        effectiveGasPrice: effectiveGasPrice,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Store transaction
+      if (this.transactionStore) {
+        this.transactionStore.addTransaction(transaction);
+      }
+      
+      // Track referral volume
+      if (this.referralStore) {
+        await this.trackReferralVolume(transaction);
+      }
+      
+      // Create trade alert
+      const traderAddr = this.formatAddress(traderAddress);
+      const tradeAlert = {
+        id: ethers.id(event.transactionHash + event.logIndex),
+        type: 'tradeAlert',
+        content: `${traderAddr} just ${action === 'buy' ? 'bought' : 'sold'} ${parseFloat(nomaAmount).toFixed(2)} NOMA on ${poolConfig.name} ${emoji}`,
+        username: 'System',
+        timestamp: transaction.timestamp,
+        txHash: event.transactionHash,
+        blockNumber: event.blockNumber,
+        transaction: transaction
+      };
+      
+      // Broadcasting disabled - only store transactions
+      // this.broadcastCallback(tradeAlert);
+      
+    } catch (error) {
+      console.error('[HANDLE SWAP V2] Error handling swap:', error);
+    }
   }
 
   async handleExchangeHelperTrade(eventName, traderAddress, amount, event) {
@@ -771,6 +994,43 @@ class BlockchainMonitor {
       await this.provider.getNetwork();
       return true;
     } catch {
+      return false;
+    }
+  }
+
+  // Method to reload pools configuration
+  async reloadPools() {
+    try {
+      console.log('Reloading pools configuration...');
+      
+      // Read the latest pools.json
+      const poolsData = fs.readFileSync(poolsConfigPath, 'utf8');
+      const newPoolsConfig = JSON.parse(poolsData);
+      
+      // Update internal config
+      this.poolsConfig = newPoolsConfig;
+      
+      // Clear existing pool contracts
+      this.dexPools.clear();
+      
+      // Create contracts for all enabled pools
+      for (const pool of this.poolsConfig.pools) {
+        if (pool.enabled && pool.address && pool.address !== '0x0000000000000000000000000000000000000000') {
+          // Select appropriate ABI based on pool version
+          const poolABI = pool.version === 'v3' ? UNISWAP_V3_POOL_ABI : UNISWAP_V2_PAIR_ABI;
+          const poolContract = new ethers.Contract(pool.address, poolABI, this.provider);
+          this.dexPools.set(pool.address, {
+            contract: poolContract,
+            config: pool
+          });
+          console.log(`Created contract for pool ${pool.name} at ${pool.address} (${pool.protocol} ${pool.version})`);
+        }
+      }
+      
+      console.log(`Reloaded ${this.dexPools.size} pools from configuration`);
+      return true;
+    } catch (error) {
+      console.error('Error reloading pools:', error);
       return false;
     }
   }

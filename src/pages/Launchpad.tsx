@@ -48,6 +48,7 @@ import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
 import { unCommify, commify, generateBytes32String, getContractAddress, formatNumberPrecise } from "../utils";
 import { tokenApi } from "../services/tokenApi";
+import { poolApi } from '../services/poolApi';
 import Logo from "../assets/images/noma_logo_transparent.png";
 import { ethers } from "ethers"; // Import ethers.js
 const { formatEther, parseEther } = ethers.utils;
@@ -179,6 +180,49 @@ const Launchpad: React.FC = () => {
                 );
                 
                 console.log(`Token status updated to ${finalStatus}`);
+                
+                // For non-presale tokens, try to get the pool address and add to pools.json
+                if (tokenData.presale === "0") {
+                    try {
+                        // Wait for transaction to be mined
+                        const { JsonRpcProvider } = ethers.providers;
+                        const provider = new JsonRpcProvider(config.RPC_URL);
+                        const receipt = await provider.waitForTransaction(data.hash);
+                        
+                        // Parse logs to find pool address (usually in VaultCreated event)
+                        if (receipt && receipt.logs) {
+                            // Look for the VaultCreated event or similar
+                            for (const log of receipt.logs) {
+                                // Check if this might be a pool/vault address (typical pattern)
+                                if (log.topics.length >= 2 && log.address === nomaFactoryAddress) {
+                                    // Second topic often contains the pool address
+                                    const poolAddress = '0x' + log.topics[1].slice(26);
+                                    console.log('Found potential pool address:', poolAddress);
+                                    
+                                    // Create pool config
+                                    const poolConfig = poolApi.createPoolConfig({
+                                        tokenName: tokenData.tokenName,
+                                        tokenSymbol: tokenData.tokenSymbol,
+                                        tokenAddress: getContractAddress(tokenData.deployerAddress, tokenDecimals),
+                                        tokenDecimals: tokenData.tokenDecimals,
+                                        poolAddress: poolAddress,
+                                        protocol: tokenData.selectedProtocol || 'uniswap',
+                                        feeTier: parseInt(tokenData.selectedProtocol === 'pancakeswap' ? '2500' : '3000')
+                                    });
+                                    
+                                    // Add pool to pools.json
+                                    await poolApi.addPool(poolConfig);
+                                    console.log('Pool added to pools.json:', poolConfig);
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (poolError) {
+                        console.error('Failed to add pool:', poolError);
+                        // Don't fail the whole operation if pool addition fails
+                    }
+                }
+                
                 sessionStorage.removeItem('pendingTokenData');
             } catch (error) {
                 console.error('Failed to save token data:', error);

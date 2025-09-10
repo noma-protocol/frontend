@@ -35,6 +35,7 @@ import Logo from "../assets/images/noma.png";
 import { ethers } from "ethers"; // Import ethers.js
 import WalletSidebar from "../components/WalletSidebar";
 import { tokenApi } from "../services/tokenApi";
+import { poolApi } from '../services/poolApi';
 import { ProgressLabel, ProgressBar, ProgressRoot, ProgressValueText } from "../components/ui/progress"
 import PresaleDetails from "../components/PresaleDetails";
 import usePresaleContract from '../hooks/usePresaleContract';
@@ -487,14 +488,15 @@ const Presale: React.FC = () => {
           await provisionPriceFeed();
           
           // Update token status to 'deployed'
+          let matchingToken;
+          const baseSymbol = tokenSymbol.startsWith("p-") ? tokenSymbol.substring(2) : tokenSymbol;
           try {
             // First find the token by symbol and deployer address
-            const baseSymbol = tokenSymbol.startsWith("p-") ? tokenSymbol.substring(2) : tokenSymbol;
             const response = await tokenApi.getTokensBySymbol(baseSymbol);
             
             if (response && response.tokens && response.tokens.length > 0) {
               // Find the token with matching presale contract address or deployer address
-              const matchingToken = response.tokens.find(token => 
+              matchingToken = response.tokens.find(token => 
                 token.deployerAddress?.toLowerCase() === deployer?.toLowerCase() ||
                 token.contractAddress?.toLowerCase() === contractAddress?.toLowerCase()
               ) || response.tokens[0]; // Fallback to first token if no exact match
@@ -512,6 +514,28 @@ const Presale: React.FC = () => {
             }
           } catch (error) {
             console.error('Error updating token status to deployed:', error);
+          }
+          
+          // Add pool to pools.json
+          if (poolAddress && poolAddress !== '0x0000000000000000000000000000000000000000' && matchingToken) {
+            try {
+              const poolConfig = poolApi.createPoolConfig({
+                tokenName: matchingToken.tokenName,
+                tokenSymbol: baseSymbol || tokenSymbol,
+                tokenAddress: tokenAddress,
+                tokenDecimals: matchingToken.tokenDecimals || '18',
+                poolAddress: poolAddress,
+                protocol: matchingToken.selectedProtocol || 'uniswap',
+                feeTier: parseInt(matchingToken.selectedProtocol === 'pancakeswap' ? '2500' : '3000')
+              });
+              
+              // Add pool to pools.json via API
+              await poolApi.addPool(poolConfig);
+              console.log('Pool added to pools.json:', poolConfig);
+            } catch (poolError) {
+              console.error('Failed to add pool to pools.json:', poolError);
+              // Don't fail the whole operation if pool addition fails
+            }
           }
         } catch (error) {
           console.error('Error getting pool address or provisioning feed:', error);
