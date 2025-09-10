@@ -3400,7 +3400,12 @@ const Exchange: React.FC = () => {
                     
                     {/* Referral Stats */}
                     <Box flexShrink={0} mt={4}>
-                        <ReferralStats totalVolume={totalVolume} token0Symbol={selectedToken?.symbol} tokenPriceUsd={spotPrice} />
+                        <ReferralStats 
+                            totalVolume={totalVolume} 
+                            token0Symbol={selectedToken?.symbol} 
+                            tokenPriceUsd={spotPrice} 
+                            poolAddress={poolInfo?.poolAddress}
+                        />
                     </Box>
                 </Box>
                 

@@ -833,7 +833,7 @@ class ReferralStore {
   }
 
   // Get referral stats for an address
-  getReferralStats(address) {
+  getReferralStats(address, poolAddress = null) {
     const normalizedAddress = address.toLowerCase();
     const stats = {
       totalReferred: 0,
@@ -850,12 +850,15 @@ class ReferralStore {
       stats.referredUsers = referrerData.referred;
     }
 
-    // Calculate volume from trades
+    // Calculate volume from trades, optionally filtered by pool
     this.trades.forEach(trade => {
       if (trade.referrerAddress && trade.referrerAddress.toLowerCase() === normalizedAddress) {
-        stats.totalVolumeETH += parseFloat(trade.volumeETH || 0);
-        stats.totalVolumeUSD += parseFloat(trade.volumeUSD || 0);
-        stats.trades.push(trade);
+        // If poolAddress is provided, only include trades from that pool
+        if (!poolAddress || (trade.poolAddress && trade.poolAddress.toLowerCase() === poolAddress.toLowerCase())) {
+          stats.totalVolumeETH += parseFloat(trade.volumeETH || 0);
+          stats.totalVolumeUSD += parseFloat(trade.volumeUSD || 0);
+          stats.trades.push(trade);
+        }
       }
     });
 
@@ -1932,7 +1935,8 @@ app.post('/api/referrals/track-trade', (req, res) => {
 app.get('/api/referrals/stats/:address', (req, res) => {
   try {
     const { address } = req.params;
-    const stats = referralStore.getReferralStats(address);
+    const { poolAddress } = req.query; // Optional pool filter
+    const stats = referralStore.getReferralStats(address, poolAddress);
     
     res.json({
       address,

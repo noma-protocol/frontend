@@ -154,5 +154,29 @@
     "verified": true,
     "isCommand": false,
     "commandType": null
+  },
+  {
+    "id": "1c46aea3-6db5-40d3-9006-2dc32d5aa1ff",
+    "type": "message",
+    "content": "yoo",
+    "username": "IamScatMan",
+    "address": "0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd",
+    "timestamp": "2025-09-10T04:16:35.072Z",
+    "clientId": "609f8f9e-1498-4ba5-9e5f-e35a286f47dd",
+    "verified": true,
+    "isCommand": false,
+    "commandType": null
+  },
+  {
+    "id": "53095d08-19e8-4020-9b56-9f92c22b286e",
+    "type": "message",
+    "content": "![gif](https://media2.giphy.com/media/v1.Y2lkPWE1YTU4ZDcwYnlxNm1kdzNtbXZleTl5bXd4YzRnOGZrZ24yNjB4Nm1heG1va3Q0NCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Z8CXMFmTpZPHQ1lAvl/200.gif)",
+    "username": "IamScatMan",
+    "address": "0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd",
+    "timestamp": "2025-09-10T04:16:49.027Z",
+    "clientId": "609f8f9e-1498-4ba5-9e5f-e35a286f47dd",
+    "verified": true,
+    "isCommand": false,
+    "commandType": null
   }
 ]
