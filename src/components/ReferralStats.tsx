@@ -15,6 +15,7 @@ interface ReferralStatsProps {
   totalVolume?: number;
   token0Symbol?: string;
   tokenPriceUsd?: number;
+  poolAddress?: string;
 }
 
 interface ReferralTrade {
@@ -28,8 +29,8 @@ interface ReferralTrade {
   referredAddress: string;
 }
 
-export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume, token0Symbol, tokenPriceUsd }) => {
-  console.log(`Token price USD in ReferralStats: ${tokenPriceUsd}`);
+export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume, token0Symbol, tokenPriceUsd, poolAddress }) => {
+  console.log(`Token price USD in ReferralStats: ${tokenPriceUsd}, poolAddress: ${poolAddress}`);
 
   const { address } = useAccount();
   const { monPrice } = useMonPrice();
@@ -66,13 +67,13 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
       // Load referral stats from localStorage
       loadReferralStats();
     }
-  }, [address]);
+  }, [address, poolAddress]);
 
   const loadReferralStats = async () => {
     setIsLoading(true);
     try {
-      // Fetch stats from API
-      const stats = await referralApi.getReferralStats(address);
+      // Fetch stats from API, filtered by pool if provided
+      const stats = await referralApi.getReferralStats(address, poolAddress);
       
       // Estimate commission (assuming 1% referral fee)
       const commissionRate = 0.01;

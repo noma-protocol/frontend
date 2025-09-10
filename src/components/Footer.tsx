@@ -173,7 +173,7 @@ const Footer: React.FC = () => {
             <Box>
               <Text color="white" fontWeight="600" mb={2}>Get Started</Text>
             </Box>
-            <Button
+            {/* <Button
               onClick={addTokenToMetaMask}
               size="sm"
               variant="outline"
@@ -188,7 +188,7 @@ const Footer: React.FC = () => {
               leftIcon={<Image src={metamaskLogo} w="16px" h="16px" />}
             >
               Add NOMA to MetaMask
-            </Button>
+            </Button> */}
           </VStack> 
           </Box>             
         </SimpleGrid>

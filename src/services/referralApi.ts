@@ -100,9 +100,14 @@ export const referralApi = {
   },
 
   // Get referral stats for an address
-  async getReferralStats(address: string): Promise<ReferralStats> {
+  async getReferralStats(address: string, poolAddress?: string): Promise<ReferralStats> {
     try {
-      const response = await fetch(`${API_BASE_URL}/referrals/stats/${address}`);
+      const url = new URL(`${API_BASE_URL}/referrals/stats/${address}`);
+      if (poolAddress) {
+        url.searchParams.append('poolAddress', poolAddress);
+      }
+      
+      const response = await fetch(url.toString());
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
