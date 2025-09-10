@@ -1894,8 +1894,8 @@ const Exchange: React.FC = () => {
                     // Calculate price and FDV
                     const tokenPrice = vault.spotPrice ? (parseFloat(formatEther(vault.spotPrice)) || 0.0000186) : 0.0000186;
                     const supplyInTokens = parseFloat(tokenSupply);
-                    const calculatedFdv = supplyInTokens * tokenPrice * monPrice;
-                    console.log(`[TOKEN LIST] ${vault.tokenSymbol} - Supply: ${tokenSupply}, Price: ${tokenPrice}, FDV: ${calculatedFdv}`);
+                    const calculatedFdv = supplyInTokens * tokenPrice * (monPrice || 1); // Use 1 as fallback if monPrice not loaded
+                    console.log(`[TOKEN LIST] ${vault.tokenSymbol} - Supply: ${tokenSupply}, Price: ${tokenPrice}, MonPrice: ${monPrice}, FDV: ${calculatedFdv}`);
                     
                     return {
                         id: index + 1,
@@ -3368,7 +3368,7 @@ const Exchange: React.FC = () => {
                                                     transition="all 0.2s"
                                                 >
                                                     <Text color="white" fontSize="xs" whiteSpace="nowrap">
-                                                        ${formatNumber(token.fdv)} 
+                                                        ${formatNumber(parseFloat(token.tokenSupply || "0") * token.price * monPrice)} 
                                                     </Text>
                                                 </Table.Cell>
                                             )}

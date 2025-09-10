@@ -89,10 +89,12 @@ const Markets: React.FC = () => {
 
   const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
     // Select the appropriate factory based on protocol
-    console.log(`Protocol is ${protocol}`)
+    console.log(`[fetchPoolAddress] Protocol: ${protocol}, Token0: ${token0}, Token1: ${token1}`)
     const factoryAddress = protocol === "uniswap" 
       ? config.protocolAddresses.uniswapV3Factory 
       : config.protocolAddresses.pancakeV3Factory;
+    
+    console.log(`[fetchPoolAddress] Using factory: ${factoryAddress}`)
     
     const factoryContract = new ethers.Contract(
       factoryAddress,
@@ -100,8 +102,10 @@ const Markets: React.FC = () => {
       localProvider
     );
     const feeTier = protocol === "uniswap" ? 3000 : 2500;
+    console.log(`[fetchPoolAddress] Using fee tier: ${feeTier}`)
 
     const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
+    console.log(`[fetchPoolAddress] Retrieved pool address: ${poolAddress}`)
 
     return poolAddress;
   }
@@ -217,59 +221,6 @@ const Markets: React.FC = () => {
           return [isFinalized, hasExpired];
         }
 
-        // const fetchVaults = async () => {
-        //     setIsAllVaultsLoading(true);
-          
-        //     try {
-        //       const allVaultDescriptions = [];
-          
-        //       // Iterate over deployers
-        //       for (const deployer of deployersData) {
-        //         const vaultsData = await nomaFactoryContract.getVaults(deployer);
-        //         console.log("Vaults Data for Deployer:", deployer, vaultsData);
-          
-        //         // Iterate over vaults for each deployer
-        //         for (const vault of vaultsData) {
-        //           const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
-        //           console.log("Vault Description Data:", vaultDescriptionData);
-          
-        //           // Convert Proxy(_Result) to a plain object
-        //           const plainVaultDescription = {
-        //             tokenName: vaultDescriptionData[0],
-        //             tokenSymbol: vaultDescriptionData[1],
-        //             tokenDecimals: Number(vaultDescriptionData[2]), // Convert BigInt to number
-        //             token0: vaultDescriptionData[3],
-        //             token1: vaultDescriptionData[4],
-        //             deployer: vaultDescriptionData[5],
-        //             vault: vaultDescriptionData[6],
-        //             presaleContract: vaultDescriptionData[7],
-        //           };
-          
-        //           console.log("Plain Vault Description:", plainVaultDescription);
-          
-        //           const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
-        //           console.log("Pool Address:", poolAddress);
-          
-        //           // Create a new object with the additional poolAddress property
-        //           const augmentedVaultDescription = {
-        //             ...plainVaultDescription, // Retains all original keys
-        //             poolAddress, // Add poolAddress to the object
-        //           };
-          
-        //           console.log("Augmented Vault Description:", augmentedVaultDescription);
-        //           allVaultDescriptions.push(augmentedVaultDescription);
-        //         }
-        //       }
-          
-        //       // Update state with all vault descriptions
-        //       console.log("All Vault Descriptions:", allVaultDescriptions);
-        //       setVaultDescriptions(allVaultDescriptions);
-        //       setIsAllVaultsLoading(false);
-
-        //     } catch (error) {
-        //       console.error("Error fetching vaults:", error);
-        //     } 
-        //   };
         const fetchVaults = async () => {
           try {
             const nomaFactoryContract = new ethers.Contract(
@@ -310,7 +261,7 @@ const Markets: React.FC = () => {
                         // }
                         
                         // Determine protocol for this token
-                        const protocol = tokenProtocols[tokenSymbol] || "pancakeswap";
+                        const protocol = tokenProtocols[tokenSymbol] || "uniswap";
                         
                         const hasPresale = vaultDescriptionData[7] !== zeroAddress;
                         let isPresaleFinalized = false;
@@ -339,11 +290,15 @@ const Markets: React.FC = () => {
                           presaleContract: vaultDescriptionData[7],
                           finalized: isPresaleFinalized,
                           expired: expired,
-                          poolAddress: await fetchPoolAddress(
-                            vaultDescriptionData[3], 
-                            vaultDescriptionData[4],
-                            protocol
-                          ),
+                          poolAddress: await (async () => {
+                            const pool = await fetchPoolAddress(
+                              vaultDescriptionData[3], 
+                              vaultDescriptionData[4],
+                              protocol
+                            );
+                            console.log(`[MARKETS] Token ${tokenSymbol} pool: ${pool}, protocol: ${protocol}`);
+                            return pool;
+                          })(),
                         };
                       } catch (error) {
                         console.error("Error fetching vault description:", error);
@@ -406,7 +361,7 @@ const Markets: React.FC = () => {
                         
                         // Determine protocol for this token
                         const tokenSymbol = vaultDescriptionData[1];
-                        const protocol = tokenProtocols[tokenSymbol] || "pancakeswap";
+                        const protocol = tokenProtocols[tokenSymbol] || "uniswap";
     
                         const hasPresale = vaultDescriptionData[7] !== zeroAddress;
                         let isPresaleFinalized = false;
@@ -607,7 +562,7 @@ const Markets: React.FC = () => {
                     )}
                   </Box>
                   {vaultsDataArray?.map((vault, index) => {
-                    const protocol = tokenProtocols[vault.tokenSymbol] || "pancakeswap";
+                    const protocol = tokenProtocols[vault.tokenSymbol] || "uniswap";
                     const tokenLogo = tokenLogos[vault.tokenSymbol] || (vault.tokenSymbol === "NOMA" ? nomaLogo : placeholderLogo);
                     console.log("Vault info:", vault.tokenSymbol, vault.vault, "Protocol:", protocol, "Logo:", tokenLogo)
                     console.log({ vault })
