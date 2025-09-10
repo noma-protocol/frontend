@@ -47,7 +47,8 @@ const UNISWAP_V2_PAIR_ABI = [
 
 // Uniswap V3 Pool ABI for Swap events
 const UNISWAP_V3_POOL_ABI = [
-  'event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)'
+  'event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)',
+  'event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick, uint128 protocolFeesToken0, uint128 protocolFeesToken1)'
 ];
 
 // ExchangeHelper ABI for trade events
@@ -290,25 +291,43 @@ class BlockchainMonitor {
         try {
           console.log(`[DEX SWAPS] Searching for swaps in pool: ${poolData.config.name} (${poolAddress})`);
           
-          // Select appropriate event signature based on pool version
-          let eventSignature;
+          // Select appropriate event signatures based on pool version
+          let eventSignatures = [];
           if (poolData.config.version === 'v3') {
-            eventSignature = 'Swap(address,address,int256,int256,uint160,uint128,int24)';
+            // V3 pools can have two different Swap event signatures
+            eventSignatures = [
+              'Swap(address,address,int256,int256,uint160,uint128,int24)', // Standard V3
+              'Swap(address,address,int256,int256,uint160,uint128,int24,uint128,uint128)' // Extended V3 with protocol fees
+            ];
           } else {
-            eventSignature = 'Swap(address,uint256,uint256,uint256,uint256,address)';
+            eventSignatures = ['Swap(address,uint256,uint256,uint256,uint256,address)']; // V2
           }
           
-          // Create filter for Swap events
-          const swapFilter = {
-            address: poolAddress,
-            topics: [ethers.id(eventSignature)],
-            fromBlock: '0x' + fromBlock.toString(16),
-            toBlock: '0x' + toBlock.toString(16)
-          };
+          let allLogs = [];
           
-          console.log(`[DEX SWAPS] Filter for ${poolData.config.name}:`, JSON.stringify(swapFilter, null, 2));
-          const logs = await this.provider.getLogs(swapFilter);
-          console.log(`[DEX SWAPS] Found ${logs.length} swap events in ${poolData.config.name} for blocks ${fromBlock}-${toBlock}`);
+          // Try each event signature
+          for (const eventSignature of eventSignatures) {
+            const swapFilter = {
+              address: poolAddress,
+              topics: [ethers.id(eventSignature)],
+              fromBlock: '0x' + fromBlock.toString(16),
+              toBlock: '0x' + toBlock.toString(16)
+            };
+            
+            console.log(`[DEX SWAPS] Trying signature ${eventSignature.substring(0, 30)}... for ${poolData.config.name}`);
+            try {
+              const logs = await this.provider.getLogs(swapFilter);
+              if (logs.length > 0) {
+                console.log(`[DEX SWAPS] Found ${logs.length} swap events with signature ${eventSignature}`);
+                allLogs = allLogs.concat(logs);
+              }
+            } catch (err) {
+              console.error(`[DEX SWAPS] Error with signature ${eventSignature}:`, err.message);
+            }
+          }
+          
+          console.log(`[DEX SWAPS] Total found ${allLogs.length} swap events in ${poolData.config.name} for blocks ${fromBlock}-${toBlock}`);
+          const logs = allLogs;
           
           for (const log of logs) {
             // Skip if already processed
