@@ -1098,6 +1098,8 @@ const Exchange: React.FC = () => {
                 console.log('[loadChartData] poolInfo:', poolInfo);
                 console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
                 console.log('[loadChartData] selectedToken:', selectedToken);
+                console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
+                console.log('[loadChartData] selectedToken:', selectedToken);
                 
                 // Skip API calls if no pool address is available
                 if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
@@ -1228,6 +1230,7 @@ const Exchange: React.FC = () => {
         
         return () => clearInterval(interval);
         
+    }, [selectedToken?.id, chartTimeframe, chartGranularity, token1Symbol, chartUpdateTrigger, poolInfo.poolAddress]);
     }, [selectedToken?.id, chartTimeframe, chartGranularity, token1Symbol, chartUpdateTrigger, poolInfo.poolAddress]);
 
     // Listen to Uniswap pool events for real-time price updates
@@ -1489,11 +1492,13 @@ const Exchange: React.FC = () => {
                     // Token already has pool address from vault data
                     console.log("Using pool address from token:", selectedToken.poolAddress);
                     console.log("Setting poolInfo with address:", selectedToken.poolAddress);
+                    console.log("Setting poolInfo with address:", selectedToken.poolAddress);
                     setPoolInfo({ 
                         poolAddress: selectedToken.poolAddress,
                         token0: selectedToken.token0,
                         token1: selectedToken.token1
                     });
+                    console.log("poolInfo should now be updated");
                     console.log("poolInfo should now be updated");
                 } else if (selectedToken.token0 && selectedToken.token1) {
                     // Fallback: fetch pool address if not available
@@ -3285,6 +3290,7 @@ const Exchange: React.FC = () => {
                                             key={token.id}
                                             cursor="pointer"
                                             onClick={() => {
+                                                console.log("=== TOKEN CLICK ===");
                                                 console.log("=== TOKEN CLICK ===");
                                                 console.log("Selected token:", token);
                                                 console.log("Token pool address:", token.poolAddress);
