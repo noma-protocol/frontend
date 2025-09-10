@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 const MONAD_RPC_URL = process.env.MONAD_RPC_URL || 'https://rpc.ankr.com/monad_testnet';
 const NOMA_TOKEN_ADDRESS = process.env.NOMA_TOKEN_ADDRESS || '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701'; // Replace with actual NOMA token address
 const DEX_POOL_ADDRESS = process.env.DEX_POOL_ADDRESS || '0xBb7EfF3E685c6564F2F09DD90b6C05754E3BDAC0'; // Replace with actual DEX pool address
-const EXCHANGE_HELPER_ADDRESS = process.env.EXCHANGE_HELPER_ADDRESS || '0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e';
+const EXCHANGE_HELPER_ADDRESS = process.env.EXCHANGE_HELPER_ADDRESS || '0xD82D7Bdd614bA07527351DE627C558Adbd0f7caE';
 
 // Load pools configuration
 const poolsConfigPath = path.join(__dirname, '../data/pools.json');
@@ -731,8 +731,9 @@ class BlockchainMonitor {
           referrerAddress: referralInfo.referrerAddress,
           type: transaction.type,
           tokenAddress: transaction.tokenAddress,
-          tokenName: 'NOMA',
+          tokenName: transaction.poolName || 'NOMA',
           tokenSymbol: transaction.tokenSymbol,
+          poolAddress: transaction.poolAddress, // Add pool address for filtering
           volumeETH: transaction.amount,
           volumeUSD: transaction.amountUSD,
           txHash: transaction.hash,

@@ -71,9 +71,11 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
 
   const loadReferralStats = async () => {
     setIsLoading(true);
+    console.log('[ReferralStats] Loading stats for address:', address, 'poolAddress:', poolAddress);
     try {
       // Fetch stats from API, filtered by pool if provided
       const stats = await referralApi.getReferralStats(address, poolAddress);
+      console.log('[ReferralStats] Received stats:', stats);
       
       // Estimate commission (assuming 1% referral fee)
       const commissionRate = 0.01;
