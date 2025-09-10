@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Container,
   VStack,
@@ -58,6 +58,7 @@ import {
   NumberInputRoot,
 } from "../components/ui/number-input"
 import { Toaster, toaster } from "../components/ui/toaster"
+import { LuSearch, LuArrowUpDown, LuArrowUp, LuArrowDown } from "react-icons/lu"
 
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 
@@ -191,6 +192,8 @@ const Exchange: React.FC = () => {
     const { selectedToken, setSelectedToken } = useToken();
     const { monPrice } = useMonPrice();
     const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useState("default"); // "default", "price", "24h"
+    const [sortOrder, setSortOrder] = useState("desc"); // "asc" or "desc"
     const [tradeAmount, setTradeAmount] = useState("");
     const [isBuying, setIsBuying] = useState(true);
     const [tradeHistoryTab, setTradeHistoryTab] = useState("all");
@@ -1645,12 +1648,40 @@ const Exchange: React.FC = () => {
     }, [spotPrice]);
 
 
-    const filteredTokens = tokens.filter(token => 
-        (token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        token.symbol.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        // Additional safety check - only show tokens that were in deployedVaults
-        vaultDescriptions.some(vault => vault.tokenSymbol === token.symbol)
-    );
+    const filteredTokens = useMemo(() => {
+        // First filter tokens based on search term
+        let filtered = tokens.filter(token => 
+            (token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            token.symbol.toLowerCase().includes(searchTerm.toLowerCase())) &&
+            // Additional safety check - only show tokens that were in deployedVaults
+            vaultDescriptions.some(vault => vault.tokenSymbol === token.symbol)
+        );
+
+        // Then sort based on selected criteria
+        if (sortBy !== "default") {
+            filtered.sort((a, b) => {
+                let aValue, bValue;
+                
+                if (sortBy === "price") {
+                    // Calculate USD price as token.price * monPrice
+                    aValue = (parseFloat(a.price) || 0) * (monPrice || 0);
+                    bValue = (parseFloat(b.price) || 0) * (monPrice || 0);
+                } else if (sortBy === "24h") {
+                    // Get 24h change from change24h field
+                    aValue = parseFloat(a.change24h) || 0;
+                    bValue = parseFloat(b.change24h) || 0;
+                }
+                
+                if (sortOrder === "desc") {
+                    return bValue - aValue;
+                } else {
+                    return aValue - bValue;
+                }
+            });
+        }
+        
+        return filtered;
+    }, [tokens, searchTerm, vaultDescriptions, sortBy, sortOrder, monPrice]);
     
     // Fetch pool address from Uniswap V3 Factory
     const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
@@ -3196,6 +3227,68 @@ const Exchange: React.FC = () => {
                             >
                                 <LuSearch />
                             </IconButton>
+                        </Flex>
+                        
+                        {/* Sorting Controls */}
+                        <Flex mb={3} gap={2}>
+                            <Button
+                                size="xs"
+                                variant={sortBy === "price" ? "solid" : "ghost"}
+                                bg={sortBy === "price" ? "#ff9500" : "transparent"}
+                                color={sortBy === "price" ? "black" : "#888"}
+                                _hover={{ bg: sortBy === "price" ? "#ff9500" : "#2a2a2a" }}
+                                onClick={() => {
+                                    if (sortBy === "price") {
+                                        setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+                                    } else {
+                                        setSortBy("price");
+                                        setSortOrder("desc");
+                                    }
+                                }}
+                                rightIcon={
+                                    sortBy === "price" ? (
+                                        sortOrder === "desc" ? <LuArrowDown /> : <LuArrowUp />
+                                    ) : <LuArrowUpDown />
+                                }
+                            >
+                                Price
+                            </Button>
+                            <Button
+                                size="xs"
+                                variant={sortBy === "24h" ? "solid" : "ghost"}
+                                bg={sortBy === "24h" ? "#ff9500" : "transparent"}
+                                color={sortBy === "24h" ? "black" : "#888"}
+                                _hover={{ bg: sortBy === "24h" ? "#ff9500" : "#2a2a2a" }}
+                                onClick={() => {
+                                    if (sortBy === "24h") {
+                                        setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+                                    } else {
+                                        setSortBy("24h");
+                                        setSortOrder("desc");
+                                    }
+                                }}
+                                rightIcon={
+                                    sortBy === "24h" ? (
+                                        sortOrder === "desc" ? <LuArrowDown /> : <LuArrowUp />
+                                    ) : <LuArrowUpDown />
+                                }
+                            >
+                                24h Change
+                            </Button>
+                            {sortBy !== "default" && (
+                                <Button
+                                    size="xs"
+                                    variant="ghost"
+                                    color="#888"
+                                    _hover={{ bg: "#2a2a2a" }}
+                                    onClick={() => {
+                                        setSortBy("default");
+                                        setSortOrder("desc");
+                                    }}
+                                >
+                                    Clear
+                                </Button>
+                            )}
                         </Flex>
                         
                         <Box overflowY="auto" overflowX="hidden" flex="1" mx={isMobile ? -2 : 0}>
