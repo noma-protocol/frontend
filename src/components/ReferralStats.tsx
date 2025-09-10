@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, VStack, HStack, Text, Button, Input, IconButton } from '@chakra-ui/react';
+import { Heading, Box, VStack, HStack, Text, Button, Input, IconButton } from '@chakra-ui/react';
 import { FiCopy, FiUsers, FiDollarSign, FiTrendingUp, FiShare2, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
 import { toaster } from './ui/toaster';
@@ -9,6 +9,7 @@ import { referralApi } from '../services/referralApi';
 import { useMonPrice } from '../contexts/MonPriceContext';
 import { formatEther } from 'viem';
 import { unCommify, commify, commifyDecimals, generateBytes32String, getContractAddress, generateReferralCode } from "../utils";
+
 
 interface ReferralStatsProps {
   isExpanded?: boolean;
@@ -30,7 +31,7 @@ interface ReferralTrade {
 }
 
 export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume, token0Symbol, tokenPriceUsd, poolAddress }) => {
-  console.log(`Token price USD in ReferralStats: ${tokenPriceUsd}, poolAddress: ${poolAddress}`);
+  // console.log(`Token price USD in ReferralStats: ${tokenPriceUsd}, poolAddress: ${poolAddress}`);
 
   const { address } = useAccount();
   const { monPrice } = useMonPrice();
@@ -71,11 +72,11 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
 
   const loadReferralStats = async () => {
     setIsLoading(true);
-    console.log('[ReferralStats] Loading stats for address:', address, 'poolAddress:', poolAddress);
+    // console.log('[ReferralStats] Loading stats for address:', address, 'poolAddress:', poolAddress);
     try {
       // Fetch stats from API, filtered by pool if provided
       const stats = await referralApi.getReferralStats(address, poolAddress);
-      console.log('[ReferralStats] Received stats:', stats);
+      // console.log('[ReferralStats] Received stats:', stats);
       
       // Estimate commission (assuming 1% referral fee)
       const commissionRate = 0.01;
@@ -442,12 +443,49 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
                 </Box>
               ))}
             </VStack>
+
           </Box>
+
+          
         )}
+
+        <Box
+          bg="rgba(0, 0, 0, 0.3)"
+          borderRadius="md"
+          p={3}
+          px={4}
+          border="1px solid rgba(255, 149, 0, 0.1)"
+          fontSize="sm"
+          h="120px"
+        >
+          <VStack gap={2} align="stretch" mt={-2}>
+            <Box mt={-4}>
+              <Heading as="h5">
+                Rewards
+              </Heading>                      
+            </Box>
+            <Box>
+              <HStack>
+                <Box>
+                  <Text color="white" fontSize="sm" fontWeight="bold">
+                      {formatNumber(referralStats.totalVolumeETH / 1333.33, 2)}
+                  </Text>
+
+                </Box>
+                <Box>
+                  <Text fontSize="xs" color="#888"> v{token0Symbol}</Text>                      
+                </Box>
+              </HStack>
+            </Box>
+            {/* <Box>
+              <Text fontSize="xs" color="#888"> Claim</Text>
+            </Box> */}
+          </VStack>
+        </Box>
 
         {/* Info Text */}
         <Box
-          bg="rgba(255, 149, 0, 0.05)"
+          bg="rgba(255, 149, 0, 0.05)" 
           borderRadius="md"
           p={3}
           border="1px dashed rgba(255, 149, 0, 0.2)"
