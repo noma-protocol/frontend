@@ -1,3 +1,7 @@
+
+> trollbox-server@1.0.0 start
+> node src/server.js
+
 Loaded 2 pools from pools.json
 [TokenStore] Loaded tokens from file: 2
 [TokenStore] Token details: [
@@ -33,20 +37,20 @@ Created contract for pool BUN/WMON Uniswap at 0x90666407c841fe58358F3ed04a245c5F
 Created contract for pool AVO/WMON PancakeSwap at 0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212 (pancakeswap v3)
 Starting blockchain monitoring with polling...
 ✅ Blockchain monitor initialized successfully
-Starting monitoring from block 36196238
-[POLL] Current block: 36196249, Last processed: 36196238
-[POLL] Processing blocks 36196239 to 36196249
-Processing blocks 36196239 to 36196249
+Starting monitoring from block 36206752
+[POLL] Current block: 36206764, Last processed: 36206752
+[POLL] Processing blocks 36206753 to 36206764
+Processing blocks 36206753 to 36206764
 [NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
 [DEX SWAPS] Processing swaps for 2 pools
 [DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36196239-36196249
+[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36206753-36206764
 [DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196239-36196249
+[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36206753-36206764
 [EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
 [EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
 [EXCHANGE HELPER] Found 0 events
@@ -57,19 +61,19 @@ Processing blocks 36196239 to 36196249
 [EXCHANGE HELPER] Searching for event: 0xa83a87a6247bd3cfb8...
 [EXCHANGE HELPER] Found 0 events
 [EXCHANGE HELPER] Total found 0 trade events
-[POLL] Current block: 36196281, Last processed: 36196249
-[POLL] Processing blocks 36196250 to 36196281
-Processing blocks 36196250 to 36196281
+[POLL] Current block: 36206799, Last processed: 36206764
+[POLL] Processing blocks 36206765 to 36206799
+Processing blocks 36206765 to 36206799
 [NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
 [DEX SWAPS] Processing swaps for 2 pools
 [DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36196250-36196281
+[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36206765-36206799
 [DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196250-36196281
+[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36206765-36206799
 [EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
 [EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
 [EXCHANGE HELPER] Found 0 events
@@ -80,19 +84,19 @@ Processing blocks 36196250 to 36196281
 [EXCHANGE HELPER] Searching for event: 0xa83a87a6247bd3cfb8...
 [EXCHANGE HELPER] Found 0 events
 [EXCHANGE HELPER] Total found 0 trade events
-[POLL] Current block: 36196312, Last processed: 36196281
-[POLL] Processing blocks 36196282 to 36196312
-Processing blocks 36196282 to 36196312
+[POLL] Current block: 36206834, Last processed: 36206799
+[POLL] Processing blocks 36206800 to 36206834
+Processing blocks 36206800 to 36206834
 [NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
 [DEX SWAPS] Processing swaps for 2 pools
 [DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36196282-36196312
+[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36206800-36206834
 [DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196282-36196312
+[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36206800-36206834
 [EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
 [EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
 [EXCHANGE HELPER] Found 0 events
@@ -103,213 +107,19 @@ Processing blocks 36196282 to 36196312
 [EXCHANGE HELPER] Searching for event: 0xa83a87a6247bd3cfb8...
 [EXCHANGE HELPER] Found 0 events
 [EXCHANGE HELPER] Total found 0 trade events
-[POLL] Current block: 36196347, Last processed: 36196312
-[POLL] Processing blocks 36196313 to 36196347
-Processing blocks 36196313 to 36196347
+[POLL] Current block: 36206867, Last processed: 36206834
+[POLL] Processing blocks 36206835 to 36206867
+Processing blocks 36206835 to 36206867
 [NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
 [DEX SWAPS] Processing swaps for 2 pools
 [DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36196313-36196347
+[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36206835-36206867
 [DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
 [DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196313-36196347
-[EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
-[EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x97c6088a966cd0ebbe...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x9169c0979d20b8ac89...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0xa83a87a6247bd3cfb8...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Total found 0 trade events
-[POLL] Current block: 36196383, Last processed: 36196347
-[POLL] Processing blocks 36196348 to 36196383
-Processing blocks 36196348 to 36196383
-[NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
-[DEX SWAPS] Processing swaps for 2 pools
-[DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Found 1 swap events with signature Swap(address,address,int256,int256,uint160,uint128,int24)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 1 swap events in BUN/WMON Uniswap for blocks 36196348-36196383
-[HANDLE SWAP V3] Processing swap event: {
-  pool: 'BUN/WMON Uniswap',
-  sender: '0xD82D7Bdd614bA07527351DE627C558Adbd0f7caE',
-  recipient: '0x54302450bc0C3779bB2669F705afD5DEE19d64B5',
-  amount0: '-21189421849413357613643',
-  amount1: '1000000000000000000',
-  txHash: '0x54c687aba0c79796a664d99b0a12a0a7ce0256d090fa388460d87e59200d02de'
-}
-[HANDLE SWAP V3] 21189.421849413357613643 BUN → 1.0 WMON
-[HANDLE SWAP V3] DEX Swap detected on BUN/WMON Uniswap: 0x54302450bc0C3779bB2669F705afD5DEE19d64B5 swapped 21189.421849413357613643 BUN for 1.0 WMON (tx: 0x54c687aba0c79796a664d99b0a12a0a7ce0256d090fa388460d87e59200d02de)
-[REFERRAL] Tracking referral volume for transaction: {
-  type: 'sell',
-  traderAddress: '0x54302450bc0C3779bB2669F705afD5DEE19d64B5',
-  sender: '0x54302450bc0C3779bB2669F705afD5DEE19d64B5',
-  recipient: '0x90666407c841fe58358F3ed04a245c5F5bd6fD0A',
-  volumeUSD: undefined,
-  txHash: '0x54c687aba0c79796a664d99b0a12a0a7ce0256d090fa388460d87e59200d02de'
-}
-[REFERRAL] Trader address: 0x54302450bc0C3779bB2669F705afD5DEE19d64B5
-[REFERRAL] Checking referral data for: 0x54302450bc0c3779bb2669f705afd5dee19d64b5
-[REFERRAL] Available referred users: [
-  '0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd',
-  '0x281722fe53a483bfa0d7dd9bec8499eb45b5d048',
-  '0xe736715a1bde335b4d21cdf793998ee5b0bae169',
-  '0x12e30fcc16b741a08ccf066074f0547f3ce79f32'
-]
-[REFERRAL] No referral info found for trader
-[DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196348-36196383
-[EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
-[EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x97c6088a966cd0ebbe...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x9169c0979d20b8ac89...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0xa83a87a6247bd3cfb8...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Total found 0 trade events
-[POLL] Current block: 36196418, Last processed: 36196383
-[POLL] Processing blocks 36196384 to 36196418
-Processing blocks 36196384 to 36196418
-[NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
-[DEX SWAPS] Processing swaps for 2 pools
-[DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36196384-36196418
-[DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196384-36196418
-[EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
-[EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x97c6088a966cd0ebbe...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x9169c0979d20b8ac89...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0xa83a87a6247bd3cfb8...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Total found 0 trade events
-[POLL] Current block: 36196451, Last processed: 36196418
-[POLL] Processing blocks 36196419 to 36196451
-Processing blocks 36196419 to 36196451
-[NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
-[DEX SWAPS] Processing swaps for 2 pools
-[DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36196419-36196451
-[DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196419-36196451
-[EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
-[EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x97c6088a966cd0ebbe...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x9169c0979d20b8ac89...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0xa83a87a6247bd3cfb8...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Total found 0 trade events
-[POLL] Current block: 36196482, Last processed: 36196451
-[POLL] Processing blocks 36196452 to 36196482
-Processing blocks 36196452 to 36196482
-[NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
-[DEX SWAPS] Processing swaps for 2 pools
-[DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Found 1 swap events with signature Swap(address,address,int256,int256,uint160,uint128,int24)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 1 swap events in BUN/WMON Uniswap for blocks 36196452-36196482
-[HANDLE SWAP V3] Processing swap event: {
-  pool: 'BUN/WMON Uniswap',
-  sender: '0xD82D7Bdd614bA07527351DE627C558Adbd0f7caE',
-  recipient: '0x54302450bc0C3779bB2669F705afD5DEE19d64B5',
-  amount0: '-10593701696400151982669',
-  amount1: '500000000000000000',
-  txHash: '0x737454cc6bcea3d965f9400a3ce134ccf2642a46410e2e7dacb77aaf4b140853'
-}
-[HANDLE SWAP V3] 10593.701696400151982669 BUN → 0.5 WMON
-[HANDLE SWAP V3] DEX Swap detected on BUN/WMON Uniswap: 0x54302450bc0C3779bB2669F705afD5DEE19d64B5 swapped 10593.701696400151982669 BUN for 0.5 WMON (tx: 0x737454cc6bcea3d965f9400a3ce134ccf2642a46410e2e7dacb77aaf4b140853)
-[REFERRAL] Tracking referral volume for transaction: {
-  type: 'sell',
-  traderAddress: '0x54302450bc0C3779bB2669F705afD5DEE19d64B5',
-  sender: '0x54302450bc0C3779bB2669F705afD5DEE19d64B5',
-  recipient: '0x90666407c841fe58358F3ed04a245c5F5bd6fD0A',
-  volumeUSD: undefined,
-  txHash: '0x737454cc6bcea3d965f9400a3ce134ccf2642a46410e2e7dacb77aaf4b140853'
-}
-[REFERRAL] Trader address: 0x54302450bc0C3779bB2669F705afD5DEE19d64B5
-[REFERRAL] Checking referral data for: 0x54302450bc0c3779bb2669f705afd5dee19d64b5
-[REFERRAL] Available referred users: [
-  '0x98f2243e853afe7d8ac5ddbc32ba167e8b5f1bbd',
-  '0x281722fe53a483bfa0d7dd9bec8499eb45b5d048',
-  '0xe736715a1bde335b4d21cdf793998ee5b0bae169',
-  '0x12e30fcc16b741a08ccf066074f0547f3ce79f32'
-]
-[REFERRAL] No referral info found for trader
-[DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196452-36196482
-[EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
-[EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x97c6088a966cd0ebbe...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x9169c0979d20b8ac89...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0xa83a87a6247bd3cfb8...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Total found 0 trade events
-[POLL] Current block: 36196521, Last processed: 36196482
-[POLL] Processing blocks 36196483 to 36196521
-Processing blocks 36196483 to 36196521
-[NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
-[DEX SWAPS] Processing swaps for 2 pools
-[DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36196483-36196521
-[DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196483-36196521
-[EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
-[EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x97c6088a966cd0ebbe...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0x9169c0979d20b8ac89...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Searching for event: 0xa83a87a6247bd3cfb8...
-[EXCHANGE HELPER] Found 0 events
-[EXCHANGE HELPER] Total found 0 trade events
-[POLL] Current block: 36196557, Last processed: 36196521
-[POLL] Processing blocks 36196522 to 36196557
-Processing blocks 36196522 to 36196557
-[NOMA TRANSFERS] Disabled - only tracking DEX trades through ExchangeHelper
-[DEX SWAPS] Processing swaps for 2 pools
-[DEX SWAPS] Searching for swaps in pool: BUN/WMON Uniswap (0x90666407c841fe58358F3ed04a245c5F5bd6fD0A)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for BUN/WMON Uniswap
-[DEX SWAPS] Total found 0 swap events in BUN/WMON Uniswap for blocks 36196522-36196557
-[DEX SWAPS] Searching for swaps in pool: AVO/WMON PancakeSwap (0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212)
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Trying signature Swap(address,address,int256,in... for AVO/WMON PancakeSwap
-[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36196522-36196557
+[DEX SWAPS] Total found 0 swap events in AVO/WMON PancakeSwap for blocks 36206835-36206867
 [EXCHANGE HELPER] Searching for trades in ExchangeHelper: 0xf1F3b64305E5cC19a949e256f029AfBDbf63e15e
 [EXCHANGE HELPER] Searching for event: 0x33daa9f9211714f679...
 [EXCHANGE HELPER] Found 0 events

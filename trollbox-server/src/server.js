@@ -835,6 +835,8 @@ class ReferralStore {
   // Get referral stats for an address
   getReferralStats(address, poolAddress = null) {
     const normalizedAddress = address.toLowerCase();
+    console.log('[ReferralStore] Getting stats for address:', normalizedAddress, 'poolAddress:', poolAddress);
+    
     const stats = {
       totalReferred: 0,
       referredUsers: [],
@@ -851,16 +853,21 @@ class ReferralStore {
     }
 
     // Calculate volume from trades, optionally filtered by pool
+    console.log('[ReferralStore] Total trades:', this.trades.length);
+    let matchingTrades = 0;
     this.trades.forEach(trade => {
       if (trade.referrerAddress && trade.referrerAddress.toLowerCase() === normalizedAddress) {
         // If poolAddress is provided, only include trades from that pool
         if (!poolAddress || (trade.poolAddress && trade.poolAddress.toLowerCase() === poolAddress.toLowerCase())) {
+          matchingTrades++;
           stats.totalVolumeETH += parseFloat(trade.volumeETH || 0);
           stats.totalVolumeUSD += parseFloat(trade.volumeUSD || 0);
           stats.trades.push(trade);
         }
       }
     });
+    
+    console.log('[ReferralStore] Matching trades for pool:', matchingTrades, 'Total volume ETH:', stats.totalVolumeETH);
 
     return stats;
   }
