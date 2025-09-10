@@ -24,8 +24,8 @@
       "protocol": "pancakeswap",
       "version": "v3",
       "token0": {
-        "symbol": "NOMA",
-        "address": "0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212",
+        "symbol": "AVO",
+        "address": "0x6b44B01922BCeF8A6db75B3147FB604c37a78b7F",
         "decimals": 18
       },
       "token1": {
