@@ -58,7 +58,7 @@ const UpcomingPresales: React.FC = () => {
     );
 
     try {
-      console.log(`Calling contract methods...`);
+      // console.log(`Calling contract methods...`);
       
       let isFinalized, hasExpired, totalRaised, hardCap;
       

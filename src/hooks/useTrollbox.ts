@@ -54,13 +54,13 @@ export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money', auto
   const [shouldConnect, setShouldConnect] = useState(autoConnect);
 
   useEffect(() => {
-    console.log('useTrollbox effect running');
+    // console.log('useTrollbox effect running');
     let mounted = true;
     let connectTimeout: NodeJS.Timeout;
 
     // Check if already connected on mount
     if (globalTrollbox.isConnected()) {
-      console.log('WebSocket already connected, updating state');
+      // console.log('WebSocket already connected, updating state');
       setConnected(true);
       // Request current state from server
       globalTrollbox.sendMessage({ type: 'requestState' });

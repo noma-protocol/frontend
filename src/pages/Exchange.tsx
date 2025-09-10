@@ -93,7 +93,7 @@ const safeParseEther = (value) => {
         
         return parseEther("0");
     } catch (error) {
-        console.error("Error in safeParseEther:", error, "for value:", value);
+        // console.error("Error in safeParseEther:", error, "for value:", value);
         return parseEther("0");
     }
 };
@@ -438,15 +438,15 @@ const Exchange: React.FC = () => {
                         AuxVaultAbi,
                         localProvider
                     );
-                    console.log({ selectedToken });
+                    // console.log({ selectedToken });
                     if (typeof selectedToken?.vault == "undefined") return;
 
-                    console.log(`Selected vault address is ${selectedToken?.vault}`);
+                    // console.log(`Selected vault address is ${selectedToken?.vault}`);
                     const referralEntity = await vaultContract.getReferralEntity(address);
 
                     setTotalVolume(parseFloat(referralEntity.totalReferred || "0"));
-                    console.log({ referralEntity}) 
-                    console.log(`Total referred for ${address} is ${formatEther(referralEntity.totalReferred)}`);
+                    // console.log({ referralEntity}) 
+                    // console.log(`Total referred for ${address} is ${formatEther(referralEntity.totalReferred)}`);
                 } catch (error) {
                     console.error("Error fetching referral stats:", error);
                 }
@@ -493,7 +493,7 @@ const Exchange: React.FC = () => {
                     if (referralStatus.referred) {
                         // User is already referred
                         setReferredBy(referralStatus.referralCode || '');
-                        console.log(`User already referred by: ${referralStatus.referralCode}`);
+                        // console.log(`User already referred by: ${referralStatus.referralCode}`);
                     } else {
                         // Check if user is trying to use their own referral code
                         const ownCode = generateReferralCode(address);
@@ -516,7 +516,7 @@ const Exchange: React.FC = () => {
                         });
                         
                         setReferredBy(urlReferralCode);
-                        console.log(`User ${address} referred by code: ${urlReferralCode}`);
+                        // console.log(`User ${address} referred by code: ${urlReferralCode}`);
                         
                         // Also keep localStorage as backup
                         localStorage.setItem(`noma_referred_by_${address}`, urlReferralCode);
@@ -601,7 +601,7 @@ const Exchange: React.FC = () => {
                 txHash: tradeData.txHash
             });
             
-            console.log('Referral trade tracked via API');
+            // console.log('Referral trade tracked via API');
             
             // Also store locally as backup
             const referralTrades = JSON.parse(localStorage.getItem('noma_referral_trades') || '[]');
@@ -683,7 +683,7 @@ const Exchange: React.FC = () => {
     
     // Calculate safe minimum Y value from chart data
     const computedMinY = chartSeries.length > 0 && chartSeries[0].data && chartSeries[0].data.length > 0
-        ? Math.min(...chartSeries[0].data.map((item) => item.y[2])) * 0.95 // Use the lowest 'low' value with 5% padding
+        ? Math.min(...chartSeries[0].data.map((item) => item.y[2])) * 0.85 // Use the lowest 'low' value with 15% padding (increased from 5%)
         : 0;
     const safeMinY = Math.max(0, computedMinY);
     
@@ -780,7 +780,9 @@ const Exchange: React.FC = () => {
         yaxis: {
             opposite: true,
             min: safeMinY,
-            forceNiceScale: true,
+            max: undefined,  // Let ApexCharts calculate max with padding
+            forceNiceScale: false,  // Disable nice scale to use exact min/max
+            tickAmount: 8,  // More tick marks for better scale
             labels: {
                 style: {
                     colors: '#4a4a4a',
@@ -975,9 +977,9 @@ const Exchange: React.FC = () => {
             // Add pool parameter if available
             if (pool && pool !== '0x0000000000000000000000000000000000000000') {
                 url.searchParams.append('pool', pool);
-                console.log('[fetchTokenPriceStats] Adding pool parameter:', pool);
+                // console.log('[fetchTokenPriceStats] Adding pool parameter:', pool);
             } else {
-                console.log('[fetchTokenPriceStats] No pool parameter provided or zero address');
+                // console.log('[fetchTokenPriceStats] No pool parameter provided or zero address');
             }
             
             const response = await fetch(url.toString());
@@ -1038,12 +1040,12 @@ const Exchange: React.FC = () => {
             // Add pool address if available
             if (pool && pool !== '0x0000000000000000000000000000000000000000') {
                 url.searchParams.append('pool', pool);
-                console.log('[fetchOHLCData] Adding pool parameter:', pool);
+                // console.log('[fetchOHLCData] Adding pool parameter:', pool);
             } else {
-                console.log('[fetchOHLCData] No pool parameter provided or zero address');
+                // console.log('[fetchOHLCData] No pool parameter provided or zero address');
             }
             
-            console.log('[fetchOHLCData] Final URL:', url.toString());
+            // console.log('[fetchOHLCData] Final URL:', url.toString());
             
             const response = await fetch(url.toString());
             if (!response.ok) {
@@ -1097,15 +1099,15 @@ const Exchange: React.FC = () => {
             setIsChartLoading(true);
             
             try {
-                console.log('[loadChartData] poolInfo:', poolInfo);
-                console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
-                console.log('[loadChartData] selectedToken:', selectedToken);
-                console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
-                console.log('[loadChartData] selectedToken:', selectedToken);
+                // console.log('[loadChartData] poolInfo:', poolInfo);
+                // console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
+                // console.log('[loadChartData] selectedToken:', selectedToken);
+                // console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
+                // console.log('[loadChartData] selectedToken:', selectedToken);
                 
                 // Skip API calls if no pool address is available
                 if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
-                    console.log('[loadChartData] Skipping API calls - no valid pool address');
+                    // console.log('[loadChartData] Skipping API calls - no valid pool address');
                     setIsChartLoading(false);
                     return;
                 }
@@ -1121,10 +1123,10 @@ const Exchange: React.FC = () => {
                     if (priceStats && priceStats.volume) {
                         const intervalKey = mapTimeframeToApiInterval(chartTimeframe);
                         const volume = priceStats.volume[intervalKey] || priceStats.volume['24h'] || 0;
-                        console.log('[Volume Debug] Pool:', poolInfo.poolAddress, 'API response:', priceStats, 'Selected interval:', intervalKey, 'Volume in MON:', volume);
+                        // console.log('[Volume Debug] Pool:', poolInfo.poolAddress, 'API response:', priceStats, 'Selected interval:', intervalKey, 'Volume in MON:', volume);
                         setIntervalVolume(volume);
                     } else {
-                        console.log('[Volume Debug] No volume data from API, setting to 0');
+                        // console.log('[Volume Debug] No volume data from API, setting to 0');
                         setIntervalVolume(0);
                     }
                 }
@@ -1311,7 +1313,7 @@ const Exchange: React.FC = () => {
                 
                 // Check if we've already processed this transaction
                 if (processedTxHashes.has(txHash)) {
-                    console.log("Transaction already processed:", txHash);
+                    // console.log("Transaction already processed:", txHash);
                     return;
                 }
                 
@@ -1404,7 +1406,7 @@ const Exchange: React.FC = () => {
                 
                 // Only process events that happened after we started listening
                 if (eventTimestamp < startListeningTime) {
-                    console.log("Ignoring historical event from:", new Date(eventTimestamp));
+                    // console.log("Ignoring historical event from:", new Date(eventTimestamp));
                     return;
                 }
                 
@@ -1491,30 +1493,30 @@ const Exchange: React.FC = () => {
                 // Use pool address from token if available, otherwise fetch it
                 if (selectedToken.poolAddress) {
                     // Token already has pool address from vault data
-                    console.log("Using pool address from token:", selectedToken.poolAddress);
-                    console.log("Setting poolInfo with address:", selectedToken.poolAddress);
-                    console.log("Setting poolInfo with address:", selectedToken.poolAddress);
+                    // console.log("Using pool address from token:", selectedToken.poolAddress);
+                    // console.log("Setting poolInfo with address:", selectedToken.poolAddress);
+                    // console.log("Setting poolInfo with address:", selectedToken.poolAddress);
                     setPoolInfo({ 
                         poolAddress: selectedToken.poolAddress,
                         token0: selectedToken.token0,
                         token1: selectedToken.token1
                     });
-                    console.log("poolInfo should now be updated");
-                    console.log("poolInfo should now be updated");
+                    // console.log("poolInfo should now be updated");
+                    // console.log("poolInfo should now be updated");
                 } else if (selectedToken.token0 && selectedToken.token1) {
                     // Fallback: fetch pool address if not available
                     try {
                         // Determine protocol for this token - use token's own protocol or default to uniswap
                         const protocol = selectedToken.selectedProtocol || tokenProtocols[selectedToken.symbol] || "uniswap";
-                        console.log(`[TOKEN SELECTION] Token: ${selectedToken.symbol}, Protocol: ${protocol}`);
-                        console.log(`[TOKEN SELECTION] selectedToken.selectedProtocol:`, selectedToken.selectedProtocol);
-                        console.log(`[TOKEN SELECTION] tokenProtocols[${selectedToken.symbol}]:`, tokenProtocols[selectedToken.symbol]);
-                        console.log(`[TOKEN SELECTION] Full tokenProtocols:`, tokenProtocols);
-                        console.log(`[TOKEN SELECTION] Token0: ${selectedToken.token0}, Token1: ${selectedToken.token1}`);
+                        // console.log(`[TOKEN SELECTION] Token: ${selectedToken.symbol}, Protocol: ${protocol}`);
+                        // console.log(`[TOKEN SELECTION] selectedToken.selectedProtocol:`, selectedToken.selectedProtocol);
+                        // console.log(`[TOKEN SELECTION] tokenProtocols[${selectedToken.symbol}]:`, tokenProtocols[selectedToken.symbol]);
+                        // console.log(`[TOKEN SELECTION] Full tokenProtocols:`, tokenProtocols);
+                        // console.log(`[TOKEN SELECTION] Token0: ${selectedToken.token0}, Token1: ${selectedToken.token1}`);
                         
                         // Check if we have a valid pool address already
                         if (selectedToken.poolAddress && selectedToken.poolAddress !== zeroAddress) {
-                            console.log(`[TOKEN SELECTION] Using existing pool address: ${selectedToken.poolAddress}`);
+                            // console.log(`[TOKEN SELECTION] Using existing pool address: ${selectedToken.poolAddress}`);
                             setPoolInfo({ 
                                 poolAddress: selectedToken.poolAddress,
                                 token0: selectedToken.token0,
@@ -1522,7 +1524,7 @@ const Exchange: React.FC = () => {
                             });
                         } else {
                             // Fetch pool address if not available or is zero address
-                            console.log(`[TOKEN SELECTION] Fetching new pool address...`);
+                            // console.log(`[TOKEN SELECTION] Fetching new pool address...`);
                             const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1, protocol);
                             
                             if (poolAddress && poolAddress !== zeroAddress) {
@@ -1542,9 +1544,9 @@ const Exchange: React.FC = () => {
                                     token0: poolToken0,
                                     token1: poolToken1
                                 });
-                                console.log(`[TOKEN SELECTION] Pool info updated with address: ${poolAddress}`);
+                                // console.log(`[TOKEN SELECTION] Pool info updated with address: ${poolAddress}`);
                             } else {
-                                console.log(`[TOKEN SELECTION] No valid pool found, pool address is: ${poolAddress}`);
+                                // console.log(`[TOKEN SELECTION] No valid pool found, pool address is: ${poolAddress}`);
                                 setPoolInfo({ poolAddress: poolAddress || null });
                             }
                         }
@@ -1553,7 +1555,7 @@ const Exchange: React.FC = () => {
                         setPoolInfo({ poolAddress: null });
                     }
                 } else {
-                    console.log("[TOKEN SELECTION] Missing token0 or token1, cannot fetch pool");
+                    // console.log("[TOKEN SELECTION] Missing token0 or token1, cannot fetch pool");
                 }
                 
                 // Set USD price for MON
@@ -1583,28 +1585,38 @@ const Exchange: React.FC = () => {
                 // console.log("Floor price (IMV) set to:", numericIMV);
             } else {
                 setFloorPrice(0);
-                console.log("Invalid IMV value, floor price set to 0");
+                // console.log("Invalid IMV value, floor price set to 0");
             }
         } else {
             setFloorPrice(0);
-            console.log("No IMV data available");
+            // console.log("No IMV data available");
         }
     }, [imvData]);
 
     // Update chart y-axis min when chart data changes
     useEffect(() => {
-        const newMinY = chartSeries.length > 0 && chartSeries[0].data && chartSeries[0].data.length > 0
-            ? Math.min(...chartSeries[0].data.map((item) => item.y[2])) * 0.95
-            : 0;
-        const newSafeMinY = Math.max(0, newMinY);
-        
-        setChartOptions(prevOptions => ({
-            ...prevOptions,
-            yaxis: {
-                ...prevOptions.yaxis,
-                min: newSafeMinY
-            }
-        }));
+        if (chartSeries.length > 0 && chartSeries[0].data && chartSeries[0].data.length > 0) {
+            const allLows = chartSeries[0].data.map((item) => item.y[2]);
+            const allHighs = chartSeries[0].data.map((item) => item.y[1]);
+            
+            const minPrice = Math.min(...allLows);
+            const maxPrice = Math.max(...allHighs);
+            const priceRange = maxPrice - minPrice;
+            
+            // Add 20% padding on both sides to make candles appear taller
+            const padding = priceRange * 0.2;
+            const newMinY = Math.max(0, minPrice - padding);
+            const newMaxY = maxPrice + padding;
+            
+            setChartOptions(prevOptions => ({
+                ...prevOptions,
+                yaxis: {
+                    ...prevOptions.yaxis,
+                    min: newMinY,
+                    max: newMaxY
+                }
+            }));
+        }
     }, [chartSeries]);
 
     // Update chart annotations when spot price changes
@@ -1684,12 +1696,12 @@ const Exchange: React.FC = () => {
     
     // Fetch pool address from Uniswap V3 Factory
     const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
-        console.log(`[fetchPoolAddress] Called with:`, {
-            token0,
-            token1,
-            protocol,
-            defaultProtocol: "uniswap"
-        });
+        // console.log(`[fetchPoolAddress] Called with:`, {
+        //     token0,
+        //     token1,
+        //     protocol,
+        //     defaultProtocol: "uniswap"
+        // });
         
         // Select the appropriate factory based on protocol
         // Handle both "pancakeswap" and "pancake" as PancakeSwap
@@ -1698,11 +1710,11 @@ const Exchange: React.FC = () => {
         ? config.protocolAddresses.pancakeV3Factory 
         : config.protocolAddresses.uniswapV3Factory;
         
-        console.log(`[fetchPoolAddress] Using protocol: ${protocol}, Factory: ${factoryAddress}`);
-        console.log(`[fetchPoolAddress] Available factories:`, {
-            uniswap: config.protocolAddresses.uniswapV3Factory,
-            pancake: config.protocolAddresses.pancakeV3Factory
-        });
+        // console.log(`[fetchPoolAddress] Using protocol: ${protocol}, Factory: ${factoryAddress}`);
+        // console.log(`[fetchPoolAddress] Available factories:`, {
+        //     uniswap: config.protocolAddresses.uniswapV3Factory,
+        //     pancake: config.protocolAddresses.pancakeV3Factory
+        // });
         
         const factoryContract = new ethers.Contract(
         factoryAddress,
@@ -1710,11 +1722,11 @@ const Exchange: React.FC = () => {
         localProvider
         );
         const feeTier = isPancakeSwap ? 2500 : 3000;
-        console.log(`[fetchPoolAddress] Using fee tier: ${feeTier} for protocol: ${protocol} (isPancakeSwap: ${isPancakeSwap})`);
+        // console.log(`[fetchPoolAddress] Using fee tier: ${feeTier} for protocol: ${protocol} (isPancakeSwap: ${isPancakeSwap})`);
 
         const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
 
-        console.log(`[fetchPoolAddress] Result: Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
+        // console.log(`[fetchPoolAddress] Result: Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
         return poolAddress;
     }
 
@@ -1751,7 +1763,7 @@ const Exchange: React.FC = () => {
                     return;
                 }
                 
-                console.log('[VAULT FETCH] Current tokenProtocols:', tokenProtocols);
+                // console.log('[VAULT FETCH] Current tokenProtocols:', tokenProtocols);
                 
                 // If no deployers found, show empty state after minimum loading time
                 if (deployersData.length === 0) {
@@ -1772,8 +1784,8 @@ const Exchange: React.FC = () => {
                     const response = await tokenApi.getTokens();
                     // API already filters for deployed tokens
                     const deployedTokens = response.tokens;
-                    console.log('[EXCHANGE] API Response tokens:', deployedTokens);
-                    console.log('[EXCHANGE] Token statuses:', deployedTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
+                    // console.log('[EXCHANGE] API Response tokens:', deployedTokens);
+                    // console.log('[EXCHANGE] Token statuses:', deployedTokens.map(t => ({ symbol: t.tokenSymbol, status: t.status })));
                     
                     deployedTokenSymbols = new Set(deployedTokens.map(token => token.tokenSymbol));
                     // Create a map for quick lookup and update protocols
@@ -1782,13 +1794,13 @@ const Exchange: React.FC = () => {
                         deployedTokensMap.set(token.tokenSymbol, token);
                         if (token.tokenSymbol && token.selectedProtocol) {
                             protocols[token.tokenSymbol] = token.selectedProtocol;
-                            console.log(`[EXCHANGE] Token protocol: ${token.tokenSymbol} -> ${token.selectedProtocol}`);
+                            // console.log(`[EXCHANGE] Token protocol: ${token.tokenSymbol} -> ${token.selectedProtocol}`);
                         }
                     });
                     // Update token protocols from deployed tokens
                     setTokenProtocols(protocols);
-                    console.log('Deployed tokens from API:', deployedTokens.length, 'tokens');
-                    console.log('Token symbols:', Array.from(deployedTokenSymbols));
+                    // console.log('Deployed tokens from API:', deployedTokens.length, 'tokens');
+                    // console.log('Token symbols:', Array.from(deployedTokenSymbols));
                 } catch (error) {
                     console.error('Failed to fetch deployed tokens:', error);
                     // Continue without filtering if API fails
@@ -1803,9 +1815,9 @@ const Exchange: React.FC = () => {
                 const allVaultDescriptions = await Promise.all(
                     deployersData.map(async (deployer) => {
                         try {
-                            console.log('[EXCHANGE] Fetching vaults for deployer:', deployer);
+                            // console.log('[EXCHANGE] Fetching vaults for deployer:', deployer);
                             const vaultsData = await nomaFactoryContract.getVaults(deployer);
-                            console.log('[EXCHANGE] Vaults data:', vaultsData);
+                            // console.log('[EXCHANGE] Vaults data:', vaultsData);
                             
                             if (!vaultsData || vaultsData.length === 0) {
                                 return [];
@@ -1838,7 +1850,7 @@ const Exchange: React.FC = () => {
                                         // Look up protocol from deployedTokensMap
                                         const tokenData = deployedTokensMap.get(tokenSymbol);
                                         const protocol = tokenData?.selectedProtocol || tokenProtocols[tokenSymbol] || "uniswap";
-                                        console.log(`[VAULT] Token ${tokenSymbol} protocol: ${protocol} (from deployedTokensMap: ${tokenData?.selectedProtocol}, from tokenProtocols: ${tokenProtocols[tokenSymbol]})`);
+                                        // console.log(`[VAULT] Token ${tokenSymbol} protocol: ${protocol} (from deployedTokensMap: ${tokenData?.selectedProtocol}, from tokenProtocols: ${tokenProtocols[tokenSymbol]}`);
                                         
                                         return {
                                             tokenName: vaultDescriptionData[0],
@@ -1855,7 +1867,7 @@ const Exchange: React.FC = () => {
                                                     vaultDescriptionData[4],
                                                     protocol
                                                 );
-                                                console.log(`[VAULT LOAD] Token ${vaultDescriptionData[1]}, Pool: ${pool}`);
+                                                // console.log(`[VAULT LOAD] Token ${vaultDescriptionData[1]}, Pool: ${pool}`);
                                                 return pool;
                                             })(),
                                             spotPrice: spotPriceWei,
@@ -1876,25 +1888,25 @@ const Exchange: React.FC = () => {
                 const flattenedVaults = allVaultDescriptions.flat().filter(Boolean);
                 
                 // Filter vaults to only include deployed tokens
-                console.log('[EXCHANGE] deployedTokenSymbols size:', deployedTokenSymbols.size);
-                console.log('[EXCHANGE] deployedTokenSymbols:', Array.from(deployedTokenSymbols));
-                console.log('[EXCHANGE] flattenedVaults count:', flattenedVaults.length);
-                console.log('[EXCHANGE] vault symbols:', flattenedVaults.map(v => v.tokenSymbol));
+                // console.log('[EXCHANGE] deployedTokenSymbols size:', deployedTokenSymbols.size);
+                // console.log('[EXCHANGE] deployedTokenSymbols:', Array.from(deployedTokenSymbols));
+                // console.log('[EXCHANGE] flattenedVaults count:', flattenedVaults.length);
+                // console.log('[EXCHANGE] vault symbols:', flattenedVaults.map(v => v.tokenSymbol));
                 
                 const deployedVaults = deployedTokenSymbols.size > 0 
                     ? flattenedVaults.filter(vault => {
                         // Check if token is in the deployed tokens set
                         const isDeployed = deployedTokenSymbols.has(vault.tokenSymbol);
                         if (!isDeployed) {
-                            console.log(`[EXCHANGE] Filtering out non-deployed token: ${vault.tokenSymbol}`);
+                            // console.log(`[EXCHANGE] Filtering out non-deployed token: ${vault.tokenSymbol}`);
                         } else {
-                            console.log(`[EXCHANGE] Including deployed token: ${vault.tokenSymbol}`);
+                            // console.log(`[EXCHANGE] Including deployed token: ${vault.tokenSymbol}`);
                         }
                         return isDeployed;
                     })
                     : [] // If API fails, show no tokens rather than risk showing non-deployed ones
                 
-                console.log('[EXCHANGE] Final deployedVaults:', deployedVaults);
+                // console.log('[EXCHANGE] Final deployedVaults:', deployedVaults);
                 setVaultDescriptions(deployedVaults);
                 
                 // Fetch price stats from API with default 24h interval
@@ -1908,8 +1920,8 @@ const Exchange: React.FC = () => {
                 }
                 
                 // Convert vault descriptions to token format for display
-                console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
-                console.log('Vault pool addresses:', deployedVaults.map(v => ({ symbol: v.tokenSymbol, poolAddress: v.poolAddress })));
+                // console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
+                // console.log('Vault pool addresses:', deployedVaults.map(v => ({ symbol: v.tokenSymbol, poolAddress: v.poolAddress })));
                 const tokenList = deployedVaults.map((vault, index) => {
                     // Use API percentage change for NOMA token, random for others
                     const isNoma = vault.tokenSymbol === 'NOMA' || vault.tokenSymbol === 'noma';
@@ -1923,13 +1935,13 @@ const Exchange: React.FC = () => {
                     const tokenSupply = tokenData?.tokenSupply || "0";
                     
                     const tokenProtocol = tokenProtocols[vault.tokenSymbol] || "uniswap";
-                    console.log(`[TOKEN LIST] Token ${vault.tokenSymbol} protocol: ${tokenProtocol}`);
+                    // console.log(`[TOKEN LIST] Token ${vault.tokenSymbol} protocol: ${tokenProtocol}`);
                     
                     // Calculate price and FDV
                     const tokenPrice = vault.spotPrice ? (parseFloat(formatEther(vault.spotPrice)) || 0.0000186) : 0.0000186;
                     const supplyInTokens = parseFloat(tokenSupply);
                     const calculatedFdv = supplyInTokens * tokenPrice * (monPrice || 1); // Use 1 as fallback if monPrice not loaded
-                    console.log(`[TOKEN LIST] ${vault.tokenSymbol} - Supply: ${tokenSupply}, Price: ${tokenPrice}, MonPrice: ${monPrice}, FDV: ${calculatedFdv}`);
+                    // console.log(`[TOKEN LIST] ${vault.tokenSymbol} - Supply: ${tokenSupply}, Price: ${tokenPrice}, MonPrice: ${monPrice}, FDV: ${calculatedFdv}`);
                     
                     return {
                         id: index + 1,
@@ -2051,13 +2063,13 @@ const Exchange: React.FC = () => {
         }
         if (deployStep == 0) {
             if (tokenName == "" || tokenSymbol == "" || tokenDecimals == 0) {
-                console.log("error", "Please fill in all fields");
+                // console.log("error", "Please fill in all fields");
                 setError("Please fill in all fields");
                 return;
             }
         } else if (deployStep == 1) {
             if (tokenSupply == 0 || price == 0 || token1 == "") {
-                console.log("error", "Please fill in all fields");
+                // console.log("error", "Please fill in all fields");
                 setError("Please fill in all fields");
                 return;
             }
@@ -2078,7 +2090,7 @@ const Exchange: React.FC = () => {
         if (currentStep < 0) {
         currentStep = 0;
         }
-        console.log("Current Step: ", currentStep);
+        // console.log("Current Step: ", currentStep);
         setDeployStep(currentStep);
     }
 
@@ -2161,7 +2173,7 @@ const Exchange: React.FC = () => {
     }
 
     const handleSetSupply = (event) => {
-        console.log("Token Supply: ", event.target.value);
+        // console.log("Token Supply: ", event.target.value);
         if (event.target.value != "") {
             const targetValue = unCommify(event.target.value);
             setTokenSupply(targetValue);
@@ -2177,7 +2189,7 @@ const Exchange: React.FC = () => {
     }
 
     const handleSetPrice = (value) => {
-        console.log(`Got value ${value}`)
+        // console.log(`Got value ${value}`)
         if (value == (floorPrice * 1.25)) return;
 
         const inputValueStr = value.trim(); // Trim whitespace
@@ -2222,7 +2234,7 @@ const Exchange: React.FC = () => {
         }
     
         // Log the result for debugging
-        console.log(`Input: ${inputValueStr}, Sale Price: ${formattedSalePrice}`);
+        // console.log(`Input: ${inputValueStr}, Sale Price: ${formattedSalePrice}`);
     
         // Update state
         setPrice(`${formattedSalePrice}`);
@@ -2246,17 +2258,17 @@ const Exchange: React.FC = () => {
     }
 
     const handleSetPresale = (event) => {
-        console.log("Presale: ", event.target.value);
+        // console.log("Presale: ", event.target.value);
         setPresale(event.target.value);
     }
 
     const handleSetDuration = (event) => {
-        console.log("Duration: ", event.target.value);
+        // console.log("Duration: ", event.target.value);
         setDuration(event.target.value);
     }
 
     const handleSetSoftCap = (event) => {
-        console.log("Soft Cap: ", event.target.value);
+        // console.log("Soft Cap: ", event.target.value);
 
         if (event.target.value != "") {
             const targetValue = unCommify(event.target.value);
@@ -2264,7 +2276,7 @@ const Exchange: React.FC = () => {
                 const valueNum = parseFloat(targetValue);
                 if (!isNaN(valueNum) && isFinite(valueNum) && valueNum >= 0) {
                     const valueString = valueNum.toFixed(18).replace(/\.?0+$/, '');
-                    console.log(`Setting soft cap to ${parseEther(valueString)}`);
+                    // console.log(`Setting soft cap to ${parseEther(valueString)}`);
                     setSoftCap(targetValue);
                 } else {
                     console.error("Invalid soft cap value:", targetValue);
@@ -3009,7 +3021,7 @@ const Exchange: React.FC = () => {
             urlReferralCode ? "0x" + urlReferralCode  :  "0x" + "00".repeat(8)
         ];
         
-        console.log({ args} );
+        // console.log({ args} );
 
         setIsLoading(true);
         setIsLoadingExecuteTrade(true);
@@ -3030,13 +3042,13 @@ const Exchange: React.FC = () => {
             const hasMaxApproval = isMaxApprovedWeth();
             const skipApproval = (approveMax && hasMaxApproval) || (!approveMax && currentAllowance >= requiredAmount);
             
-            console.log("Buy WETH approval check:", {
-                approveMax,
-                hasMaxApproval,
-                currentAllowance: currentAllowance.toString(),
-                requiredAmount: requiredAmount.toString(),
-                skipApproval
-            });
+            // console.log("Buy WETH approval check:", {
+            //     approveMax,
+            //     hasMaxApproval,
+            //     currentAllowance: currentAllowance.toString(),
+            //     requiredAmount: requiredAmount.toString(),
+            //     skipApproval
+            // });
             
             if (skipApproval) {
                 // Skip approval and directly buy
@@ -3150,13 +3162,13 @@ const Exchange: React.FC = () => {
         const hasMaxApproval = isMaxApproved();
         const skipApproval = (approveMax && hasMaxApproval) || (!approveMax && currentAllowance >= requiredAmount);
         
-        console.log("Sell token approval check:", {
-            approveMax,
-            hasMaxApproval,
-            currentAllowance: currentAllowance.toString(),
-            requiredAmount: requiredAmount.toString(),
-            skipApproval
-        });
+        // console.log("Sell token approval check:", {
+        //     approveMax,
+        //     hasMaxApproval,
+        //     currentAllowance: currentAllowance.toString(),
+        //     requiredAmount: requiredAmount.toString(),
+        //     skipApproval
+        // });
         
         if (skipApproval) {
             // Skip approval and directly sell
@@ -3390,12 +3402,12 @@ const Exchange: React.FC = () => {
                                             key={token.id}
                                             cursor="pointer"
                                             onClick={() => {
-                                                console.log("=== TOKEN CLICK ===");
-                                                console.log("=== TOKEN CLICK ===");
-                                                console.log("Selected token:", token);
-                                                console.log("Token pool address:", token.poolAddress);
-                                                console.log("Token protocol:", token.selectedProtocol);
-                                                console.log("Full token object:", JSON.stringify(token, null, 2));
+                                                // console.log("=== TOKEN CLICK ===");
+                                                // console.log("=== TOKEN CLICK ===");
+                                                // console.log("Selected token:", token);
+                                                // console.log("Token pool address:", token.poolAddress);
+                                                // console.log("Token protocol:", token.selectedProtocol);
+                                                // console.log("Full token object:", JSON.stringify(token, null, 2));
                                                 setSelectedToken(token);
                                                 if (isMobile) {
                                                     setIsTokenListCollapsed(true);
