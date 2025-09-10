@@ -79,6 +79,7 @@ const Markets: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [tokenProtocols, setTokenProtocols] = useState<{ [symbol: string]: string }>({});
   const [tokenLogos, setTokenLogos] = useState<{ [symbol: string]: string }>({});
+  const [protocolsLoaded, setProtocolsLoaded] = useState(false);
 
   const [modalFocus, setModalFocus] = useState<boolean>(false);
 
@@ -90,24 +91,38 @@ const Markets: React.FC = () => {
   const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
     // Select the appropriate factory based on protocol
     console.log(`[fetchPoolAddress] Protocol: ${protocol}, Token0: ${token0}, Token1: ${token1}`)
-    const factoryAddress = protocol === "uniswap" 
-      ? config.protocolAddresses.uniswapV3Factory 
-      : config.protocolAddresses.pancakeV3Factory;
     
-    console.log(`[fetchPoolAddress] Using factory: ${factoryAddress}`)
+    // Handle both "pancakeswap" and "pancake" as PancakeSwap
+    const isPancakeSwap = protocol === "pancakeswap" || protocol === "pancake";
+    const factoryAddress = isPancakeSwap
+      ? config.protocolAddresses.pancakeV3Factory 
+      : config.protocolAddresses.uniswapV3Factory;
+    
+    console.log(`[fetchPoolAddress] Using factory: ${factoryAddress} (isPancakeSwap: ${isPancakeSwap})`)
     
     const factoryContract = new ethers.Contract(
       factoryAddress,
       uniswapV3FactoryABI, // Same ABI for both Uniswap and PancakeSwap V3
       localProvider
     );
-    const feeTier = protocol === "uniswap" ? 3000 : 2500;
+    const feeTier = isPancakeSwap ? 2500 : 3000;
     console.log(`[fetchPoolAddress] Using fee tier: ${feeTier}`)
 
-    const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
-    console.log(`[fetchPoolAddress] Retrieved pool address: ${poolAddress}`)
-
-    return poolAddress;
+    try {
+      const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
+      console.log(`[fetchPoolAddress] Retrieved pool address: ${poolAddress}`)
+      
+      // Check if it's a zero address
+      if (poolAddress === "0x0000000000000000000000000000000000000000") {
+        console.warn(`[fetchPoolAddress] Zero address returned for ${protocol} pool with tokens ${token0} and ${token1}, fee tier ${feeTier}`);
+        console.warn(`[fetchPoolAddress] Factory being used: ${factoryAddress}`);
+      }
+      
+      return poolAddress;
+    } catch (error) {
+      console.error(`[fetchPoolAddress] Error fetching pool address:`, error);
+      return "0x0000000000000000000000000000000000000000";
+    }
   }
 
 
@@ -145,8 +160,11 @@ const Markets: React.FC = () => {
         
         setTokenProtocols(protocols);
         setTokenLogos(logos);
-        console.log("Token protocols loaded:", protocols);
-        console.log("Token logos loaded:", logos);
+        setProtocolsLoaded(true);
+        console.log("[MARKETS] Token protocols loaded:", protocols);
+        console.log("[MARKETS] BUN protocol:", protocols["BUN"]);
+        console.log("[MARKETS] AVO protocol:", protocols["AVO"]);
+        console.log("[MARKETS] Token logos loaded:", logos);
       } catch (error) {
         console.error("Failed to fetch token protocols:", error);
       }
@@ -186,8 +204,8 @@ const Markets: React.FC = () => {
   });
 
   useEffect(() => {
-    // Set loading state true whenever deployersData changes (either loads initially or refreshes)
-    if (typeof deployersData != "undefined") {
+    // Only proceed if we have both deployersData and protocols loaded
+    if (typeof deployersData !== "undefined" && protocolsLoaded) {
       setIsAllVaultsLoading(true);
 
       const nomaFactoryContract = new ethers.Contract(
@@ -236,6 +254,8 @@ const Markets: React.FC = () => {
               setVaultDescriptions([]);
               return;
             }
+            
+            console.log("[MARKETS] Fetching vaults with token protocols:", tokenProtocols);
       
             const allVaultDescriptions = await Promise.all(
               deployersData.map(async (deployer) => {
@@ -262,6 +282,7 @@ const Markets: React.FC = () => {
                         
                         // Determine protocol for this token
                         const protocol = tokenProtocols[tokenSymbol] || "uniswap";
+                        console.log(`[VAULT] Processing ${tokenSymbol}, protocol from map: ${tokenProtocols[tokenSymbol]}, using: ${protocol}`);
                         
                         const hasPresale = vaultDescriptionData[7] !== zeroAddress;
                         let isPresaleFinalized = false;
@@ -433,7 +454,7 @@ const Markets: React.FC = () => {
 
     setTriggerReload(false);
 
-  }, [deployersData]);
+  }, [deployersData, protocolsLoaded]);
  
 
   // Handle vault selection click
