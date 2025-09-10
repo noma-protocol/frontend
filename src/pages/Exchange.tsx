@@ -136,7 +136,6 @@ import config from '../config';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment.json";
 import { FaArrowTrendUp, FaArrowTrendDown } from "react-icons/fa6";
-import { LuSearch } from "react-icons/lu";
 import { useMonPrice } from '../contexts/MonPriceContext';
 
 const addresses = config.chain == "local"
