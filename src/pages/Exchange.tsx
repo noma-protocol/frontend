@@ -3214,9 +3214,9 @@ const Exchange: React.FC = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 bg="#2a2a2a"
                                 border="none"
-                                _placeholder={{ color: "#666" }}
-                                h="36px"
-                                fontSize="sm"
+                                _placeholder={{ color: "#666", fontSize: "xs" }}
+                                h="32px"
+                                fontSize="xs"
                             />
                             <IconButton
                                 ml={2}
@@ -3249,6 +3249,8 @@ const Exchange: React.FC = () => {
                                         sortOrder === "desc" ? <LuArrowDown /> : <LuArrowUp />
                                     ) : <LuArrowUpDown />
                                 }
+                                fontSize="2xs"
+                                h="26px"
                             >
                                 Price
                             </Button>
@@ -3271,6 +3273,8 @@ const Exchange: React.FC = () => {
                                         sortOrder === "desc" ? <LuArrowDown /> : <LuArrowUp />
                                     ) : <LuArrowUpDown />
                                 }
+                                fontSize="2xs"
+                                h="26px"
                             >
                                 24h Change
                             </Button>
@@ -3284,6 +3288,8 @@ const Exchange: React.FC = () => {
                                         setSortBy("default");
                                         setSortOrder("desc");
                                     }}
+                                    fontSize="2xs"
+                                    h="26px"
                                 >
                                     Clear
                                 </Button>
@@ -3372,10 +3378,10 @@ const Exchange: React.FC = () => {
                             <Table.Root size="sm" variant="unstyled" borderSpacing="0">
                                 <Table.Header>
                                     <Table.Row>
-                                        <Table.ColumnHeader color="#888" fontSize="xs" py={2} pl={isMobile ? 2 : 0} pr={isMobile ? 1 : 3}>Token</Table.ColumnHeader>
-                                        <Table.ColumnHeader color="#888" fontSize="xs" py={2} px={isMobile ? 1 : 2} textAlign="right">Price</Table.ColumnHeader>
-                                        <Table.ColumnHeader color="#888" fontSize="xs" py={2} px={isMobile ? 1 : 2} textAlign="right">24h</Table.ColumnHeader>
-                                        {!isMobile && <Table.ColumnHeader color="#888" fontSize="xs" py={2} pr={3} pl={2} textAlign="right">FDV</Table.ColumnHeader>}
+                                        <Table.ColumnHeader color="#888" fontSize="2xs" py={1} pl={isMobile ? 2 : 0} pr={isMobile ? 1 : 3}>Token</Table.ColumnHeader>
+                                        <Table.ColumnHeader color="#888" fontSize="2xs" py={1} px={isMobile ? 1 : 2} textAlign="right">Price</Table.ColumnHeader>
+                                        <Table.ColumnHeader color="#888" fontSize="2xs" py={1} px={isMobile ? 1 : 2} textAlign="right">24h</Table.ColumnHeader>
+                                        {!isMobile && <Table.ColumnHeader color="#888" fontSize="2xs" py={1} pr={3} pl={2} textAlign="right">FDV</Table.ColumnHeader>}
                                     </Table.Row>
                                 </Table.Header>
                                 <Table.Body>
@@ -3398,7 +3404,7 @@ const Exchange: React.FC = () => {
                                             transition="all 0.2s"
                                         >
                                             <Table.Cell 
-                                                py={isMobile ? 1 : 2} 
+                                                py={isMobile ? 0.5 : 1} 
                                                 pl={selectedToken?.id === token.id ? "8px" : (isMobile ? 2 : 0)} 
                                                 pr={isMobile ? 1 : 3} 
                                                 bg={selectedToken?.id === token.id ? "#2a2a2a" : "transparent"}
@@ -3420,7 +3426,7 @@ const Exchange: React.FC = () => {
                                                             />
                                                         </Box>
                                                         <Box>
-                                                            <Text color="white" fontSize={isMobile ? "xs" : "sm"} fontWeight="500" whiteSpace="nowrap">
+                                                            <Text color="white" fontSize="xs" fontWeight="500" whiteSpace="nowrap">
                                                                 {token.symbol}
                                                             </Text>
                                                         </Box>
@@ -3436,7 +3442,7 @@ const Exchange: React.FC = () => {
                                                 _hover={{ bg: selectedToken?.id === token.id ? "#2a2a2a" : "#252525" }}
                                                 transition="all 0.2s"
                                             >
-                                                <Text color="white" fontSize="xs" whiteSpace="nowrap">
+                                                <Text color="white" fontSize="2xs" whiteSpace="nowrap">
                                                     ${formatPrice(token.price * (monPrice || 0))}
                                                 </Text>
                                             </Table.Cell>
@@ -3451,7 +3457,7 @@ const Exchange: React.FC = () => {
                                             >
                                                 <Text 
                                                     color={token.change24h > 0 ? "#4ade80" : "#ef4444"} 
-                                                    fontSize="xs" 
+                                                    fontSize="2xs" 
                                                     whiteSpace="nowrap"
                                                 >
                                                     {token.change24h > 0 ? "+" : ""}{token.change24h.toFixed(2)}%
@@ -3467,7 +3473,7 @@ const Exchange: React.FC = () => {
                                                     _hover={{ bg: selectedToken?.id === token.id ? "#2a2a2a" : "#252525" }}
                                                     transition="all 0.2s"
                                                 >
-                                                    <Text color="white" fontSize="xs" whiteSpace="nowrap">
+                                                    <Text color="white" fontSize="2xs" whiteSpace="nowrap">
                                                         ${formatNumber(parseFloat(token.tokenSupply || "0") * token.price * monPrice)} 
                                                     </Text>
                                                 </Table.Cell>
