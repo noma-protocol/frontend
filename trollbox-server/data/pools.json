@@ -34,8 +34,7 @@
         "decimals": 18
       },
       "feeTier": 2500,
-      "enabled": false,
-      "comment": "Enable this pool once the PancakeSwap pool address is known"
+      "enabled": true
     }
   ]
 }

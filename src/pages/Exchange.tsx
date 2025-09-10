@@ -949,7 +949,7 @@ const Exchange: React.FC = () => {
         return data;
     };
     
-    const API_BASE_URL = import.meta.env.VITE_CHAIN === "local" ? "http://localhost:3001" : "https://pricefeed.noma.money";
+    const API_BASE_URL = import.meta.env.VITE_ENV === "dev" ? "http://localhost:3001" : "https://pricefeed.noma.money";
     
     // Map chart timeframe to API interval
     const mapTimeframeToApiInterval = (timeframe: string): string => {
@@ -1230,7 +1230,6 @@ const Exchange: React.FC = () => {
         
         return () => clearInterval(interval);
         
-    }, [selectedToken?.id, chartTimeframe, chartGranularity, token1Symbol, chartUpdateTrigger, poolInfo.poolAddress]);
     }, [selectedToken?.id, chartTimeframe, chartGranularity, token1Symbol, chartUpdateTrigger, poolInfo.poolAddress]);
 
     // Listen to Uniswap pool events for real-time price updates
@@ -2645,7 +2644,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+            const msg = error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
+                        error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
@@ -2741,7 +2741,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+            const msg = error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
+                        error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
@@ -2836,7 +2837,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false); 
-            const msg = error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+            const msg = error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
+                        error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("0xe450d38c") > -1 ? "Not enough balance" :
                         error.message.toString().indexOf("Amount must be greater than 0") > -1 ? "Invalid amount" :
