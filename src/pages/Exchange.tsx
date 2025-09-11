@@ -793,13 +793,14 @@ const Exchange: React.FC = () => {
                     style: {
                         color: '#000',
                         background: '#4ade80',
-                        fontSize: '10px',
-                        fontWeight: 'bold',
+                        fontSize: '12px',  // Reduced from 10px
+                        fontWeight: '600',  // Changed from 'bold' to '600'
+                        fontFamily: 'inherit',
                         padding: {
-                            left: 5,
-                            right: 5,
-                            top: 2,
-                            bottom: 2
+                            left: 3,  // Further reduced padding
+                            right: 3,
+                            top: 0,
+                            bottom: 0
                         }
                     },
                     text: 'Spot Price',
@@ -876,6 +877,30 @@ const Exchange: React.FC = () => {
     };
     
     const API_BASE_URL = import.meta.env.VITE_ENV === "dev" ? "http://localhost:3001" : "https://pricefeed.noma.money";
+    
+    // Add custom styles for ApexCharts annotations
+    useEffect(() => {
+        // Create style element to override ApexCharts annotation label font size
+        const style = document.createElement('style');
+        style.textContent = `
+            .apexcharts-yaxis-annotation-label {
+                font-size: 13px !important;
+                font-weight: 600 !important;
+            }
+            .apexcharts-yaxis-annotation-label text {
+                font-size: 13px !important;
+            }
+            .apexcharts-annotation-label {
+                font-size: 13px !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Cleanup on unmount
+        return () => {
+            document.head.removeChild(style);
+        };
+    }, []);
     
     // Handle referral code from URL with pool-specific logic
     useEffect(() => {
@@ -1690,16 +1715,18 @@ const Exchange: React.FC = () => {
                             style: {
                                 color: '#000',
                                 background: '#4ade80',
-                                fontSize: '10px',
-                                fontWeight: 'bold',
+                                fontSize: '13px',  // Reduced from 10px
+                                fontWeight: '600',  // Changed from 'bold' to '600'
+                                fontFamily: 'inherit',
                                 padding: {
-                                    left: 5,
-                                    right: 5,
-                                    top: 2,
-                                    bottom: 2
-                                }
+                                    left: 3,  // Further reduced padding
+                                    right: 3,
+                                    top: 0,
+                                    bottom: 0
+                                },
+                                width:"110%"
                             },
-                            text: `${spotPrice < 0.00001 ? spotPrice.toFixed(8) : spotPrice < 0.01 ? spotPrice.toFixed(8) : spotPrice.toFixed(6)}`,
+                            text: `${spotPrice < 0.00001 ? spotPrice.toFixed(6) : spotPrice < 0.01 ? spotPrice.toFixed(6) : spotPrice.toFixed(6)}`,
                             textAnchor: 'middle',
                             position: 'right',
                             offsetX: 73,
@@ -3314,8 +3341,8 @@ const Exchange: React.FC = () => {
                                         sortOrder === "desc" ? <LuArrowDown /> : <LuArrowUp />
                                     ) : <LuArrowUpDown />
                                 }
-                                fontSize="2xs"
-                                h="26px"
+                                fontSize="xs"
+                                h="32px"
                             >
                                 Price
                             </Button>
@@ -3338,8 +3365,8 @@ const Exchange: React.FC = () => {
                                         sortOrder === "desc" ? <LuArrowDown /> : <LuArrowUp />
                                     ) : <LuArrowUpDown />
                                 }
-                                fontSize="2xs"
-                                h="26px"
+                                fontSize="xs"
+                                h="32px"
                             >
                                 24h Change
                             </Button>
@@ -3353,8 +3380,8 @@ const Exchange: React.FC = () => {
                                         setSortBy("default");
                                         setSortOrder("desc");
                                     }}
-                                    fontSize="2xs"
-                                    h="26px"
+                                    fontSize="xs"
+                                    h="32px"
                                 >
                                     Clear
                                 </Button>
