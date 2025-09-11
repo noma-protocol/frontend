@@ -6,6 +6,7 @@ interface ReferralRegistration {
   referralCode: string;
   referrerAddress?: string; // Optional, will be resolved by backend
   referredAddress: string;
+  poolAddress: string; // Required for pool-specific referrals
 }
 
 interface ReferralTrade {
@@ -18,6 +19,7 @@ interface ReferralTrade {
   volumeETH: string;
   volumeUSD: string;
   txHash: string;
+  poolAddress?: string; // Optional for backward compatibility
 }
 
 interface ReferralStats {
@@ -120,14 +122,15 @@ export const referralApi = {
     }
   },
 
-  // Check if a user was referred
-  async checkReferral(userAddress: string): Promise<{
+  // Check if a user was referred for a specific pool
+  async checkReferral(userAddress: string, poolAddress: string): Promise<{
     referred: boolean;
     referralCode?: string;
     referrerAddress?: string;
+    poolAddress?: string;
   }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/referrals/check/${userAddress}`);
+      const response = await fetch(`${API_BASE_URL}/referrals/check/${userAddress}/${poolAddress}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
