@@ -798,34 +798,41 @@ class ReferralStore {
   }
 
 
-  // Add a referred user to a referral code
-  addReferral(referralCode, referrerAddress, referredAddress) {
+  // Add a referred user to a referral code for a specific pool
+  addReferral(referralCode, referrerAddress, referredAddress, poolAddress) {
     const normalizedReferrerAddress = referrerAddress.toLowerCase();
     const normalizedReferredAddress = referredAddress.toLowerCase();
+    const normalizedPoolAddress = poolAddress.toLowerCase();
     
-    // Check if the referred user is already referred by someone
-    if (this.referrals.referred_users[normalizedReferredAddress]) {
-      console.log(`User ${referredAddress} is already referred by ${this.referrals.referred_users[normalizedReferredAddress].referrer}`);
+    // Create composite key for pool-specific referral
+    const referralKey = `${normalizedReferredAddress}:${normalizedPoolAddress}`;
+    
+    // Check if the user is already referred for this specific pool
+    if (this.referrals.referred_users[referralKey]) {
+      console.log(`User ${referredAddress} is already referred by ${this.referrals.referred_users[referralKey].referrer} for pool ${poolAddress}`);
       return false;
     }
     
-    // Add to referred_users
-    this.referrals.referred_users[normalizedReferredAddress] = {
+    // Add pool-specific referral
+    this.referrals.referred_users[referralKey] = {
       referrer: normalizedReferrerAddress,
       referralCode: referralCode,
+      poolAddress: normalizedPoolAddress,
       timestamp: Date.now()
     };
     
-    // Add to referrers list
-    if (!this.referrals.referrers[normalizedReferrerAddress]) {
-      this.referrals.referrers[normalizedReferrerAddress] = {
+    // Add to referrers list with pool-specific key
+    const referrerKey = `${normalizedReferrerAddress}:${normalizedPoolAddress}`;
+    if (!this.referrals.referrers[referrerKey]) {
+      this.referrals.referrers[referrerKey] = {
         code: referralCode,
+        poolAddress: normalizedPoolAddress,
         referred: []
       };
     }
     
-    if (!this.referrals.referrers[normalizedReferrerAddress].referred.includes(normalizedReferredAddress)) {
-      this.referrals.referrers[normalizedReferrerAddress].referred.push(normalizedReferredAddress);
+    if (!this.referrals.referrers[referrerKey].referred.includes(normalizedReferredAddress)) {
+      this.referrals.referrers[referrerKey].referred.push(normalizedReferredAddress);
     }
     
     this.saveReferrals();
@@ -845,11 +852,24 @@ class ReferralStore {
       trades: []
     };
 
-    // Get referrer data
-    const referrerData = this.referrals.referrers[normalizedAddress];
-    if (referrerData) {
-      stats.totalReferred = referrerData.referred.length;
-      stats.referredUsers = referrerData.referred;
+    if (poolAddress) {
+      // Pool-specific stats
+      const normalizedPoolAddress = poolAddress.toLowerCase();
+      const referrerKey = `${normalizedAddress}:${normalizedPoolAddress}`;
+      const referrerData = this.referrals.referrers[referrerKey];
+      
+      if (referrerData) {
+        stats.totalReferred = referrerData.referred.length;
+        stats.referredUsers = referrerData.referred;
+      }
+    } else {
+      // Aggregate stats across all pools
+      Object.entries(this.referrals.referrers).forEach(([key, data]) => {
+        if (key.startsWith(`${normalizedAddress}:`)) {
+          stats.totalReferred += data.referred.length;
+          stats.referredUsers = [...new Set([...stats.referredUsers, ...data.referred])];
+        }
+      });
     }
 
     // Calculate volume from trades, optionally filtered by pool
@@ -877,7 +897,9 @@ class ReferralStore {
     const trade = {
       id: uuidv4(),
       timestamp: Date.now(),
-      ...tradeData
+      ...tradeData,
+      // Ensure poolAddress is included
+      poolAddress: tradeData.poolAddress || tradeData.tokenAddress // fallback to tokenAddress if not provided
     };
     
     this.trades.push(trade);
@@ -1851,10 +1873,10 @@ app.patch('/api/pools/:address/status', (req, res) => {
 // Register a referral (when user connects with referral code)
 app.post('/api/referrals/register', (req, res) => {
   try {
-    const { referralCode, referredAddress } = req.body;
+    const { referralCode, referredAddress, poolAddress } = req.body;
     
-    if (!referralCode || !referredAddress) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!referralCode || !referredAddress || !poolAddress) {
+      return res.status(400).json({ error: 'Missing required fields (referralCode, referredAddress, poolAddress)' });
     }
     
     // Get referrer address from code
@@ -1869,26 +1891,18 @@ app.post('/api/referrals/register', (req, res) => {
       return res.status(400).json({ error: 'Cannot use your own referral code' });
     }
     
-    // Check if already referred
-    const key = `${referralCode}:${referrerAddress}`;
-    const existingReferrals = referralStore.referrals[key] || [];
-    
-    if (existingReferrals.includes(referredAddress.toLowerCase())) {
-      return res.status(400).json({ error: 'User already referred' });
-    }
-    
-    // Add the referral
-    const added = referralStore.addReferral(referralCode, referrerAddress, referredAddress);
+    // Add the pool-specific referral
+    const added = referralStore.addReferral(referralCode, referrerAddress, referredAddress, poolAddress);
     
     if (added) {
       res.json({ 
         success: true, 
         message: 'Referral registered successfully',
-        referralKey: key,
-        referrerAddress
+        referrerAddress,
+        poolAddress
       });
     } else {
-      res.status(400).json({ error: 'Failed to register referral' });
+      res.status(400).json({ error: 'User already referred for this pool' });
     }
   } catch (error) {
     console.error('Error registering referral:', error);
@@ -1955,20 +1969,25 @@ app.get('/api/referrals/stats/:address', (req, res) => {
   }
 });
 
-// Check if a user was referred
-app.get('/api/referrals/check/:userAddress', (req, res) => {
+// Check if a user was referred for a specific pool
+app.get('/api/referrals/check/:userAddress/:poolAddress', (req, res) => {
   try {
-    const { userAddress } = req.params;
+    const { userAddress, poolAddress } = req.params;
     const normalizedAddress = userAddress.toLowerCase();
+    const normalizedPoolAddress = poolAddress.toLowerCase();
     
-    // Check if user was referred using new structure
-    const referredUserData = referralStore.referrals.referred_users[normalizedAddress];
+    // Create composite key for pool-specific lookup
+    const referralKey = `${normalizedAddress}:${normalizedPoolAddress}`;
+    
+    // Check if user was referred for this specific pool
+    const referredUserData = referralStore.referrals.referred_users[referralKey];
     
     if (referredUserData) {
       res.json({ 
         referred: true, 
         referralCode: referredUserData.referralCode,
         referrerAddress: referredUserData.referrer,
+        poolAddress: referredUserData.poolAddress,
         referredAddress: userAddress
       });
     } else {

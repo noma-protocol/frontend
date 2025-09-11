@@ -352,7 +352,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
             <VStack alignItems={"left"} textAlign={"left"}>
               <Box>
                 <Text fontSize="xl" fontWeight="bold" color="white">
-                  ${(Number(referralStats.totalVolumeETH) * (tokenPriceUsd * monPrice)).toFixed(2)}
+                  ${formatNumber(Number(referralStats.totalVolumeETH) * (tokenPriceUsd * monPrice), 2) }
                 </Text>             
               </Box>
               <Box>

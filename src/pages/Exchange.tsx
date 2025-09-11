@@ -482,81 +482,6 @@ const Exchange: React.FC = () => {
         loadTradeHistory();
     }, []);
     
-    // Handle referral code from URL
-    useEffect(() => {
-        const handleReferral = async () => {
-            if (urlReferralCode && address) {
-                try {
-                    // Check if user is already referred via API
-                    const referralStatus = await referralApi.checkReferral(address);
-                    
-                    if (referralStatus.referred) {
-                        // User is already referred
-                        setReferredBy(referralStatus.referralCode || '');
-                        // console.log(`User already referred by: ${referralStatus.referralCode}`);
-                    } else {
-                        // Check if user is trying to use their own referral code
-                        const ownCode = generateReferralCode(address);
-                        if (urlReferralCode === ownCode || urlReferralCode === `0x${ownCode}`) {
-                            console.warn('Cannot use your own referral code');
-                            toaster.create({
-                                title: "Invalid Referral",
-                                description: "You cannot use your own referral code",
-                                status: "warning",
-                                duration: 3000,
-                            });
-                            return;
-                        }
-                        
-                        // Register new referral using only the code
-                        await referralApi.registerReferral({
-                            referralCode: urlReferralCode,
-                            referrerAddress: '', // Will be resolved by backend
-                            referredAddress: address
-                        });
-                        
-                        setReferredBy(urlReferralCode);
-                        // console.log(`User ${address} referred by code: ${urlReferralCode}`);
-                        
-                        // Also keep localStorage as backup
-                        localStorage.setItem(`noma_referred_by_${address}`, urlReferralCode);
-                    }
-                } catch (error) {
-                    console.error('Error handling referral:', error);
-                    // Fallback to localStorage
-                    const existingReferral = localStorage.getItem(`noma_referred_by_${address}`);
-                    if (existingReferral) {
-                        setReferredBy(existingReferral);
-                    }
-                }
-            } else if (address) {
-                // Check for existing referral
-                try {
-                    const referralStatus = await referralApi.checkReferral(address);
-                    if (referralStatus.referred) {
-                        setReferredBy(referralStatus.referralCode || '');
-                    } else {
-                        // Fallback to localStorage
-                        const existingReferral = localStorage.getItem(`noma_referred_by_${address}`);
-                        if (existingReferral) {
-                            setReferredBy(existingReferral);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error checking referral:', error);
-                }
-            }
-            
-            // Generate referral code for current user
-            if (address) {
-                const code = generateReferralCode(address);
-                setReferralCode(code || ""); // Already returns 8 chars
-            }
-        };
-        
-        handleReferral();
-    }, [urlReferralCode, address]);
-    
     // Save trade history to local storage whenever it changes
     useEffect(() => {
         if (tradeHistory.length > 0) {
@@ -585,10 +510,10 @@ const Exchange: React.FC = () => {
         volumeUSD: number;
         txHash: string;
     }) => {
-        if (!referredBy || !address) return;
+        if (!referredBy || !address || !poolInfo.poolAddress) return;
         
         try {
-            // Track trade via API
+            // Track trade via API with poolAddress
             await referralApi.trackTrade({
                 userAddress: address,
                 referralCode: referredBy,
@@ -598,12 +523,13 @@ const Exchange: React.FC = () => {
                 tokenSymbol: tradeData.tokenSymbol,
                 volumeETH: tradeData.volumeETH,
                 volumeUSD: tradeData.volumeUSD.toString(),
-                txHash: tradeData.txHash
+                txHash: tradeData.txHash,
+                poolAddress: poolInfo.poolAddress
             });
             
             // console.log('Referral trade tracked via API');
             
-            // Also store locally as backup
+            // Also store locally as backup with pool info
             const referralTrades = JSON.parse(localStorage.getItem('noma_referral_trades') || '[]');
             const newTrade = {
                 id: Date.now() + Math.random(),
@@ -616,6 +542,7 @@ const Exchange: React.FC = () => {
                 volumeETH: tradeData.volumeETH,
                 volumeUSD: tradeData.volumeUSD.toString(),
                 txHash: tradeData.txHash,
+                poolAddress: poolInfo.poolAddress,
                 timestamp: Date.now()
             };
             
@@ -681,11 +608,6 @@ const Exchange: React.FC = () => {
     const [balanceBeforePurchase, setBalanceBeforePurchase] = useState(0);
     const [balanceBeforeSale, setBalanceBeforeSale] = useState(0);
     
-    // Calculate safe minimum Y value from chart data
-    const computedMinY = chartSeries.length > 0 && chartSeries[0].data && chartSeries[0].data.length > 0
-        ? Math.min(...chartSeries[0].data.map((item) => item.y[2])) * 0.85 // Use the lowest 'low' value with 15% padding (increased from 5%)
-        : 0;
-    const safeMinY = Math.max(0, computedMinY);
     
     // Chart options with professional styling
     const [chartOptions, setChartOptions] = useState({
@@ -779,10 +701,10 @@ const Exchange: React.FC = () => {
         },
         yaxis: {
             opposite: true,
-            min: safeMinY,
-            max: undefined,  // Let ApexCharts calculate max with padding
+            min: 0,  // Will be dynamically updated
+            max: undefined,  // Will be dynamically updated
             forceNiceScale: false,  // Disable nice scale to use exact min/max
-            tickAmount: 8,  // More tick marks for better scale
+            tickAmount: 6,  // Optimal number of ticks
             labels: {
                 style: {
                     colors: '#4a4a4a',
@@ -954,6 +876,103 @@ const Exchange: React.FC = () => {
     };
     
     const API_BASE_URL = import.meta.env.VITE_ENV === "dev" ? "http://localhost:3001" : "https://pricefeed.noma.money";
+    
+    // Handle referral code from URL with pool-specific logic
+    useEffect(() => {
+        const handleReferral = async () => {
+            // Only process referrals if we have a valid pool address
+            if (urlReferralCode && address && poolInfo.poolAddress && poolInfo.poolAddress !== '0x0000000000000000000000000000000000000000') {
+                try {
+                    // Check if user is already referred for THIS POOL via API
+                    const referralStatus = await referralApi.checkReferral(address, poolInfo.poolAddress);
+                    
+                    if (referralStatus.referred) {
+                        // User is already referred for this pool
+                        setReferredBy(referralStatus.referralCode || '');
+                        // console.log(`User already referred by: ${referralStatus.referralCode} for pool: ${poolInfo.poolAddress}`);
+                    } else {
+                        // Check if user is trying to use their own referral code
+                        const ownCode = generateReferralCode(address);
+                        if (urlReferralCode === ownCode || urlReferralCode === `0x${ownCode}`) {
+                            console.warn('Cannot use your own referral code');
+                            toaster.create({
+                                title: "Invalid Referral",
+                                description: "You cannot use your own referral code",
+                                status: "warning",
+                                duration: 3000,
+                            });
+                            return;
+                        }
+                        
+                        // Register new pool-specific referral
+                        await referralApi.registerReferral({
+                            referralCode: urlReferralCode,
+                            referrerAddress: '', // Will be resolved by backend
+                            referredAddress: address,
+                            poolAddress: poolInfo.poolAddress
+                        });
+                        
+                        setReferredBy(urlReferralCode);
+                        // console.log(`User ${address} referred by code: ${urlReferralCode} for pool: ${poolInfo.poolAddress}`);
+                        
+                        // Store pool-specific referral
+                        localStorage.setItem(`noma_referred_by_${address}_${poolInfo.poolAddress}`, urlReferralCode);
+                        
+                        toaster.create({
+                            title: "Referral Success",
+                            description: `You've been successfully referred for ${selectedToken?.symbol || 'this pool'}!`,
+                            status: "success",
+                            duration: 3000,
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error handling referral:', error);
+                    // Fallback to pool-specific localStorage
+                    const existingReferral = localStorage.getItem(`noma_referred_by_${address}_${poolInfo.poolAddress}`);
+                    if (existingReferral) {
+                        setReferredBy(existingReferral);
+                    }
+                }
+            } else if (address && poolInfo.poolAddress && poolInfo.poolAddress !== '0x0000000000000000000000000000000000000000') {
+                // Check for existing pool-specific referral
+                try {
+                    const referralStatus = await referralApi.checkReferral(address, poolInfo.poolAddress);
+                    if (referralStatus.referred) {
+                        setReferredBy(referralStatus.referralCode || '');
+                    } else {
+                        // Fallback to pool-specific localStorage
+                        const existingReferral = localStorage.getItem(`noma_referred_by_${address}_${poolInfo.poolAddress}`);
+                        if (existingReferral) {
+                            setReferredBy(existingReferral);
+                        } else {
+                            // Clear referredBy if no pool-specific referral exists
+                            setReferredBy('');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking referral:', error);
+                    // Fallback to pool-specific localStorage
+                    const existingReferral = localStorage.getItem(`noma_referred_by_${address}_${poolInfo.poolAddress}`);
+                    if (existingReferral) {
+                        setReferredBy(existingReferral);
+                    } else {
+                        setReferredBy('');
+                    }
+                }
+            } else {
+                // No valid pool address yet, clear referral
+                setReferredBy('');
+            }
+            
+            // Generate referral code for current user (this remains global)
+            if (address) {
+                const code = generateReferralCode(address);
+                setReferralCode(code || ""); // Already returns 8 chars
+            }
+        };
+        
+        handleReferral();
+    }, [urlReferralCode, address, poolInfo.poolAddress, selectedToken?.symbol]); // Added poolInfo.poolAddress to dependencies
     
     // Map chart timeframe to API interval
     const mapTimeframeToApiInterval = (timeframe: string): string => {
@@ -1603,17 +1622,51 @@ const Exchange: React.FC = () => {
             const maxPrice = Math.max(...allHighs);
             const priceRange = maxPrice - minPrice;
             
-            // Add 20% padding on both sides to make candles appear taller
-            const padding = priceRange * 0.2;
-            const newMinY = Math.max(0, minPrice - padding);
-            const newMaxY = maxPrice + padding;
+            // Calculate dynamic padding based on price range
+            let paddingPercentage = 0.15; // Default 15%
+            
+            // For very small ranges, use more padding to avoid cramped candles
+            if (priceRange < minPrice * 0.01) {
+                paddingPercentage = 0.5; // 50% for very stable prices
+            } else if (priceRange < minPrice * 0.05) {
+                paddingPercentage = 0.3; // 30% for low volatility
+            } else if (priceRange > minPrice * 0.5) {
+                paddingPercentage = 0.1; // 10% for high volatility
+            }
+            
+            const padding = priceRange * paddingPercentage;
+            
+            // Ensure minimum padding to prevent candles from touching edges
+            const minPadding = minPrice * 0.01; // At least 1% of min price
+            const effectivePadding = Math.max(padding, minPadding);
+            
+            const newMinY = Math.max(0, minPrice - effectivePadding);
+            const newMaxY = maxPrice + effectivePadding;
             
             setChartOptions(prevOptions => ({
                 ...prevOptions,
                 yaxis: {
                     ...prevOptions.yaxis,
                     min: newMinY,
-                    max: newMaxY
+                    max: newMaxY,
+                    tickAmount: 6, // Reduce tick marks for cleaner look
+                    labels: {
+                        ...prevOptions.yaxis.labels,
+                        formatter: (value) => {
+                            if (!value || isNaN(value)) return '0';
+                            // Improved formatting based on value magnitude
+                            if (value === 0) return '0';
+                            if (value < 0.00000001) return value.toExponential(2);
+                            if (value < 0.00001) return value.toFixed(8);
+                            if (value < 0.001) return value.toFixed(6);
+                            if (value < 0.01) return value.toFixed(5);
+                            if (value < 1) return value.toFixed(4);
+                            if (value < 10) return value.toFixed(3);
+                            if (value < 100) return value.toFixed(2);
+                            if (value < 1000) return value.toFixed(1);
+                            return value.toFixed(0);
+                        }
+                    }
                 }
             }));
         }
