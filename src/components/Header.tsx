@@ -115,12 +115,6 @@ const Header: React.FC = () => {
                 vault: vaultDescriptionData[6],
               };
               
-              if (config.environment != "dev") {
-                if (plainVaultDescription.tokenSymbol != "OKS") {
-                  continue;
-                }
-              }
-
               allVaultDescriptions.push(plainVaultDescription);
             }
           }

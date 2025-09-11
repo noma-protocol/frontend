@@ -198,11 +198,11 @@ const Liquidity: React.FC = () => {
     address: nomaFactoryAddress,
     abi: NomaFactoryAbi,
     functionName: "getDeployers",
-    enabled: selectedVault !== '',
+    enabled: true, // Always fetch deployers to show available vaults
   });
 
   useEffect(() => {
-    if (typeof deployersData !== "undefined" && selectedVault) {
+    if (typeof deployersData !== "undefined") { // Removed selectedVault requirement to show all vaults
       const nomaFactoryContract = new ethers.Contract(
         nomaFactoryAddress,
         NomaFactoryAbi,
@@ -232,12 +232,6 @@ const Liquidity: React.FC = () => {
                 vault: vaultDescriptionData[6],
                 presaleContract: vaultDescriptionData[7],
               };
-              
-              if (config.environment != "dev") {
-                if (plainVaultDescription.tokenSymbol != "OKS") {
-                  continue;
-                }
-              }
 
               const poolAddress = await fetchPoolAddress(plainVaultDescription.token0, plainVaultDescription.token1);
 
@@ -261,7 +255,7 @@ const Liquidity: React.FC = () => {
 
       fetchVaultDescriptions();
     }
-  }, [deployersData, selectedVault]);
+  }, [deployersData]); // Removed selectedVault from dependencies
 
 
   useEffect(() => {
@@ -433,10 +427,6 @@ const Liquidity: React.FC = () => {
       ) : (
         <Box w="100%" bg="#0a0a0a" p={isMobile ? 4 : 8}>
           <Box maxW="1600px" mx="auto">
-            {/* Header with navigation */}
-
-
-
             {/* Main content area */}
             {!errorDeployed ? (
               selectedVault ? (
