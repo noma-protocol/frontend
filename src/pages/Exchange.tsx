@@ -48,6 +48,8 @@ import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
 import { useAllowance } from "../hooks/useAllowance";
 import { isMobile } from "react-device-detect";
 import { tokenApi } from '../services/tokenApi';
+import { useVault } from '../hooks/useVault';
+import { vaultApiService } from '../services/vaultApiService';
 import { Slider } from "../components/ui/slider"
 import {
   StatRoot,
@@ -69,7 +71,7 @@ import WalletSidebar from "../components/WalletSidebar";
 import StandaloneWrapModal from "../components/StandaloneWrapModal";
 import StandaloneUnwrapModal from "../components/StandaloneUnwrapModal";
 import StandaloneSlippageModal from "../components/StandaloneSlippageModal";
-import UpcomingPresales from "../components/UpcomingPresales";
+// import UpcomingPresales from "../components/UpcomingPresales"; // DISABLED TO FIND RPC ISSUES
 // import WalletNotConnected from '../components/WalletNotConnected';
 import { useToken } from "../contexts/TokenContext";
 
@@ -184,15 +186,16 @@ const modelHelperAddress = getContractAddress(
 );
 
 // Provider setup
+console.log('[Provider] Setting up provider with RPC_URL:', config.chain == "local" ? "http://localhost:8545" : config.RPC_URL);
 const localProvider = new providers.JsonRpcProvider(
-    config.chain == "local" ? "http://localhost:8545" : config.RPC_URL
+    config.chain == "local" ? "http://localhost:8545" : config.RPC_URL || "https://rpc.troll.box"
 );
 
 const Exchange: React.FC = () => {
     const { address, isConnected } = useAccount();
     const { selectedToken, setSelectedToken } = useToken();
     const { monPrice } = useMonPrice();
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState(""); // Search disabled to find RPC issues
     const [sortBy, setSortBy] = useState("default"); // "default", "price", "24h"
     const [sortOrder, setSortOrder] = useState("desc"); // "asc" or "desc"
     const [tradeAmount, setTradeAmount] = useState("");
@@ -410,7 +413,15 @@ const Exchange: React.FC = () => {
     const [quote, setQuote] = useState("");
     const [priceImpact, setPriceImpact] = useState("0");
     const [showQuoteLoading, setShowQuoteLoading] = useState(false);
+    
+    // Use vault API hook for selected token's vault - moved here to avoid initialization error
+    const { vault: selectedVaultData, loading: selectedVaultLoading } = useVault({
+        address: selectedToken?.vault,
+        autoFetch: !!selectedToken?.vault,
+        refetchInterval: 30000 // Refresh every 30 seconds
+    });
     const [totalSupply, setTotalSupply] = useState("0");
+    const [shouldRefreshBalances, setShouldRefreshBalances] = useState(true);
     const [isSlippageModalOpen, setIsSlippageModalOpen] = useState(false);
     const [slippageAutoAdjusted, setSlippageAutoAdjusted] = useState(false);
 
@@ -427,6 +438,7 @@ const Exchange: React.FC = () => {
     const [token1Symbol, setToken1Symbol] = useState("ETH"); // Default to ETH
     const [priceUSD, setPriceUSD] = useState(0); // Price of token1 in USD
     const [tokenProtocols, setTokenProtocols] = useState<{ [symbol: string]: string }>({});
+    const [tokenStats, setTokenStats] = useState<{ [symbol: string]: number }>({});
     
     // Fetch IMV (Intrinsic Minimum Value) from ModelHelper contract
     const { data: imvData } = useContractRead({
@@ -434,7 +446,7 @@ const Exchange: React.FC = () => {
         abi: ModelHelperAbi,
         functionName: "getIntrinsicMinimumValue",
         args: selectedToken?.vault ? [selectedToken.vault] : undefined,
-        watch: true,
+        watch: false, // Disable continuous polling to reduce RPC calls
         enabled: !!selectedToken?.vault
     });
     
@@ -448,31 +460,32 @@ const Exchange: React.FC = () => {
     const [myTxCurrentPage, setMyTxCurrentPage] = useState(1);
     const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false);
     
-    useEffect(() => {
-        const loadReferralStats = async () => {
-            if (address) {
-                try {
-                    const vaultContract = new ethers.Contract(
-                        selectedToken?.vault || zeroAddress,
-                        AuxVaultAbi,
-                        localProvider
-                    );
-                    // console.log({ selectedToken });
-                    if (typeof selectedToken?.vault == "undefined") return;
+    // DISABLED TO FIND RPC ISSUES
+    // useEffect(() => {
+    //     const loadReferralStats = async () => {
+    //         if (address) {
+    //             try {
+    //                 const vaultContract = new ethers.Contract(
+    //                     selectedToken?.vault || zeroAddress,
+    //                     AuxVaultAbi,
+    //                     localProvider
+    //                 );
+    //                 // console.log({ selectedToken });
+    //                 if (typeof selectedToken?.vault == "undefined") return;
 
-                    // console.log(`Selected vault address is ${selectedToken?.vault}`);
-                    const referralEntity = await vaultContract.getReferralEntity(address);
+    //                 // console.log(`Selected vault address is ${selectedToken?.vault}`);
+    //                 const referralEntity = await vaultContract.getReferralEntity(address);
 
-                    setTotalVolume(parseFloat(referralEntity.totalReferred || "0"));
-                    // console.log({ referralEntity}) 
-                    // console.log(`Total referred for ${address} is ${formatEther(referralEntity.totalReferred)}`);
-                } catch (error) {
-                    console.error("Error fetching referral stats:", error);
-                }
-            }
-        };
-        loadReferralStats();
-    }, [address, selectedToken]);
+    //                 setTotalVolume(parseFloat(referralEntity.totalReferred || "0"));
+    //                 // console.log({ referralEntity}) 
+    //                 // console.log(`Total referred for ${address} is ${formatEther(referralEntity.totalReferred)}`);
+    //             } catch (error) {
+    //                 console.error("Error fetching referral stats:", error);
+    //             }
+    //         }
+    //     };
+    //     loadReferralStats();
+    // }, [address, selectedToken]);
 
     
     
@@ -1676,15 +1689,13 @@ const Exchange: React.FC = () => {
             setIsChartLoading(true);
             
             try {
-                // console.log('[loadChartData] poolInfo:', poolInfo);
-                // console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
-                // console.log('[loadChartData] selectedToken:', selectedToken);
-                // console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
-                // console.log('[loadChartData] selectedToken:', selectedToken);
+                console.log('[loadChartData] poolInfo:', poolInfo);
+                console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
+                console.log('[loadChartData] selectedToken:', selectedToken);
                 
                 // Skip API calls if no pool address is available
                 if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
-                    // console.log('[loadChartData] Skipping API calls - no valid pool address');
+                    console.log('[loadChartData] Skipping API calls - no valid pool address');
                     setIsChartLoading(false);
                     return;
                 }
@@ -2012,86 +2023,87 @@ const Exchange: React.FC = () => {
 
     // Fetch token1 symbol and spot price when token is selected
     useEffect(() => {
-        if (!selectedToken || !selectedToken.token1 || !selectedToken.vault) return;
+        console.log('[Token Selection Effect] selectedToken:', selectedToken);
+        if (!selectedToken || !selectedToken.token1 || !selectedToken.vault) {
+            console.log('[Token Selection Effect] Returning early - missing data:', {
+                hasToken: !!selectedToken,
+                hasToken1: !!selectedToken?.token1,
+                hasVault: !!selectedToken?.vault
+            });
+            return;
+        }
         
         const fetchTokenInfo = async () => {
+            console.log('[fetchTokenInfo] Starting with token:', selectedToken.symbol);
             try {
-                // Fetch token1 info
-                const token1Contract = new ethers.Contract(
-                    selectedToken.token1,
-                    ERC20Abi,
-                    localProvider
-                );
-                const token0Contract = new ethers.Contract(
-                    selectedToken.token0,
-                    ERC20Abi,
-                    localProvider
-                )
-
-                const totalSupply = await token0Contract.totalSupply();
-                setTotalSupply(totalSupply);
-                
-                const symbol = await token1Contract.symbol();
-                setToken1Symbol(symbol);
-                
-                // If token1 is WETH/WMON, set it as MON for display
-                if (symbol === "WMON" || symbol === "WETH") {
-                    setToken1Symbol("MON");
-                }
-                
-                // Fetch spot price from vault contract
-                const VaultAbi = [
-                    "function getVaultInfo() view returns (uint256, uint256, uint256, uint256, uint256, uint256, address, address, uint256)"
-                ];
-                
-                const vaultContract = new ethers.Contract(
-                    selectedToken.vault,
-                    VaultAbi,
-                    localProvider
-                );
+                // Skip RPC calls if provider is having issues - use defaults
+                let symbol = "MON"; // Default to MON
                 
                 try {
-                    const vaultInfo = await vaultContract.getVaultInfo();
-                    // The vault info is returned as an array/tuple
-                    // We only need the spot price from index 2
-                    const spotPriceFromContract = vaultInfo[2]; // spotPriceX96 is at index 2
+                    // Try to fetch token1 info
+                    const token1Contract = new ethers.Contract(
+                        selectedToken.token1,
+                        ERC20Abi,
+                        localProvider
+                    );
+                    const token0Contract = new ethers.Contract(
+                        selectedToken.token0,
+                        ERC20Abi,
+                        localProvider
+                    )
+
+                    const totalSupply = await token0Contract.totalSupply();
+                    setTotalSupply(totalSupply);
                     
-                    const formattedPrice = formatEther(spotPriceFromContract);
-                    const numericPrice = parseFloat(formattedPrice);
+                    symbol = await token1Contract.symbol();
+                    setToken1Symbol(symbol);
                     
-                    if (!isNaN(numericPrice) && isFinite(numericPrice) && numericPrice > 0) {
-                        setSpotPrice(numericPrice);
-                    } else {
-                        console.warn("Invalid spot price from contract, using fallback");
+                    // If token1 is WETH/WMON, set it as MON for display
+                    if (symbol === "WMON" || symbol === "WETH") {
+                        setToken1Symbol("MON");
+                    }
+                } catch (rpcError) {
+                    console.warn('[fetchTokenInfo] RPC calls failed, using defaults:', rpcError.message);
+                    setToken1Symbol("MON");
+                    // Continue with the rest of the function
+                }
+                
+                // Use spot price from vault API data if available
+                if (selectedVaultData) {
+                    try {
+                        const spotPriceFromAPI = selectedVaultData.spotPriceX96;
+                        const formattedPrice = formatEther(spotPriceFromAPI);
+                        const numericPrice = parseFloat(formattedPrice);
+                        
+                        if (!isNaN(numericPrice) && isFinite(numericPrice) && numericPrice > 0) {
+                            setSpotPrice(numericPrice);
+                        } else {
+                            console.warn("Invalid spot price from API, using fallback");
+                            setSpotPrice(selectedToken.price || 0.0000186);
+                        }
+                        
+                        // Additional vault data is now available from API
+                        // console.log("Vault data from API:", selectedVaultData);
+                    } catch (error) {
+                        console.error("Error processing vault data:", error);
+                        // Fallback to token price if vault info fails
                         setSpotPrice(selectedToken.price || 0.0000186);
                     }
-                    
-                    // Floor price (IMV) is now fetched separately via useContractRead
-                } catch (error) {
-                    console.error("Error fetching vault info:", error);
-                    // Fallback to token price if vault info fails
+                } else if (!selectedVaultLoading) {
+                    // No vault data available, use fallback
                     setSpotPrice(selectedToken.price || 0.0000186);
                 }
                 
                 // Use pool address from token if available, otherwise fetch it
+                console.log('[fetchTokenInfo] Checking poolAddress:', selectedToken.poolAddress);
                 if (selectedToken.poolAddress) {
                     // Token already has pool address from vault data
                     // console.log("Using pool address from token:", selectedToken.poolAddress);
                     // console.log("Setting poolInfo with address:", selectedToken.poolAddress);
                     // console.log("Setting poolInfo with address:", selectedToken.poolAddress);
-                    // Override with hardcoded pool addresses for BUN and AVO
-                    let poolAddressToUse = selectedToken.poolAddress;
-                    if (selectedToken.symbol === 'BUN') {
-                        poolAddressToUse = '0x90666407c841fe58358F3ed04a245c5F5bd6fD0A';
-                        console.log('[Exchange] Using hardcoded BUN pool address:', poolAddressToUse);
-                    } else if (selectedToken.symbol === 'AVO') {
-                        poolAddressToUse = '0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212';
-                        console.log('[Exchange] Using hardcoded AVO pool address:', poolAddressToUse);
-                    }
-                    
-                    console.log('[Exchange] Setting poolInfo for token:', selectedToken.symbol, 'poolAddress:', poolAddressToUse);
+                    console.log('[Exchange] Setting poolInfo for token:', selectedToken.symbol, 'poolAddress:', selectedToken.poolAddress);
                     setPoolInfo({ 
-                        poolAddress: poolAddressToUse,
+                        poolAddress: selectedToken.poolAddress,
                         token0: selectedToken.token0,
                         token1: selectedToken.token1
                     });
@@ -2099,6 +2111,7 @@ const Exchange: React.FC = () => {
                     // console.log("poolInfo should now be updated");
                 } else if (selectedToken.token0 && selectedToken.token1) {
                     // Fallback: fetch pool address if not available
+                    console.log('[fetchTokenInfo] No poolAddress, will fetch it. token0:', selectedToken.token0, 'token1:', selectedToken.token1);
                     try {
                         // Determine protocol for this token - use token's own protocol or default to uniswap
                         const protocol = selectedToken.selectedProtocol || tokenProtocols[selectedToken.symbol] || "uniswap";
@@ -2118,20 +2131,13 @@ const Exchange: React.FC = () => {
                             });
                         } else {
                             // Fetch pool address if not available or is zero address
-                            // console.log(`[TOKEN SELECTION] Fetching new pool address...`);
+                            console.log(`[TOKEN SELECTION] Fetching new pool address...`);
                             const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1, protocol);
                             
                             if (poolAddress && poolAddress !== zeroAddress) {
-                                const poolContract = new ethers.Contract(
-                                    poolAddress,
-                                    uniswapV3PoolABI,
-                                    localProvider
-                                );
-                                
-                                const [poolToken0, poolToken1] = await Promise.all([
-                                    poolContract.token0(),
-                                    poolContract.token1()
-                                ]);
+                                // Use token addresses from vault data instead of RPC calls
+                                const poolToken0 = selectedToken.token0;
+                                const poolToken1 = selectedToken.token1;
                                 
                                 setPoolInfo({ 
                                     poolAddress, 
@@ -2163,7 +2169,7 @@ const Exchange: React.FC = () => {
         };
         
         fetchTokenInfo();
-    }, [selectedToken, monPrice]);
+    }, [selectedToken, monPrice, selectedVaultData, selectedVaultLoading]);
 
     // Update floor price when IMV data changes
     useEffect(() => {
@@ -2308,9 +2314,9 @@ const Exchange: React.FC = () => {
                     aValue = (parseFloat(a.price) || 0) * (monPrice || 0);
                     bValue = (parseFloat(b.price) || 0) * (monPrice || 0);
                 } else if (sortBy === "24h") {
-                    // Get 24h change from change24h field
-                    aValue = parseFloat(a.change24h) || 0;
-                    bValue = parseFloat(b.change24h) || 0;
+                    // Get 24h change from tokenStats
+                    aValue = tokenStats[a.symbol] || parseFloat(a.change24h) || 0;
+                    bValue = tokenStats[b.symbol] || parseFloat(b.change24h) || 0;
                 }
                 
                 if (sortOrder === "desc") {
@@ -2322,7 +2328,7 @@ const Exchange: React.FC = () => {
         }
         
         return filtered;
-    }, [tokens, searchTerm, vaultDescriptions, sortBy, sortOrder, monPrice]);
+    }, [tokens, searchTerm, vaultDescriptions, sortBy, sortOrder, monPrice, tokenStats]);
     
     // Fetch pool address from Uniswap V3 Factory
     const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
@@ -2380,23 +2386,29 @@ const Exchange: React.FC = () => {
     
     // Token protocols will be loaded when deployed tokens are fetched
 
+    // Use vault API hook to fetch all vaults
+    const { vaults: allVaultsData, loading: vaultsLoading, error: vaultsError } = useVault({
+        autoFetch: true,
+        refetchInterval: 60000 // Refresh every minute
+    });
+
     // Fetch vault data and convert to token list
     useEffect(() => {
-        const fetchVaults = async () => {
+        const processVaults = async () => {
             // Keep loading state for minimum time for better UX
             const minLoadingTime = 1500;
             const startTime = Date.now();
             
             try {
-                // If no deployer data yet, wait for it
-                if (!deployersData) {
+                // If still loading vaults, wait
+                if (vaultsLoading || !allVaultsData) {
                     return;
                 }
                 
-                // console.log('[VAULT FETCH] Current tokenProtocols:', tokenProtocols);
+                // console.log('[VAULT FETCH] Processing vaults from API:', allVaultsData.length);
                 
-                // If no deployers found, show empty state after minimum loading time
-                if (deployersData.length === 0) {
+                // If no vaults found, show empty state after minimum loading time
+                if (allVaultsData.length === 0) {
                     const elapsedTime = Date.now() - startTime;
                     const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
                     
@@ -2436,86 +2448,45 @@ const Exchange: React.FC = () => {
                     // Continue without filtering if API fails
                 }
                 
-                const nomaFactoryContract = new ethers.Contract(
-                    nomaFactoryAddress,
-                    FactoryAbi,
-                    localProvider
-                );
-                
-                const allVaultDescriptions = await Promise.all(
-                    deployersData.map(async (deployer) => {
+                // Process vaults from API - no more RPC calls needed!
+                const processedVaults = await Promise.all(
+                    allVaultsData.map(async (vault) => {
                         try {
-                            // console.log('[EXCHANGE] Fetching vaults for deployer:', deployer);
-                            const vaultsData = await nomaFactoryContract.getVaults(deployer);
-                            // console.log('[EXCHANGE] Vaults data:', vaultsData);
+                            // Determine protocol for this token
+                            const tokenData = deployedTokensMap.get(vault.tokenSymbol);
+                            const protocol = tokenData?.selectedProtocol || tokenProtocols[vault.tokenSymbol] || "uniswap";
                             
-                            if (!vaultsData || vaultsData.length === 0) {
-                                return [];
-                            }
+                            // Don't fetch pool address during initial load - only when token is selected
+                            // This saves hundreds of RPC calls!
                             
-                            return Promise.all(
-                                vaultsData.map(async (vault) => {
-                                    try {
-                                        const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
-                                        
-                                        // Fetch spot price from vault
-                                        let spotPriceWei = "0";
-                                        try {
-                                            const VaultAbi = [
-                                                "function getVaultInfo() view returns (uint256, uint256, uint256, uint256, uint256, uint256, address, address, uint256)"
-                                            ];
-                                            const vaultContract = new ethers.Contract(
-                                                vaultDescriptionData[6],
-                                                VaultAbi,
-                                                localProvider
-                                            );
-                                            const vaultInfo = await vaultContract.getVaultInfo();
-                                            spotPriceWei = vaultInfo[2].toString(); // spotPrice is at index 2
-                                        } catch (error) {
-                                            console.error("Error fetching vault spot price:", error);
-                                        }
-                                        
-                                        // Determine protocol for this token
-                                        const tokenSymbol = vaultDescriptionData[1];
-                                        // Look up protocol from deployedTokensMap
-                                        const tokenData = deployedTokensMap.get(tokenSymbol);
-                                        const protocol = tokenData?.selectedProtocol || tokenProtocols[tokenSymbol] || "uniswap";
-                                        // console.log(`[VAULT] Token ${tokenSymbol} protocol: ${protocol} (from deployedTokensMap: ${tokenData?.selectedProtocol}, from tokenProtocols: ${tokenProtocols[tokenSymbol]}`);
-                                        
-                                        return {
-                                            tokenName: vaultDescriptionData[0],
-                                            tokenSymbol: vaultDescriptionData[1],
-                                            tokenDecimals: Number(vaultDescriptionData[2]),
-                                            token0: vaultDescriptionData[3],
-                                            token1: vaultDescriptionData[4],
-                                            deployer: vaultDescriptionData[5],
-                                            vault: vaultDescriptionData[6],
-                                            presaleContract: vaultDescriptionData[7],
-                                            poolAddress: await (async () => {
-                                                const pool = await fetchPoolAddress(
-                                                    vaultDescriptionData[3], 
-                                                    vaultDescriptionData[4],
-                                                    protocol
-                                                );
-                                                // console.log(`[VAULT LOAD] Token ${vaultDescriptionData[1]}, Pool: ${pool}`);
-                                                return pool;
-                                            })(),
-                                            spotPrice: spotPriceWei,
-                                        };
-                                    } catch (error) {
-                                        console.error("Error fetching vault description:", error);
-                                        return null;
-                                    }
-                                })
-                            );
+                            return {
+                                tokenName: vault.tokenName,
+                                tokenSymbol: vault.tokenSymbol,
+                                tokenDecimals: Number(vault.tokenDecimals),
+                                token0: vault.token0,
+                                token1: vault.token1,
+                                deployer: vault.deployer,
+                                vault: vault.address,
+                                presaleContract: vault.presaleContract,
+                                stakingContract: vault.stakingContract,
+                                poolAddress: null, // Don't fetch during initial load
+                                spotPrice: vault.spotPriceX96, // API provides spot price
+                                // Additional fields from API
+                                liquidityRatio: vault.liquidityRatio,
+                                circulatingSupply: vault.circulatingSupply,
+                                anchorCapacity: vault.anchorCapacity,
+                                floorCapacity: vault.floorCapacity,
+                                newFloor: vault.newFloor,
+                                totalInterest: vault.totalInterest
+                            };
                         } catch (error) {
-                            console.error(`Error fetching vaults for deployer ${deployer}:`, error);
-                            return [];
+                            console.error("Error processing vault:", error);
+                            return null;
                         }
                     })
                 );
                 
-                const flattenedVaults = allVaultDescriptions.flat().filter(Boolean);
+                const flattenedVaults = processedVaults.filter(Boolean);
                 
                 // Filter vaults to only include deployed tokens
                 // console.log('[EXCHANGE] deployedTokenSymbols size:', deployedTokenSymbols.size);
@@ -2620,45 +2591,47 @@ const Exchange: React.FC = () => {
             }
         };
         
-        fetchVaults();
-    }, [deployersData]);
+        processVaults();
+    }, [allVaultsData, vaultsLoading]);
     
-    // Periodically update 24h change for tokens
+    // Update token stats when tokens are loaded
     useEffect(() => {
         if (tokens.length === 0) return;
         
         const updateTokenStats = async () => {
             try {
-                // Update each token's stats using its own pool address
-                const updatedTokens = await Promise.all(
+                const stats: { [symbol: string]: number } = {};
+                
+                // Fetch stats for each token
+                await Promise.all(
                     tokens.map(async (token) => {
                         if (token.poolAddress && token.poolAddress !== '0x0000000000000000000000000000000000000000') {
                             try {
                                 const priceStats = await fetchTokenPriceStats("24h", token.poolAddress);
                                 if (priceStats?.percentageChange !== undefined) {
-                                    return { ...token, change24h: priceStats.percentageChange };
+                                    stats[token.symbol] = priceStats.percentageChange;
                                 }
                             } catch (error) {
                                 console.error(`Error updating stats for ${token.symbol}:`, error);
                             }
                         }
-                        return token;
                     })
                 );
-                setTokens(updatedTokens);
+                
+                setTokenStats(stats);
             } catch (error) {
                 console.error("Error updating token stats:", error);
             }
         };
         
-        // Update immediately
+        // Update stats once when tokens change
         updateTokenStats();
         
-        // Then update every 60 seconds
+        // Set up interval for periodic updates
         const interval = setInterval(updateTokenStats, 60000);
         
         return () => clearInterval(interval);
-    }, [tokens.length]);
+    }, [tokens.length]); // Only re-run when number of tokens changes
     
     const formatPrice = (price) => {
         if (price == null || price === undefined || isNaN(price)) return '0.00';
@@ -3017,7 +2990,7 @@ const Exchange: React.FC = () => {
         if (!isWrapDrawerOpen && !isUnwrapDrawerOpen) {
             interval = setInterval(() => {
                 fetchBalances();
-            }, 10000); // Refresh every 10 seconds
+            }, 30000); // Refresh every 30 seconds (reduced from 10s)
         }
         
         return () => {
@@ -3059,7 +3032,7 @@ const Exchange: React.FC = () => {
         args: swapPath && tradeAmount && parseFloat(tradeAmount) > 0 ? 
             [swapPath, safeParseEther(tradeAmount)] : undefined,
         enabled: !!swapPath && !!tradeAmount && parseFloat(tradeAmount) > 0 && !!quoterAddress,
-        watch: true,
+        watch: false, // Disable to reduce RPC calls - will update on dependencies change
     });
     
     // Calculate quote and price impact
@@ -3848,7 +3821,8 @@ const Exchange: React.FC = () => {
                     h="100%"
                 >
                     <Box bg="#1a1a1a" borderRadius="lg" pr={3} pl={3} py={3} overflowX="hidden" flex="1" display="flex" flexDirection="column">
-                        <Flex alignItems="center" mb={3}>
+                        {/* Search box - DISABLED TO FIND RPC ISSUES */}
+                        {/* <Flex alignItems="center" mb={3}>
                             <Input
                                 placeholder="Search tokens..."
                                 value={searchTerm}
@@ -3867,7 +3841,7 @@ const Exchange: React.FC = () => {
                             >
                                 <LuSearch />
                             </IconButton>
-                        </Flex>
+                        </Flex> */}
                         
                         {/* Sorting Controls */}
                         <Flex mb={3} gap={2}>
@@ -4097,11 +4071,11 @@ const Exchange: React.FC = () => {
                                                 transition="all 0.2s"
                                             >
                                                 <Text 
-                                                    color={token.change24h > 0 ? "#4ade80" : "#ef4444"} 
+                                                    color={(tokenStats[token.symbol] || token.change24h || 0) > 0 ? "#4ade80" : "#ef4444"} 
                                                     fontSize="2xs" 
                                                     whiteSpace="nowrap"
                                                 >
-                                                    {token.change24h > 0 ? "+" : ""}{token.change24h.toFixed(2)}%
+                                                    {(tokenStats[token.symbol] || token.change24h || 0) > 0 ? "+" : ""}{(tokenStats[token.symbol] || token.change24h || 0).toFixed(2)}%
                                                 </Text>
                                             </Table.Cell>
                                             {!isMobile && (
@@ -4127,10 +4101,10 @@ const Exchange: React.FC = () => {
                         </Box>
                     </Box>
                     
-                    {/* Upcoming Presales */}
-                    <Box flexShrink={0} w="100%">
+                    {/* Upcoming Presales - DISABLED TO FIND RPC ISSUES */}
+                    {/* <Box flexShrink={0} w="100%">
                         <UpcomingPresales />
-                    </Box>
+                    </Box> */}
                     
                     {/* Troll Box */}
                     <Box flexShrink={0} mt={4}>
@@ -4874,6 +4848,8 @@ const Exchange: React.FC = () => {
                             setIsWrapDrawerOpen={setIsWrapDrawerOpen}
                             isUnwrapDrawerOpen={isUnwrapDrawerOpen}
                             setIsUnwrapDrawerOpen={setIsUnwrapDrawerOpen}
+                            vaultToken0={selectedToken?.token0}
+                            vaultToken1={selectedToken?.token1}
                         />
                     
                     {/* Trading Panel */}

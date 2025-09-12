@@ -4,6 +4,10 @@ import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"
 import "./index.css";
 import "./styles/windows-chrome-fixes.css";
 import App from "./App";
+import { createInterceptedFetch } from "./utils/rpcInterceptor";
+
+// Enable RPC interceptor to track calls
+createInterceptedFetch();
 import HomePage from "./pages/Home";
 // import Bootstrap from "./pages/Bootstrap";
 import Presale from "./pages/Presale";

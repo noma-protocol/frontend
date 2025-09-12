@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
 import { ethers } from 'ethers';
 import { zeroAddress } from 'viem';
+
+// Import ERC20 ABI once at module level to avoid repeated imports
+const ERC20AbiPromise = import('../assets/ERC20.json').then(module => module.abi);
 
 export const useAllowance = (
     tokenAddress?: string,
@@ -12,6 +15,7 @@ export const useAllowance = (
     const [allowance, setAllowance] = useState<bigint>(BigInt(0));
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
+    const lastFetchRef = useRef<number>(0);
 
     useEffect(() => {
         const fetchAllowance = async () => {
@@ -20,13 +24,19 @@ export const useAllowance = (
                 return;
             }
 
+            // Debounce to prevent excessive calls
+            const now = Date.now();
+            if (now - lastFetchRef.current < 5000) { // Don't fetch more than once per 5 seconds
+                return;
+            }
+            lastFetchRef.current = now;
+
             try {
                 setIsLoading(true);
                 setError(null);
 
-                // Dynamically import ERC20 ABI to avoid initialization issues
-                const ERC20Artifact = await import('../assets/ERC20.json');
-                const ERC20Abi = ERC20Artifact.abi;
+                // Use the pre-imported ABI
+                const ERC20Abi = await ERC20AbiPromise;
 
                 const allowanceResult = await publicClient.readContract({
                     address: tokenAddress as `0x${string}`,
@@ -48,8 +58,8 @@ export const useAllowance = (
 
         fetchAllowance();
         
-        // Poll for allowance updates every 15 seconds
-        const interval = setInterval(fetchAllowance, 15000);
+        // Reduce polling frequency to 60 seconds - allowances rarely change
+        const interval = setInterval(fetchAllowance, 60000);
         
         return () => clearInterval(interval);
     }, [tokenAddress, spenderAddress, address, publicClient]);

@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead } from "wagmi";
 import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
+import { useVault } from "../hooks/useVault";
 import useScreenOrientation from '../hooks/useScreenOrientation';
 import { useVisibilityPolling } from "../hooks/useVisibilityPolling";
 import RotateDeviceMessage from '../components/RotateDeviceMessage';
@@ -112,6 +113,13 @@ const Stake = () => {
     const [token1, setToken1] = useState("");
 
     const [vaultDescription, setVaultDescription] = useState({});
+    
+    // Use the new vault API hook
+    const { vault: vaultData, loading: vaultLoading, error: vaultError } = useVault({ 
+        address: vaultAddress,
+        autoFetch: !!vaultAddress,
+        refetchInterval: 30000 // Refresh every 30 seconds
+    });
 
     // Reference to track if component is mounted
     const isMounted = React.useRef(true);
@@ -213,41 +221,48 @@ const Stake = () => {
     //     });
     // } 
 
+    // Update local state when vault data is fetched from API
     useEffect(() => {
-        const fetchVaultDescription = async () => {
-            try {
-                const nomaFactoryContract = new ethers.Contract(
-                    oikosFactoryAddress,
-                    NomaFactoryAbi,
-                    localProvider
-                );
-
-                const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vaultAddress);
-
-                const plainVaultDescription = {
-                    tokenName: vaultDescriptionData[0],
-                    tokenSymbol: vaultDescriptionData[1],
-                    tokenDecimals: Number(vaultDescriptionData[2]), // Convert BigInt to number
-                    token0: vaultDescriptionData[3],
-                    token1: vaultDescriptionData[4],
-                    deployer: vaultDescriptionData[5],
-                    vault: vaultDescriptionData[6],
-                    presaleContract: vaultDescriptionData[7],
-                    stakingContract: vaultDescriptionData[8],
-                };
-
-                if (isMounted.current) {
-                    setVaultDescription(plainVaultDescription);
-                    setToken0(plainVaultDescription.token0);
-                    setToken1(plainVaultDescription.token1);
-                }
-            } catch (error) {
-                console.error("Error fetching vault description:", error);
-            }
+        if (vaultData && isMounted.current) {
+            const plainVaultDescription = {
+                tokenName: vaultData.tokenName,
+                tokenSymbol: vaultData.tokenSymbol,
+                tokenDecimals: Number(vaultData.tokenDecimals),
+                token0: vaultData.token0,
+                token1: vaultData.token1,
+                deployer: vaultData.deployer,
+                vault: vaultData.address,
+                presaleContract: vaultData.presaleContract,
+                stakingContract: vaultData.stakingContract,
+                // Additional fields from API
+                liquidityRatio: vaultData.liquidityRatio,
+                circulatingSupply: vaultData.circulatingSupply,
+                spotPriceX96: vaultData.spotPriceX96,
+                anchorCapacity: vaultData.anchorCapacity,
+                floorCapacity: vaultData.floorCapacity,
+                newFloor: vaultData.newFloor,
+                totalInterest: vaultData.totalInterest
+            };
+            
+            setVaultDescription(plainVaultDescription);
+            setToken0(vaultData.token0);
+            setToken1(vaultData.token1);
         }
-
-        fetchVaultDescription();
-    }, [vaultAddress]);
+    }, [vaultData]);
+    
+    // Handle vault loading error
+    useEffect(() => {
+        if (vaultError) {
+            console.error("Error fetching vault data:", vaultError);
+            toaster.create({
+                title: "Error",
+                description: "Failed to fetch vault information. Please try again later.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    }, [vaultError]);
 
     useEffect(() => {
         if (!address) return;

@@ -18,6 +18,7 @@ import { Toaster } from "../components/ui/toaster";
 import { ethers } from "ethers";
 import {getContractAddress} from "../utils";
 import config from "../config";
+import { useVault } from "../hooks/useVault";
 import wethLogo from "../assets/images/weth.svg";
 import bnbLogo from "../assets/images/bnb-logo.png";
 import monadLogo from "../assets/images/monad.png";
@@ -71,6 +72,19 @@ const Markets: React.FC = () => {
 
   const [view, setView] = useState<"all" | "my">("all");
   const [userVaults, setUserVaults] = useState<any[]>([]);
+  
+  // Use the vault API hook for all vaults
+  const { vaults: allVaultsFromAPI, loading: allVaultsLoading, error: allVaultsError, refetch: refetchAllVaults } = useVault({ 
+    autoFetch: true,
+    refetchInterval: 60000 // Refresh every minute
+  });
+  
+  // Use the vault API hook for user's vaults
+  const { vaults: myVaultsFromAPI, loading: myVaultsLoading, error: myVaultsError, refetch: refetchMyVaults } = useVault({ 
+    deployerAddress: address,
+    autoFetch: !!address && view === "my",
+    refetchInterval: 60000
+  });
   const [uniswapPool, setUniswapPool] = useState<any | null>(null);
 
   const [triggerReload, setTriggerReload] = useState<boolean>(true);
@@ -190,272 +204,113 @@ const Markets: React.FC = () => {
     return labelToLogoMap[label] || "";
   };
 
-  /**
-   * Fetch all vaults for the "All Markets" view
-   */
-  const {
-    data: deployersData,
-    isError: isAllVaultsError,
-  } = useContractRead({
-    address: oikosFactoryAddress,
-    abi: NomaFactoryAbi,
-    functionName: "getDeployers",
-    enabled: view === "all" && isConnected,
-  });
-
-  useEffect(() => {
-    // Only proceed if we have both deployersData and protocols loaded
-    if (typeof deployersData !== "undefined" && protocolsLoaded) {
-      setIsAllVaultsLoading(true);
-
-      const nomaFactoryContract = new ethers.Contract(
-        oikosFactoryAddress,
-        NomaFactoryAbi,
-        localProvider
-      );
-
-      setTimeout(() => {
-
-        const fetchPresaleDetails = async ({ presaleContract }) => {
-          if (presaleContract === zeroAddress) {
-            return false;
+  // Process vault data from API
+  const processVaultData = async (vaultsFromAPI) => {
+    if (!vaultsFromAPI || vaultsFromAPI.length === 0) return [];
+    
+    const processedVaults = await Promise.all(
+      vaultsFromAPI.map(async (vault) => {
+        try {
+          const tokenSymbol = vault.tokenSymbol;
+          const protocol = tokenProtocols[tokenSymbol] || "uniswap";
+          
+          // Check presale status if needed
+          const hasPresale = vault.presaleContract !== zeroAddress;
+          let isPresaleFinalized = false;
+          let expired = false;
+          
+          if (hasPresale) {
+            try {
+              const presaleContractInstance = new ethers.Contract(
+                vault.presaleContract,
+                [
+                  "function finalized() view returns (bool)",
+                  "function hasExpired() view returns (bool)",
+                ],
+                localProvider
+              );
+              
+              isPresaleFinalized = await presaleContractInstance.finalized();
+              expired = await presaleContractInstance.hasExpired();
+            } catch (error) {
+              console.error("Error fetching presale details:", error);
+            }
           }
-      
-          const presaleContractInstance = new ethers.Contract(
-            presaleContract,
-            [
-              "function finalized() view returns (bool)",
-              "function hasExpired() view returns (bool)",
-            ],
-            localProvider
+          
+          // Fetch pool address
+          const poolAddress = await fetchPoolAddress(
+            vault.token0, 
+            vault.token1,
+            protocol
           );
-      
-          const isFinalized = await presaleContractInstance.finalized();
-          const hasExpired = await presaleContractInstance.hasExpired();
-
-          // console.log("Presale Finalized:", isFinalized);
-          // console.log("Presale Expired:", hasExpired);
-
-          return [isFinalized, hasExpired];
+          
+          return {
+            tokenName: vault.tokenName,
+            tokenSymbol: vault.tokenSymbol,
+            tokenDecimals: Number(vault.tokenDecimals),
+            token0: vault.token0,
+            token1: vault.token1,
+            deployer: vault.deployer,
+            vault: vault.address,
+            presaleContract: vault.presaleContract,
+            stakingContract: vault.stakingContract,
+            finalized: isPresaleFinalized,
+            expired: expired,
+            poolAddress: poolAddress,
+            // Additional fields from API
+            liquidityRatio: vault.liquidityRatio,
+            circulatingSupply: vault.circulatingSupply,
+            spotPriceX96: vault.spotPriceX96,
+            anchorCapacity: vault.anchorCapacity,
+            floorCapacity: vault.floorCapacity,
+            newFloor: vault.newFloor,
+            totalInterest: vault.totalInterest
+          };
+        } catch (error) {
+          console.error("Error processing vault:", error);
+          return null;
         }
+      })
+    );
+    
+    return processedVaults.filter(Boolean);
+  };
 
-        const fetchVaults = async () => {
-          try {
-            const nomaFactoryContract = new ethers.Contract(
-              oikosFactoryAddress,
-              NomaFactoryAbi,
-              localProvider
-            );
-
-            // console.log("Deployers Data:", deployersData); // Debug log
-
-            if (!deployersData || deployersData.length === 0) {
-              console.warn("No deployers found.");
-              setVaultDescriptions([]);
-              return;
-            }
-            
-            console.log("[MARKETS] Fetching vaults with token protocols:", tokenProtocols);
-      
-            const allVaultDescriptions = await Promise.all(
-              deployersData.map(async (deployer) => {
-                try {
-                  const vaultsData = await nomaFactoryContract.getVaults(deployer);
-                  // console.log("Vaults for deployer", deployer, ":", vaultsData);
-        
-                  if (!vaultsData || vaultsData.length === 0) {
-                    console.warn(`No vaults found for deployer ${deployer}`);
-                    return []; // Return an empty array to prevent `flat()` errors
-                  }
-        
-                  return Promise.all(
-                    vaultsData.map(async (vault) => {
-                      try {
-                        const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
-                        // console.log("Vault Description:", vaultDescriptionData);
-                        const tokenSymbol = vaultDescriptionData[1];
-                        // Include all vaults regardless of symbol
-                        // Comment out filter to display all vaults
-                        // if (tokenSymbol != "OKS") {
-                        //   return null; // Skip this vault
-                        // }
-                        
-                        // Determine protocol for this token
-                        const protocol = tokenProtocols[tokenSymbol] || "uniswap";
-                        console.log(`[VAULT] Processing ${tokenSymbol}, protocol from map: ${tokenProtocols[tokenSymbol]}, using: ${protocol}`);
-                        
-                        const hasPresale = vaultDescriptionData[7] !== zeroAddress;
-                        let isPresaleFinalized = false;
-                        let expired = false;
-                        
-                        // console.log(`Presale Contract: ${hasPresale}`);
-                        if (hasPresale) {
-                          try {
-                            [isPresaleFinalized, expired] = await fetchPresaleDetails({
-                              presaleContract: vaultDescriptionData[7],
-                            });
-                            
-                          } catch (error) {
-                            console.error("Error fetching presale details:", error);
-                          }
-                        }
-      
-                        return {
-                          tokenName: vaultDescriptionData[0],
-                          tokenSymbol: vaultDescriptionData[1],
-                          tokenDecimals: Number(vaultDescriptionData[2]),
-                          token0: vaultDescriptionData[3],
-                          token1: vaultDescriptionData[4],
-                          deployer: vaultDescriptionData[5],
-                          vault: vaultDescriptionData[6],
-                          presaleContract: vaultDescriptionData[7],
-                          finalized: isPresaleFinalized,
-                          expired: expired,
-                          poolAddress: await (async () => {
-                            const pool = await fetchPoolAddress(
-                              vaultDescriptionData[3], 
-                              vaultDescriptionData[4],
-                              protocol
-                            );
-                            console.log(`[MARKETS] Token ${tokenSymbol} pool: ${pool}, protocol: ${protocol}`);
-                            return pool;
-                          })(),
-                        };
-                      } catch (error) {
-                        console.error("Error fetching vault description:", error);
-                        return null; // Ensure we return a value to avoid `Promise.all()` issues
-                      }
-                    })
-                  );
-                } catch (error) {
-                  console.error(`Error fetching vaults for deployer ${deployer}:`, error);
-                  return [];
-                }
-              })
-            );
-      
-            const flattenedVaults = allVaultDescriptions.flat().filter(Boolean); // Remove null entries
-            // console.log("Final Vault Descriptions:", flattenedVaults);
-      
-            if (flattenedVaults.length === 0) {
-              console.warn("No vaults available.");
-            }
-      
-            setVaultDescriptions(flattenedVaults);
-
-          } catch (error) {
-            console.error("Error fetching vaults:", error);
-            setVaultDescriptions([]); // Set empty array on error
-          }
+  // Update vaults when API data or protocols change
+  useEffect(() => {
+    if (protocolsLoaded && allVaultsFromAPI.length > 0) {
+      const updateVaults = async () => {
+        setIsAllVaultsLoading(true);
+        try {
+          const processed = await processVaultData(allVaultsFromAPI);
+          setVaultDescriptions(processed);
+        } catch (error) {
+          console.error("Error processing vaults:", error);
+          setError("Failed to process vault data");
+        } finally {
+          setIsAllVaultsLoading(false);
+        }
       };
       
-      const fetchUserVaults = async () => {
-        try {
-            const nomaFactoryContract = new ethers.Contract(
-                oikosFactoryAddress,
-                NomaFactoryAbi,
-                localProvider
-            );
-
-            if (!address) {
-                console.warn("No user address found. Skipping user vaults fetch.");
-                setUserVaults([]);
-                return;
-            }
-    
-            // console.log("Fetching user vaults for address:", address);
-    
-            const vaultsData = await nomaFactoryContract.getVaults(address);
-            // console.log("Vaults Data for User:", vaultsData);
-    
-            if (!vaultsData || vaultsData.length === 0) {
-                console.warn(`No vaults found for user ${address}`);
-                setUserVaults([]); // Ensure state updates even if empty
-                return;
-            }
-    
-            const userVaultDescriptions = await Promise.all(
-                vaultsData.map(async (vault) => {
-                    try {
-                        const vaultDescriptionData = await nomaFactoryContract.getVaultDescription(vault);
-                        // console.log("Vault Description Data:", vaultDescriptionData);
-                        
-                        // Determine protocol for this token
-                        const tokenSymbol = vaultDescriptionData[1];
-                        const protocol = tokenProtocols[tokenSymbol] || "uniswap";
-    
-                        const hasPresale = vaultDescriptionData[7] !== zeroAddress;
-                        let isPresaleFinalized = false;
-                        let expired = false;
-    
-                        if (hasPresale) {
-                            try {
-                                [isPresaleFinalized, expired] = await fetchPresaleDetails({
-                                    presaleContract: vaultDescriptionData[7],
-                                });
-                            } catch (error) {
-                                console.error("Error fetching presale details:", error);
-                            }
-                        }
-    
-                        // Construct immutable object
-                        return {
-                            tokenName: vaultDescriptionData[0],
-                            tokenSymbol: vaultDescriptionData[1],
-                            tokenDecimals: Number(vaultDescriptionData[2]),
-                            token0: vaultDescriptionData[3],
-                            token1: vaultDescriptionData[4],
-                            deployer: vaultDescriptionData[5],
-                            vault: vaultDescriptionData[6],
-                            presaleContract: vaultDescriptionData[7],
-                            finalized: isPresaleFinalized,
-                            expired: expired,
-                            poolAddress: await fetchPoolAddress(
-                                vaultDescriptionData[3], 
-                                vaultDescriptionData[4],
-                                protocol
-                            ),
-                        };
-                    } catch (error) {
-                        console.error("Error fetching vault description:", error);
-                        return null; // Ensure function does not break
-                    }
-                })
-            );
-    
-            const filteredVaults = userVaultDescriptions.filter(Boolean); // Remove null entries
-            // console.log("Final User Vault Descriptions:", filteredVaults);
-    
-            setUserVaults(filteredVaults);
-
-        } catch (error) {
-            console.error("Error fetching user vaults:", error);
-            setUserVaults([]); // Set empty array on error
-        }
-    };
-    
-          
-          // Run both fetch operations in parallel
-          Promise.all([
-            fetchVaults(),
-            fetchUserVaults()
-          ])
-          .catch(error => {
-            console.error("Error fetching data:", error);
-          })
-          .finally(() => {
-            // Set loading to false only after both operations complete
-            setIsAllVaultsLoading(false);
-          });
-
-      }, 3000);
-      // return () => clearInterval(interval);
+      updateVaults();
     }
-
-    setTriggerReload(false);
-
-  }, [deployersData, protocolsLoaded]);
- 
+  }, [allVaultsFromAPI, protocolsLoaded]);
+  
+  // Update user vaults when API data changes
+  useEffect(() => {
+    if (view === "my" && address && myVaultsFromAPI.length > 0) {
+      const updateMyVaults = async () => {
+        try {
+          const processed = await processVaultData(myVaultsFromAPI);
+          setUserVaults(processed);
+        } catch (error) {
+          console.error("Error processing user vaults:", error);
+        }
+      };
+      
+      updateMyVaults();
+    }
+  }, [myVaultsFromAPI, view, address]);
 
   // Handle vault selection click
   const handleVaultClick = (vault) => {
@@ -538,7 +393,7 @@ const Markets: React.FC = () => {
                   <Spinner size="lg" color="#4ade80" thickness="3px" />
                   <Text mt={4} color="#666">Loading markets...</Text>
                 </Box>
-              ) : isAllVaultsError || error ? (
+              ) : (allVaultsError || myVaultsError || error) ? (
                 <Box textAlign="center" py={10}>
                   <Text color="#ef4444">Error fetching vaults</Text>
                 </Box>

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Container, Box, Text, Button, VStack, HStack, Link } from "@chakra-ui/react"
+import React, { useState, useEffect } from "react";
+import { Container, Box, Text, Button, VStack, HStack, Link, Spinner } from "@chakra-ui/react"
 import {
   DialogActionTrigger,
   DialogBody,
@@ -16,6 +16,7 @@ import { commify } from "../utils";
 import { formatEther } from "viem";
 import metamaskLogo from "../assets/images/metamask.svg";
 import { ethers } from "ethers";
+import { useVault } from "../hooks/useVault";
 
 const ERC20Artifact = await import(`../assets/ERC20.json`);
 const ERC20Abi = ERC20Artifact.abi;
@@ -23,9 +24,14 @@ const ERC20Abi = ERC20Artifact.abi;
 const tokenAddress = "0x550e4395567137f42857659a1A0F1b3b268Bb11F"; // Replace with your token's contract address
 
 const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...rest}) => {
+  // Use vault API to get additional vault data
+  const { vault: vaultData, loading: vaultLoading, error: vaultError } = useVault({ 
+    address: vaultInfo?.vault,
+    autoFetch: !!vaultInfo?.vault
+  });
 
   const bscscanLink = `https://testnet.monadexplorer.com/token/${tokenAddress}`;
-  const tokenDecimals = vaultInfo.tokenDecimals || 0;
+  const tokenDecimals = vaultInfo?.tokenDecimals || vaultData?.tokenDecimals || 0;
   const [symbol, setSymbol] = useState("NOMA");
 
      const {
@@ -118,6 +124,17 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
           </DialogTitle>
         </DialogHeader>
         <DialogBody mt={10} p={4} mt={"=50px"}>
+            {vaultLoading && (
+              <Box textAlign="center" py={4}>
+                <Spinner size="lg" color="green.400" />
+                <Text mt={2} color="gray">Loading vault details...</Text>
+              </Box>
+            )}
+            {vaultError && (
+              <Box textAlign="center" py={4}>
+                <Text color="red.400">Error loading vault data: {vaultError}</Text>
+              </Box>
+            )}
             <VStack p={4} w="100%">
             <Box w="100%">
               <HStack>
@@ -184,6 +201,36 @@ const VaultModal = ({vaultInfo, isMobile, token0Info, token1Info, address, ...re
                   <Text>{commify(formatEther(`${totalSupply}`))}</Text>
                 </Box>
               </HStack>
+              {vaultData && (
+                <>
+                  <HStack>
+                    <Box w={"50%"}>
+                      <Text fontWeight="bold" color="gray">Liquidity Ratio</Text>
+                    </Box>
+                    <Box>
+                      <Text>{vaultData.liquidityRatio}</Text>
+                    </Box>
+                  </HStack>
+                  <HStack>
+                    <Box w={"50%"}>
+                      <Text fontWeight="bold" color="gray">Circulating Supply</Text>
+                    </Box>
+                    <Box>
+                      <Text>{commify(formatEther(vaultData.circulatingSupply))}</Text>
+                    </Box>
+                  </HStack>
+                  {vaultData.totalInterest !== "0" && (
+                    <HStack>
+                      <Box w={"50%"}>
+                        <Text fontWeight="bold" color="gray">Total Interest</Text>
+                      </Box>
+                      <Box>
+                        <Text>{commify(formatEther(vaultData.totalInterest))}</Text>
+                      </Box>
+                    </HStack>
+                  )}
+                </>
+              )}
               <HStack>
                 <Box w={"50%"}>
                 </Box>

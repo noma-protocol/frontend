@@ -30,4 +30,10 @@ export const features = {
     defaultTimeRange: '24h',
     defaultLimit: 50,
   },
+  
+  // Vault API settings
+  vault: {
+    apiUrl: (import.meta.env.VITE_VAULT_API_URL as string) || 'http://localhost:3004',
+    cacheTimeout: 30000, // 30 seconds
+  },
 };

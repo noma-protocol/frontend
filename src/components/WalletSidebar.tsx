@@ -22,6 +22,7 @@ interface WalletSidebarProps {
     token1Info?: TokenInfo;
     selectedToken?: string;
     selectedTokenBalance?: bigint;
+    selectedTokenAddress?: string;
     address?: string;
     deposit?: () => void;
     withdraw?: () => void;
@@ -35,6 +36,9 @@ interface WalletSidebarProps {
     setIsWrapDrawerOpen?: (value: boolean) => void;
     isUnwrapDrawerOpen?: boolean;
     setIsUnwrapDrawerOpen?: (value: boolean) => void;
+    // Add vault data to avoid RPC calls
+    vaultToken0?: string;
+    vaultToken1?: string;
 }
 
 const WalletSidebar: React.FC<WalletSidebarProps> = ({
@@ -43,6 +47,7 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
     token1Info,
     selectedToken,
     selectedTokenBalance,
+    selectedTokenAddress,
     address,
     deposit,
     withdraw,
@@ -55,7 +60,9 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
     isWrapDrawerOpen = false,
     setIsWrapDrawerOpen,
     isUnwrapDrawerOpen = false,
-    setIsUnwrapDrawerOpen
+    setIsUnwrapDrawerOpen,
+    vaultToken0,
+    vaultToken1
 }) => {
     const [actionType, setActionType] = useState('');
     const [nomaSpotPrice, setNomaSpotPrice] = useState<number>(0);
@@ -92,9 +99,9 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 const slot0 = await poolContract.slot0();
                 const sqrtPriceX96 = slot0[0];
                 
-                // Get token addresses to determine price direction
-                const token0 = await poolContract.token0();
-                const token1 = await poolContract.token1();
+                // Get token addresses - use vault data if available to avoid RPC calls
+                const token0 = vaultToken0 || await poolContract.token0();
+                const token1 = vaultToken1 || await poolContract.token1();
                 
                 // Convert sqrtPriceX96 to price
                 const sqrtPrice = parseFloat(sqrtPriceX96.toString()) / Math.pow(2, 96);

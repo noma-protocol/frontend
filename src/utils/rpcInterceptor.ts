@@ -33,8 +33,15 @@ export function createInterceptedFetch() {
         const privyCall = stack.includes('privy');
         const wagmiCall = stack.includes('wagmi');
         
-        // Silently track requests without logging
-        // Uncomment for debugging: console.log(`[RPC] ${body.method} #${requestCounts[body.method]}`);
+        // Log RPC calls with stack trace for debugging
+        if (!privyCall && !wagmiCall) {
+            console.log(`[RPC] ${body.method} #${requestCounts[body.method]}`);
+            // Log first 10 calls with details
+            if (requestCounts[body.method] <= 10) {
+                console.log(`  Params:`, body.params);
+                console.log(`  Stack:`, stack.split('\n').slice(2, 5).join('\n'));
+            }
+        }
         
         // Block excessive calls for certain methods
         const blockThresholds: Record<string, number> = {
