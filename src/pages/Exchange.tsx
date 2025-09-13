@@ -1989,25 +1989,22 @@ const Exchange: React.FC = () => {
                 // console.log('[EXCHANGE] Final deployedVaults:', deployedVaults);
                 setVaultDescriptions(deployedVaults);
                 
-                // Fetch price stats from API with default 24h interval
-                let priceStats = null;
-                if (poolInfo.poolAddress && poolInfo.poolAddress !== '0x0000000000000000000000000000000000000000') {
-                    try {
-                        priceStats = await fetchTokenPriceStats("24h", poolInfo.poolAddress);
-                    } catch (error) {
-                        console.error("Failed to fetch price stats:", error);
-                    }
-                }
-                
                 // Convert vault descriptions to token format for display
                 // console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
                 // console.log('Vault pool addresses:', deployedVaults.map(v => ({ symbol: v.tokenSymbol, poolAddress: v.poolAddress })));
-                const tokenList = deployedVaults.map((vault, index) => {
-                    // Use API percentage change for NOMA token, random for others
-                    const isNoma = vault.tokenSymbol === 'NOMA' || vault.tokenSymbol === 'noma';
-                    const change24h = isNoma && priceStats?.percentageChange !== undefined 
-                        ? priceStats.percentageChange 
-                        : (Math.random() - 0.5) * 20; // Random change between -10% and +10%
+                const tokenList = await Promise.all(deployedVaults.map(async (vault, index) => {
+                    // Fetch price stats for this specific token's pool
+                    let change24h = (Math.random() - 0.5) * 20; // Default random change
+                    if (vault.poolAddress && vault.poolAddress !== '0x0000000000000000000000000000000000000000') {
+                        try {
+                            const priceStats = await fetchTokenPriceStats("24h", vault.poolAddress);
+                            if (priceStats?.percentageChange !== undefined) {
+                                change24h = priceStats.percentageChange;
+                            }
+                        } catch (error) {
+                            console.error(`Failed to fetch price stats for ${vault.tokenSymbol}:`, error);
+                        }
+                    }
                     
                     // Get logo URL and token supply from deployedTokensMap
                     const tokenData = deployedTokensMap.get(vault.tokenSymbol);
@@ -2043,7 +2040,7 @@ const Exchange: React.FC = () => {
                         logoUrl: logoUrl, // Add logo URL
                         selectedProtocol: tokenProtocol // Add protocol with uniswap as default
                     };
-                });
+                }));
                 
                 // Ensure minimum loading time for better UX
                 const elapsedTime = Date.now() - startTime;
@@ -2081,24 +2078,24 @@ const Exchange: React.FC = () => {
         if (tokens.length === 0) return;
         
         const updateTokenStats = async () => {
-            // Skip if no pool address is available
-            if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
-                return;
-            }
-            
             try {
-                const priceStats = await fetchTokenPriceStats("24h", poolInfo.poolAddress);
-                if (priceStats?.percentageChange !== undefined) {
-                    // Update NOMA token's 24h change
-                    setTokens(prevTokens => 
-                        prevTokens.map(token => {
-                            if (token.symbol === 'NOMA' || token.symbol === 'noma') {
-                                return { ...token, change24h: priceStats.percentageChange };
+                // Update each token's stats using its own pool address
+                const updatedTokens = await Promise.all(
+                    tokens.map(async (token) => {
+                        if (token.poolAddress && token.poolAddress !== '0x0000000000000000000000000000000000000000') {
+                            try {
+                                const priceStats = await fetchTokenPriceStats("24h", token.poolAddress);
+                                if (priceStats?.percentageChange !== undefined) {
+                                    return { ...token, change24h: priceStats.percentageChange };
+                                }
+                            } catch (error) {
+                                console.error(`Error updating stats for ${token.symbol}:`, error);
                             }
-                            return token;
-                        })
-                    );
-                }
+                        }
+                        return token;
+                    })
+                );
+                setTokens(updatedTokens);
             } catch (error) {
                 console.error("Error updating token stats:", error);
             }
