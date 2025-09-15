@@ -16,6 +16,7 @@ import {
   GridItem
 } from "@chakra-ui/react";
 import { useAccount, useContractRead } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { Toaster } from "../components/ui/toaster";
 import { ethers } from "ethers";
 const { JsonRpcProvider } = ethers.providers;
@@ -75,7 +76,7 @@ const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local"
 const feeTier = 3000;
 
 const Liquidity: React.FC = () => {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = usePrivyWagmi();
   const location = useLocation();
   const { monPrice, monPriceChange } = useMonPrice();
 

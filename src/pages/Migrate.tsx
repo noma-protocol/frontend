@@ -15,6 +15,7 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { ethers } from "ethers";
 const { JsonRpcProvider } = ethers.providers;
 import { isMobile } from "react-device-detect";
@@ -66,7 +67,7 @@ const migrationContractAddress = "0x5693Af4DbD109D396330d6C173FFB84Ce1ce487C";
 // const feeTier = 3000;
 
 const Migrate: React.FC = () => {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected } = usePrivyWagmi();
     const screenOrientation = useScreenOrientation();
     const isLandscape = screenOrientation.includes("landscape");
     const [isMigrating, setIsMigrating] = useState(false);

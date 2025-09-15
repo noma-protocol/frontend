@@ -11,7 +11,7 @@ export const monad = {
   },
   rpcUrls: {
     default: {
-      http: ['https://monad-testnet.g.alchemy.com/v2/mVGRu2kI9eyr_Q1yUzdBW'],
+      http: ['https://testnet-rpc.monad.xyz'],
     },
     public: {
       http: [config.RPC_URL],

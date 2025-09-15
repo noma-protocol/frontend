@@ -22,6 +22,7 @@ import {
   DialogCloseTrigger,
 } from './ui/dialog';
 import { useAccount, useBalance, useContractWrite, useContractRead, useWaitForTransaction } from 'wagmi';
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { ethers } from 'ethers';
 import { FaWallet, FaPaperPlane } from 'react-icons/fa';
 import { toaster } from "./ui/toaster";
@@ -45,7 +46,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
   tokenDecimals = 18,
   tokenLogo
 }) => {
-  const { address } = useAccount();
+  const { address } = usePrivyWagmi();
   const [recipientAddress, setRecipientAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [isValidAddress, setIsValidAddress] = useState(true);

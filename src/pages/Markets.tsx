@@ -13,6 +13,7 @@ import {
   Spinner
 } from "@chakra-ui/react";
 import { useAccount, useContractRead } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { isMobile } from "react-device-detect";
 import { Toaster } from "../components/ui/toaster";
 import { ethers } from "ethers";
@@ -22,6 +23,7 @@ import wethLogo from "../assets/images/weth.svg";
 import bnbLogo from "../assets/images/bnb-logo.png";
 import monadLogo from "../assets/images/monad.png";
 import VaultModal from "../components/VaultModal";
+import LiveStreamModal from "../components/LiveStreamModal";
 import { set } from "react-ga";
 import { useSearchParams } from "react-router-dom"; // Import useSearchParams
 import placeholderLogo from "../assets/images/question_white.svg";
@@ -62,7 +64,7 @@ const uniswapV3FactoryABI = [
 const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
 
 const Markets: React.FC = () => {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = usePrivyWagmi();
   // Parse the referral code from the URL
   const [searchParams] = useSearchParams();
   const showVaults = searchParams.get("v") || ""; // Fallback to empty string
@@ -82,6 +84,8 @@ const Markets: React.FC = () => {
   const [protocolsLoaded, setProtocolsLoaded] = useState(false);
 
   const [modalFocus, setModalFocus] = useState<boolean>(false);
+  const [liveStreamModalOpen, setLiveStreamModalOpen] = useState<boolean>(false);
+  const [selectedStreamVault, setSelectedStreamVault] = useState<any>(null);
 
   const reserveAssetsMap = {
     [config.protocolAddresses.WMON] : "WMON",
@@ -476,6 +480,19 @@ const Markets: React.FC = () => {
   return (
     <Container maxW="100%" px={0} py={0} bg="#0a0a0a" minH="100vh">
       <Toaster />
+      
+      {/* Live Stream Modal */}
+      {liveStreamModalOpen && selectedStreamVault && (
+        <LiveStreamModal
+          isOpen={liveStreamModalOpen}
+          onClose={() => {
+            setLiveStreamModalOpen(false);
+            setSelectedStreamVault(null);
+          }}
+          vaultInfo={selectedStreamVault}
+          userAddress={address || ''}
+        />
+      )}
       {/* Prompt user to connect their wallet if not connected */}
       {!isConnected ? (
         <Box display="flex" alignItems="center" justifyContent="center" minH="100vh">
@@ -635,6 +652,27 @@ const Markets: React.FC = () => {
                             <Box>
                               <Text color="white" fontSize="sm" fontWeight="500">{vault.tokenSymbol}</Text>
                             </Box>
+                            {/* Live Stream Icon for mobile - Only show for deployer */}
+                            {isMobile && vault.deployer?.toLowerCase() === address?.toLowerCase() && (
+                              <Button
+                                size="xs"
+                                variant="ghost"
+                                color={vault.finalized ? "#ef4444" : "#4ade80"}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedStreamVault(vault);
+                                  setLiveStreamModalOpen(true);
+                                }}
+                                _hover={{
+                                  bg: vault.finalized ? "rgba(239, 68, 68, 0.1)" : "rgba(74, 222, 128, 0.1)",
+                                  transform: "scale(1.1)"
+                                }}
+                                title={vault.finalized ? "Presale Finalized - Stream Available" : "Start Live Stream"}
+                                p={1}
+                              >
+                                <i className="fa-solid fa-video" style={{ fontSize: "14px" }}></i>
+                              </Button>
+                            )}
                           </HStack>
 
                           {/* Reserve */}
@@ -703,9 +741,29 @@ const Markets: React.FC = () => {
                             )}
                           </Box>
 
-                          {/* Vault Modal */}
-                          <Box display={isMobile ? "none" : "flex"} justifyContent="flex-start">
+                          {/* Vault Modal and Live Stream Icon */}
+                          <Box display={isMobile ? "none" : "flex"} justifyContent="flex-start" alignItems="center" gap={2}>
                             <VaultModal vaultInfo={vault} isMobile={isMobile} address={address}/>
+                            {/* Live Stream Icon - Only show for deployer */}
+                            {vault.deployer?.toLowerCase() === address?.toLowerCase() && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                color={vault.finalized ? "#ef4444" : "#4ade80"}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedStreamVault(vault);
+                                  setLiveStreamModalOpen(true);
+                                }}
+                                _hover={{
+                                  bg: vault.finalized ? "rgba(239, 68, 68, 0.1)" : "rgba(74, 222, 128, 0.1)",
+                                  transform: "scale(1.1)"
+                                }}
+                                title={vault.finalized ? "Presale Finalized - Stream Available" : "Start Live Stream"}
+                              >
+                                <i className="fa-solid fa-video" style={{ fontSize: "16px" }}></i>
+                              </Button>
+                            )}
                           </Box>
                     </Box>
                     )

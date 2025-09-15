@@ -3,6 +3,7 @@ import { Input, Image, Flex, Container, Heading, HStack, Box, Button, Spinner, T
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
 import useScreenOrientation from '../hooks/useScreenOrientation';
 import { useVisibilityPolling } from "../hooks/useVisibilityPolling";
@@ -81,7 +82,7 @@ const oikosFactoryAddress = getContractAddress(addresses, config.chain == "local
 const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 const Stake = () => {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected } = usePrivyWagmi();
     const [searchParams] = useSearchParams();
     const screenOrientation = useScreenOrientation();
     const isLandscape = screenOrientation.includes("landscape");

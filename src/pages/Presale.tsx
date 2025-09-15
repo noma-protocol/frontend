@@ -14,6 +14,7 @@ import {
   Spinner
 } from "@chakra-ui/react";
 import { useAccount, useBalance, useContractRead, useContractWrite } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { isMobile } from "react-device-detect";
 import { Slider } from "../components/ui/slider"
 import {
@@ -69,7 +70,7 @@ const ERC20Artifact = await import(`../assets/ERC20.json`);
 const ERC20Abi = ERC20Artifact.abi;
 
 const Presale: React.FC = () => {
-   const { address, isConnected } = useAccount();
+   const { address, isConnected } = usePrivyWagmi();
   // Parse the referral code from the URL
   const [searchParams] = useSearchParams();
   const rawReferralCode = searchParams.get("r") || ""; // Fallback to empty string

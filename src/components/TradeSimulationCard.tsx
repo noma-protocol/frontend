@@ -18,6 +18,7 @@ import {
 import { ethers } from 'ethers';
 import { commify, formatNumberPrecise } from '../utils';
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 // import bnbLogo from "../assets/images/bnb.png";
 import monadLogo from "../assets/images/monad.png";
 // import oksLogo from "../assets/images/logo.svg";

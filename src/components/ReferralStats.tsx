@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Heading, Box, VStack, HStack, Text, Button, Input, IconButton } from '@chakra-ui/react';
 import { FiCopy, FiUsers, FiDollarSign, FiTrendingUp, FiShare2, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { toaster } from './ui/toaster';
 import { Tooltip } from './ui/tooltip';
 import { isMobile } from "react-device-detect";
@@ -33,7 +34,7 @@ interface ReferralTrade {
 export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false, totalVolume, token0Symbol, tokenPriceUsd, poolAddress }) => {
   // console.log(`Token price USD in ReferralStats: ${tokenPriceUsd}, poolAddress: ${poolAddress}`);
 
-  const { address } = useAccount();
+  const { address } = usePrivyWagmi();
   const { monPrice } = useMonPrice();
 
   const [referralCode, setReferralCode] = useState<string>('');

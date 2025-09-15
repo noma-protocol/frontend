@@ -12,6 +12,7 @@ import {
   DialogTrigger
 } from "../components/ui/dialog"
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { commify } from "../utils";
 import { formatEther } from "viem";
 import metamaskLogo from "../assets/images/metamask.svg";

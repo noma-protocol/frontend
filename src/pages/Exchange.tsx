@@ -42,6 +42,7 @@ import { Checkbox } from "../components/ui/checkbox"
 import { Tooltip } from "../components/ui/tooltip"
   
 import { useAccount, useBalance, useContractRead } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
 import { useAllowance } from "../hooks/useAllowance";
 import { isMobile } from "react-device-detect";
@@ -187,7 +188,7 @@ const localProvider = new providers.JsonRpcProvider(
 );
 
 const Exchange: React.FC = () => {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected } = usePrivyWagmi();
     const { selectedToken, setSelectedToken } = useToken();
     const { monPrice } = useMonPrice();
     const [searchTerm, setSearchTerm] = useState("");
