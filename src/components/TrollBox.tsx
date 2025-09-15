@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { FiSend, FiMaximize2, FiMinimize2, FiMessageSquare, FiX, FiChevronDown, FiImage, FiYoutube, FiCornerUpRight } from 'react-icons/fi';
 import { useAccount } from 'wagmi';
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { useTrollbox } from '../hooks/useTrollbox';
 import UserProfileModal from './UserProfileModal';
 import EmojiPicker from 'emoji-picker-react';
@@ -86,7 +87,7 @@ const TrollBox: React.FC = () => {
   const instanceId = useRef(++instanceCounter);
   // console.log(`TrollBox instance ${instanceId.current} created`);
   
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = usePrivyWagmi();
   const [prevAddress, setPrevAddress] = useState<string | undefined>(undefined);
   const [authAttempts, setAuthAttempts] = useState(0);
   const [isAuthenticating, setIsAuthenticating] = useState(false);

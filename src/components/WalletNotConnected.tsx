@@ -1,16 +1,13 @@
 import React from 'react';
 import { Box, VStack, Text, Button, Icon } from "@chakra-ui/react";
-import { useConnect } from "wagmi";
+import { usePrivy } from '@privy-io/react-auth';
 import { FaWallet } from "react-icons/fa";
 
 const WalletNotConnected: React.FC = () => {
-    const { connectors, connect } = useConnect();
+    const { login, ready } = usePrivy();
 
     const handleConnect = () => {
-        const connector = connectors[0];
-        if (connector) {
-            connect({ connector });
-        }
+        login();
     };
 
     return (
@@ -101,7 +98,7 @@ const WalletNotConnected: React.FC = () => {
                         fontSize="lg"
                         maxW="400px"
                     >
-                        Connect your wallet to access all features and start trading on Oikos
+                        Connect your wallet to access all features and start trading on Noma
                     </Text>
                 </VStack>
                 
@@ -126,6 +123,7 @@ const WalletNotConnected: React.FC = () => {
                         boxShadow: "0 2px 15px rgba(74, 222, 128, 0.3)"
                     }}
                     onClick={handleConnect}
+                    isDisabled={!ready}
                 >
                     Connect Wallet
                 </Button>

@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Box, Text, Button, createListCollection, Spinner, HStack, VStack } from '@chakra-ui/react';
 import { LanguageContext, LanguageContextType } from "../core/LanguageProvider";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { usePrivy } from '@privy-io/react-auth';
 import { useAccount, useContractRead } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import Logo from "../assets/images/logo.svg";
 import { isMobile } from 'react-device-detect';
 import { Link, Image } from '@chakra-ui/react';
@@ -36,8 +37,8 @@ const localProvider = new JsonRpcProvider(
 
 const Header: React.FC = () => {
   const ctx = useContext<LanguageContextType>(LanguageContext);
-  const { open } = useWeb3Modal();
-  const { address, isConnected } = useAccount();
+  const { login, ready, authenticated, logout } = usePrivy();
+  const { address, isConnected } = usePrivyWagmi();
   const { setIsMenuOpen } = useMenu(); // Access setIsMenuOpen from context
   const navigate = useNavigate();
   const location = useLocation();
@@ -621,13 +622,14 @@ const Header: React.FC = () => {
 
           {/* Wallet Connect Button */}
           <Button 
-            onClick={() => open()} 
+            onClick={() => isConnected ? logout() : login()} 
             bg="#4ade80" 
             color="black" 
             h="40px" 
             px={isMobile ? 3 : 6}
             fontWeight="600"
             _hover={{ bg: "#22c55e" }}
+            isDisabled={!ready}
           >
             <i className="fa-solid fa-wallet" style={{ marginRight: isMobile ? "4px" : "8px" }}></i>
             {isConnected

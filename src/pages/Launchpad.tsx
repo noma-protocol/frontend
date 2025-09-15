@@ -27,6 +27,7 @@ import { Checkbox } from "../components/ui/checkbox"
 // import WalletNotConnected from '../components/WalletNotConnected';
   
 import { useAccount, useBalance, useContractWrite } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { isMobile } from "react-device-detect";
 import { useMonPrice } from '../contexts/MonPriceContext';
 import { Slider } from "../components/ui/slider"
@@ -98,7 +99,7 @@ const FactoryAbi = FactoryArtifact.abi;
 const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory"); 
 
 const Launchpad: React.FC = () => {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected } = usePrivyWagmi();
     const { monPrice } = useMonPrice();
     const [deployStep, setDeployStep] = useState(0);
     const [tokenName, setTokenName] = useState("");

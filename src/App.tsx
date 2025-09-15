@@ -1,13 +1,15 @@
 // import "./App.css";
 import { Outlet } from "react-router-dom";
 import { LanguageProvider } from "./core/LanguageProvider";
-import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
-import { WagmiConfig } from "wagmi";
+import { PrivyProvider } from '@privy-io/react-auth';
+import { WagmiConfig, createConfig } from "wagmi";
+import { createPublicClient, http } from 'viem';
 import React from "react";
-import { bsc, bscTestnet, localhost } from "viem/chains";
+import { localhost } from "viem/chains";
 
 import { monad } from './chains/monad';
-import config from './config'; 
+import config from './config';
+import { privyConfig } from './config/privyConfig'; 
 
 // import { ToastContainer } from "react-toastify";
 import { switchNetwork, watchNetwork } from "wagmi/actions";
@@ -27,22 +29,15 @@ function App() {
   const TRACKING_ID = "UA-XXXXX-X"; // OUR_TRACKING_ID
   ReactGA.initialize(TRACKING_ID);
 
-  const projectId = "a49d90d6ef89c4f94f1629f5821784a5";
-  const metadata = {
-    name: "Noma",
-    description: "Next-gen Launchpad",
-    url: "https://app.noma.money",
-    icons: ["https://avatars.githubusercontent.com/u/37784886"],
-  };
-
   const chains = [monad, localhost];
-  const wagmiConfig = defaultWagmiConfig({
+  
+  const wagmiConfig = createConfig({
     chains,
-    projectId,
-    metadata,
+    publicClient: createPublicClient({
+      chain: monad,
+      transport: http(),
+    }),
   });
-
-  createWeb3Modal({ wagmiConfig, projectId, chains });
 
   watchNetwork(async (network) => {
     console.log("Network changed:", network.chain?.name);
@@ -55,21 +50,26 @@ function App() {
   });
 
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <LanguageProvider>
-        <MonPriceProvider>
-          <TokenProvider>
-            <MenuProvider>
-              <Provider>
-                <Header />
-                <Outlet />
-                <Footer />
-              </Provider>
-            </MenuProvider>
-          </TokenProvider>
-        </MonPriceProvider>
-      </LanguageProvider>
-    </WagmiConfig>
+    <PrivyProvider
+      appId={privyConfig.appId}
+      config={privyConfig.config}
+    >
+      <WagmiConfig config={wagmiConfig}>
+        <LanguageProvider>
+          <MonPriceProvider>
+            <TokenProvider>
+              <MenuProvider>
+                <Provider>
+                  <Header />
+                  <Outlet />
+                  <Footer />
+                </Provider>
+              </MenuProvider>
+            </TokenProvider>
+          </MonPriceProvider>
+        </LanguageProvider>
+      </WagmiConfig>
+    </PrivyProvider>
   );
 }
 

@@ -3,6 +3,7 @@ import { Input, Image, Flex, Container, Heading, HStack, Box, Grid, GridItem, Bu
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import useScreenOrientation from '../hooks/useScreenOrientation';
 import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import { Toaster, toaster } from "../components/ui/toaster";
@@ -100,7 +101,7 @@ const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local"
 const modelHelperAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
 const Borrow = () => {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected } = usePrivyWagmi();
     const [searchParams] = useSearchParams();
     const screenOrientation = useScreenOrientation();
     const isLandscape = screenOrientation.includes("landscape");

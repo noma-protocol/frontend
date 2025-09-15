@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Container, VStack, Box, SimpleGrid, HStack, Heading, Text, Button } from "@chakra-ui/react";
 import { useAccount } from "wagmi";
+import { usePrivyWagmi } from '../hooks/usePrivyWagmi';
 import { isMobile } from "react-device-detect";
 // import { CopyIcon } from "@chakra-ui/icons";
 
 const Bootstrap: React.FC = () => {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = usePrivyWagmi();
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [error, setError] = useState(""); // Frontend error messages
   const [apiMessage, setApiMessage] = useState(""); // Success messages from backend
