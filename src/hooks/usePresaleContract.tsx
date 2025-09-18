@@ -71,20 +71,35 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
                 timeLeftInSeconds,
                 hasExpired,
                 currentTimestamp
-            ] = await Promise.all([
-                PresaleContract.totalRaised(),
-                PresaleContract.getParticipantCount(),
-                PresaleContract.finalized(),
-                PresaleContract.softCapReached(),
-                PresaleContract.contributions(userAddress),
-                PresaleContract.getTotalReferredByCode(referralCode ? `0x${referralCode}` : "0x" + "00".repeat(8)),
-                PresaleContract.getReferralUserCount(referralCode ? `0x${referralCode}` : "0x" + "00".repeat(8)),
-                PresaleContract.getPresaleParams(),
-                PresaleContract.deployer(),
-                PresaleContract.getTimeLeft(),
-                PresaleContract.hasExpired(),
-                PresaleContract.getCurrentTimestamp()
-            ]);
+            // Temporarily disabled RPC calls
+            ] = [
+                BigNumber.from(0), // totalRaised
+                BigNumber.from(0), // getParticipantCount
+                false, // finalized
+                false, // softCapReached
+                BigNumber.from(0), // contributions
+                BigNumber.from(0), // getTotalReferredByCode
+                BigNumber.from(0), // getReferralUserCount
+                [BigNumber.from(0), BigNumber.from(0), BigNumber.from(0)], // getPresaleParams
+                ethers.constants.AddressZero, // deployer
+                BigNumber.from(0), // getTimeLeft
+                true, // hasExpired
+                BigNumber.from(0) // getCurrentTimestamp
+            ];
+            // ] = await Promise.all([
+            //     PresaleContract.totalRaised(),
+            //     PresaleContract.getParticipantCount(),
+            //     PresaleContract.finalized(),
+            //     PresaleContract.softCapReached(),
+            //     PresaleContract.contributions(userAddress),
+            //     PresaleContract.getTotalReferredByCode(referralCode ? `0x${referralCode}` : "0x" + "00".repeat(8)),
+            //     PresaleContract.getReferralUserCount(referralCode ? `0x${referralCode}` : "0x" + "00".repeat(8)),
+            //     PresaleContract.getPresaleParams(),
+            //     PresaleContract.deployer(),
+            //     PresaleContract.getTimeLeft(),
+            //     PresaleContract.hasExpired(),
+            //     PresaleContract.getCurrentTimestamp()
+            // ]);
 
 
             // console.log("presaleInfo array:", presaleInfo?.map(v => v?.toString()));

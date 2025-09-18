@@ -17,6 +17,7 @@ export interface VaultInfo {
   // Associated contracts
   presaleContract: string;
   stakingContract: string;
+  poolAddress: string;
   
   // Vault metrics (all values as strings due to BigInt conversion)
   liquidityRatio: string;

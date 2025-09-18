@@ -237,12 +237,15 @@ const Markets: React.FC = () => {
             }
           }
           
-          // Fetch pool address
-          const poolAddress = await fetchPoolAddress(
-            vault.token0, 
-            vault.token1,
-            protocol
-          );
+          // Use pool address from vault API if available, otherwise fetch it
+          // const poolAddress = vault.poolAddress || await fetchPoolAddress(
+          //   vault.token0, 
+          //   vault.token1,
+          //   protocol
+          // );
+          
+          // For now, only use pool address from API
+          const poolAddress = vault.poolAddress || null;
           
           return {
             tokenName: vault.tokenName,

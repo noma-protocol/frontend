@@ -187,9 +187,19 @@ const modelHelperAddress = getContractAddress(
 
 // Provider setup
 console.log('[Provider] Setting up provider with RPC_URL:', config.chain == "local" ? "http://localhost:8545" : config.RPC_URL);
+console.log('[Provider] Config:', { chain: config.chain, RPC_URL: config.RPC_URL, environment: config.environment });
 const localProvider = new providers.JsonRpcProvider(
-    config.chain == "local" ? "http://localhost:8545" : config.RPC_URL || "https://rpc.troll.box"
+    config.chain == "local" ? "http://localhost:8545" : "https://rpc.ankr.com/monad_testnet" //config.RPC_URL || "https://testnet-rpc.monad.xyz"
 );
+
+console.log({localProvider})
+
+// Test provider connection - Temporarily disabled
+localProvider.getNetwork().then(network => {
+    console.log('[Provider] Connected to network:', network);
+}).catch(error => {
+    console.error('[Provider] Failed to connect to network:', error);
+});
 
 const Exchange: React.FC = () => {
     const { address, isConnected } = useAccount();
@@ -440,15 +450,16 @@ const Exchange: React.FC = () => {
     const [tokenProtocols, setTokenProtocols] = useState<{ [symbol: string]: string }>({});
     const [tokenStats, setTokenStats] = useState<{ [symbol: string]: number }>({});
     
-    // Fetch IMV (Intrinsic Minimum Value) from ModelHelper contract
-    const { data: imvData } = useContractRead({
-        address: modelHelperAddress,
-        abi: ModelHelperAbi,
-        functionName: "getIntrinsicMinimumValue",
-        args: selectedToken?.vault ? [selectedToken.vault] : undefined,
-        watch: false, // Disable continuous polling to reduce RPC calls
-        enabled: !!selectedToken?.vault
-    });
+    // Fetch IMV (Intrinsic Minimum Value) from ModelHelper contract - Temporarily disabled
+    // const { data: imvData } = useContractRead({
+    //     address: modelHelperAddress,
+    //     abi: ModelHelperAbi,
+    //     functionName: "getIntrinsicMinimumValue",
+    //     args: selectedToken?.vault ? [selectedToken.vault] : undefined,
+    //     watch: false, // Disable continuous polling to reduce RPC calls
+    //     enabled: !!selectedToken?.vault
+    // });
+    const imvData = null;
     
     // Trade history data with local storage persistence
     const [tradeHistory, setTradeHistory] = useState([]);
@@ -1693,9 +1704,19 @@ const Exchange: React.FC = () => {
                 console.log('[loadChartData] poolInfo.poolAddress:', poolInfo.poolAddress);
                 console.log('[loadChartData] selectedToken:', selectedToken);
                 
-                // Skip API calls if no pool address is available
+                // Skip API calls if no pool address is available, but show mock data
                 if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
-                    console.log('[loadChartData] Skipping API calls - no valid pool address');
+                    console.log('[loadChartData] No valid pool address - showing mock data');
+                    
+                    // Generate mock data for display
+                    const mockData = generateMockOHLCData(chartTimeframe);
+                    if (mockData && mockData.length > 0) {
+                        setChartSeries([{
+                            name: `${selectedToken.symbol}/${token1Symbol}`,
+                            data: mockData
+                        }]);
+                    }
+                    
                     setIsChartLoading(false);
                     return;
                 }
@@ -1915,8 +1936,10 @@ const Exchange: React.FC = () => {
                 // Mark as processed immediately to prevent duplicates
                 processedTxHashes.current.add(txHash);
                 
-                const block = await event.getBlock();
-                const timestamp = new Date(block.timestamp * 1000);
+                // Temporarily disabled RPC call
+                // const block = await event.getBlock();
+                // const timestamp = new Date(block.timestamp * 1000);
+                const timestamp = new Date();
                 
                 // Determine if it's a buy or sell based on amounts and token positions
                 // IMPORTANT: We need to check which position our selected token is in the pool
@@ -1972,17 +1995,19 @@ const Exchange: React.FC = () => {
         };
         */
         
-        // Get initial price from slot0
+        // Get initial price from slot0 - Temporarily disabled
         const getInitialPrice = async () => {
             try {
-                const slot0 = await poolContract.slot0();
-                updatePriceFromSqrtPriceX96(slot0.sqrtPriceX96);
+                // const slot0 = await poolContract.slot0();
+                // updatePriceFromSqrtPriceX96(slot0.sqrtPriceX96);
+                // Use default price
+                updatePriceFromSqrtPriceX96(BigInt("1844674407370955161600000000"));
             } catch (error) {
                 console.error("Error fetching initial price:", error);
             }
         };
         
-        getInitialPrice();
+        // getInitialPrice();
         
         // DISABLED: Pool event listeners - now using WebSocket for trade history
         /*
@@ -1994,8 +2019,10 @@ const Exchange: React.FC = () => {
         const handleSwapWithTimeCheck = async (...args) => {
             try {
                 const event = args[args.length - 1];
-                const block = await event.getBlock();
-                const eventTimestamp = block.timestamp * 1000;
+                // Temporarily disabled RPC call
+                // const block = await event.getBlock();
+                // const eventTimestamp = block.timestamp * 1000;
+                const eventTimestamp = Date.now();
                 
                 // Only process events that happened after we started listening
                 if (eventTimestamp < startListeningTime) {
@@ -2052,11 +2079,14 @@ const Exchange: React.FC = () => {
                         localProvider
                     )
 
-                    const totalSupply = await token0Contract.totalSupply();
-                    setTotalSupply(totalSupply);
+                    // Temporarily disabled RPC calls
+                    // const totalSupply = await token0Contract.totalSupply();
+                    // setTotalSupply(totalSupply);
+                    setTotalSupply(BigNumber.from("1000000000000000000000000")); // Default 1M tokens
                     
-                    symbol = await token1Contract.symbol();
-                    setToken1Symbol(symbol);
+                    // symbol = await token1Contract.symbol();
+                    // setToken1Symbol(symbol);
+                    symbol = "MON"; // Default symbol
                     
                     // If token1 is WETH/WMON, set it as MON for display
                     if (symbol === "WMON" || symbol === "WETH") {
@@ -2131,24 +2161,30 @@ const Exchange: React.FC = () => {
                             });
                         } else {
                             // Fetch pool address if not available or is zero address
-                            console.log(`[TOKEN SELECTION] Fetching new pool address...`);
-                            const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1, protocol);
-                            
-                            if (poolAddress && poolAddress !== zeroAddress) {
-                                // Use token addresses from vault data instead of RPC calls
-                                const poolToken0 = selectedToken.token0;
-                                const poolToken1 = selectedToken.token1;
+                            // console.log(`[TOKEN SELECTION] Fetching new pool address...`);
+
+                            // const poolAddress = await fetchPoolAddress(selectedToken.token0, selectedToken.token1, protocol);
+
+                            // console.log(`[TOKEN SELECTION] Fetched new pool address ${poolAddress}...`);
+
+                            // if (poolAddress && poolAddress !== zeroAddress) {
+                            //     // Use token addresses from vault data instead of RPC calls
+                            //     const poolToken0 = selectedToken.token0;
+                            //     const poolToken1 = selectedToken.token1;
                                 
-                                setPoolInfo({ 
-                                    poolAddress, 
-                                    token0: poolToken0,
-                                    token1: poolToken1
-                                });
-                                // console.log(`[TOKEN SELECTION] Pool info updated with address: ${poolAddress}`);
-                            } else {
-                                // console.log(`[TOKEN SELECTION] No valid pool found, pool address is: ${poolAddress}`);
-                                setPoolInfo({ poolAddress: poolAddress || null });
-                            }
+                            //     setPoolInfo({ 
+                            //         poolAddress, 
+                            //         token0: poolToken0,
+                            //         token1: poolToken1
+                            //     });
+                            //     // console.log(`[TOKEN SELECTION] Pool info updated with address: ${poolAddress}`);
+                            // } else {
+                            //     // console.log(`[TOKEN SELECTION] No valid pool found, pool address is: ${poolAddress}`);
+                            //     setPoolInfo({ poolAddress: poolAddress || null });
+                            // }
+                            
+                            // For now, just set pool info to null if not available from API
+                            setPoolInfo({ poolAddress: null });
                         }
                     } catch (error) {
                         console.error("[TOKEN SELECTION] Error fetching pool info:", error);
@@ -2331,40 +2367,53 @@ const Exchange: React.FC = () => {
     }, [tokens, searchTerm, vaultDescriptions, sortBy, sortOrder, monPrice, tokenStats]);
     
     // Fetch pool address from Uniswap V3 Factory
-    const fetchPoolAddress = async (token0: string, token1: string, protocol: string = "uniswap") => {
-        // console.log(`[fetchPoolAddress] Called with:`, {
-        //     token0,
-        //     token1,
-        //     protocol,
-        //     defaultProtocol: "uniswap"
-        // });
-        
-        // Select the appropriate factory based on protocol
-        // Handle both "pancakeswap" and "pancake" as PancakeSwap
-        const isPancakeSwap = protocol === "pancakeswap" || protocol === "pancake";
-        const factoryAddress = isPancakeSwap
-        ? config.protocolAddresses.pancakeV3Factory 
-        : config.protocolAddresses.uniswapV3Factory;
-        
-        // console.log(`[fetchPoolAddress] Using protocol: ${protocol}, Factory: ${factoryAddress}`);
-        // console.log(`[fetchPoolAddress] Available factories:`, {
-        //     uniswap: config.protocolAddresses.uniswapV3Factory,
-        //     pancake: config.protocolAddresses.pancakeV3Factory
-        // });
-        
-        const factoryContract = new ethers.Contract(
-        factoryAddress,
-        uniswapV3FactoryABI, // Same ABI for both Uniswap and PancakeSwap V3
-        localProvider
-        );
-        const feeTier = isPancakeSwap ? 2500 : 3000;
-        // console.log(`[fetchPoolAddress] Using fee tier: ${feeTier} for protocol: ${protocol} (isPancakeSwap: ${isPancakeSwap})`);
+    const fetchPoolAddress = async (token0: string, token1: string, protocol?: string) => {
+        console.log(`[fetchPoolAddress] Called with:`, {
+            token0,
+            token1,
+            protocol: protocol || "auto-detect"
+        });
 
-        const poolAddress = await factoryContract.getPool(token0, token1, feeTier);
+        const factories = [
+            {
+                name: "uniswap",
+                address: config.protocolAddresses.uniswapV3Factory,
+                feeTier: 3000
+            },
+            {
+                name: "pancakeswap",
+                address: config.protocolAddresses.pancakeV3Factory,
+                feeTier: 2500
+            }
+        ];
 
-        // console.log(`[fetchPoolAddress] Result: Protocol is ${protocol} Fetched pool address for ${token0} is ${poolAddress} using ${factoryAddress}`)
-        return poolAddress;
+        // Check both factories
+        for (const factory of factories) {
+            try {
+                const factoryContract = new ethers.Contract(
+                    factory.address,
+                    uniswapV3FactoryABI,
+                    localProvider
+                );
+
+                const poolAddress = await factoryContract.getPool(token0, token1, factory.feeTier);
+
+                if (poolAddress !== ethers.constants.AddressZero) {
+                    console.log(`[fetchPoolAddress] Found pool in ${factory.name}: ${poolAddress}`);
+                    return poolAddress;
+                }
+            } catch (error) {
+                console.error(`[fetchPoolAddress] Error checking ${factory.name} factory:`, error);
+                console.error(`[fetchPoolAddress] Factory address: ${factory.address}`);
+                console.error(`[fetchPoolAddress] RPC URL: ${config.RPC_URL}`);
+                console.error(`[fetchPoolAddress] Provider network:`, await localProvider.getNetwork().catch(e => 'Failed to get network'));
+            }
+        }
+
+        console.log(`[fetchPoolAddress] No pool found in any factory for tokens ${token0} and ${token1}`);
+        return ethers.constants.AddressZero;
     }
+
 
     const WETH_ADDRESS = config.protocolAddresses.WMON;
     const [wrapAmount, setWrapAmount] = useState(0);
@@ -2456,8 +2505,7 @@ const Exchange: React.FC = () => {
                             const tokenData = deployedTokensMap.get(vault.tokenSymbol);
                             const protocol = tokenData?.selectedProtocol || tokenProtocols[vault.tokenSymbol] || "uniswap";
                             
-                            // Don't fetch pool address during initial load - only when token is selected
-                            // This saves hundreds of RPC calls!
+                            // Pool address is now provided by the vault API
                             
                             return {
                                 tokenName: vault.tokenName,
@@ -2469,7 +2517,7 @@ const Exchange: React.FC = () => {
                                 vault: vault.address,
                                 presaleContract: vault.presaleContract,
                                 stakingContract: vault.stakingContract,
-                                poolAddress: null, // Don't fetch during initial load
+                                poolAddress: vault.poolAddress || null,
                                 spotPrice: vault.spotPriceX96, // API provides spot price
                                 // Additional fields from API
                                 liquidityRatio: vault.liquidityRatio,
@@ -3025,15 +3073,18 @@ const Exchange: React.FC = () => {
     // Fetch quotes using wagmi hooks
     const quoterAddress = config.protocolAddresses?.uniswapQuoterV2;
     
-    const { data: quoteData, isLoading: isQuoteLoading } = useContractRead({
-        address: quoterAddress,
-        abi: QuoterAbi,
-        functionName: "quoteExactInput",
-        args: swapPath && tradeAmount && parseFloat(tradeAmount) > 0 ? 
-            [swapPath, safeParseEther(tradeAmount)] : undefined,
-        enabled: !!swapPath && !!tradeAmount && parseFloat(tradeAmount) > 0 && !!quoterAddress,
-        watch: false, // Disable to reduce RPC calls - will update on dependencies change
-    });
+    // Quote fetching - Temporarily disabled
+    // const { data: quoteData, isLoading: isQuoteLoading } = useContractRead({
+    //     address: quoterAddress,
+    //     abi: QuoterAbi,
+    //     functionName: "quoteExactInput",
+    //     args: swapPath && tradeAmount && parseFloat(tradeAmount) > 0 ? 
+    //         [swapPath, safeParseEther(tradeAmount)] : undefined,
+    //     enabled: !!swapPath && !!tradeAmount && parseFloat(tradeAmount) > 0 && !!quoterAddress,
+    //     watch: false, // Disable to reduce RPC calls - will update on dependencies change
+    // });
+    const quoteData = null;
+    const isQuoteLoading = false;
     
     // Calculate quote and price impact
     useEffect(() => {
@@ -4373,28 +4424,41 @@ const Exchange: React.FC = () => {
                                         </HStack>
                                     </Box>
                                 </HStack>
-                                {isChartLoading ? (
-                                    <Center h="calc(100% - 60px)">
-                                        <VStack>
-                                            <Spinner size="md" color="#4ade80" thickness="3px" />
-                                            <Text color="#4ade80" fontSize="sm">Loading chart data...</Text>
-                                        </VStack>
-                                    </Center>
-                                ) : chartSeries.length > 0 && chartSeries[0].data.length > 0 ? (
-                                    <Box h="calc(100% - 60px)" minH="300px" w="100%">
-                                        <ReactApexChart
-                                            options={chartOptions}
-                                            series={chartSeries}
-                                            type="candlestick"
-                                            height="100%"
-                                            width="100%"
-                                        />
-                                    </Box>
-                                ) : (
-                                    <Center h="calc(100% - 60px)">
-                                        <Text color="#666" fontSize="sm">No price data available</Text>
-                                    </Center>
-                                )}
+                                {(() => {
+                                    console.log('[Chart Render] isChartLoading:', isChartLoading);
+                                    console.log('[Chart Render] chartSeries:', chartSeries);
+                                    console.log('[Chart Render] chartSeries.length:', chartSeries.length);
+                                    console.log('[Chart Render] chartSeries[0]?.data.length:', chartSeries[0]?.data?.length);
+                                    
+                                    if (isChartLoading) {
+                                        return (
+                                            <Center h="calc(100% - 60px)">
+                                                <VStack>
+                                                    <Spinner size="md" color="#4ade80" thickness="3px" />
+                                                    <Text color="#4ade80" fontSize="sm">Loading chart data...</Text>
+                                                </VStack>
+                                            </Center>
+                                        );
+                                    } else if (chartSeries.length > 0 && chartSeries[0].data.length > 0) {
+                                        return (
+                                            <Box h="calc(100% - 60px)" minH="300px" w="100%">
+                                                <ReactApexChart
+                                                    options={chartOptions}
+                                                    series={chartSeries}
+                                                    type="candlestick"
+                                                    height="100%"
+                                                    width="100%"
+                                                />
+                                            </Box>
+                                        );
+                                    } else {
+                                        return (
+                                            <Center h="calc(100% - 60px)">
+                                                <Text color="#666" fontSize="sm">No price data available</Text>
+                                            </Center>
+                                        );
+                                    }
+                                })()}
                             </Box>
                             
                             {/* Trade History with Tabs - Only show on desktop */}

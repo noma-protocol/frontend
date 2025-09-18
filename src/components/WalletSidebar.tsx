@@ -100,8 +100,8 @@ const WalletSidebar: React.FC<WalletSidebarProps> = ({
                 const sqrtPriceX96 = slot0[0];
                 
                 // Get token addresses - use vault data if available to avoid RPC calls
-                const token0 = vaultToken0 || await poolContract.token0();
-                const token1 = vaultToken1 || await poolContract.token1();
+                const token0 = vaultToken0 || "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701";
+                const token1 = vaultToken1 || "0x0000000000000000000000000000000000000000";
                 
                 // Convert sqrtPriceX96 to price
                 const sqrtPrice = parseFloat(sqrtPriceX96.toString()) / Math.pow(2, 96);
