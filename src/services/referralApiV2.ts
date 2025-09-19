@@ -1,0 +1,258 @@
+// New referral API service for the WebSocket infrastructure
+const API_BASE_URL = (import.meta.env.VITE_REFERRAL_API_URL as string) || 'http://localhost:3004';
+
+interface ReferralRegistration {
+  referralCode: string;
+  referrerAddress?: string;
+  referredAddress: string;
+  poolAddress: string;
+}
+
+interface ReferralTrade {
+  userAddress: string;
+  poolAddress: string;
+  type: 'buy' | 'sell';
+  tokenAddress: string;
+  tokenName: string;
+  tokenSymbol: string;
+  volumeETH: string;
+  volumeUSD: string;
+  txHash: string;
+}
+
+interface ReferralStats {
+  referrerAddress: string;
+  stats: Array<{
+    poolAddress: string;
+    referredCount: number;
+    referredAddresses: string[];
+    totalVolumeETH: string;
+    totalVolumeUSD: string;
+    lastTradeTime: string | null;
+  }>;
+  totalStats: {
+    totalReferred: number;
+    totalVolumeETH: string;
+    totalVolumeUSD: string;
+  };
+}
+
+interface RecentTrade {
+  id: string;
+  userAddress: string;
+  poolAddress: string;
+  referralCode: string;
+  referrerAddress: string;
+  type: 'buy' | 'sell';
+  tokenAddress: string;
+  tokenName: string;
+  tokenSymbol: string;
+  volumeETH: string;
+  volumeUSD: string;
+  txHash: string;
+  timestamp: string;
+}
+
+export const referralApiV2 = {
+  // Register a referral code for a user
+  async registerCode(code: string, address: string): Promise<{
+    message: string;
+    code: string;
+    address: string;
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/referrals/register-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code, address }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error registering referral code:', error);
+      throw error;
+    }
+  },
+
+  // Register a new referral relationship
+  async registerReferral(data: ReferralRegistration): Promise<{
+    message: string;
+    referral: any;
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/referrals/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error registering referral:', error);
+      throw error;
+    }
+  },
+
+  // Track a referral trade
+  async trackTrade(tradeData: ReferralTrade): Promise<{
+    message: string;
+    trade: any;
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/referrals/track-trade`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tradeData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error tracking referral trade:', error);
+      throw error;
+    }
+  },
+
+  // Get referral stats for an address (supports pool-specific queries)
+  async getReferralStats(address: string, poolAddress?: string): Promise<ReferralStats> {
+    try {
+      const url = new URL(`${API_BASE_URL}/api/referrals/stats/${address}`);
+      if (poolAddress) {
+        url.searchParams.append('poolAddress', poolAddress);
+      }
+      
+      const response = await fetch(url.toString());
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching referral stats:', error);
+      throw error;
+    }
+  },
+
+  // Check if a user was referred for a specific pool
+  async checkReferral(userAddress: string, poolAddress: string): Promise<{
+    referred: boolean;
+    referral?: {
+      referralCode: string;
+      referrerAddress: string;
+      referredAddress: string;
+      poolAddress: string;
+      timestamp: string;
+    };
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/referrals/check/${userAddress}/${poolAddress}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking referral:', error);
+      throw error;
+    }
+  },
+
+  // Get referrals by code (optionally filtered by pool)
+  async getReferralsByCode(code: string, poolAddress?: string): Promise<{
+    code: string;
+    referrals: Array<{
+      referrerAddress: string;
+      poolAddress: string;
+      referredAddresses: string[];
+      count: number;
+    }>;
+  }> {
+    try {
+      const url = new URL(`${API_BASE_URL}/api/referrals/code/${code}`);
+      if (poolAddress) {
+        url.searchParams.append('poolAddress', poolAddress);
+      }
+      
+      const response = await fetch(url.toString());
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching referrals by code:', error);
+      throw error;
+    }
+  },
+
+  // Get all referral codes
+  async getAllCodes(): Promise<{
+    codes: Array<{
+      code: string;
+      addresses: string[];
+    }>;
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/referrals/codes`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching all referral codes:', error);
+      throw error;
+    }
+  },
+
+  // Get recent trades
+  async getRecentTrades(limit = 100, poolAddress?: string, referrerAddress?: string): Promise<{
+    trades: RecentTrade[];
+  }> {
+    try {
+      const url = new URL(`${API_BASE_URL}/api/referrals/trades/recent`);
+      url.searchParams.append('limit', limit.toString());
+      if (poolAddress) {
+        url.searchParams.append('poolAddress', poolAddress);
+      }
+      if (referrerAddress) {
+        url.searchParams.append('referrerAddress', referrerAddress);
+      }
+      
+      const response = await fetch(url.toString());
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching recent trades:', error);
+      throw error;
+    }
+  },
+};

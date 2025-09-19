@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   Container,
   VStack,
@@ -20,6 +20,8 @@ import {
   Tabs,
   Center
 } from "@chakra-ui/react";
+import { useBlockchainWebSocketWagmi } from '../hooks/useBlockchainWebSocketWagmi';
+import { features } from '../config/features';
 import {
     DialogRoot,
     DialogContent,
@@ -200,6 +202,23 @@ const Exchange: React.FC = () => {
     // Parse referral code from URL
     const [searchParams] = useSearchParams();
     const urlReferralCode = searchParams.get("r") || "";
+    
+    // WebSocket connection for real-time trade monitoring
+    const {
+        isConnected: wsConnected,
+        isAuthenticated: wsAuthenticated,
+        events: wsEvents,
+        error: wsError,
+        authenticate: wsAuthenticate,
+        subscribe: wsSubscribe,
+        unsubscribe: wsUnsubscribe,
+        getHistory: wsGetHistory,
+        clearEvents
+    } = useBlockchainWebSocketWagmi({
+        autoConnect: true,
+        autoAuthenticate: false, // Manual auth to prevent startup errors
+        pools: [] // Will subscribe after we have pool info
+    });
     
     // Referral state
     const [referralCode, setReferralCode] = useState("");
@@ -421,7 +440,7 @@ const Exchange: React.FC = () => {
     
     // Trade history data with local storage persistence
     const [tradeHistory, setTradeHistory] = useState([]);
-    const [processedTxHashes] = useState(() => new Set());
+    const processedTxHashes = useRef(new Set());
     
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -455,48 +474,12 @@ const Exchange: React.FC = () => {
         loadReferralStats();
     }, [address, selectedToken]);
 
-    // Load trade history from local storage on mount
-    useEffect(() => {
-        const loadTradeHistory = () => {
-            try {
-                const stored = localStorage.getItem('noma_trade_history');
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    // Convert time strings back to Date objects
-                    const history = parsed.map(trade => ({
-                        ...trade,
-                        time: new Date(trade.time)
-                    }));
-                    setTradeHistory(history);
-                    // Add loaded tx hashes to processed set
-                    history.forEach(trade => {
-                        if (trade.fullTxHash) {
-                            processedTxHashes.add(trade.fullTxHash);
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error("Error loading trade history:", error);
-            }
-        };
-        loadTradeHistory();
-    }, []);
     
-    // Save trade history to local storage whenever it changes
-    useEffect(() => {
-        if (tradeHistory.length > 0) {
-            try {
-                localStorage.setItem('noma_trade_history', JSON.stringify(tradeHistory));
-            } catch (error) {
-                console.error("Error saving trade history:", error);
-            }
-        }
-    }, [tradeHistory]);
     
     // Function to clear trade history
     const clearTradeHistory = () => {
         setTradeHistory([]);
-        processedTxHashes.clear();
+        processedTxHashes.current.clear();
         localStorage.removeItem('noma_trade_history');
     };
     
@@ -607,6 +590,99 @@ const Exchange: React.FC = () => {
     const [isLoadingExecuteTrade, setIsLoadingExecuteTrade] = useState(false);
     const [balanceBeforePurchase, setBalanceBeforePurchase] = useState(0);
     const [balanceBeforeSale, setBalanceBeforeSale] = useState(0);
+    
+    // Track if we're already subscribed to avoid re-subscribing
+    const subscribedPoolRef = useRef<string | null>(null);
+    // Track if localStorage has been loaded for the current pool
+    const localStorageLoadedRef = useRef<string | null>(null);
+    
+    // Load trade history from local storage when pool changes
+    useEffect(() => {
+        console.log('[Exchange] Load history effect triggered, poolAddress:', poolInfo.poolAddress, 'token:', selectedToken?.symbol);
+        if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
+            console.log('[Exchange] No valid pool address, skipping history load');
+            return;
+        }
+        
+        const loadTradeHistory = () => {
+            try {
+                // Clear existing trade history first to avoid mixing trades from different pools
+                console.log('[Exchange] Clearing trade history for token switch to:', selectedToken?.symbol);
+                console.log('[Exchange] Current localStorage keys:', Object.keys(localStorage).filter(k => k.includes('noma_trade_history')));
+                setTradeHistory([]);
+                
+                // Use pool-specific key
+                const key = `noma_trade_history_${poolInfo.poolAddress}`;
+                console.log('[Exchange] Attempting to load trade history with key:', key, 'for token:', selectedToken?.symbol);
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    console.log('[Exchange] Raw parsed trades from localStorage:', parsed.length, 'trades');
+                    console.log('[Exchange] First trade:', parsed[0]?.token, 'from pool:', poolInfo.poolAddress);
+                    // Convert time strings back to Date objects
+                    const history = parsed.map(trade => {
+                        let convertedTime;
+                        // Handle different time formats
+                        if (trade.time instanceof Date) {
+                            convertedTime = trade.time;
+                        } else if (typeof trade.time === 'string') {
+                            convertedTime = new Date(trade.time);
+                        } else if (typeof trade.time === 'number') {
+                            // Assume it's a timestamp in milliseconds
+                            convertedTime = new Date(trade.time);
+                        } else {
+                            console.error('[Exchange] Unknown time format:', trade.time, 'type:', typeof trade.time);
+                            convertedTime = new Date(); // Default to now
+                        }
+                        console.log('[Exchange] Converting time:', trade.time, 'to:', convertedTime, 'isValid:', !isNaN(convertedTime.getTime()), 'type:', typeof trade.time);
+                        return {
+                            ...trade,
+                            time: convertedTime
+                        };
+                    });
+                    // Filter trades to only include the current token
+                    const filteredHistory = history.filter(trade => trade.token === selectedToken?.symbol);
+                    console.log('[Exchange] Loaded', history.length, 'total trades, filtered to', filteredHistory.length, 'trades for', selectedToken?.symbol);
+                    console.log('[Exchange] Pool address check - expected:', poolInfo.poolAddress);
+                    
+                    setTradeHistory(filteredHistory);
+                    localStorageLoadedRef.current = poolInfo.poolAddress;
+                } else {
+                    console.log('[Exchange] No stored trade history found for key:', key);
+                    localStorageLoadedRef.current = poolInfo.poolAddress;
+                }
+            } catch (error) {
+                console.error("Error loading trade history:", error);
+            }
+        };
+        loadTradeHistory();
+    }, [poolInfo.poolAddress, selectedToken?.symbol]); // Added selectedToken.symbol to ensure reload on token change
+    
+    // Save trade history to local storage whenever it changes
+    useEffect(() => {
+        console.log('[Exchange] Trade history updated:', tradeHistory.length, 'trades');
+        if (tradeHistory.length > 0 && poolInfo.poolAddress && poolInfo.poolAddress !== '0x0000000000000000000000000000000000000000') {
+            console.log('[Exchange] Latest trade:', tradeHistory[0]);
+            try {
+                // Use pool-specific key
+                const key = `noma_trade_history_${poolInfo.poolAddress}`;
+                
+                // Double-check we're saving the right token's trades
+                const tokenMismatch = tradeHistory.some(trade => trade.token !== selectedToken?.symbol);
+                if (tokenMismatch) {
+                    console.error('[Exchange] WARNING: Saving trades for wrong token! Current token:', selectedToken?.symbol);
+                    console.error('[Exchange] Trade tokens in history:', [...new Set(tradeHistory.map(t => t.token))]);
+                }
+                
+                console.log('[Exchange] Saving trade to localStorage for token:', selectedToken?.symbol, 'pool:', poolInfo.poolAddress);
+                console.log('[Exchange] First trade:', tradeHistory[0].token, 'time:', tradeHistory[0].time);
+                localStorage.setItem(key, JSON.stringify(tradeHistory));
+                console.log('[Exchange] Saved', tradeHistory.length, 'trades to localStorage with key:', key);
+            } catch (error) {
+                console.error("Error saving trade history:", error);
+            }
+        }
+    }, [tradeHistory, poolInfo.poolAddress]);
     
     
     // Chart options with professional styling
@@ -998,6 +1074,463 @@ const Exchange: React.FC = () => {
         
         handleReferral();
     }, [urlReferralCode, address, poolInfo.poolAddress, selectedToken?.symbol]); // Added poolInfo.poolAddress to dependencies
+
+    // Authenticate WebSocket when wallet is connected
+    useEffect(() => {
+        console.log('[Exchange] WebSocket auth check:', {
+            wsConnected,
+            wsAuthenticated,
+            walletConnected: isConnected,
+            address: address || 'no address',
+            wsError
+        });
+        
+        if (!wsConnected) {
+            console.log('[Exchange] WebSocket not connected yet');
+            return;
+        }
+        
+        if (wsAuthenticated) {
+            console.log('[Exchange] Already authenticated');
+            return;
+        }
+        
+        if (!isConnected || !address) {
+            console.log('[Exchange] Wallet not connected - isConnected:', isConnected, 'address:', address);
+            return;
+        }
+        
+        console.log('[Exchange] All conditions met, authenticating WebSocket...');
+        
+        // Add retry logic for authentication
+        let retries = 0;
+        const maxRetries = 3;
+        
+        const attemptAuth = async () => {
+            try {
+                const success = await wsAuthenticate();
+                if (success) {
+                    console.log('[Exchange] WebSocket authenticated successfully');
+                } else {
+                    console.error('[Exchange] WebSocket authentication failed');
+                    if (retries < maxRetries) {
+                        retries++;
+                        console.log(`[Exchange] Retrying authentication (${retries}/${maxRetries})...`);
+                        setTimeout(attemptAuth, 2000); // Wait 2 seconds before retry
+                    }
+                }
+            } catch (err) {
+                console.error('[Exchange] WebSocket authentication error:', err);
+                if (err.message?.includes('Connector not found') && retries < maxRetries) {
+                    retries++;
+                    console.log(`[Exchange] Connector not ready, retrying (${retries}/${maxRetries})...`);
+                    setTimeout(attemptAuth, 2000); // Wait 2 seconds before retry
+                }
+            }
+        };
+        
+        attemptAuth();
+    }, [wsConnected, wsAuthenticated, isConnected, address, wsAuthenticate]);
+
+    
+    // Subscribe to WebSocket events for the current pool
+    useEffect(() => {
+        console.log('[Exchange] Pool subscription check:', {
+            wsConnected,
+            wsAuthenticated,
+            poolAddress: poolInfo.poolAddress,
+            selectedToken: selectedToken?.symbol,
+            alreadySubscribed: subscribedPoolRef.current === poolInfo.poolAddress
+        });
+        
+        if (!wsConnected || !wsAuthenticated || !poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
+            return;
+        }
+
+        // Wait for localStorage to load first
+        if (localStorageLoadedRef.current !== poolInfo.poolAddress) {
+            console.log('[Exchange] Waiting for localStorage to load for pool:', poolInfo.poolAddress);
+            return;
+        }
+
+        // Skip if already subscribed to this pool
+        if (subscribedPoolRef.current === poolInfo.poolAddress) {
+            console.log('[Exchange] Already subscribed to pool:', poolInfo.poolAddress);
+            return;
+        }
+
+        // Unsubscribe from previous pool if there was one
+        if (subscribedPoolRef.current && wsUnsubscribe) {
+            console.log('[Exchange] Unsubscribing from previous pool:', subscribedPoolRef.current);
+            wsUnsubscribe([subscribedPoolRef.current]);
+        }
+
+        // Clear everything when subscribing to a NEW pool
+        console.log('[Exchange] Subscribing to NEW pool...');
+        // TEMPORARILY DISABLED - processedTxHashes.current = new Set(); // Create new Set
+        // Don't clear trade history - it should persist from localStorage
+        // setTradeHistory([]);
+        // Don't reset lastProcessedEventIndex - it should track wsEvents array
+        // setLastProcessedEventIndex(0);
+        
+        // Clear WebSocket events from previous pool
+        if (clearEvents) {
+            console.log('[Exchange] Clearing WebSocket events from previous pool');
+            clearEvents();
+        }
+        
+        // Subscribe to the current pool
+        console.log('[Exchange] Subscribing to pool events:', poolInfo.poolAddress);
+        wsSubscribe([poolInfo.poolAddress]);
+        subscribedPoolRef.current = poolInfo.poolAddress;
+
+        // Fetch recent history - try 24 hours instead of 1 hour
+        // Only fetch if we don't have any trades yet (to avoid overwriting loaded history)
+        const shouldFetchHistory = tradeHistory.length === 0;
+        
+        if (!shouldFetchHistory) {
+            console.log('[Exchange] Skipping history fetch - already have', tradeHistory.length, 'trades');
+            return;
+        }
+        
+        const oneDayAgo = Math.floor(Date.now() / 1000) - (24 * 3600);
+        const now = Math.floor(Date.now() / 1000);
+        
+        console.log('[Exchange] Fetching history for pool:', poolInfo.poolAddress, 'from:', new Date(oneDayAgo * 1000), 'to:', new Date(now * 1000));
+        
+        wsGetHistory([poolInfo.poolAddress], oneDayAgo, now, 100)
+            .then(history => {
+                console.log('[Exchange] Fetched historical events:', history.length);
+                console.log('[Exchange] Raw history response:', history);
+                
+                // Process historical swap events
+                const swapEvents = history.filter(event => event.eventName === 'Swap');
+                console.log('[Exchange] Processing', swapEvents.length, 'historical swap events');
+                
+                const historicalTrades = swapEvents.map(event => {
+                    const amount0 = ethers.BigNumber.from(event.args.amount0 || '0');
+                    const amount1 = ethers.BigNumber.from(event.args.amount1 || '0');
+                    
+                    // Skip zero-amount swaps
+                    if (amount0.isZero() && amount1.isZero()) return null;
+                    
+                    // For pool token positions
+                    const isSelectedTokenPoolToken0 = selectedToken?.token0?.toLowerCase() === poolInfo?.token0?.toLowerCase();
+                    
+                    // Simplified buy/sell determination based on which token is being traded
+                    const isBuy = isSelectedTokenPoolToken0 ? amount0.lt(0) : amount1.lt(0);
+                    
+                    const tokenAmount = isSelectedTokenPoolToken0 ? amount0.abs() : amount1.abs();
+                    const ethAmount = isSelectedTokenPoolToken0 ? amount1.abs() : amount0.abs();
+                    
+                    const tokenAmountFormatted = parseFloat(formatEther(tokenAmount));
+                    const ethAmountFormatted = parseFloat(formatEther(ethAmount));
+                    const price = tokenAmountFormatted > 0 ? ethAmountFormatted / tokenAmountFormatted : 0;
+                    
+                    return {
+                        id: `${event.transactionHash}-${event.blockNumber}`,
+                        type: isBuy ? "buy" : "sell",
+                        token: selectedToken?.symbol || "TOKEN",
+                        amount: tokenAmountFormatted,
+                        price: price,
+                        total: ethAmountFormatted,
+                        // Smart timestamp conversion - check if result is reasonable
+                        time: (() => {
+                            const testDate = new Date(event.timestamp);
+                            if (testDate.getFullYear() >= 2020 && testDate.getFullYear() <= 2030) {
+                                return testDate;
+                            } else {
+                                const testDate2 = new Date(event.timestamp * 1000);
+                                if (testDate2.getFullYear() >= 2020 && testDate2.getFullYear() <= 2030) {
+                                    return testDate2;
+                                }
+                                console.error('[Exchange] Invalid historical timestamp:', event.timestamp);
+                                return new Date();
+                            }
+                        })(),
+                        txHash: `${event.transactionHash.slice(0, 6)}...${event.transactionHash.slice(-4)}`,
+                        sender: event.args.recipient,
+                        recipient: event.args.sender,
+                        fullTxHash: event.transactionHash
+                    };
+                }).filter(Boolean);
+                
+                // Add historical trades to trade history
+                if (historicalTrades.length > 0) {
+                    console.log('[Exchange] Historical trades to add:', historicalTrades);
+                    
+                    setTradeHistory(prev => {
+                        console.log('[Exchange] Previous trade history length:', prev.length);
+                        
+                        // IMPORTANT: Filter historical trades to only include current token
+                        const tokenFilteredHistoricalTrades = historicalTrades.filter(t => t.token === selectedToken?.symbol);
+                        console.log('[Exchange] Filtered historical trades from', historicalTrades.length, 'to', tokenFilteredHistoricalTrades.length, 'for token:', selectedToken?.symbol);
+                        
+                        // Also filter existing trades to ensure they're for current token
+                        const tokenFilteredPrev = prev.filter(t => t.token === selectedToken?.symbol);
+                        if (tokenFilteredPrev.length !== prev.length) {
+                            console.warn('[Exchange] Had to filter existing trades from', prev.length, 'to', tokenFilteredPrev.length);
+                        }
+                        
+                        // Merge historical trades with existing, avoiding duplicates
+                        const existingHashes = new Set(tokenFilteredPrev.map(t => t.fullTxHash));
+                        const newTrades = tokenFilteredHistoricalTrades.filter(t => !existingHashes.has(t.fullTxHash));
+                        
+                        console.log('[Exchange] New trades to add:', newTrades.length);
+                        
+                        // Sort by time descending (most recent first)
+                        const combined = [...newTrades, ...tokenFilteredPrev].sort((a, b) => b.time - a.time);
+                        
+                        console.log('[Exchange] Combined trades length:', combined.length);
+                        
+                        // Keep only last 100 trades
+                        return combined.slice(0, 100);
+                    });
+                    
+                    // Mark these as processed AFTER state update
+                    console.log('[Exchange] About to mark as processed:', historicalTrades.map(t => t.fullTxHash));
+                    
+                    // Don't mark as processed yet - let the state update happen first
+                    // historicalTrades.forEach(trade => {
+                    //     processedTxHashes.current.add(trade.fullTxHash);
+                    // });
+                    
+                    console.log('[Exchange] Added', historicalTrades.length, 'historical trades to history');
+                    console.log('[Exchange] ProcessedTxHashes size:', processedTxHashes.current.size);
+                }
+            })
+            .catch(err => {
+                console.error('[Exchange] Failed to fetch history:', err);
+            });
+    // Re-run when localStorage is loaded
+    }, [wsConnected, wsAuthenticated, poolInfo.poolAddress, selectedToken, wsSubscribe, wsGetHistory, tradeHistory.length, localStorageLoadedRef.current]);
+    
+    // Keep track of last processed event index
+    const [lastProcessedEventIndex, setLastProcessedEventIndex] = useState(0);
+    
+    // Reset last processed index and clear processed hashes when pool changes
+    useEffect(() => {
+        console.log('[Exchange] Pool change detected, clearing state for pool:', poolInfo.poolAddress);
+        // Reset lastProcessedEventIndex since we're clearing events when switching pools
+        setLastProcessedEventIndex(0);
+        // TEMPORARILY DISABLED - Create a new Set instead of clearing to ensure it's truly empty
+        // processedTxHashes.current = new Set();
+        
+        // Don't clear trade history here - it will be loaded from localStorage
+        // setTradeHistory([]); // Clear trade history when switching pools
+        
+        // Reset subscribed pool ref so we can subscribe to the new pool
+        if (subscribedPoolRef.current !== poolInfo.poolAddress) {
+            subscribedPoolRef.current = null;
+            localStorageLoadedRef.current = null; // Reset localStorage loaded flag
+        }
+        console.log('[Exchange] Reset subscription tracking for pool change');
+    }, [poolInfo.poolAddress]);
+
+    // Process WebSocket events and add to trade history
+    useEffect(() => {
+        console.log('[Exchange] WebSocket events:', wsEvents.length, 'selectedToken:', !!selectedToken, 'poolAddress:', poolInfo.poolAddress, 'lastProcessed:', lastProcessedEventIndex);
+        if (wsEvents.length === 0 || !selectedToken || !poolInfo.poolAddress) return;
+        
+        // Only process new events
+        if (wsEvents.length <= lastProcessedEventIndex) return;
+
+        // Function to update price from sqrtPriceX96
+        const updatePriceFromSqrtPriceX96 = (sqrtPriceX96) => {
+            try {
+                // Convert sqrtPriceX96 to price
+                const sqrtPrice = parseFloat(sqrtPriceX96.toString()) / Math.pow(2, 96);
+                const price = Math.pow(sqrtPrice, 2);
+                
+                // If token0 is WETH/ETH, we need to invert the price
+                const isToken0Weth = selectedToken?.token1?.toLowerCase() === config.protocolAddresses.WMON?.toLowerCase();
+                const finalPrice = isToken0Weth ? price : 1 / price;
+                
+                // Update the selected token's price
+                if (selectedToken) {
+                    let priceString;
+                    try {
+                        const priceNum = parseFloat(finalPrice.toString());
+                        if (!isNaN(priceNum) && isFinite(priceNum)) {
+                            priceString = priceNum.toFixed(18).replace(/\.?0+$/, '');
+                            
+                            setSelectedToken(prev => ({
+                                ...prev,
+                                price: finalPrice,
+                                spotPrice: parseEther(priceString)
+                            }));
+                            
+                            // Update tokens list
+                            setTokens(prevTokens => 
+                                prevTokens.map(token => 
+                                    token.id === selectedToken.id 
+                                        ? { ...token, price: finalPrice, spotPrice: parseEther(priceString) }
+                                        : token
+                                )
+                            );
+                        }
+                    } catch (error) {
+                        console.error("Error parsing price:", error);
+                    }
+                }
+                
+                // Trigger chart update
+                setChartUpdateTrigger(prev => prev + 1);
+            } catch (error) {
+                console.error("Error updating price from event:", error);
+            }
+        };
+
+        // Process only new events
+        const newEvents = wsEvents.slice(lastProcessedEventIndex);
+        console.log('[Exchange] Processing new WebSocket events:', newEvents.length, 'of', wsEvents.length, 'total');
+        console.log('[Exchange] All events:', wsEvents);
+        console.log('[Exchange] New events to process:', newEvents);
+        
+        newEvents.forEach(event => {
+            console.log('[Exchange] Processing event:', event);
+            
+            // Check if event is for current pool
+            if (event.poolAddress.toLowerCase() !== poolInfo.poolAddress?.toLowerCase()) {
+                console.log('[Exchange] Skipping event for different pool:', event.poolAddress, 'vs', poolInfo.poolAddress);
+                return;
+            }
+            
+            if (event.eventName !== 'Swap') {
+                console.log('[Exchange] Skipping non-swap event:', event.eventName);
+                return;
+            }
+
+            // Check if we've already processed this transaction
+            const txHash = event.transactionHash;
+            // TEMPORARILY DISABLED - Always process events
+            // if (processedTxHashes.current.has(txHash)) {
+            //     console.log('[Exchange] Transaction already processed:', txHash);
+            //     console.log('[Exchange] Current trade history length:', tradeHistory.length);
+            //     console.log('[Exchange] ProcessedTxHashes size:', processedTxHashes.current.size);
+            //     console.log('[Exchange] ProcessedTxHashes contents:', Array.from(processedTxHashes.current));
+            //     // Force process if trade history is empty but hash is marked as processed
+            //     if (tradeHistory.length === 0) {
+            //         console.log('[Exchange] Force processing - trade history is empty but tx marked as processed');
+            //     } else {
+            //         return;
+            //     }
+            // }
+
+            // Skip if no actual amounts were swapped
+            const amount0 = ethers.BigNumber.from(event.args.amount0 || '0');
+            const amount1 = ethers.BigNumber.from(event.args.amount1 || '0');
+            if (amount0.isZero() && amount1.isZero()) {
+                console.log('[Exchange] Skipping zero-amount swap');
+                return;
+            }
+
+            // Process the swap event BEFORE marking as processed
+            console.log('[Exchange] Processing new trade:', txHash);
+            console.log('[Exchange] Raw event.timestamp:', event.timestamp, 'type:', typeof event.timestamp);
+            
+            // Check if timestamp is already in milliseconds (13+ digits) or seconds (10 digits)
+            const timestampValue = typeof event.timestamp === 'number' ? event.timestamp : parseInt(event.timestamp);
+            
+            // A reasonable timestamp should be between year 2020 and 2030
+            // In seconds: 1577836800 (2020) to 1893456000 (2030)
+            // In milliseconds: 1577836800000 to 1893456000000
+            let timestamp;
+            
+            // First try as-is
+            let testDate = new Date(timestampValue);
+            if (testDate.getFullYear() >= 2020 && testDate.getFullYear() <= 2030) {
+                timestamp = testDate;
+            } else {
+                // Try multiplying by 1000 (convert seconds to milliseconds)
+                testDate = new Date(timestampValue * 1000);
+                if (testDate.getFullYear() >= 2020 && testDate.getFullYear() <= 2030) {
+                    timestamp = testDate;
+                } else {
+                    console.error('[Exchange] Invalid timestamp:', timestampValue, 'results in year:', new Date(timestampValue).getFullYear());
+                    timestamp = new Date(); // Default to now
+                }
+            }
+            
+            console.log('[Exchange] Timestamp conversion:', 'raw:', timestampValue, 'result:', timestamp, 'year:', timestamp.getFullYear());
+            
+            // Determine if it's a buy or sell
+            const isSelectedTokenPoolToken0 = selectedToken?.token0?.toLowerCase() === poolInfo?.token0?.toLowerCase();
+            const isBuy = isSelectedTokenPoolToken0 ? amount0.lt(0) : amount1.lt(0);
+            
+            // Get the correct amounts
+            const tokenAmount = isSelectedTokenPoolToken0 ? amount0.abs() : amount1.abs();
+            const ethAmount = isSelectedTokenPoolToken0 ? amount1.abs() : amount0.abs();
+            
+            // Calculate price
+            const tokenAmountFormatted = parseFloat(formatEther(tokenAmount));
+            const ethAmountFormatted = parseFloat(formatEther(ethAmount));
+            const price = tokenAmountFormatted > 0 ? ethAmountFormatted / tokenAmountFormatted : 0;
+            
+            const newTrade = {
+                id: Date.now() + Math.random(),
+                type: isBuy ? "buy" : "sell",
+                token: selectedToken?.symbol || "TOKEN",
+                amount: tokenAmountFormatted,
+                price: price,
+                total: ethAmountFormatted,
+                time: timestamp,
+                txHash: `${txHash.slice(0, 6)}...${txHash.slice(-4)}`,
+                sender: event.args.recipient,
+                recipient: event.args.sender,
+                fullTxHash: txHash
+            };
+            
+            // Add to trade history
+            console.log('[Exchange] Adding new trade to history:', newTrade);
+            console.log('[Exchange] Trade timestamp:', event.timestamp, 'converted:', timestamp, 'isValid:', !isNaN(timestamp.getTime()), 'year:', timestamp.getFullYear());
+            
+            // IMPORTANT: Only add trades for the current token
+            if (newTrade.token !== selectedToken?.symbol) {
+                console.error('[Exchange] SKIPPING TRADE - Wrong token! Trade token:', newTrade.token, 'Current token:', selectedToken?.symbol);
+                return;
+            }
+            
+            setTradeHistory(prev => {
+                console.log('[Exchange] Previous trade history length:', prev.length);
+                
+                // Double-check all trades in history are for current token
+                const wrongTokenTrades = prev.filter(t => t.token !== selectedToken?.symbol);
+                if (wrongTokenTrades.length > 0) {
+                    console.error('[Exchange] Found', wrongTokenTrades.length, 'trades for wrong token in history!');
+                    console.error('[Exchange] Wrong token trades:', wrongTokenTrades.map(t => ({ token: t.token, txHash: t.txHash })));
+                    // Filter out wrong token trades
+                    const filtered = prev.filter(t => t.token === selectedToken?.symbol);
+                    console.log('[Exchange] Filtered history from', prev.length, 'to', filtered.length, 'trades');
+                    prev = filtered;
+                }
+                
+                // Check if this trade already exists in history
+                const exists = prev.some(t => t.fullTxHash === txHash);
+                if (exists) {
+                    console.log('[Exchange] Trade already exists in history, skipping');
+                    return prev;
+                }
+                
+                const updated = [newTrade, ...prev.slice(0, 99)];
+                console.log('[Exchange] Updated trade history length:', updated.length);
+                
+                // TEMPORARILY DISABLED - Mark as processed only after successfully adding
+                // processedTxHashes.current.add(txHash);
+                // console.log('[Exchange] Marked transaction as processed:', txHash);
+                
+                return updated;
+            });
+            
+            // Update price from sqrtPriceX96
+            if (event.args.sqrtPriceX96) {
+                updatePriceFromSqrtPriceX96(event.args.sqrtPriceX96);
+            }
+        });
+        
+        // Update last processed index
+        setLastProcessedEventIndex(wsEvents.length);
+    }, [wsEvents, selectedToken, poolInfo, setSelectedToken, setTokens, setChartUpdateTrigger, lastProcessedEventIndex]);
     
     // Map chart timeframe to API interval
     const mapTimeframeToApiInterval = (timeframe: string): string => {
@@ -1346,6 +1879,8 @@ const Exchange: React.FC = () => {
             }
         };
         
+        // DISABLED: handleSwap - now using WebSocket for trade history
+        /*
         // Listen to Swap events
         const handleSwap = async (sender, recipient, amount0, amount1, sqrtPriceX96, liquidity, tick, event) => {
             // console.log("Swap event detected");
@@ -1356,7 +1891,7 @@ const Exchange: React.FC = () => {
                 const txHash = event.transactionHash;
                 
                 // Check if we've already processed this transaction
-                if (processedTxHashes.has(txHash)) {
+                if (processedTxHashes.current.has(txHash)) {
                     // console.log("Transaction already processed:", txHash);
                     return;
                 }
@@ -1367,7 +1902,7 @@ const Exchange: React.FC = () => {
                 }
                 
                 // Mark as processed immediately to prevent duplicates
-                processedTxHashes.add(txHash);
+                processedTxHashes.current.add(txHash);
                 
                 const block = await event.getBlock();
                 const timestamp = new Date(block.timestamp * 1000);
@@ -1424,6 +1959,7 @@ const Exchange: React.FC = () => {
                 console.error("Error processing swap event:", error);
             }
         };
+        */
         
         // Get initial price from slot0
         const getInitialPrice = async () => {
@@ -1437,6 +1973,8 @@ const Exchange: React.FC = () => {
         
         getInitialPrice();
         
+        // DISABLED: Pool event listeners - now using WebSocket for trade history
+        /*
         // Record the timestamp when we start listening
         const startListeningTime = Date.now();
         // console.log("Starting to listen for Swap events at:", new Date(startListeningTime));
@@ -1469,6 +2007,7 @@ const Exchange: React.FC = () => {
             // console.log("Removing pool event listener");
             poolContract.off("Swap", handleSwapWithTimeCheck);
         };
+        */
     }, [poolInfo.poolAddress, selectedToken?.id, selectedToken?.symbol]);
 
     // Fetch token1 symbol and spot price when token is selected
@@ -1540,8 +2079,19 @@ const Exchange: React.FC = () => {
                     // console.log("Using pool address from token:", selectedToken.poolAddress);
                     // console.log("Setting poolInfo with address:", selectedToken.poolAddress);
                     // console.log("Setting poolInfo with address:", selectedToken.poolAddress);
+                    // Override with hardcoded pool addresses for BUN and AVO
+                    let poolAddressToUse = selectedToken.poolAddress;
+                    if (selectedToken.symbol === 'BUN') {
+                        poolAddressToUse = '0x90666407c841fe58358F3ed04a245c5F5bd6fD0A';
+                        console.log('[Exchange] Using hardcoded BUN pool address:', poolAddressToUse);
+                    } else if (selectedToken.symbol === 'AVO') {
+                        poolAddressToUse = '0x8Eb5C457F7a29554536Dc964B3FaDA2961Dd8212';
+                        console.log('[Exchange] Using hardcoded AVO pool address:', poolAddressToUse);
+                    }
+                    
+                    console.log('[Exchange] Setting poolInfo for token:', selectedToken.symbol, 'poolAddress:', poolAddressToUse);
                     setPoolInfo({ 
-                        poolAddress: selectedToken.poolAddress,
+                        poolAddress: poolAddressToUse,
                         token0: selectedToken.token0,
                         token1: selectedToken.token1
                     });
@@ -2698,9 +3248,9 @@ const Exchange: React.FC = () => {
                 fullTxHash: data.hash
             };
             // Check if already processed
-            if (!processedTxHashes.has(data.hash)) {
-                processedTxHashes.add(data.hash);
-                setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
+            if (!processedTxHashes.current.has(data.hash)) {
+                processedTxHashes.current.add(data.hash);
+                // setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
             }
             
             // Track referral trade
@@ -2800,9 +3350,9 @@ const Exchange: React.FC = () => {
                 fullTxHash: data.hash
             };
             // Check if already processed
-            if (!processedTxHashes.has(data.hash)) {
-                processedTxHashes.add(data.hash);
-                setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
+            if (!processedTxHashes.current.has(data.hash)) {
+                processedTxHashes.current.add(data.hash);
+                // setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
             }
             
             // Track referral trade
@@ -2897,9 +3447,9 @@ const Exchange: React.FC = () => {
                 fullTxHash: data.hash
             };
             // Check if already processed
-            if (!processedTxHashes.has(data.hash)) {
-                processedTxHashes.add(data.hash);
-                setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
+            if (!processedTxHashes.current.has(data.hash)) {
+                processedTxHashes.current.add(data.hash);
+                // setTradeHistory(prev => [newTrade, ...prev.slice(0, 99)]);
             }
             
             // Track referral trade
@@ -3279,6 +3829,8 @@ const Exchange: React.FC = () => {
     return (
         <Container maxW="100%" p={0} bg="#0a0a0a"> 
             <Toaster />
+            
+            
             {!isConnected ? (
                 <Box display="flex" alignItems="center" justifyContent="center" minH="100vh">
                     <Text color="white" fontSize="xl">Please connect your wallet</Text>
@@ -3904,6 +4456,11 @@ const Exchange: React.FC = () => {
                                     
                                     <Tabs.Content value="all">
                                         <VStack gap={2} align="stretch">
+                                                {tradeHistory.length === 0 && (
+                                                    <Box p={4} textAlign="center" color="gray.500">
+                                                        No trades yet. Waiting for trades...
+                                                    </Box>
+                                                )}
                                                 {getPaginatedData(tradeHistory, currentPage, itemsPerPage).map((trade) => (
                                                     <HStack
                                                         key={trade.id}
@@ -3996,7 +4553,42 @@ const Exchange: React.FC = () => {
                                                         {/* Time */}
                                                         <Box w="80px">
                                                             <Text color="#888" fontSize="xs" textAlign="right">
-                                                                {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                                {(() => {
+                                                                    try {
+                                                                        let timeMs;
+                                                                        if (trade.time instanceof Date) {
+                                                                            timeMs = trade.time.getTime();
+                                                                        } else if (typeof trade.time === 'string' || typeof trade.time === 'number') {
+                                                                            timeMs = new Date(trade.time).getTime();
+                                                                        } else {
+                                                                            console.error('[Exchange] Invalid time format:', trade.time);
+                                                                            return 'Unknown';
+                                                                        }
+                                                                        
+                                                                        const diff = Date.now() - timeMs;
+                                                                        
+                                                                        // Debug log
+                                                                        if (isNaN(diff)) {
+                                                                            console.error('[Exchange] Time diff is NaN. trade.time:', trade.time, 'timeMs:', timeMs, 'Date.now():', Date.now());
+                                                                            return 'Unknown';
+                                                                        }
+                                                                        
+                                                                        if (diff < 0) {
+                                                                            console.warn('[Exchange] Time is in the future:', trade.time);
+                                                                            return 'Just now';
+                                                                        }
+                                                                        
+                                                                        const minutes = Math.floor(diff / 60000);
+                                                                        if (minutes < 1) return 'Just now';
+                                                                        if (minutes < 60) return `${minutes}m ago`;
+                                                                        const hours = Math.floor(minutes / 60);
+                                                                        if (hours < 24) return `${hours}h ago`;
+                                                                        return `${Math.floor(hours / 24)}d ago`;
+                                                                    } catch (e) {
+                                                                        console.error('Error formatting time:', e, trade.time);
+                                                                        return 'Unknown';
+                                                                    }
+                                                                })()}
                                                             </Text>
                                                         </Box>
                                                     </HStack>
@@ -4155,7 +4747,22 @@ const Exchange: React.FC = () => {
                                                                         {/* Time */}
                                                                         <Box w="80px">
                                                                             <Text color="#888" fontSize="xs" textAlign="right">
-                                                                                {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                                                {(() => {
+                                                                                    try {
+                                                                                        const timeMs = trade.time instanceof Date ? trade.time.getTime() : new Date(trade.time).getTime();
+                                                                                        const diff = Date.now() - timeMs;
+                                                                                        if (isNaN(diff) || diff < 0) return 'Just now';
+                                                                                        const minutes = Math.floor(diff / 60000);
+                                                                                        if (minutes < 1) return 'Just now';
+                                                                                        if (minutes < 60) return `${minutes}m ago`;
+                                                                                        const hours = Math.floor(minutes / 60);
+                                                                                        if (hours < 24) return `${hours}h ago`;
+                                                                                        return `${Math.floor(hours / 24)}d ago`;
+                                                                                    } catch (e) {
+                                                                                        console.error('Error formatting time:', e, trade.time);
+                                                                                        return 'Unknown';
+                                                                                    }
+                                                                                })()}
                                                                             </Text>
                                                                         </Box>
                                                                     </HStack>
@@ -5329,7 +5936,22 @@ const Exchange: React.FC = () => {
                                                                 </Box>
                                                                 <Box>
                                                                     <Text color="#888" fontSize="xs">
-                                                                        {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                                        {(() => {
+                                                                            try {
+                                                                                const timeMs = trade.time instanceof Date ? trade.time.getTime() : new Date(trade.time).getTime();
+                                                                                const diff = Date.now() - timeMs;
+                                                                                if (isNaN(diff) || diff < 0) return 'Just now';
+                                                                                const minutes = Math.floor(diff / 60000);
+                                                                                if (minutes < 1) return 'Just now';
+                                                                                if (minutes < 60) return `${minutes}m ago`;
+                                                                                const hours = Math.floor(minutes / 60);
+                                                                                if (hours < 24) return `${hours}h ago`;
+                                                                                return `${Math.floor(hours / 24)}d ago`;
+                                                                            } catch (e) {
+                                                                                console.error('Error formatting time:', e, trade.time);
+                                                                                return 'Unknown';
+                                                                            }
+                                                                        })()}
                                                                     </Text>
                                                                 </Box>
                                                             </HStack>
@@ -5453,7 +6075,22 @@ const Exchange: React.FC = () => {
                                                                                 </Box>
                                                                                 <Box>
                                                                                     <Text color="#888" fontSize="xs">
-                                                                                        {Math.floor((Date.now() - trade.time.getTime()) / 60000)}m ago
+                                                                                        {(() => {
+                                                                                            try {
+                                                                                                const timeMs = trade.time instanceof Date ? trade.time.getTime() : new Date(trade.time).getTime();
+                                                                                                const diff = Date.now() - timeMs;
+                                                                                                if (isNaN(diff) || diff < 0) return 'Just now';
+                                                                                                const minutes = Math.floor(diff / 60000);
+                                                                                                if (minutes < 1) return 'Just now';
+                                                                                                if (minutes < 60) return `${minutes}m ago`;
+                                                                                                const hours = Math.floor(minutes / 60);
+                                                                                                if (hours < 24) return `${hours}h ago`;
+                                                                                                return `${Math.floor(hours / 24)}d ago`;
+                                                                                            } catch (e) {
+                                                                                                console.error('Error formatting time:', e, trade.time);
+                                                                                                return 'Unknown';
+                                                                                            }
+                                                                                        })()}
                                                                                     </Text>
                                                                                 </Box>
                                                                             </HStack>

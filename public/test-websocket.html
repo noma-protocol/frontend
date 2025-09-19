@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Connection Test</h1>
+    <div id="status">Not connected</div>
+    <button onclick="connect()">Connect</button>
+    <button onclick="testAuth()">Test Auth</button>
+    <pre id="log"></pre>
+
+    <script>
+        let ws = null;
+        const log = (msg) => {
+            document.getElementById('log').innerHTML += msg + '\n';
+            console.log(msg);
+        };
+
+        function connect() {
+            try {
+                ws = new WebSocket('ws://localhost:8080');
+                
+                ws.onopen = () => {
+                    document.getElementById('status').innerHTML = 'Connected';
+                    log('WebSocket connected');
+                };
+                
+                ws.onmessage = (event) => {
+                    log('Received: ' + event.data);
+                };
+                
+                ws.onerror = (error) => {
+                    log('Error: ' + error);
+                };
+                
+                ws.onclose = () => {
+                    document.getElementById('status').innerHTML = 'Disconnected';
+                    log('WebSocket closed');
+                };
+            } catch (error) {
+                log('Connection error: ' + error);
+            }
+        }
+
+        function testAuth() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('Not connected');
+                return;
+            }
+
+            const message = {
+                type: 'auth',
+                address: '0x1234567890123456789012345678901234567890',
+                signature: 'test-signature',
+                message: 'test-message'
+            };
+
+            ws.send(JSON.stringify(message));
+            log('Sent auth message');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+.container {
+  min-height: 100vh;
+  background-color: #000;
+  color: #fff;
+  padding: 80px 20px 20px;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #333;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.statusItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusLabel {
+  color: #999;
+}
+
+.statusIcon {
+  font-size: 16px;
+}
+
+.success {
+  color: #10b981;
+}
+
+.error {
+  color: #ef4444;
+}
+
+.errorBox {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 16px 0;
+}
+
+.button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.buttonPrimary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.buttonPrimary:hover {
+  background-color: #2563eb;
+}
+
+.buttonDanger {
+  background-color: #dc2626;
+  color: white;
+}
+
+.buttonDanger:hover {
+  background-color: #b91c1c;
+}
+
+.buttonSuccess {
+  background-color: #10b981;
+  color: white;
+}
+
+.buttonSuccess:hover {
+  background-color: #059669;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.select {
+  background-color: #262626;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #404040;
+}
+
+.filterSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.configList {
+  font-size: 14px;
+}
+
+.configList > div {
+  margin-bottom: 8px;
+}
+
+.configLabel {
+  color: #999;
+  margin-right: 8px;
+}
+
+.configValue {
+  font-family: monospace;
+  color: #60a5fa;
+}
+
+.poolList {
+  margin-top: 8px;
+  margin-left: 16px;
+}
+
+.poolList li {
+  color: #ccc;
+  margin-bottom: 4px;
+}
+
+.poolAddress {
+  font-family: monospace;
+  font-size: 12px;
+  color: #666;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.statCard {
+  background-color: #262626;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.poolStatCard {
+  background-color: #262626;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.poolStatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.poolStatName {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.poolStatInfo {
+  font-size: 14px;
+  color: #999;
+}
+
+.poolStatVolume {
+  text-align: right;
+}
+
+.volumeLabel {
+  font-size: 12px;
+  color: #999;
+}
+
+.centerText {
+  text-align: center;
+  padding: 32px;
+  color: #999;
+}

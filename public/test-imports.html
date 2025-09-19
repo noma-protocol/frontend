@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Import Test</title>
+</head>
+<body>
+    <h1>Testing which import causes RPC requests</h1>
+    <div id="log"></div>
+    
+    <script type="module">
+        const log = (msg) => {
+            document.getElementById('log').innerHTML += `<p>${msg}</p>`;
+            console.log(msg);
+        };
+        
+        log('Starting import test...');
+        
+        // Test 1: Import React only
+        log('Test 1: Importing React...');
+        const React = await import('react');
+        log('React imported - check network tab');
+        
+        // Wait 2 seconds between tests
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Test 2: Import viem
+        log('Test 2: Importing viem...');
+        try {
+            const viem = await import('viem');
+            log('viem imported - check network tab');
+        } catch (e) {
+            log('viem import failed: ' + e.message);
+        }
+        
+        // Wait 2 seconds
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Test 3: Import wagmi
+        log('Test 3: Importing wagmi...');
+        try {
+            const wagmi = await import('wagmi');
+            log('wagmi imported - check network tab');
+        } catch (e) {
+            log('wagmi import failed: ' + e.message);
+        }
+        
+        // Wait 2 seconds
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Test 4: Import privy
+        log('Test 4: Importing @privy-io/react-auth...');
+        try {
+            const privy = await import('@privy-io/react-auth');
+            log('Privy imported - check network tab');
+        } catch (e) {
+            log('Privy import failed: ' + e.message);
+        }
+        
+        log('All tests complete!');
+    </script>
+</body>
+</html>

@@ -14,6 +14,7 @@ import Exchange from "./pages/Exchange";
 import Borrow from "./pages/Borrow";
 import Stake from "./pages/Stake";
 import Migrate from "./pages/Migrate";
+import WebSocketDemo from "./pages/WebSocketDemo";
 import config from "./config";
 
 const router = createBrowserRouter([
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: "/migrate",
         element: <Migrate />,
+      },
+      {
+        path: "/websocket-demo",
+        element: <WebSocketDemo />,
       },
     ],
   },
