@@ -31,6 +31,7 @@ export interface UseBlockchainWebSocketReturn {
   unsubscribe: (pools: string[]) => void;
   getHistory: (pools: string[], startTime?: number, endTime?: number, limit?: number) => Promise<BlockchainEvent[]>;
   getLatestEvents: (limit?: number) => Promise<BlockchainEvent[]>;
+  getGlobalTrades: (limit?: number) => Promise<BlockchainEvent[]>;
   clearEvents: () => void;
 }
 
@@ -226,6 +227,21 @@ export function useBlockchainWebSocketWagmi(options: UseBlockchainWebSocketOptio
     eventsRef.current = [];
   }, []);
 
+  // Get global trades
+  const getGlobalTrades = useCallback(async (limit?: number): Promise<BlockchainEvent[]> => {
+    if (!isAuthenticated) {
+      throw new Error('Must authenticate before fetching global trades');
+    }
+    try {
+      setError(null);
+      const globalTrades = await websocketService.getGlobalTrades(limit);
+      return globalTrades;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch global trades');
+      throw err;
+    }
+  }, [isAuthenticated]);
+
   // Setup effect
   useEffect(() => {
     // Subscribe to WebSocket events
@@ -300,6 +316,7 @@ export function useBlockchainWebSocketWagmi(options: UseBlockchainWebSocketOptio
     unsubscribe,
     getHistory,
     getLatestEvents,
+    getGlobalTrades,
     clearEvents
   };
 }

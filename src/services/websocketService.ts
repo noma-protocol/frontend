@@ -19,9 +19,10 @@ export interface BlockchainEvent {
 }
 
 export interface WebSocketMessage {
-  type: 'auth' | 'subscribe' | 'unsubscribe' | 'getHistory' | 'getLatest' | 'event' | 'error' | 'authenticated' | 'subscribed' | 'history' | 'latest' | 'connection';
+  type: 'auth' | 'subscribe' | 'unsubscribe' | 'getHistory' | 'getLatest' | 'getGlobalTrades' | 'event' | 'error' | 'authenticated' | 'subscribed' | 'history' | 'latest' | 'globalTrades' | 'connection';
   data?: any;
   events?: any[];
+  trades?: any[];
   count?: number;
   pools?: string[];
   address?: string;
@@ -178,6 +179,15 @@ class WebSocketService {
         console.log('[WebSocketService] Received latest response:', message.count, 'events');
         if (this.historyPromiseResolve) {
           this.historyPromiseResolve(message.events || []);
+          this.historyPromiseResolve = null;
+          this.historyPromiseReject = null;
+        }
+        break;
+
+      case 'globalTrades':
+        console.log('[WebSocketService] Received global trades:', message.count, 'trades');
+        if (this.historyPromiseResolve) {
+          this.historyPromiseResolve(message.trades || []);
           this.historyPromiseResolve = null;
           this.historyPromiseReject = null;
         }
@@ -349,6 +359,39 @@ class WebSocketService {
       setTimeout(() => {
         if (this.historyPromiseReject) {
           this.historyPromiseReject(new Error('History fetch timeout'));
+          this.historyPromiseResolve = null;
+          this.historyPromiseReject = null;
+        }
+      }, 30000);
+    });
+  }
+
+  async getGlobalTrades(limit?: number): Promise<BlockchainEvent[]> {
+    return new Promise((resolve, reject) => {
+      if (!this.isConnected()) {
+        reject(new Error('Not connected to WebSocket'));
+        return;
+      }
+
+      if (!this.authenticated) {
+        reject(new Error('Not authenticated'));
+        return;
+      }
+
+      this.historyPromiseResolve = resolve;
+      this.historyPromiseReject = reject;
+
+      const message: WebSocketMessage = {
+        type: 'getGlobalTrades',
+        limit
+      };
+
+      this.send(message);
+
+      // Timeout after 30 seconds
+      setTimeout(() => {
+        if (this.historyPromiseReject) {
+          this.historyPromiseReject(new Error('Request timeout'));
           this.historyPromiseResolve = null;
           this.historyPromiseReject = null;
         }

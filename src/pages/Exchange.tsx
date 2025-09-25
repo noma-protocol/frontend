@@ -210,7 +210,9 @@ const Exchange: React.FC = () => {
     const [sortOrder, setSortOrder] = useState("desc"); // "asc" or "desc"
     const [tradeAmount, setTradeAmount] = useState("");
     const [isBuying, setIsBuying] = useState(true);
-    const [tradeHistoryTab, setTradeHistoryTab] = useState("all");
+    const [tradeHistoryTab, setTradeHistoryTab] = useState("global");
+    const [globalTrades, setGlobalTrades] = useState([]);
+    const [poolToTokenMap, setPoolToTokenMap] = useState<{ [poolAddress: string]: { symbol: string, token0: string, token1: string } }>({});
     const [totalVolume, setTotalVolume] = useState(0);
     // Parse referral code from URL
     const [searchParams] = useSearchParams();
@@ -226,6 +228,7 @@ const Exchange: React.FC = () => {
         subscribe: wsSubscribe,
         unsubscribe: wsUnsubscribe,
         getHistory: wsGetHistory,
+        getGlobalTrades: wsGetGlobalTrades,
         clearEvents
     } = useBlockchainWebSocketWagmi({
         autoConnect: true,
@@ -1500,12 +1503,21 @@ const Exchange: React.FC = () => {
                 total: ethAmountFormatted,
                 time: timestamp,
                 txHash: `${txHash.slice(0, 6)}...${txHash.slice(-4)}`,
-                sender: event.args.recipient,
-                recipient: event.args.sender,
+                sender: event.actualSender || event.tradeInfo?.sender || event.args.sender,
+                recipient: event.actualRecipient || event.tradeInfo?.recipient || event.args.recipient,
                 fullTxHash: txHash
             };
             
             // Add to trade history
+            console.log('[Exchange] Raw event args:', {
+                sender: event.args.sender,
+                recipient: event.args.recipient,
+                amount0: event.args.amount0?.toString(),
+                amount1: event.args.amount1?.toString(),
+                actualSender: event.actualSender,
+                actualRecipient: event.actualRecipient
+            });
+            console.log('[Exchange] TradeInfo:', event.tradeInfo);
             console.log('[Exchange] Adding new trade to history:', newTrade);
             console.log('[Exchange] Trade timestamp:', event.timestamp, 'converted:', timestamp, 'isValid:', !isNaN(timestamp.getTime()), 'year:', timestamp.getFullYear());
             
@@ -1555,6 +1567,76 @@ const Exchange: React.FC = () => {
         // Update last processed index
         setLastProcessedEventIndex(wsEvents.length);
     }, [wsEvents, selectedToken, poolInfo, setSelectedToken, setTokens, setChartUpdateTrigger, lastProcessedEventIndex]);
+    
+    // Fetch global trades when tab switches to global
+    useEffect(() => {
+        const fetchGlobalTrades = async () => {
+            // Only fetch global trades if we have tokens loaded (poolToTokenMap populated)
+            if (tradeHistoryTab === 'global' && wsAuthenticated && wsGetGlobalTrades && Object.keys(poolToTokenMap).length > 0) {
+                try {
+                    console.log('[Exchange] Fetching global trades...');
+                    const trades = await wsGetGlobalTrades(50);
+                    console.log('[Exchange] Received global trades:', trades.length);
+                    console.log('[Exchange] First trade structure:', trades[0]);
+                    console.log('[Exchange] poolToTokenMap has', Object.keys(poolToTokenMap).length, 'entries');
+                    
+                    // Transform the trades to match the expected format
+                    const formattedTrades = trades.map((trade, index) => {
+                        // Get token info from pool address
+                        const poolAddress = (trade.poolAddress || trade.data?.poolAddress || '').toLowerCase();
+                        const tokenInfo = poolToTokenMap[poolAddress];
+                        
+                        // Try to get token symbol from different sources
+                        let tokenSymbol = 'UNKNOWN';
+                        if (tokenInfo) {
+                            tokenSymbol = tokenInfo.symbol;
+                        } else if (trade.tokenSymbol) {
+                            // If trade includes token symbol directly
+                            tokenSymbol = trade.tokenSymbol;
+                        } else if (trade.token0Symbol && trade.token1Symbol) {
+                            // Try to determine which token is not WMON
+                            tokenSymbol = trade.token1Symbol === 'WMON' ? trade.token0Symbol : trade.token1Symbol;
+                        }
+                        
+                        // Debug logging only for unknown tokens
+                        if (!tokenInfo && index < 3) {
+                            console.log('[Exchange] Unknown pool in global trades:', {
+                                poolAddress,
+                                tokenSymbol,
+                                tradeData: trade
+                            });
+                        }
+                        
+                        // Parse amounts
+                        const tokenAmount = Math.abs(parseFloat(ethers.utils.formatEther(trade.tradeInfo?.amount0 || trade.args?.amount0 || '0')));
+                        const ethAmount = Math.abs(parseFloat(ethers.utils.formatEther(trade.tradeInfo?.amount1 || trade.args?.amount1 || '0')));
+                        const price = tokenAmount > 0 ? ethAmount / tokenAmount : 0;
+                        
+                        return {
+                            id: `global-${trade.transactionHash}-${index}`,
+                            type: trade.tradeInfo?.type || (parseFloat(trade.args?.amount0 || '0') > 0 ? 'buy' : 'sell'),
+                            token: tokenSymbol,
+                            amount: tokenAmount,
+                            price: price,
+                            total: ethAmount,
+                            time: new Date(trade.timestamp),
+                            txHash: `${trade.transactionHash.slice(0, 6)}...${trade.transactionHash.slice(-4)}`,
+                            fullTxHash: trade.transactionHash,
+                            sender: trade.data?.actualSender || trade.actualSender || trade.tradeInfo?.sender || trade.args?.sender,
+                            recipient: trade.data?.actualRecipient || trade.actualRecipient || trade.tradeInfo?.recipient || trade.args?.recipient,
+                            poolAddress: trade.poolAddress
+                        };
+                    });
+                    
+                    setGlobalTrades(formattedTrades);
+                } catch (error) {
+                    console.error('[Exchange] Error fetching global trades:', error);
+                }
+            }
+        };
+        
+        fetchGlobalTrades();
+    }, [tradeHistoryTab, wsAuthenticated, wsGetGlobalTrades, poolToTokenMap]);
     
     // Map chart timeframe to API interval
     const mapTimeframeToApiInterval = (timeframe: string): string => {
@@ -2617,6 +2699,23 @@ const Exchange: React.FC = () => {
                 
                 setTimeout(() => {
                     setTokens(tokenList);
+                    
+                    // Build pool to token mapping
+                    const newPoolMap: { [poolAddress: string]: { symbol: string, token0: string, token1: string } } = {};
+                    tokenList.forEach(token => {
+                        if (token.poolAddress && token.poolAddress !== '0x0000000000000000000000000000000000000000') {
+                            newPoolMap[token.poolAddress.toLowerCase()] = {
+                                symbol: token.symbol,
+                                token0: token.token0,
+                                token1: token.token1
+                            };
+                            console.log('[Exchange] Adding to pool map:', token.symbol, '->', token.poolAddress.toLowerCase());
+                        }
+                    });
+                    setPoolToTokenMap(newPoolMap);
+                    console.log('[Exchange] Built pool to token map:', Object.keys(newPoolMap).length, 'pools');
+                    console.log('[Exchange] Pool addresses in map:', Object.keys(newPoolMap));
+                    
                     setIsTokensLoading(false);
                     
                     // Select first token if none selected
@@ -4468,14 +4567,22 @@ const Exchange: React.FC = () => {
                                     <Flex justifyContent="space-between" alignItems="center" mb={4}>
                                         <Tabs.List flex={1}>
                                             <Tabs.Trigger 
+                                                value="global" 
+                                                flex={1}
+                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                                color="white"
+                                                fontWeight="600"
+                                            >
+                                                Global
+                                            </Tabs.Trigger>
+                                            <Tabs.Trigger 
                                                 value="my" 
                                                 flex={1}
                                                 _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
                                                 color="white"
                                                 fontWeight="600"
-                                                disabled={true}                                      
                                             >
-                                                {"History"}
+                                                My Trades
                                             </Tabs.Trigger>
                                         </Tabs.List>
                                         {tradeHistory.length > 0 && (
@@ -4492,14 +4599,14 @@ const Exchange: React.FC = () => {
                                         )}
                                     </Flex>
                                     
-                                    <Tabs.Content value="all">
+                                    <Tabs.Content value="global">
                                         <VStack gap={2} align="stretch">
-                                                {tradeHistory.length === 0 && (
+                                                {globalTrades.length === 0 && (
                                                     <Box p={4} textAlign="center" color="gray.500">
-                                                        No trades yet. Waiting for trades...
+                                                        Fetching global trades...
                                                     </Box>
                                                 )}
-                                                {getPaginatedData(tradeHistory, currentPage, itemsPerPage).map((trade) => (
+                                                {getPaginatedData(globalTrades, currentPage, itemsPerPage).map((trade) => (
                                                     <HStack
                                                         key={trade.id}
                                                         p={2}
@@ -4687,6 +4794,21 @@ const Exchange: React.FC = () => {
                                                             trade.sender?.toLowerCase() === address.toLowerCase() || 
                                                             trade.recipient?.toLowerCase() === address.toLowerCase()
                                                         );
+                                                        console.log('[My Trades Debug] Total trades:', tradeHistory.length);
+                                                        console.log('[My Trades Debug] My address:', address);
+                                                        console.log('[My Trades Debug] ALL trades before filter:');
+                                                        tradeHistory.forEach((t, index) => {
+                                                            console.log(`Trade ${index}:`, {
+                                                                type: t.type,
+                                                                sender: t.sender,
+                                                                recipient: t.recipient,
+                                                                amount: t.amount,
+                                                                senderMatches: t.sender?.toLowerCase() === address.toLowerCase(),
+                                                                recipientMatches: t.recipient?.toLowerCase() === address.toLowerCase(),
+                                                                isMine: t.sender?.toLowerCase() === address.toLowerCase() || t.recipient?.toLowerCase() === address.toLowerCase()
+                                                            });
+                                                        });
+                                                        console.log('[My Trades Debug] Filtered my trades:', myTrades.length);
                                                         const paginatedMyTrades = getPaginatedData(myTrades, myTxCurrentPage, itemsPerPage);
                                                         
                                                         return myTrades.length > 0 ? (
@@ -5892,17 +6014,25 @@ const Exchange: React.FC = () => {
                                 <Tabs.Root value={tradeHistoryTab} onValueChange={(e) => setTradeHistoryTab(e.value)}>
                                     <Flex justifyContent="space-between" alignItems="center" mb={4}>
                                         <Tabs.List flex={1}>
-                                        <Tabs.Trigger 
-                                            value="my" 
-                                            flex={1}
-                                            // _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
-                                            color="#888"
-                                            fontWeight="600"     
-                                            disabled={true}                                      
-                                        >
-                                            {"History"}
-                                        </Tabs.Trigger>
-                                    </Tabs.List>
+                                            <Tabs.Trigger 
+                                                value="global" 
+                                                flex={1}
+                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                                color="white"
+                                                fontWeight="600"
+                                            >
+                                                Global
+                                            </Tabs.Trigger>
+                                            <Tabs.Trigger 
+                                                value="my" 
+                                                flex={1}
+                                                _selected={{ bg: "#2a2a2a", color: "#4ade80" }}
+                                                color="white"
+                                                fontWeight="600"
+                                            >
+                                                My Trades
+                                            </Tabs.Trigger>
+                                        </Tabs.List>
                                     {tradeHistory.length > 0 && (
                                         <Button
                                             size="sm"
@@ -5917,9 +6047,14 @@ const Exchange: React.FC = () => {
                                     )}
                                 </Flex>
                                     
-                                <Tabs.Content value="all">
+                                <Tabs.Content value="global">
                                         <VStack gap={2} align="stretch">
-                                                {getPaginatedData(tradeHistory, currentPage, itemsPerPage).map((trade) => (
+                                                {globalTrades.length === 0 && (
+                                                    <Box p={4} textAlign="center" color="gray.500">
+                                                        Fetching global trades...
+                                                    </Box>
+                                                )}
+                                                {getPaginatedData(globalTrades, currentPage, itemsPerPage).map((trade) => (
                                                     <Box
                                                         key={trade.id}
                                                         p={3}
@@ -6054,6 +6189,21 @@ const Exchange: React.FC = () => {
                                                             trade.sender?.toLowerCase() === address.toLowerCase() || 
                                                             trade.recipient?.toLowerCase() === address.toLowerCase()
                                                         );
+                                                        console.log('[My Trades Debug] Total trades:', tradeHistory.length);
+                                                        console.log('[My Trades Debug] My address:', address);
+                                                        console.log('[My Trades Debug] ALL trades before filter:');
+                                                        tradeHistory.forEach((t, index) => {
+                                                            console.log(`Trade ${index}:`, {
+                                                                type: t.type,
+                                                                sender: t.sender,
+                                                                recipient: t.recipient,
+                                                                amount: t.amount,
+                                                                senderMatches: t.sender?.toLowerCase() === address.toLowerCase(),
+                                                                recipientMatches: t.recipient?.toLowerCase() === address.toLowerCase(),
+                                                                isMine: t.sender?.toLowerCase() === address.toLowerCase() || t.recipient?.toLowerCase() === address.toLowerCase()
+                                                            });
+                                                        });
+                                                        console.log('[My Trades Debug] Filtered my trades:', myTrades.length);
                                                         const paginatedMyTrades = getPaginatedData(myTrades, myTxCurrentPage, itemsPerPage);
                                                         
                                                         return myTrades.length > 0 ? (
