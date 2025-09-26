@@ -433,6 +433,10 @@ const Exchange: React.FC = () => {
     const [useWeth, setUseWeth] = useState(false);
     const [useMax, setUseMax] = useState(false);
     
+    // Wrap/Unwrap drawer states - needed for multicall hook
+    const [isWrapDrawerOpen, setIsWrapDrawerOpen] = useState(false);
+    const [isUnwrapDrawerOpen, setIsUnwrapDrawerOpen] = useState(false);
+    
     // Use multicall for balance fetching
     const { balances, refetch: refetchBalances } = useMulticallBalances({
         userAddress: address,
@@ -2623,8 +2627,6 @@ const Exchange: React.FC = () => {
     const [wrapAmount, setWrapAmount] = useState(0);
     const [isWrapping, setIsWrapping] = useState(false);
     const [isUnwrapping, setIsUnwrapping] = useState(false);
-    const [isWrapDrawerOpen, setIsWrapDrawerOpen] = useState(false);
-    const [isUnwrapDrawerOpen, setIsUnwrapDrawerOpen] = useState(false);
     
     // Fetch all deployers from factory contract
     const {
