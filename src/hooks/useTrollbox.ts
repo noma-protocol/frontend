@@ -299,7 +299,41 @@ export const useTrollbox = (wsUrl: string = TROLLBOX_WS_URL, autoConnect: boolea
             });
             
             if (success) {
-              return; // Wait for server response
+              // Wait for server response with timeout
+              const checkCachePromise = new Promise<boolean>((resolve, reject) => {
+                let resolved = false;
+                
+                // Set up listener for auth response
+                const handleAuthResponse = (data: any) => {
+                  if (data.type === 'authenticated' || (data.type === 'requireAuth' && data.address === address)) {
+                    resolved = true;
+                    globalTrollbox.removeListener(handleAuthResponse);
+                    if (data.type === 'authenticated') {
+                      resolve(true);
+                    } else {
+                      // Server requires fresh auth, continue with normal flow
+                      resolve(false);
+                    }
+                  }
+                };
+                
+                globalTrollbox.addListener(handleAuthResponse);
+                
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                  if (!resolved) {
+                    globalTrollbox.removeListener(handleAuthResponse);
+                    // Continue with normal auth flow
+                    resolve(false);
+                  }
+                }, 5000);
+              });
+              
+              const cacheWorked = await checkCachePromise;
+              if (cacheWorked) {
+                return; // Successfully authenticated with cache
+              }
+              // Otherwise continue with normal auth flow below
             }
           }
         } catch (e) {
