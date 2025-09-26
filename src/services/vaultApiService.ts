@@ -35,7 +35,7 @@ export class VaultApiService {
   private cacheTimeout = 30000; // 30 seconds cache
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || features.vault.apiUrl || 'http://localhost:3004';
+    this.baseUrl = baseUrl || features.vault.apiUrl;
   }
 
   async fetchVaults(address?: string): Promise<VaultInfo[]> {

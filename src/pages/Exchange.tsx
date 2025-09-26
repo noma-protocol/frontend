@@ -1837,6 +1837,8 @@ const Exchange: React.FC = () => {
             url.searchParams.append('to_timestamp', to_timestamp.toString());
             url.searchParams.append('interval', interval);
             
+            console.log('[fetchOHLCData] Building URL:', url.toString());
+            
             // Add pool address if available
             if (pool && pool !== '0x0000000000000000000000000000000000000000') {
                 url.searchParams.append('pool', pool);
@@ -1906,6 +1908,7 @@ const Exchange: React.FC = () => {
                 // Skip API calls if no pool address is available, but show mock data
                 if (!poolInfo.poolAddress || poolInfo.poolAddress === '0x0000000000000000000000000000000000000000') {
                     console.log('[loadChartData] No valid pool address - showing mock data');
+                    console.log('[loadChartData] poolInfo full object:', JSON.stringify(poolInfo));
                     
                     // Generate mock data for display
                     const mockData = generateMockOHLCData(chartTimeframe);
@@ -1939,6 +1942,12 @@ const Exchange: React.FC = () => {
                     }
                 }
                 
+                console.log('[loadChartData] About to call fetchOHLCData with:', {
+                    chartTimeframe,
+                    chartGranularity,
+                    poolAddress: poolInfo.poolAddress,
+                    API_BASE_URL
+                });
                 const ohlcData = await fetchOHLCData(chartTimeframe, chartGranularity, poolInfo.poolAddress);
                 
                 // Validate data before setting
@@ -2757,6 +2766,7 @@ const Exchange: React.FC = () => {
                 // Convert vault descriptions to token format for display
                 console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
                 console.log('Vault pool addresses:', deployedVaults.map(v => ({ symbol: v.tokenSymbol, poolAddress: v.poolAddress })));
+                console.log('[IMPORTANT] Full vault data sample:', deployedVaults.slice(0, 2));
                 const tokenList = await Promise.all(deployedVaults.map(async (vault, index) => {
                     // Fetch price stats for this specific token's pool
                     let change24h = (Math.random() - 0.5) * 20; // Default random change

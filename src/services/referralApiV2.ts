@@ -1,5 +1,6 @@
 // New referral API service for the WebSocket infrastructure
-const API_BASE_URL = (import.meta.env.VITE_REFERRAL_API_URL as string) || 'http://localhost:3004';
+const isProduction = import.meta.env.VITE_ENV === 'prod' || import.meta.env.VITE_ENV === 'production';
+const API_BASE_URL = (import.meta.env.VITE_REFERRAL_API_URL as string) || (isProduction ? 'https://trollbox.noma.money' : 'http://localhost:3004');
 
 interface ReferralRegistration {
   referralCode: string;

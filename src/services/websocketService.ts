@@ -60,7 +60,8 @@ class WebSocketService {
   private authPromise: Promise<boolean> | null = null;
 
   constructor(url?: string) {
-    this.url = url || (import.meta.env.VITE_WSS_URL as string) || 'ws://localhost:8080';
+    const isProduction = import.meta.env.VITE_ENV === 'prod' || import.meta.env.VITE_ENV === 'production';
+    this.url = url || (import.meta.env.VITE_WSS_URL as string) || (isProduction ? 'wss://trollbox-ws.noma.money' : 'ws://localhost:8080');
     console.log('[WebSocketService] Initialized with URL:', this.url);
   }
 

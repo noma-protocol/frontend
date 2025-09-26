@@ -18,6 +18,9 @@ export function createInterceptedFetch() {
       url.includes('rpc.troll.box') ||
       url.includes('localhost:8545') ||
       url.includes('127.0.0.1:8545') ||
+      url.includes('ankr.com') ||
+      url.includes('alchemy.com') ||
+      url.includes('monad_testnet') ||
       (options?.body && typeof options.body === 'string' && options.body.includes('jsonrpc'))
     );
     

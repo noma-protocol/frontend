@@ -1,4 +1,8 @@
 // Feature flags for gradual migration
+
+// Check if environment is production
+const isProduction = import.meta.env.VITE_ENV === 'prod' || import.meta.env.VITE_ENV === 'production';
+
 export const features = {
   // Enable new WebSocket infrastructure
   useNewWebSocket: import.meta.env.VITE_USE_NEW_WEBSOCKET === 'true' || true, // Default to true
@@ -8,14 +12,14 @@ export const features = {
   
   // WebSocket endpoints
   websocket: {
-    url: (import.meta.env.VITE_WSS_URL as string) || 'ws://localhost:8080',
+    url: (import.meta.env.VITE_WSS_URL as string) || (isProduction ? 'wss://trollbox-ws.noma.money' : 'ws://localhost:8080'),
     reconnectAttempts: 5,
     reconnectDelay: 1000,
   },
   
   // Referral API endpoint
   referralApi: {
-    url: (import.meta.env.VITE_REFERRAL_API_URL as string) || 'http://localhost:3004',
+    url: (import.meta.env.VITE_REFERRAL_API_URL as string) || (isProduction ? 'https://trollbox.noma.money' : 'http://localhost:3004'),
   },
   
   // Pool addresses
@@ -33,7 +37,7 @@ export const features = {
   
   // Vault API settings
   vault: {
-    apiUrl: (import.meta.env.VITE_VAULT_API_URL as string) || 'http://localhost:3004',
+    apiUrl: (import.meta.env.VITE_VAULT_API_URL as string) || (isProduction ? 'https://trollbox.noma.money' : 'http://localhost:3004'),
     cacheTimeout: 30000, // 30 seconds
   },
 };

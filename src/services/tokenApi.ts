@@ -1,7 +1,10 @@
 import config from '../config';
 
+// Check if environment is production
+const isProduction = import.meta.env.VITE_ENV === 'prod' || import.meta.env.VITE_ENV === 'production';
+
 // Use dedicated tokens API endpoint
-const TOKENS_API_URL = import.meta.env.VITE_TOKENS_API_URL || 'http://localhost:3004/api';
+const TOKENS_API_URL = import.meta.env.VITE_TOKENS_API_URL || (isProduction ? 'https://trollbox.noma.money/api' : 'http://localhost:3004/api');
 const API_BASE_URL = import.meta.env.VITE_API_URL || config.API_URL;
 
 interface TokenData {

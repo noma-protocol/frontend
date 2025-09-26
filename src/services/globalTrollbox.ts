@@ -25,8 +25,9 @@ if (!window.__trollboxInitialized) {
   console.log('Global trollbox already initialized');
 }
 
-// Use environment variable or default to local development server
-const TROLLBOX_WS_URL = import.meta.env.VITE_TROLLBOX_WS_URL || 'ws://localhost:8080';
+// Use environment variable or default based on environment
+const isProduction = import.meta.env.VITE_ENV === 'prod' || import.meta.env.VITE_ENV === 'production';
+const TROLLBOX_WS_URL = import.meta.env.VITE_TROLLBOX_WS_URL || (isProduction ? 'wss://trollbox-ws.noma.money' : 'ws://localhost:8080');
 
 const connect = (wsUrl: string = TROLLBOX_WS_URL): Promise<void> => {
   // Rate limit connection attempts
