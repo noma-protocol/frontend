@@ -3,6 +3,7 @@ import { Input, Image, Flex, Container, Heading, HStack, Box, Grid, GridItem, Bu
 import { ethers } from 'ethers';
 import { isMobile } from "react-device-detect";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { getProvider } from '../services/providerService';
 import useScreenOrientation from '../hooks/useScreenOrientation';
 import RotateDeviceMessage from '../components/RotateDeviceMessage';
 import { Toaster, toaster } from "../components/ui/toaster";
@@ -70,12 +71,9 @@ const addresses = config.chain === "local"
  
 
 const { formatEther, parseEther, isAddress, MaxUint256 } = ethers.utils;
-const { JsonRpcProvider } = ethers.providers;
 
-const localProvider = new JsonRpcProvider(
-  config.chain == "local" ? "http://localhost:8545" :
-  config.RPC_URL
-);
+// Use singleton provider instead of creating a new one
+const localProvider = getProvider();
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
 const IWETHAbi = IWETHArtifact.abi;

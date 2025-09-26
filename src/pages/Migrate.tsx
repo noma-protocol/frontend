@@ -16,7 +16,6 @@ import {
 } from "@chakra-ui/react";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { ethers } from "ethers";
-const { JsonRpcProvider } = ethers.providers;
 import { isMobile } from "react-device-detect";
 import useScreenOrientation from '../hooks/useScreenOrientation';
 import RotateDeviceMessage from '../components/RotateDeviceMessage';
@@ -27,20 +26,16 @@ import { formatEther } from "viem";
 import { formatNumberPrecise, getContractAddress, commify } from "../utils";
 import { Toaster, toaster } from "../components/ui/toaster";
 import metamaskLogo from "../assets/images/metamask.svg";
+import { getProvider } from '../services/providerService';
 // import WalletNotConnected from '../components/WalletNotConnected';
 
 const addresses = config.chain === "local"
   ? addressesLocal
   : [];
 
-const localProvider = new JsonRpcProvider(
-  config.chain == "local" ? "http://localhost:8545" :
-  config.RPC_URL
-);
-
-const bscProvider = new JsonRpcProvider(
-    config.RPC_URL
-);
+// Use singleton provider instead of creating new ones
+const localProvider = getProvider();
+const bscProvider = getProvider();
 
 const Whitelist = await import(`../assets/Whitelist.json`);
 const whitelistedAddresses = Whitelist.addresses || [];

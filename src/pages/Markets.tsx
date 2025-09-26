@@ -35,6 +35,7 @@ import pancakeLogo from "../assets/images/pancake.png";
 import walletIcon from '../assets/images/walletIcon.svg';
 import addressesBsc from "../assets/deployment.json";
 import { tokenApi } from '../services/tokenApi';
+import { getProvider } from '../services/providerService';
 // import WalletNotConnected from '../components/WalletNotConnected';
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -44,12 +45,8 @@ const addresses = config.chain === "local"
   : addressesBsc;
 
 const { formatEther } = ethers.utils;
-const {JsonRpcProvider} = ethers.providers;
 
-const localProvider = new JsonRpcProvider(
-  config.chain == "local" ? "http://localhost:8545" :
- config.RPC_URL
-);
+const localProvider = getProvider();
 
 // Dynamically import the NomaFactory artifact and extract its ABI
 const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);

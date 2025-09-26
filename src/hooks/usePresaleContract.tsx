@@ -1,9 +1,8 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { ethers } from "ethers";
-const { JsonRpcProvider } = ethers.providers;
-
 import { generateBytes32String, generateReferralCodeBytes32 } from "../utils";
 import config from "../config";
+import { getProvider } from "../services/providerService";
 
 const { formatEther } = ethers.utils;
 
@@ -31,12 +30,7 @@ const usePresaleContract = (network, userAddress, presaleContractAddress, referr
 
     // Setup Provider
     const provider = useMemo(
-        () =>
-            new JsonRpcProvider(
-                config.chain == "local"
-                ? "http://localhost:8545"
-                :  config.RPC_URL
-            ),
+        () => getProvider(),
         [network]
     );
 

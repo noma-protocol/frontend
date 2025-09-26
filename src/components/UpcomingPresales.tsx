@@ -16,15 +16,11 @@ import addresses from "../assets/deployment.json";
 import placeholderLogo from "../assets/images/question_white.svg";
 import nomaLogo from "../assets/images/noma.png";
 import { tokenApi } from "../services/tokenApi";
+import { getProvider } from "../services/providerService";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 const { formatEther } = ethers.utils;
-const { JsonRpcProvider } = ethers.providers;
-
-const localProvider = new JsonRpcProvider(
-  config.chain == "local" ? "http://localhost:8545" : config.RPC_URL
-);
 
 // Dynamically import the NomaFactory artifact and extract its ABI
 const NomaFactoryArtifact = await import(`../assets/NomaFactory.json`);
@@ -54,7 +50,7 @@ const UpcomingPresales: React.FC = () => {
     const presaleContractInstance = new ethers.Contract(
       presaleContract,
       PresaleAbi,
-      localProvider
+      getProvider()
     );
 
     try {
@@ -172,7 +168,7 @@ const UpcomingPresales: React.FC = () => {
         const nomaFactoryContract = new ethers.Contract(
           oikosFactoryAddress,
           NomaFactoryAbi,
-          localProvider
+          getProvider()
         );
 
         // console.log("Fetching deployers...");

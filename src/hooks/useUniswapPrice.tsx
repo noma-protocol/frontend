@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { abi as IUniswapV3PoolABI } from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
+import { getProvider } from "../services/providerService";
 
 const useUniswapPrice = (poolAddress, providerUrl) => {
     const [priceData, setPriceData] = useState(null);
@@ -11,7 +12,7 @@ const useUniswapPrice = (poolAddress, providerUrl) => {
 
     const fetchLatestPrice = async () => {
         try {
-            const provider = new ethers.providers.JsonRpcProvider(providerUrl);
+            const provider = getProvider();
             const poolContract = new ethers.Contract(poolAddress, IUniswapV3PoolABI, provider);
             const slot0 = await poolContract.slot0();
             const sqrtPriceX96 = slot0.sqrtPriceX96;

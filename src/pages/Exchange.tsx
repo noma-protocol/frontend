@@ -1421,7 +1421,7 @@ const Exchange: React.FC = () => {
             console.log('[Exchange] Processing event:', event);
             
             // Check if event is for current pool
-            if (event.poolAddress.toLowerCase() !== poolInfo.poolAddress?.toLowerCase()) {
+            if (!event.poolAddress || !poolInfo.poolAddress || event.poolAddress.toLowerCase() !== poolInfo.poolAddress.toLowerCase()) {
                 console.log('[Exchange] Skipping event for different pool:', event.poolAddress, 'vs', poolInfo.poolAddress);
                 return;
             }
@@ -2817,14 +2817,16 @@ const Exchange: React.FC = () => {
                     // Build pool to token mapping
                     const newPoolMap: { [poolAddress: string]: { symbol: string, token0: string, token1: string } } = {};
                     tokenList.forEach(token => {
-                        if (token.poolAddress && token.poolAddress !== '0x0000000000000000000000000000000000000000') {
-                            newPoolMap[token.poolAddress.toLowerCase()] = {
+                        // Add safety check for poolAddress
+                        if (token.poolAddress && typeof token.poolAddress === 'string' && token.poolAddress !== '0x0000000000000000000000000000000000000000') {
+                            const poolAddressLower = token.poolAddress.toLowerCase();
+                            newPoolMap[poolAddressLower] = {
                                 symbol: token.symbol,
                                 token0: token.token0,
                                 token1: token.token1
                             };
-                            console.log('[Exchange] Adding to pool map:', token.symbol, '->', token.poolAddress.toLowerCase());
-                            if (token.poolAddress.toLowerCase() === '0x8eb5c457f7a29554536dc964b3fada2961dd8212') {
+                            console.log('[Exchange] Adding to pool map:', token.symbol, '->', poolAddressLower);
+                            if (poolAddressLower === '0x8eb5c457f7a29554536dc964b3fada2961dd8212') {
                                 console.log('[Exchange] Found the mystery pool! Token:', token.symbol);
                             }
                         }

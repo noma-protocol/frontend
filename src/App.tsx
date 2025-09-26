@@ -40,9 +40,20 @@ function App() {
     chains,
     projectId,
     metadata,
+    // Add performance optimizations
+    autoConnect: true, // Auto-connect to last used wallet
+    connectors: {
+      // Configure connectors with specific options if needed
+    },
   });
 
-  createWeb3Modal({ wagmiConfig, projectId, chains });
+  createWeb3Modal({ 
+    wagmiConfig, 
+    projectId, 
+    chains,
+    themeMode: 'dark', // Set a default theme
+    enableAnalytics: false, // Disable analytics to reduce external calls
+  });
 
   // Removed watchNetwork - it causes excessive eth_chainId calls
   // Wagmi already handles network state internally

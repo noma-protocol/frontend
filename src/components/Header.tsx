@@ -23,16 +23,13 @@ import { ethers } from "ethers";
 import { getContractAddress } from "../utils";
 import addressesLocal from "../assets/deployment.json";
 import addressesBsc from "../assets/deployment.json";
+import { getProvider } from "../services/providerService";
 
 // Get contract addresses
 const addresses = config.chain == "local" ? addressesLocal : addressesBsc;
 import NomaFactoryArtifact from "../assets/NomaFactory.json";
 const NomaFactoryAbi = NomaFactoryArtifact.abi;
 const nomaFactoryAddress = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "Factory");
-const { JsonRpcProvider } = ethers.providers;
-const localProvider = new JsonRpcProvider(
-  config.chain == "local" ? "http://localhost:8545" : config.RPC_URL
-);
 
 const Header: React.FC = () => {
   const ctx = useContext<LanguageContextType>(LanguageContext);
@@ -95,7 +92,7 @@ const Header: React.FC = () => {
       const nomaFactoryContract = new ethers.Contract(
         nomaFactoryAddress,
         NomaFactoryAbi,
-        localProvider
+        getProvider()
       );
 
       const fetchVaults = async () => {

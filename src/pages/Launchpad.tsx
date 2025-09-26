@@ -83,6 +83,7 @@ import monadLogo from "../assets/images/monad.png";
 import uniswapLogo from "../assets/images/uniswap.png";
 import pancakeLogo from "../assets/images/pancake.png";
 import config from '../config';
+import { getProvider } from '../services/providerService';
 import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment_monad.json";
 import addressesBsc from "../assets/deployment.json";
@@ -185,8 +186,7 @@ const Launchpad: React.FC = () => {
                 if (tokenData.presale === "0") {
                     try {
                         // Wait for transaction to be mined
-                        const { JsonRpcProvider } = ethers.providers;
-                        const provider = new JsonRpcProvider(config.RPC_URL);
+                        const provider = getProvider();
                         const receipt = await provider.waitForTransaction(data.hash);
                         
                         // Parse logs to find pool address (usually in VaultCreated event)
