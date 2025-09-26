@@ -18,7 +18,6 @@ import {
 import { useAccount, useContractRead } from "wagmi";
 import { Toaster } from "../components/ui/toaster";
 import { ethers } from "ethers";
-const { JsonRpcProvider } = ethers.providers;
 const { formatEther } = ethers.utils;
 import { isMobile } from "react-device-detect";
 import useScreenOrientation from '../hooks/useScreenOrientation';
@@ -42,6 +41,7 @@ import addressesBsc   from "../assets/deployment.json";
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import { useMonPrice } from '../contexts/MonPriceContext';
+import { getProvider } from '../services/providerService';
 
 import ModelHelperArtifact from "../assets/ModelHelper.json";
 const ModelHelperAbi = ModelHelperArtifact.abi;
@@ -52,10 +52,8 @@ const addresses = config.chain === "local"
 
 const addressModelHelper = getContractAddress(addresses, config.chain == "local" ? "1337" : "10143", "ModelHelper");
 
-const localProvider = new JsonRpcProvider(
-  config.chain == "local" ? "http://localhost:8545" :
-  config.RPC_URL
-);
+// Use singleton provider instead of creating a new one
+const localProvider = getProvider();
 
 // Import the NomaFactory artifact and extract its ABI
 import NomaFactoryArtifact from "../assets/NomaFactory.json";
@@ -121,14 +119,22 @@ const Liquidity: React.FC = () => {
   };
 
   const {
-    data: imv
+    data: imv,
+    refetch: refetchImv
   } = useContractRead({
     address: addressModelHelper,
     abi: ModelHelperAbi,
     functionName: "getIntrinsicMinimumValue",
     args: [selectedVault],
-    watch: true,
+    watch: false, // Disabled to reduce RPC calls - manually refresh when needed
   });
+
+  // Refetch IMV when selectedVault changes
+  useEffect(() => {
+    if (selectedVault && refetchImv) {
+      refetchImv();
+    }
+  }, [selectedVault, refetchImv]);
 
   // useEffect(() => {
   //   const fetchPrice = async () => {

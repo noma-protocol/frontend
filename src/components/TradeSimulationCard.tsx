@@ -51,25 +51,41 @@ const TradeSimulationCard: React.FC<TradeSimulationCardProps> = ({
     // const [dummyQuoteAsk, setDummyQuoteAsk] = useState(0);
 
     // --- Fetch Quotes ---
-    const { data: _bidQuote } = useContractRead({
+    const { data: _bidQuote, refetch: refetchBidQuote } = useContractRead({
         address: quoterAddress,
         abi: quoterAbi,
         functionName: "quoteExactOutput", // Get amount of tokenA needed for 1 tokenB
         args: [swapPath, parseEther(`${amountToBuy}`)],
-        watch: true, // Re-fetch data when dependencies change
+        watch: false, // Disabled to reduce RPC calls - use polling interval instead
     });
 
-    const { data: _askQuote } = useContractRead({
+    const { data: _askQuote, refetch: refetchAskQuote } = useContractRead({
         address: quoterAddress,
         abi: quoterAbi,
         functionName: "quoteExactInput", // Get amount of tokenB for 1 tokenA
         args: [swapPath, parseEther(`${amountToSell}`)],
-        watch: true,
+        watch: false, // Disabled to reduce RPC calls - use polling interval instead
     });
 
     // Compute prices and spread
     const bidQuote = _bidQuote ? parseFloat(formatEther(_bidQuote[0])) : null;
     const askQuote = _askQuote ? parseFloat(formatEther(_askQuote[0])) : null;
+
+    // Poll quotes every 15 seconds to reduce RPC calls while maintaining fresh data
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (amountToBuy > 0) refetchBidQuote();
+            if (amountToSell > 0) refetchAskQuote();
+        }, 15000); // 15 seconds
+
+        return () => clearInterval(interval);
+    }, [amountToBuy, amountToSell, refetchBidQuote, refetchAskQuote]);
+
+    // Refetch quotes when amounts change
+    useEffect(() => {
+        if (amountToBuy > 0) refetchBidQuote();
+        if (amountToSell > 0) refetchAskQuote();
+    }, [amountToBuy, amountToSell, refetchBidQuote, refetchAskQuote]);
 
     // 1) Compute per-token rates:
     const bidRate = (bidQuote && amountToBuy && amountToBuy !== 0) ? bidQuote / amountToBuy : 0;   // e.g. 1.00420996 MON/TOK

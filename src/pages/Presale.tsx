@@ -45,7 +45,8 @@ import metamaskLogo from "../assets/images/metamask.svg";
 import placeholderLogo from "../assets/images/question_white.svg"; 
 import monadLogo from "../assets/images/monad.png";
 
-import config from '../config'; 
+import config from '../config';
+import { getProvider } from '../services/providerService'; 
 
 import addressesLocal   from "../assets/deployment.json";
 import addressesBsc   from "../assets/deployment.json";
@@ -223,13 +224,14 @@ const Presale: React.FC = () => {
   }
   
     const {
-      data: tokenBalancePresale
+      data: tokenBalancePresale,
+      refetch: refetchTokenBalancePresale
     } = useContractRead({
       address: contractAddress,
       abi: ERC20Abi,
       functionName: "balanceOf",
       args: [contractAddress],
-      watch: true,
+      watch: false, // Disabled to reduce RPC calls - manually refresh on important events
       enabled: /*!!tokenAddress &&*/ !!contractAddress,
       onError(error) {
         console.error("Error in tokenBalancePresale read:", error);
@@ -250,11 +252,19 @@ const Presale: React.FC = () => {
     abi: ERC20Abi,
     functionName: "balanceOf",
     args: [address],
-    watch: true,
+    watch: false, // Disabled to reduce RPC calls - manually refresh on important events
     onError(error) {
       console.error("Error in tokenBalance read:", error);
     }
   });
+
+  // Refetch balances when address changes
+  useEffect(() => {
+    if (address) {
+      refetchTokenBalance();
+      refetchTokenBalancePresale();
+    }
+  }, [address, refetchTokenBalance, refetchTokenBalancePresale]);
 
   const {
     data: tokenName
@@ -417,6 +427,8 @@ const Presale: React.FC = () => {
     onSuccess(data) {
       console.log(`transaction successful: ${data.hash} referral code: ${urlReferralCode}`);
       refetchBalance();
+      refetchTokenBalance();
+      refetchTokenBalancePresale();
       fetchPresaleInfo();
       toaster.create({
         title: "Success",
@@ -452,8 +464,7 @@ const Presale: React.FC = () => {
         
         // Get the pool address from the presale contract
         try {
-          const { JsonRpcProvider } = ethers.providers;
-          const localProvider = new JsonRpcProvider(config.RPC_URL);
+          const localProvider = getProvider();
           const presaleContract = new ethers.Contract(contractAddress, PresaleAbi, localProvider);
           const poolAddress = await presaleContract.pool();
           console.log('Pool address:', poolAddress);
@@ -576,6 +587,8 @@ const Presale: React.FC = () => {
     functionName: "withdraw",
     onSuccess(data) {
       console.log(`transaction successful: ${data.hash}`);
+      refetchTokenBalance();
+      refetchTokenBalancePresale();
       fetchPresaleInfo();
       toaster.create({
         title: "Success",

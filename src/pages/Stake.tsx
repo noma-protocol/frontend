@@ -52,15 +52,12 @@ import { Tooltip } from "../components/ui/tooltip"
 import CountdownTimer from '../components/CooldownCountdown';
 import { ro } from '@faker-js/faker';
 import addresses from "../assets/deployment.json";
-import config from '../config'; 
+import config from '../config';
+import { getProvider } from '../services/providerService';
 
 const { formatEther, parseEther, isAddress } = ethers.utils;
-const { JsonRpcProvider } = ethers.providers;
 
-const localProvider = new JsonRpcProvider(
-  config.chain == "local" ? "http://localhost:8545" :
-  config.RPC_URL
-);
+const localProvider = getProvider();
 
 const IWETHArtifact = await import(`../assets/IWETH.json`);
 const IWETHAbi = IWETHArtifact.abi;
@@ -125,13 +122,14 @@ const Stake = () => {
     const isMounted = React.useRef(true);
 
     const {
-        data: stakedBalance
+        data: stakedBalance,
+        refetch: refetchStakedBalance
     } = useContractRead({
         address: vaultDescription.stakingContract,
         abi: StakingContractAbi,
         functionName: "stakedBalance",
         args: [address],
-        watch: true,
+        watch: false, // Disabled to reduce RPC calls - manually refresh on stake/unstake
     });
 
     const {
@@ -140,55 +138,60 @@ const Stake = () => {
         address: vaultDescription.stakingContract,
         abi: StakingContractAbi,
         functionName: "sOKS",
-        watch: true,
+        watch: false, // Disabled to reduce RPC calls - this value rarely changes
     });
 
     const {
-        data: sNomaBalance
+        data: sNomaBalance,
+        refetch: refetchSNomaBalance
     } = useContractRead({
         address: sNomaToken,
         abi: ERC20Abi,
         functionName: "balanceOf",
         args: [address],
-        watch: true,
+        watch: false, // Disabled to reduce RPC calls - manually refresh on stake/unstake
     });
     
     const {
-        data: sNomaTotalSupply
+        data: sNomaTotalSupply,
+        refetch: refetchSNomaTotalSupply
     } = useContractRead({
         address: sNomaToken,
         abi: ERC20Abi,
         functionName: "totalSupply",
-        watch: true,
+        watch: false, // Disabled to reduce RPC calls - use polling interval
     });
 
     const {
-        data: totalStaked
+        data: totalStaked,
+        refetch: refetchTotalStaked
     } = useContractRead({
         address: vaultDescription.stakingContract,
         abi: StakingContractAbi,
         functionName: "totalStaked",
-        watch: true
+        watch: false // Disabled to reduce RPC calls - use polling interval
     });
 
 
     const {
-        data: totalRewards
+        data: totalRewards,
+        refetch: refetchTotalRewards
     } = useContractRead({
         address: vaultDescription.stakingContract,
         abi: StakingContractAbi,
         functionName: "totalRewards",
-        watch: true
+        watch: false // Disabled to reduce RPC calls - use polling interval
     });
 
     const {
-        data: lastOperationTimestamp
+        data: lastOperationTimestamp,
+        refetch: refetchLastOperationTimestamp
     } = useContractRead({
         address: vaultDescription.stakingContract,
         abi: StakingContractAbi,
         functionName: "lastOperationTimestamp",
         args: [address],
-        watch: true
+        watch: false // Disabled to reduce RPC calls - manually refresh on stake/unstake
     });
 
     // Convert BigNumber to string if necessary
@@ -211,6 +214,26 @@ const Stake = () => {
             isMounted.current = false;
         };
     }, []);
+
+    // Poll for global state changes every 30 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refetchSNomaTotalSupply();
+            refetchTotalStaked();
+            refetchTotalRewards();
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(interval);
+    }, [refetchSNomaTotalSupply, refetchTotalStaked, refetchTotalRewards]);
+
+    // Refetch user-specific data when address changes
+    useEffect(() => {
+        if (address) {
+            refetchStakedBalance();
+            refetchSNomaBalance();
+            refetchLastOperationTimestamp();
+        }
+    }, [address, refetchStakedBalance, refetchSNomaBalance, refetchLastOperationTimestamp]);
 
     // if (token1Info?.tokenSymbol == "WMON") {
     //     setToken1Info({
@@ -502,9 +525,17 @@ const Stake = () => {
         ],
         onSuccess(data) {
             setIsStaking(false);
-            setTimeout(() => {
-                window.location.reload();
-            }, 4000); // 4000ms = 4 seconds
+            // Refetch all relevant data after successful stake
+            refetchStakedBalance();
+            refetchSNomaBalance();
+            refetchSNomaTotalSupply();
+            refetchTotalStaked();
+            refetchTotalRewards();
+            refetchLastOperationTimestamp();
+            toaster.create({
+                title: "Success",
+                description: "Staking successful!",
+            });
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
@@ -532,9 +563,17 @@ const Stake = () => {
         args: [],
         onSuccess(data) {
             setIsUnstaking(false);
-            setTimeout(() => {
-                window.location.reload();
-            }, 4000);
+            // Refetch all relevant data after successful unstake
+            refetchStakedBalance();
+            refetchSNomaBalance();
+            refetchSNomaTotalSupply();
+            refetchTotalStaked();
+            refetchTotalRewards();
+            refetchLastOperationTimestamp();
+            toaster.create({
+                title: "Success",
+                description: "Unstaking successful!",
+            });
         },
         onError(error) {
             console.error(`transaction failed: ${error.message}`);
