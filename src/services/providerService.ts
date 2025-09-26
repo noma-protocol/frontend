@@ -24,14 +24,31 @@ class ProviderService {
 
   getProvider(): ethers.providers.JsonRpcProvider {
     if (!this.provider) {
-      console.log('[ProviderService] Creating singleton provider instance');
+      console.log('[ProviderService] Creating singleton provider instance with RPC:', config.RPC_URL);
       this.provider = new JsonRpcProvider(config.RPC_URL);
       
-      // Cache the network info to prevent repeated eth_chainId calls
+      // Pre-cache the network info to reduce initial eth_chainId calls
+      // But allow it to be overridden by actual network detection
+      const expectedChainId = config.chain === "local" ? 1337 : 10143;
       this.provider._network = {
-        chainId: config.chain === "local" ? 1337 : 10143,
+        chainId: expectedChainId,
         name: config.chain === "local" ? "localhost" : "monad"
       };
+      
+      // Verify network connection asynchronously
+      this.provider.ready.then(() => {
+        console.log('[ProviderService] Provider is ready');
+        return this.provider.getNetwork();
+      }).then(network => {
+        console.log('[ProviderService] Network detected:', network);
+        this.chainId = network.chainId;
+        if (network.chainId !== expectedChainId) {
+          console.warn('[ProviderService] Network mismatch! Expected:', expectedChainId, 'Got:', network.chainId);
+        }
+      }).catch(error => {
+        console.error('[ProviderService] Failed to detect network:', error);
+        console.error('[ProviderService] This may cause issues with contract calls');
+      });
     }
     return this.provider;
   }
@@ -63,6 +80,15 @@ class ProviderService {
     })();
 
     return this.chainIdPromise;
+  }
+
+  /**
+   * Get provider that's guaranteed to be ready
+   */
+  async getReadyProvider(): Promise<ethers.providers.JsonRpcProvider> {
+    const provider = this.getProvider();
+    await provider.ready;
+    return provider;
   }
 
   /**

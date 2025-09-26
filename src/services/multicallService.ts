@@ -87,6 +87,11 @@ class MulticallService {
   constructor() {
     this.provider = getProvider();
     this.multicallContract = new ethers.Contract(MULTICALL3_ADDRESS, MULTICALL3_ABI, this.provider);
+    
+    // Ensure provider is ready
+    this.provider.ready.catch(error => {
+      console.error('[MulticallService] Provider not ready:', error);
+    });
   }
 
   /**
@@ -151,6 +156,9 @@ class MulticallService {
    */
   async tryAggregate(calls: Call[]): Promise<CallResult[]> {
     try {
+      // Ensure provider is ready before making calls
+      await this.provider.ready;
+      
       const formattedCalls = calls.map((call) => ({
         target: call.target,
         callData: call.callData,

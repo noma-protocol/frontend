@@ -53,6 +53,8 @@ export const useGasPrice = (
 
   const fetchGasPrice = async () => {
     try {
+      // Ensure provider is ready
+      await provider.ready;
       // Check cache first
       if (gasPriceCache && (Date.now() - gasPriceCache.timestamp) < CACHE_DURATION) {
         if (isMountedRef.current) {
