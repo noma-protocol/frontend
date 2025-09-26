@@ -42,6 +42,7 @@ export function useMulticallBalances({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Memoize fetchBalances to prevent unnecessary recreations
   const fetchBalances = useCallback(async () => {
     if (!userAddress || !enabled) return;
 
@@ -101,6 +102,16 @@ export function useMulticallBalances({
       return () => clearInterval(interval);
     }
   }, [fetchBalances, refetchInterval, enabled]);
+
+  // Add a separate effect to log when dependencies change
+  useEffect(() => {
+    console.log('[useMulticallBalances] Dependencies changed:', {
+      userAddress,
+      wethAddress, 
+      tokenAddress,
+      enabled
+    });
+  }, [userAddress, wethAddress, tokenAddress, enabled]);
 
   return {
     balances,
