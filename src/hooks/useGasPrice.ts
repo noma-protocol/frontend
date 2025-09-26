@@ -33,6 +33,9 @@ const GAS_ESTIMATES = {
   approve: 50000, // Token approval
 };
 
+// Minimum gas price in Gwei (fallback for testnet)
+const MIN_GAS_PRICE_GWEI = '1'; // 1 Gwei minimum
+
 // Global cache for gas price
 let gasPriceCache: GasPriceData | null = null;
 
@@ -66,14 +69,29 @@ export const useGasPrice = (
       setIsLoading(true);
       setError(null);
 
-      const currentGasPrice = await provider.getGasPrice();
+      let currentGasPrice = await provider.getGasPrice();
       
       if (!isMountedRef.current) return;
+
+      // Ensure minimum gas price for proper fee display (especially on testnets)
+      const minGasPrice = ethers.utils.parseUnits(MIN_GAS_PRICE_GWEI, 'gwei');
+      if (currentGasPrice.lt(minGasPrice)) {
+        console.log('[useGasPrice] Gas price too low, using minimum:', MIN_GAS_PRICE_GWEI, 'Gwei');
+        currentGasPrice = minGasPrice;
+      }
 
       // Convert to Gwei (1 Gwei = 10^9 Wei)
       const gwei = ethers.utils.formatUnits(currentGasPrice, 'gwei');
       // Convert to ETH (1 ETH = 10^18 Wei)
       const eth = ethers.utils.formatEther(currentGasPrice);
+
+      // Log for debugging
+      console.log('[useGasPrice] Gas price fetched:', {
+        wei: currentGasPrice.toString(),
+        gwei: gwei,
+        eth: eth,
+        monPrice: monPrice
+      });
 
       // Update cache
       gasPriceCache = {
@@ -102,9 +120,26 @@ export const useGasPrice = (
     ? ethers.utils.formatEther(gasPrice.mul(estimatedGas))
     : '0';
   
-  const estimatedFeeUsd = gasPrice && monPrice > 0
-    ? (parseFloat(estimatedFeeEth) * monPrice).toFixed(2)
-    : '0.00';
+  // Calculate USD value with proper precision
+  let estimatedFeeUsd = '0.00';
+  if (gasPrice && monPrice > 0) {
+    const feeInUsd = parseFloat(estimatedFeeEth) * monPrice;
+    
+    // Log calculation for debugging
+    console.log('[useGasPrice] Fee calculation:', {
+      estimatedGas,
+      estimatedFeeEth,
+      monPrice,
+      feeInUsd
+    });
+    
+    // Ensure we show at least $0.01 if fee is greater than 0 but rounds to 0.00
+    if (feeInUsd > 0 && feeInUsd < 0.01) {
+      estimatedFeeUsd = '< 0.01';
+    } else if (feeInUsd >= 0.01) {
+      estimatedFeeUsd = feeInUsd.toFixed(2);
+    }
+  }
 
   useEffect(() => {
     isMountedRef.current = true;

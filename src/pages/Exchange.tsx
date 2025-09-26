@@ -5506,13 +5506,20 @@ const Exchange: React.FC = () => {
                                     <Text color="#888" fontSize="sm">Network Fee</Text>
                                 </Box>
                                 <Box>
-                                    <Text color="white" fontSize="sm">
-                                        {gasLoading ? (
-                                            <Spinner size="xs" color="#4ade80" />
-                                        ) : (
-                                            `~$${estimatedFeeUsd}`
+                                    <VStack align="end" spacing={0}>
+                                        <Text color="white" fontSize="sm">
+                                            {gasLoading ? (
+                                                <Spinner size="xs" color="#4ade80" />
+                                            ) : (
+                                                `~$${estimatedFeeUsd}`
+                                            )}
+                                        </Text>
+                                        {!gasLoading && gasPriceGwei && (
+                                            <Text color="#888" fontSize="xs">
+                                                {parseFloat(gasPriceGwei).toFixed(4)} Gwei
+                                            </Text>
                                         )}
-                                    </Text>
+                                    </VStack>
                                 </Box>
                             </Flex>                                
                             </Box>
