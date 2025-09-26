@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { getProvider } from './providerService';
+import { getProvider, providerService } from './providerService';
 
 // Multicall3 ABI - only the functions we need
 const MULTICALL3_ABI = [
@@ -78,20 +78,36 @@ export interface CallResult {
 }
 
 class MulticallService {
-  private provider: ethers.providers.JsonRpcProvider;
-  private multicallContract: ethers.Contract;
+  private provider: ethers.providers.JsonRpcProvider | null = null;
+  private multicallContract: ethers.Contract | null = null;
   private pendingCalls: Map<string, { call: Call; resolve: (value: any) => void; reject: (error: any) => void }> = new Map();
   private batchTimeout: NodeJS.Timeout | null = null;
   private readonly BATCH_DELAY = 10; // ms to wait before executing batch
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
-    this.provider = getProvider();
-    this.multicallContract = new ethers.Contract(MULTICALL3_ADDRESS, MULTICALL3_ABI, this.provider);
+    // Delay initialization until first use
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    if (this.multicallContract) return;
     
-    // Ensure provider is ready
-    this.provider.ready.catch(error => {
-      console.error('[MulticallService] Provider not ready:', error);
-    });
+    if (!this.initPromise) {
+      this.initPromise = this.initialize();
+    }
+    
+    await this.initPromise;
+  }
+
+  private async initialize(): Promise<void> {
+    try {
+      this.provider = await providerService.getReadyProvider();
+      this.multicallContract = new ethers.Contract(MULTICALL3_ADDRESS, MULTICALL3_ABI, this.provider);
+      console.log('[MulticallService] Initialized successfully');
+    } catch (error) {
+      console.error('[MulticallService] Failed to initialize:', error);
+      throw error;
+    }
   }
 
   /**
@@ -101,6 +117,8 @@ class MulticallService {
     userAddress: string,
     tokenAddresses: string[]
   ): Promise<{ [tokenAddress: string]: ethers.BigNumber }> {
+    await this.ensureInitialized();
+    
     const calls: Call[] = tokenAddresses.map((tokenAddress) => ({
       target: tokenAddress,
       callData: ERC20_INTERFACE.encodeFunctionData('balanceOf', [userAddress]),
@@ -138,8 +156,10 @@ class MulticallService {
     eth: ethers.BigNumber;
     tokens: { [tokenAddress: string]: ethers.BigNumber };
   }> {
+    await this.ensureInitialized();
+    
     // Get ETH balance separately (can't be multicalled)
-    const ethBalancePromise = this.provider.getBalance(userAddress);
+    const ethBalancePromise = this.provider!.getBalance(userAddress);
     
     // Get all token balances in one multicall
     const tokenBalancesPromise = tokenAddresses.length > 0 
@@ -156,8 +176,7 @@ class MulticallService {
    */
   async tryAggregate(calls: Call[]): Promise<CallResult[]> {
     try {
-      // Ensure provider is ready before making calls
-      await this.provider.ready;
+      await this.ensureInitialized();
       
       const formattedCalls = calls.map((call) => ({
         target: call.target,
@@ -165,7 +184,7 @@ class MulticallService {
       }));
 
       // Use callStatic to ensure this is a read call, not a transaction
-      const results = await this.multicallContract.callStatic.tryAggregate(
+      const results = await this.multicallContract!.callStatic.tryAggregate(
         false, // requireSuccess = false to allow individual calls to fail
         formattedCalls
       );

@@ -54,38 +54,70 @@ class ProviderService {
         this.provider = new JsonRpcProvider({
           url: config.RPC_URL,
           timeout: 30000, // 30 second timeout
+          allowGzip: true,
         });
         
         const expectedChainId = config.chain === "local" ? 1337 : 10143;
         
-        // Track ready state
-        this.providerReadyPromise = this.provider.ready.then(() => {
-          console.log('[ProviderService] Provider is ready');
-          return this.provider!.getNetwork();
-        }).then(network => {
-          console.log('[ProviderService] Network detected:', network);
-          this.chainId = network.chainId;
-          
-          // Cache the network to avoid future calls
-          if (this.provider) {
-            this.provider._network = network;
-          }
-          
-          if (network.chainId !== expectedChainId) {
-            console.warn('[ProviderService] Network mismatch! Expected:', expectedChainId, 'Got:', network.chainId);
-          }
-        }).catch(error => {
-          console.error('[ProviderService] Failed to detect network:', error);
-          console.error('[ProviderService] This may cause issues with contract calls');
-          console.error('[ProviderService] RPC URL:', config.RPC_URL);
-          throw error; // Re-throw to handle in calling code
-        });
+        // Set network immediately to prevent detection calls
+        this.provider._network = {
+          name: 'monad-testnet',
+          chainId: expectedChainId,
+        };
+        
+        // Track ready state with retry logic
+        this.providerReadyPromise = this.initializeNetwork(expectedChainId);
       } catch (error) {
         console.error('[ProviderService] Failed to create provider:', error);
         throw error;
       }
     }
     return this.provider;
+  }
+
+  private async initializeNetwork(expectedChainId: number): Promise<void> {
+    let retries = 3;
+    let lastError: any;
+    
+    while (retries > 0) {
+      try {
+        // Wait for provider to be ready
+        await this.provider!.ready;
+        console.log('[ProviderService] Provider is ready');
+        
+        // Try to get network
+        const network = await this.provider!.getNetwork();
+        console.log('[ProviderService] Network detected:', network);
+        this.chainId = network.chainId;
+        
+        // Cache the network to avoid future calls
+        if (this.provider) {
+          this.provider._network = network;
+        }
+        
+        if (network.chainId !== expectedChainId) {
+          console.warn('[ProviderService] Network mismatch! Expected:', expectedChainId, 'Got:', network.chainId);
+        }
+        
+        return; // Success!
+      } catch (error) {
+        lastError = error;
+        retries--;
+        
+        if (retries > 0) {
+          console.warn(`[ProviderService] Network detection failed, retrying... (${retries} retries left)`);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+        }
+      }
+    }
+    
+    // All retries failed
+    console.error('[ProviderService] Failed to detect network after all retries:', lastError);
+    console.error('[ProviderService] RPC URL:', config.RPC_URL);
+    console.error('[ProviderService] Continuing with cached network configuration');
+    
+    // Set a default network to prevent further errors
+    this.chainId = expectedChainId;
   }
 
   /**

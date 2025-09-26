@@ -2,7 +2,8 @@
 import { Outlet } from "react-router-dom";
 import { LanguageProvider } from "./core/LanguageProvider";
 import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
-import { WagmiConfig } from "wagmi";
+import { WagmiConfig, configureChains } from "wagmi";
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import React from "react";
 import { bsc, bscTestnet, localhost } from "viem/chains";
 
@@ -36,6 +37,7 @@ function App() {
   };
 
   const chains = [monad, localhost];
+  
   const wagmiConfig = defaultWagmiConfig({
     chains,
     projectId,
@@ -44,6 +46,16 @@ function App() {
     autoConnect: true, // Auto-connect to last used wallet
     connectors: {
       // Configure connectors with specific options if needed
+    },
+    // Add error handling options
+    transports: {
+      [monad.id]: jsonRpcProvider({
+        rpc: () => ({ http: config.RPC_URL }),
+        pollingInterval: 30_000, // Reduce polling frequency
+      }),
+      [localhost.id]: jsonRpcProvider({
+        rpc: () => ({ http: 'http://localhost:8545' }),
+      }),
     },
   });
 

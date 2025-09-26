@@ -5,6 +5,7 @@ import "./index.css";
 import "./styles/windows-chrome-fixes.css";
 import App from "./App";
 import { createInterceptedFetch } from "./utils/rpcInterceptor";
+import "./utils/consoleFilter";
 
 // Enable RPC interceptor to track calls
 createInterceptedFetch();
