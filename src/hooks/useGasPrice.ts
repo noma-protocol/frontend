@@ -51,6 +51,7 @@ export const useGasPrice = (
   const isMountedRef = useRef(true);
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  console.warn(`Using RPC ${config.RPC_URL}`)
   const provider = new JsonRpcProvider(config.RPC_URL);
 
   const fetchGasPrice = async () => {

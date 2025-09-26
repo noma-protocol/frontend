@@ -216,6 +216,9 @@ const Exchange: React.FC = () => {
     const [globalTrades, setGlobalTrades] = useState([]);
     const [poolToTokenMap, setPoolToTokenMap] = useState<{ [poolAddress: string]: { symbol: string, token0: string, token1: string } }>({});
     
+    // Define WETH_ADDRESS early to avoid initialization errors
+    const WETH_ADDRESS = config.protocolAddresses.WMON;
+    
     // Hardcoded pool mappings as a fallback for global trades
     const KNOWN_POOLS = {
         '0x90666407c841fe58358f3ed04a245c5f5bd6fd0a': { symbol: 'BUN', token0: '', token1: '' },
@@ -2617,7 +2620,6 @@ const Exchange: React.FC = () => {
     }
 
 
-    const WETH_ADDRESS = config.protocolAddresses.WMON;
     const [wrapAmount, setWrapAmount] = useState(0);
     const [isWrapping, setIsWrapping] = useState(false);
     const [isUnwrapping, setIsUnwrapping] = useState(false);
