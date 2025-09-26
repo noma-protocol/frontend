@@ -1,5 +1,7 @@
 import config from '../config';
 
+// Use dedicated tokens API endpoint
+const TOKENS_API_URL = import.meta.env.VITE_TOKENS_API_URL || 'http://localhost:3004/api';
 const API_BASE_URL = import.meta.env.VITE_API_URL || config.API_URL;
 
 interface TokenData {
@@ -34,7 +36,7 @@ export const tokenApi = {
   // Save new token
   async saveToken(tokenData: TokenData): Promise<TokenResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/tokens`, {
+      const response = await fetch(`${TOKENS_API_URL}/tokens`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +60,7 @@ export const tokenApi = {
   async getTokens(options?: { includeAll?: boolean }): Promise<{ tokens: TokenResponse[] }> {
     try {
       const queryParams = options?.includeAll ? '?includeAll=true' : '';
-      const response = await fetch(`${API_BASE_URL}/tokens${queryParams}`);
+      const response = await fetch(`${TOKENS_API_URL}/tokens${queryParams}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -74,7 +76,7 @@ export const tokenApi = {
   // Get tokens by deployer address
   async getTokensByDeployer(address: string): Promise<{ tokens: TokenResponse[] }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/tokens/deployer/${address}`);
+      const response = await fetch(`${TOKENS_API_URL}/tokens/deployer/${address}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -95,7 +97,7 @@ export const tokenApi = {
     contractAddress?: string
   ): Promise<TokenResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/tokens/${tokenId}/status`, {
+      const response = await fetch(`${TOKENS_API_URL}/tokens/${tokenId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +120,7 @@ export const tokenApi = {
   // Get tokens by symbol
   async getTokensBySymbol(symbol: string): Promise<{ tokens: TokenResponse[] }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/tokens/by-symbol/${symbol}`);
+      const response = await fetch(`${TOKENS_API_URL}/tokens/by-symbol/${symbol}`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -143,7 +145,7 @@ export const tokenApi = {
     lastDeployment: string | null;
   }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/tokens/stats`);
+      const response = await fetch(`${TOKENS_API_URL}/tokens/stats`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -159,7 +161,7 @@ export const tokenApi = {
   // Export tokens
   async exportTokens(): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/tokens/export`);
+      const response = await fetch(`${TOKENS_API_URL}/tokens/export`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

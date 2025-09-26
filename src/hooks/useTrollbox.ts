@@ -41,7 +41,10 @@ interface UseTrollboxReturn {
 const AUTH_STORAGE_KEY = 'trollbox_auth';
 const AUTH_MESSAGE_PREFIX = 'Sign this message to authenticate with the Noma Trollbox\n\nTimestamp: ';
 
-export const useTrollbox = (wsUrl: string = 'wss://trollbox-ws.noma.money', autoConnect: boolean = false): UseTrollboxReturn => {
+// Use environment variable or default to local development server
+const TROLLBOX_WS_URL = import.meta.env.VITE_TROLLBOX_WS_URL || 'ws://localhost:8080';
+
+export const useTrollbox = (wsUrl: string = TROLLBOX_WS_URL, autoConnect: boolean = false): UseTrollboxReturn => {
   const { signMessageAsync } = useSignMessage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [connected, setConnected] = useState(false);

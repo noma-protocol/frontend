@@ -59,7 +59,7 @@ const TradeHistory: React.FC<TradeHistoryProps> = ({
     clearEvents
   } = useBlockchainWebSocketWagmi({
     autoConnect: true,
-    autoAuthenticate: true,
+    autoAuthenticate: false, // Don't auto-authenticate, let Exchange.tsx handle it
     pools: showRealtime ? poolsToSubscribe : []
   });
 

@@ -139,7 +139,7 @@ const TrollBox: React.FC = () => {
     reconnect,
     clearAuth,
     error 
-  } = useTrollbox(config.WS_URL, false);
+  } = useTrollbox(undefined, false); // Will use default TROLLBOX_WS_URL
   
   // Add authentication timeout
   useEffect(() => {

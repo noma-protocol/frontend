@@ -25,7 +25,10 @@ if (!window.__trollboxInitialized) {
   console.log('Global trollbox already initialized');
 }
 
-const connect = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Promise<void> => {
+// Use environment variable or default to local development server
+const TROLLBOX_WS_URL = import.meta.env.VITE_TROLLBOX_WS_URL || 'ws://localhost:8080';
+
+const connect = (wsUrl: string = TROLLBOX_WS_URL): Promise<void> => {
   // Rate limit connection attempts
   const now = Date.now();
   if (window.__trollboxLastConnectionAttempt && now - window.__trollboxLastConnectionAttempt < 1000) {
@@ -56,10 +59,11 @@ const connect = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Promise<void> 
         window.__trollboxWs.close();
       }
 
+      console.log(`[Trollbox] Attempting to connect to: ${wsUrl}`);
       window.__trollboxWs = new WebSocket(wsUrl);
       
       window.__trollboxWs.onopen = () => {
-        // console.log('WebSocket connected successfully');
+        console.log('[Trollbox] WebSocket connected successfully');
         window.__trollboxConnectionPromise = undefined;
         window.__trollboxConnecting = false;
         notifyListeners({ type: 'connected' });
@@ -76,23 +80,30 @@ const connect = (wsUrl: string = 'wss://trollbox-ws.noma.money'): Promise<void> 
       };
 
       window.__trollboxWs.onclose = (event) => {
-        console.log('WebSocket disconnected', { code: event.code, reason: event.reason });
+        console.log('[Trollbox] WebSocket disconnected', { code: event.code, reason: event.reason });
         window.__trollboxWs = undefined;
         window.__trollboxConnectionPromise = undefined;
         window.__trollboxConnecting = false;
         notifyListeners({ type: 'disconnected' });
         
-        // Only reconnect if it wasn't a normal closure
-        if (event.code !== 1000) {
+        // Only reconnect if it wasn't a normal closure and not a connection refused error
+        if (event.code !== 1000 && event.code !== 1006) {
+          console.log('[Trollbox] Will retry connection in 3 seconds...');
           setTimeout(() => connect(wsUrl), 3000);
+        } else if (event.code === 1006) {
+          console.warn('[Trollbox] Connection refused. Make sure the WebSocket server is running on', wsUrl);
+          // For connection refused, try again but with longer delay
+          setTimeout(() => connect(wsUrl), 30000); // 30 seconds
         }
       };
 
       window.__trollboxWs.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error('[Trollbox] WebSocket error:', error);
+        console.error('[Trollbox] Failed to connect to:', wsUrl);
+        console.error('[Trollbox] Make sure the WebSocket server is running on port 3001');
         window.__trollboxConnectionPromise = undefined;
         window.__trollboxConnecting = false;
-        notifyListeners({ type: 'error', message: 'Connection error' });
+        notifyListeners({ type: 'error', message: `Connection failed to ${wsUrl}` });
         reject(error);
       };
     } catch (err) {

@@ -56,6 +56,8 @@ class WebSocketService {
   private authPromiseReject: ((reason: any) => void) | null = null;
   private historyPromiseResolve: ((value: BlockchainEvent[]) => void) | null = null;
   private historyPromiseReject: ((reason: any) => void) | null = null;
+  private authInProgress = false;
+  private authPromise: Promise<boolean> | null = null;
 
   constructor(url?: string) {
     this.url = url || (import.meta.env.VITE_WSS_URL as string) || 'ws://localhost:8080';
@@ -83,6 +85,9 @@ class WebSocketService {
         this.ws.onclose = () => {
           console.log('WebSocket disconnected');
           this.authenticated = false;
+          // Clear authentication state
+          this.authInProgress = false;
+          this.authPromise = null;
           this.notifyConnectionCallbacks(false);
           this.attemptReconnect();
         };
@@ -121,6 +126,9 @@ class WebSocketService {
               this.authPromiseResolve = null;
               this.authPromiseReject = null;
             }
+            // Clear auth flags
+            this.authInProgress = false;
+            this.authPromise = null;
             // Re-subscribe to pools after authentication
             if (this.subscribedPools.size > 0) {
               this.subscribe(Array.from(this.subscribedPools));
@@ -132,6 +140,9 @@ class WebSocketService {
               this.authPromiseResolve = null;
               this.authPromiseReject = null;
             }
+            // Clear auth flags
+            this.authInProgress = false;
+            this.authPromise = null;
           }
         }
         break;
@@ -144,6 +155,9 @@ class WebSocketService {
           this.authPromiseResolve = null;
           this.authPromiseReject = null;
         }
+        // Clear auth flags
+        this.authInProgress = false;
+        this.authPromise = null;
         // Re-subscribe to pools after authentication
         if (this.subscribedPools.size > 0) {
           this.subscribe(Array.from(this.subscribedPools));
@@ -163,6 +177,9 @@ class WebSocketService {
           this.authPromiseReject(new Error(message.error));
           this.authPromiseResolve = null;
           this.authPromiseReject = null;
+          // Clear auth flags on auth error
+          this.authInProgress = false;
+          this.authPromise = null;
         }
         break;
 
@@ -210,11 +227,19 @@ class WebSocketService {
   }
 
   async authenticate(address: string, signer: ethers.Signer): Promise<boolean> {
+    // Check if authentication is already in progress
+    if (this.authInProgress && this.authPromise) {
+      console.log('[WebSocketService] Authentication already in progress, returning existing promise');
+      return this.authPromise;
+    }
+
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       await this.connect();
     }
 
-    return new Promise((resolve, reject) => {
+    // Mark authentication as in progress and create the promise
+    this.authInProgress = true;
+    this.authPromise = new Promise((resolve, reject) => {
       this.authPromiseResolve = resolve;
       this.authPromiseReject = reject;
 
@@ -239,6 +264,8 @@ class WebSocketService {
         reject(error);
         this.authPromiseResolve = null;
         this.authPromiseReject = null;
+        this.authInProgress = false;
+        this.authPromise = null;
       });
 
       // Timeout after 30 seconds
@@ -247,13 +274,23 @@ class WebSocketService {
           this.authPromiseReject(new Error('Authentication timeout'));
           this.authPromiseResolve = null;
           this.authPromiseReject = null;
+          this.authInProgress = false;
+          this.authPromise = null;
         }
       }, 30000);
     });
+
+    return this.authPromise;
   }
 
   // Alternative authentication method using window.ethereum directly
   async authenticateWithWindowEthereum(address: string): Promise<boolean> {
+    // Check if authentication is already in progress
+    if (this.authInProgress && this.authPromise) {
+      console.log('[WebSocketService] Authentication already in progress, returning existing promise');
+      return this.authPromise;
+    }
+
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       await this.connect();
     }
@@ -262,7 +299,9 @@ class WebSocketService {
       throw new Error('No ethereum provider found');
     }
 
-    return new Promise((resolve, reject) => {
+    // Mark authentication as in progress and create the promise
+    this.authInProgress = true;
+    this.authPromise = new Promise((resolve, reject) => {
       this.authPromiseResolve = resolve;
       this.authPromiseReject = reject;
 
@@ -290,6 +329,8 @@ class WebSocketService {
         reject(error);
         this.authPromiseResolve = null;
         this.authPromiseReject = null;
+        this.authInProgress = false;
+        this.authPromise = null;
       });
 
       // Timeout after 30 seconds
@@ -298,9 +339,13 @@ class WebSocketService {
           this.authPromiseReject(new Error('Authentication timeout'));
           this.authPromiseResolve = null;
           this.authPromiseReject = null;
+          this.authInProgress = false;
+          this.authPromise = null;
         }
       }, 30000);
     });
+
+    return this.authPromise;
   }
 
   subscribe(pools: string[]): void {

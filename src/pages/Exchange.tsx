@@ -629,6 +629,8 @@ const Exchange: React.FC = () => {
     const subscribedPoolRef = useRef<string | null>(null);
     // Track if localStorage has been loaded for the current pool
     const localStorageLoadedRef = useRef<string | null>(null);
+    // Track if authentication is in progress to prevent loops
+    const authInProgressRef = useRef(false);
     
     // Load trade history from local storage when pool changes
     useEffect(() => {
@@ -1116,7 +1118,8 @@ const Exchange: React.FC = () => {
             wsAuthenticated,
             walletConnected: isConnected,
             address: address || 'no address',
-            wsError
+            wsError,
+            authInProgress: authInProgressRef.current
         });
         
         if (!wsConnected) {
@@ -1126,6 +1129,7 @@ const Exchange: React.FC = () => {
         
         if (wsAuthenticated) {
             console.log('[Exchange] Already authenticated');
+            authInProgressRef.current = false; // Reset flag
             return;
         }
         
@@ -1134,7 +1138,14 @@ const Exchange: React.FC = () => {
             return;
         }
         
+        // Prevent multiple authentication attempts
+        if (authInProgressRef.current) {
+            console.log('[Exchange] Authentication already in progress, skipping...');
+            return;
+        }
+        
         console.log('[Exchange] All conditions met, authenticating WebSocket...');
+        authInProgressRef.current = true;
         
         // Add retry logic for authentication
         let retries = 0;
@@ -1145,12 +1156,15 @@ const Exchange: React.FC = () => {
                 const success = await wsAuthenticate();
                 if (success) {
                     console.log('[Exchange] WebSocket authenticated successfully');
+                    authInProgressRef.current = false;
                 } else {
                     console.error('[Exchange] WebSocket authentication failed');
                     if (retries < maxRetries) {
                         retries++;
                         console.log(`[Exchange] Retrying authentication (${retries}/${maxRetries})...`);
                         setTimeout(attemptAuth, 2000); // Wait 2 seconds before retry
+                    } else {
+                        authInProgressRef.current = false; // Reset after max retries
                     }
                 }
             } catch (err) {
@@ -1159,6 +1173,8 @@ const Exchange: React.FC = () => {
                     retries++;
                     console.log(`[Exchange] Connector not ready, retrying (${retries}/${maxRetries})...`);
                     setTimeout(attemptAuth, 2000); // Wait 2 seconds before retry
+                } else if (retries >= maxRetries) {
+                    authInProgressRef.current = false; // Reset after max retries
                 }
             }
         };
