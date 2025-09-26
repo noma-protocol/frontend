@@ -3,6 +3,28 @@ import config from '../config';
 
 const { JsonRpcProvider } = ethers.providers;
 
+// Test RPC connection on load
+if (config.RPC_URL) {
+  console.log('[ProviderService] Testing RPC connection to:', config.RPC_URL);
+  fetch(config.RPC_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'eth_chainId',
+      params: [],
+      id: 1
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log('[ProviderService] RPC test successful, chainId:', data.result);
+  })
+  .catch(error => {
+    console.error('[ProviderService] RPC test failed:', error);
+  });
+}
+
 /**
  * Singleton provider service to prevent multiple provider instances
  * Each provider instance makes eth_chainId calls, so we need to reuse a single instance
@@ -12,6 +34,7 @@ class ProviderService {
   private provider: ethers.providers.JsonRpcProvider | null = null;
   private chainId: number | null = null;
   private chainIdPromise: Promise<number> | null = null;
+  private providerReadyPromise: Promise<void> | null = null;
 
   private constructor() {}
 
@@ -25,30 +48,42 @@ class ProviderService {
   getProvider(): ethers.providers.JsonRpcProvider {
     if (!this.provider) {
       console.log('[ProviderService] Creating singleton provider instance with RPC:', config.RPC_URL);
-      this.provider = new JsonRpcProvider(config.RPC_URL);
       
-      // Pre-cache the network info to reduce initial eth_chainId calls
-      // But allow it to be overridden by actual network detection
-      const expectedChainId = config.chain === "local" ? 1337 : 10143;
-      this.provider._network = {
-        chainId: expectedChainId,
-        name: config.chain === "local" ? "localhost" : "monad"
-      };
-      
-      // Verify network connection asynchronously
-      this.provider.ready.then(() => {
-        console.log('[ProviderService] Provider is ready');
-        return this.provider.getNetwork();
-      }).then(network => {
-        console.log('[ProviderService] Network detected:', network);
-        this.chainId = network.chainId;
-        if (network.chainId !== expectedChainId) {
-          console.warn('[ProviderService] Network mismatch! Expected:', expectedChainId, 'Got:', network.chainId);
-        }
-      }).catch(error => {
-        console.error('[ProviderService] Failed to detect network:', error);
-        console.error('[ProviderService] This may cause issues with contract calls');
-      });
+      try {
+        // Create provider with connection info
+        this.provider = new JsonRpcProvider({
+          url: config.RPC_URL,
+          timeout: 30000, // 30 second timeout
+        });
+        
+        const expectedChainId = config.chain === "local" ? 1337 : 10143;
+        
+        // Track ready state
+        this.providerReadyPromise = this.provider.ready.then(() => {
+          console.log('[ProviderService] Provider is ready');
+          return this.provider!.getNetwork();
+        }).then(network => {
+          console.log('[ProviderService] Network detected:', network);
+          this.chainId = network.chainId;
+          
+          // Cache the network to avoid future calls
+          if (this.provider) {
+            this.provider._network = network;
+          }
+          
+          if (network.chainId !== expectedChainId) {
+            console.warn('[ProviderService] Network mismatch! Expected:', expectedChainId, 'Got:', network.chainId);
+          }
+        }).catch(error => {
+          console.error('[ProviderService] Failed to detect network:', error);
+          console.error('[ProviderService] This may cause issues with contract calls');
+          console.error('[ProviderService] RPC URL:', config.RPC_URL);
+          throw error; // Re-throw to handle in calling code
+        });
+      } catch (error) {
+        console.error('[ProviderService] Failed to create provider:', error);
+        throw error;
+      }
     }
     return this.provider;
   }
@@ -87,7 +122,11 @@ class ProviderService {
    */
   async getReadyProvider(): Promise<ethers.providers.JsonRpcProvider> {
     const provider = this.getProvider();
-    await provider.ready;
+    if (this.providerReadyPromise) {
+      await this.providerReadyPromise;
+    } else {
+      await provider.ready;
+    }
     return provider;
   }
 
