@@ -7,7 +7,7 @@ const presaleContractAddress = "0x99b32151E3C0c8432c4c6C9b6F3213123e443F06";
 
 // API URL configuration based on environment
 const API_URL = environment === 'dev' 
-    ? 'http://localhost:9091/api' 
+    ? 'http://localhost:3004/api' 
     : 'https://trollbox.noma.money/api';
 
 // WebSocket URL configuration based on environment
