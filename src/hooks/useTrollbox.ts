@@ -99,8 +99,6 @@ export const useTrollbox = (wsUrl: string = TROLLBOX_WS_URL, autoConnect: boolea
           setUsername(data.username);
           setCanChangeUsername(data.canChangeUsername);
           setCooldownRemaining(data.cooldownRemaining);
-          setError('Authentication successful!');
-          setTimeout(() => setError(null), 3000);
           
           // Store auth in localStorage if not from cache
           if (!data.fromCache && data.address) {
@@ -294,7 +292,6 @@ export const useTrollbox = (wsUrl: string = TROLLBOX_WS_URL, autoConnect: boolea
           
           // Check if cached auth is still valid (24 hours)
           if (cachedAuth && Date.now() - cachedAuth.timestamp < 24 * 60 * 60 * 1000) {
-            setError('Checking cached authentication...');
             // Try to use cached auth first
             const success = globalTrollbox.sendMessage({
               type: 'checkAuth',
@@ -302,8 +299,6 @@ export const useTrollbox = (wsUrl: string = TROLLBOX_WS_URL, autoConnect: boolea
             });
             
             if (success) {
-              // Clear error after short delay to show the message
-              setTimeout(() => setError(null), 1000);
               return; // Wait for server response
             }
           }
@@ -315,13 +310,11 @@ export const useTrollbox = (wsUrl: string = TROLLBOX_WS_URL, autoConnect: boolea
       // Generate auth message with timestamp
       const timestamp = Date.now();
       const message = AUTH_MESSAGE_PREFIX + timestamp;
-      setError('Please sign the message in your wallet...');
       
       // Request signature from wallet with retry for mobile
       let signature;
       try {
         signature = await signMessageAsync({ message });
-        setError('Signature received, authenticating...');
       } catch (signError: any) {
         console.error('Sign message error:', signError);
         
@@ -364,9 +357,6 @@ export const useTrollbox = (wsUrl: string = TROLLBOX_WS_URL, autoConnect: boolea
         setError('Failed to authenticate with server');
         throw new Error('Failed to authenticate with server');
       }
-      
-      // Don't show success here - wait for server response
-      setError('Waiting for server confirmation...');
     } catch (error) {
       console.error('Authentication error:', error);
       setError('Failed to sign authentication message');
