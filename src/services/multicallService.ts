@@ -1,7 +1,5 @@
 import { ethers } from 'ethers';
-import config from '../config';
-
-const { JsonRpcProvider } = ethers.providers;
+import { getProvider } from './providerService';
 
 // Multicall3 ABI - only the functions we need
 const MULTICALL3_ABI = [
@@ -87,7 +85,7 @@ class MulticallService {
   private readonly BATCH_DELAY = 10; // ms to wait before executing batch
 
   constructor() {
-    this.provider = new JsonRpcProvider(config.RPC_URL);
+    this.provider = getProvider();
     this.multicallContract = new ethers.Contract(MULTICALL3_ADDRESS, MULTICALL3_ABI, this.provider);
   }
 

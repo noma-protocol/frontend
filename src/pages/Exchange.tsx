@@ -188,20 +188,10 @@ const modelHelperAddress = getContractAddress(
 );
 
 // Provider setup
-console.log('[Provider] Setting up provider with RPC_URL:', config.chain == "local" ? "http://localhost:8545" : config.RPC_URL);
-console.log('[Provider] Config:', { chain: config.chain, RPC_URL: config.RPC_URL, environment: config.environment });
-const localProvider = new providers.JsonRpcProvider(
-    config.chain == "local" ? "http://localhost:8545" : "https://rpc.ankr.com/monad_testnet" //config.RPC_URL || "https://testnet-rpc.monad.xyz"
-);
+// Use singleton provider to prevent multiple instances and reduce eth_chainId calls
+import { localProvider } from '../services/providerService';
 
-console.log({localProvider})
-
-// Test provider connection - Temporarily disabled
-localProvider.getNetwork().then(network => {
-    console.log('[Provider] Connected to network:', network);
-}).catch(error => {
-    console.error('[Provider] Failed to connect to network:', error);
-});
+console.log('[Provider] Using singleton provider instance');
 
 const Exchange: React.FC = () => {
     const { address, isConnected } = useAccount();

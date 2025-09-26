@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ethers } from 'ethers';
-import config from '../config';
-
-const { JsonRpcProvider } = ethers.providers;
+import { getProvider } from '../services/providerService';
 
 interface GasPriceData {
   gasPrice: ethers.BigNumber;
@@ -51,8 +49,7 @@ export const useGasPrice = (
   const isMountedRef = useRef(true);
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  console.warn(`Using RPC ${config.RPC_URL}`)
-  const provider = new JsonRpcProvider(config.RPC_URL);
+  const provider = getProvider();
 
   const fetchGasPrice = async () => {
     try {
