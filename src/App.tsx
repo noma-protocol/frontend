@@ -10,7 +10,7 @@ import { monad } from './chains/monad';
 import config from './config'; 
 
 // import { ToastContainer } from "react-toastify";
-import { switchNetwork, watchNetwork } from "wagmi/actions";
+// Removed unused imports that caused excessive eth_chainId calls
 import "react-toastify/dist/ReactToastify.css";
 import { MenuProvider } from "./hooks/MenuContext"; // Import the MenuProvider
 import { TokenProvider } from "./contexts/TokenContext"; // Import the TokenProvider
@@ -44,15 +44,8 @@ function App() {
 
   createWeb3Modal({ wagmiConfig, projectId, chains });
 
-  watchNetwork(async (network) => {
-    console.log("Network changed:", network.chain?.name);
-    if (network.chain?.name != "local") {
-      await switchNetwork({
-        chainId: config.chain == "local" ? 1337 : 10143,
-      });
-    }
-    console.log(`Network is ${network.chain?.name}`)
-  });
+  // Removed watchNetwork - it causes excessive eth_chainId calls
+  // Wagmi already handles network state internally
 
   return (
     <WagmiConfig config={wagmiConfig}>
