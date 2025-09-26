@@ -7,6 +7,7 @@ const { JsonRpcProvider } = ethers.providers;
 const MULTICALL3_ABI = [
   {
     inputs: [
+      { name: 'requireSuccess', type: 'bool' },
       {
         components: [
           { name: 'target', type: 'address' },
@@ -16,10 +17,16 @@ const MULTICALL3_ABI = [
         type: 'tuple[]',
       },
     ],
-    name: 'aggregate',
+    name: 'tryAggregate',
     outputs: [
-      { name: 'blockNumber', type: 'uint256' },
-      { name: 'returnData', type: 'bytes[]' },
+      {
+        components: [
+          { name: 'success', type: 'bool' },
+          { name: 'returnData', type: 'bytes' },
+        ],
+        name: 'returnData',
+        type: 'tuple[]',
+      },
     ],
     stateMutability: 'payable',
     type: 'function',
@@ -36,8 +43,10 @@ const MULTICALL3_ABI = [
         type: 'tuple[]',
       },
     ],
-    name: 'tryAggregate',
+    name: 'tryBlockAndAggregate',
     outputs: [
+      { name: 'blockNumber', type: 'uint256' },
+      { name: 'blockHash', type: 'bytes32' },
       {
         components: [
           { name: 'success', type: 'bool' },
@@ -146,11 +155,14 @@ class MulticallService {
     try {
       const formattedCalls = calls.map((call) => ({
         target: call.target,
-        allowFailure: call.allowFailure !== false,
         callData: call.callData,
       }));
 
-      const results = await this.multicallContract.tryAggregate(formattedCalls);
+      // Use callStatic to ensure this is a read call, not a transaction
+      const results = await this.multicallContract.callStatic.tryAggregate(
+        false, // requireSuccess = false to allow individual calls to fail
+        formattedCalls
+      );
       return results;
     } catch (error) {
       console.error('Multicall failed:', error);

@@ -5443,18 +5443,23 @@ const Exchange: React.FC = () => {
                                 </Box>
                                 <Box>
                                     <VStack align="end" spacing={0}>
+                                        <Box>
+                                        {!gasLoading && gasPriceGwei && (
+                                            <Text color="#888" fontSize="xs">
+                                                {parseFloat(gasPriceGwei).toFixed(4)} Gwei
+                                            </Text>
+                                        )}                                            
+                                        </Box>
+                                        <Box>
                                         <Text color="white" fontSize="sm">
                                             {gasLoading ? (
                                                 <Spinner size="xs" color="#4ade80" />
                                             ) : (
                                                 `~$${estimatedFeeUsd}`
                                             )}
-                                        </Text>
-                                        {!gasLoading && gasPriceGwei && (
-                                            <Text color="#888" fontSize="xs">
-                                                {parseFloat(gasPriceGwei).toFixed(4)} Gwei
-                                            </Text>
-                                        )}
+                                        </Text>                                            
+                                        </Box>
+
                                     </VStack>
                                 </Box>
                             </Flex>                                
