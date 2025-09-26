@@ -142,6 +142,7 @@ import addressesMonad from "../assets/deployment.json";
 import { FaArrowTrendUp, FaArrowTrendDown } from "react-icons/fa6";
 import { useMonPrice } from '../contexts/MonPriceContext';
 import { useGasPrice } from '../hooks/useGasPrice';
+import { useMulticallBalances } from '../hooks/useMulticallBalances';
 
 const addresses = config.chain == "local"
   ? addressesLocal
@@ -426,11 +427,22 @@ const Exchange: React.FC = () => {
     
     // Exchange-related states
     const [isLoading, setIsLoading] = useState(false);
-    const [ethBalance, setEthBalance] = useState("0");
-    const [tokenBalance, setTokenBalance] = useState("0");
-    const [wethBalance, setWethBalance] = useState("0");
     const [useWeth, setUseWeth] = useState(false);
     const [useMax, setUseMax] = useState(false);
+    
+    // Use multicall for balance fetching
+    const { balances, refetch: refetchBalances } = useMulticallBalances({
+        userAddress: address,
+        wethAddress: WETH_ADDRESS,
+        tokenAddress: selectedToken?.token0,
+        refetchInterval: 30000, // 30 seconds
+        enabled: !!address && (!isWrapDrawerOpen && !isUnwrapDrawerOpen), // Disable during modal operations
+    });
+    
+    // Extract balances for backward compatibility
+    const ethBalance = balances.eth;
+    const wethBalance = balances.weth;
+    const tokenBalance = balances.token;
     const [approveMax, setApproveMax] = useState(() => {
         // Load approveMax preference from localStorage
         const stored = localStorage.getItem('noma_approve_max');
@@ -3181,81 +3193,7 @@ const Exchange: React.FC = () => {
         return Number(duration) / 86400;
     }
 
-    // Fetch balances
-    useEffect(() => {
-        const fetchBalances = async () => {
-            if (!address) return;
-            
-            try {
-                // Fetch ETH balance
-                const ethBal = await localProvider.getBalance(address);
-                if (ethBal && ethBal._isBigNumber) {
-                    setEthBalance(formatEther(ethBal));
-                } else {
-                    setEthBalance("0");
-                }
-                
-                // Fetch WETH balance
-                try {
-                    // console.log("Fetching WMON balance from address:", WETH_ADDRESS, "for wallet:", address);
-                    const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
-                    const wethBal = await wethContract.balanceOf(address);
-                    // console.log("Raw WMON balance:", wethBal?.toString());
-                    if (wethBal && wethBal._isBigNumber) {
-                        const formattedWethBalance = formatEther(wethBal);
-                        // console.log("Formatted WMON balance:", formattedWethBalance);
-                        setWethBalance(formattedWethBalance);
-                    } else {
-                        // console.log("Invalid WMON balance format, setting to 0");
-                        setWethBalance("0");
-                    }
-                } catch (wethError) {
-                    // console.error("Error fetching WETH balance:", wethError);
-                    setWethBalance("0");
-                }
-                
-                // Fetch selected token balance if available
-                if (selectedToken && selectedToken.token0) {
-                    try {
-                        // console.log("Fetching balance for token:", selectedToken.symbol, "at address:", selectedToken.token0);
-                        const tokenContract = new ethers.Contract(selectedToken.token0, ERC20Abi, localProvider);
-                        const tokenBal = await tokenContract.balanceOf(address);
-                        // console.log("Raw token balance:", tokenBal.toString());
-                        
-                        // Ensure we have a valid BigNumber before formatting
-                        if (tokenBal && tokenBal._isBigNumber) {
-                            const formattedBalance = formatEther(tokenBal);
-                            // console.log("Formatted token balance:", formattedBalance);
-                            setTokenBalance(formattedBalance);
-                        } else {
-                            // console.log("Invalid balance format, setting to 0");
-                            setTokenBalance("0");
-                        }
-                    } catch (tokenError) {
-                        // console.error("Error fetching token balance:", tokenError);
-                        setTokenBalance("0");
-                    }
-                } else {
-                    setTokenBalance("0");
-                }
-            } catch (error) {
-                console.error("Error fetching balances:", error);
-            }
-        };
-        
-        fetchBalances();
-        // Only set up interval if modals are not open
-        let interval: NodeJS.Timeout | null = null;
-        if (!isWrapDrawerOpen && !isUnwrapDrawerOpen) {
-            interval = setInterval(() => {
-                fetchBalances();
-            }, 30000); // Refresh every 30 seconds (reduced from 10s)
-        }
-        
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [address, selectedToken, isWrapDrawerOpen, isUnwrapDrawerOpen]);
+    // Balance fetching is now handled by useMulticallBalances hook above
     
     // Build swap path for quotes
     const [swapPath, setSwapPath] = useState("");
@@ -3397,11 +3335,8 @@ const Exchange: React.FC = () => {
             });
             // Refresh balances after 2 seconds
             setTimeout(async () => {
-                const ethBal = await localProvider.getBalance(address);
-                setEthBalance(formatEther(ethBal));
-                const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
-                const wethBal = await wethContract.balanceOf(address);
-                setWethBalance(formatEther(wethBal));
+                // Refetch all balances using multicall
+                await refetchBalances();
                 
                 // Reset states after balance update to keep drawer open longer
                 setIsWrapping(false);
@@ -3433,11 +3368,8 @@ const Exchange: React.FC = () => {
             });
             // Refresh balances after 2 seconds
             setTimeout(async () => {
-                const ethBal = await localProvider.getBalance(address);
-                setEthBalance(formatEther(ethBal));
-                const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
-                const wethBal = await wethContract.balanceOf(address);
-                setWethBalance(formatEther(wethBal));
+                // Refetch all balances using multicall
+                await refetchBalances();
                 
                 // Reset states after balance update to keep drawer open longer
                 setIsUnwrapping(false);
