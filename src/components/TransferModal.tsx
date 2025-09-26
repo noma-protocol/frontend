@@ -27,6 +27,8 @@ import { FaWallet, FaPaperPlane } from 'react-icons/fa';
 import { toaster } from "./ui/toaster";
 import { isMobile } from 'react-device-detect';
 import ERC20_ABI from '../assets/ERC20.json';
+import { useGasPrice } from '../hooks/useGasPrice';
+import { useMonPrice } from '../contexts/MonPriceContext';
 
 interface TransferModalProps {
   isOpen: boolean;
@@ -46,6 +48,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
   tokenLogo
 }) => {
   const { address } = useAccount();
+  const { monPrice } = useMonPrice();
   const [recipientAddress, setRecipientAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [isValidAddress, setIsValidAddress] = useState(true);
@@ -57,6 +60,14 @@ const TransferModal: React.FC<TransferModalProps> = ({
     name: '',
     balance: '0'
   });
+  
+  // Gas price hook for real-time network fees
+  const { 
+    estimatedFeeEth, 
+    estimatedFeeUsd, 
+    isLoading: gasLoading,
+    gasPriceGwei 
+  } = useGasPrice('tokenTransfer', monPrice);
 
   // Get ETH balance
   const { data: ethBalance } = useBalance({
@@ -341,9 +352,18 @@ const TransferModal: React.FC<TransferModalProps> = ({
             <Box w="100%" p={3} bg="#0a0a0a" borderRadius="lg" border="1px solid #2a2a2a">
               <HStack justify="space-between">
                 <Text color="#888" fontSize="sm">Network Fee</Text>
-                <HStack>
-                  <Text color="white" fontSize="sm">~{ethBalance ? ethers.utils.formatEther(ethBalance.value).slice(0, 8) : '0'} ETH</Text>
-                </HStack>
+                <VStack align="end" spacing={0}>
+                  <Text color="white" fontSize="sm">
+                    {gasLoading ? (
+                      <Spinner size="xs" color="#4ade80" />
+                    ) : (
+                      <>~{parseFloat(estimatedFeeEth).toFixed(6)} MON</>
+                    )}
+                  </Text>
+                  {!gasLoading && monPrice > 0 && (
+                    <Text color="#888" fontSize="xs">~${estimatedFeeUsd}</Text>
+                  )}
+                </VStack>
               </HStack>
             </Box>
           </VStack>

@@ -141,6 +141,7 @@ import addressesLocal   from "../assets/deployment.json";
 import addressesMonad from "../assets/deployment.json";
 import { FaArrowTrendUp, FaArrowTrendDown } from "react-icons/fa6";
 import { useMonPrice } from '../contexts/MonPriceContext';
+import { useGasPrice } from '../hooks/useGasPrice';
 
 const addresses = config.chain == "local"
   ? addressesLocal
@@ -262,6 +263,14 @@ const Exchange: React.FC = () => {
         selectedToken?.token1 || config.protocolAddresses.WMON,
         exchangeHelperAddress
     );
+    
+    // Gas price hook for real-time network fees
+    const { 
+        estimatedFeeEth, 
+        estimatedFeeUsd, 
+        isLoading: gasLoading,
+        gasPriceGwei 
+    } = useGasPrice('swap', monPrice);
     
     // Input validation function
     const validateAndSetTradeAmount = (value) => {
@@ -3539,10 +3548,12 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
+            
             const msg = error.message.toString().indexOf("fb8f41b2") > -1 ? "Insufficient allowance" :
                         error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
                         error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+                        error.message.toString().indexOf("NoTokensExchanged()") > -1 ? "Not yet available for trading." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -3641,6 +3652,7 @@ const Exchange: React.FC = () => {
                         error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
                         error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
+                        error.message.toString().indexOf("NoTokensExchanged()") > -1 ? "Not yet available for trading." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -3740,6 +3752,7 @@ const Exchange: React.FC = () => {
                         error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("0xe450d38c") > -1 ? "Not enough balance" :
                         error.message.toString().indexOf("Amount must be greater than 0") > -1 ? "Invalid amount" :
+                        error.message.toString().indexOf("NoTokensExchanged()") > -1 ? "Not yet available for trading." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
@@ -5493,7 +5506,13 @@ const Exchange: React.FC = () => {
                                     <Text color="#888" fontSize="sm">Network Fee</Text>
                                 </Box>
                                 <Box>
-                                    <Text color="white" fontSize="sm">~$0.12</Text>
+                                    <Text color="white" fontSize="sm">
+                                        {gasLoading ? (
+                                            <Spinner size="xs" color="#4ade80" />
+                                        ) : (
+                                            `~$${estimatedFeeUsd}`
+                                        )}
+                                    </Text>
                                 </Box>
                             </Flex>                                
                             </Box>
