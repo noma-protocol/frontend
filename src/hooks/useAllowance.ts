@@ -38,18 +38,16 @@ export const useAllowance = (
                 // Use the pre-imported ABI
                 const ERC20Abi = await ERC20AbiPromise;
 
-                // Temporarily disabled RPC call
-                // const allowanceResult = await publicClient.readContract({
-                //     address: tokenAddress as `0x${string}`,
-                //     abi: ERC20Abi,
-                //     functionName: 'allowance',
-                //     args: [address, spenderAddress]
-                // });
+                // Re-enable RPC call for allowance checking
+                const allowanceResult = await publicClient.readContract({
+                    address: tokenAddress as `0x${string}`,
+                    abi: ERC20Abi,
+                    functionName: 'allowance',
+                    args: [address, spenderAddress]
+                });
 
-                // setAllowance(allowanceResult as bigint);
-                // Return max allowance to avoid approval issues
-                setAllowance(ethers.constants.MaxUint256.toBigInt());
-                // console.log(`Allowance for ${tokenAddress} to ${spenderAddress}:`, allowanceResult.toString());
+                setAllowance(allowanceResult as bigint);
+                console.log(`Allowance for ${tokenAddress} to ${spenderAddress}:`, allowanceResult.toString());
             } catch (err) {
                 console.error('Error fetching allowance:', err);
                 setError(err as Error);

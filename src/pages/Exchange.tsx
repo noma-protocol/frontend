@@ -213,6 +213,13 @@ const Exchange: React.FC = () => {
     const [tradeHistoryTab, setTradeHistoryTab] = useState("global");
     const [globalTrades, setGlobalTrades] = useState([]);
     const [poolToTokenMap, setPoolToTokenMap] = useState<{ [poolAddress: string]: { symbol: string, token0: string, token1: string } }>({});
+    
+    // Hardcoded pool mappings as a fallback for global trades
+    const KNOWN_POOLS = {
+        '0x90666407c841fe58358f3ed04a245c5f5bd6fd0a': { symbol: 'BUN', token0: '', token1: '' },
+        '0xcacab5abdc478c6a05ac59125865b2658df982ca': { symbol: 'SBF', token0: '', token1: '' },
+        // Add more pools as needed
+    };
     const [totalVolume, setTotalVolume] = useState(0);
     // Parse referral code from URL
     const [searchParams] = useSearchParams();
@@ -1568,6 +1575,96 @@ const Exchange: React.FC = () => {
         setLastProcessedEventIndex(wsEvents.length);
     }, [wsEvents, selectedToken, poolInfo, setSelectedToken, setTokens, setChartUpdateTrigger, lastProcessedEventIndex]);
     
+    // Subscribe to all pools when viewing global trades
+    useEffect(() => {
+        if (tradeHistoryTab === 'global' && wsAuthenticated && Object.keys(poolToTokenMap).length > 0) {
+            // Subscribe to all known pools for global trades
+            const allPools = Object.keys(poolToTokenMap);
+            if (allPools.length > 0) {
+                console.log('[Exchange] Subscribing to all pools for global trades:', allPools);
+                wsSubscribe(allPools);
+            }
+        }
+    }, [tradeHistoryTab, wsAuthenticated, poolToTokenMap, wsSubscribe]);
+
+    // Update global trades with new WebSocket events
+    useEffect(() => {
+        if (tradeHistoryTab === 'global' && wsEvents.length > 0 && Object.keys(poolToTokenMap).length > 0) {
+            // Process all WebSocket events and add them to global trades
+            const newGlobalTrades = wsEvents.map((event, index) => {
+                const poolAddress = (event.poolAddress || '').toLowerCase();
+                const tokenInfo = poolToTokenMap[poolAddress];
+                
+                // Try to get token symbol
+                let tokenSymbol = tokenInfo?.symbol || KNOWN_POOLS[poolAddress]?.symbol || 'UNKNOWN';
+                
+                // Debug log the event structure
+                if (index < 2) {
+                    console.log('[Exchange] Real-time WebSocket event:', {
+                        event,
+                        amount0: event.args?.amount0,
+                        amount0AsString: event.args?.amount0?.toString(),
+                        tradeInfo: event.tradeInfo
+                    });
+                }
+                
+                // Parse amounts
+                const tokenAmount = Math.abs(parseFloat(ethers.utils.formatEther(event.args?.amount0 || '0')));
+                const ethAmount = Math.abs(parseFloat(ethers.utils.formatEther(event.args?.amount1 || '0')));
+                const price = tokenAmount > 0 ? ethAmount / tokenAmount : 0;
+                
+                // Determine trade type
+                // For token0: If amount0 < 0, tokens are leaving the pool (someone is buying token0)
+                // For token0: If amount0 > 0, tokens are entering the pool (someone is selling token0)
+                // We assume the traded token is always token0 for simplicity in global view
+                const amount0Raw = event.args?.amount0 || '0';
+                const amount0 = BigInt(amount0Raw);
+                
+                // Always determine from amounts, don't trust tradeInfo.type
+                // The actual behavior seems to be opposite of the spec
+                // When someone BUYS: amount0 < 0 (tokens leave the pool)
+                // When someone SELLS: amount0 > 0 (tokens enter the pool)
+                const tradeType = amount0 < 0n ? "buy" : "sell";
+                
+                // Debug: Check if tradeInfo.type matches our determination
+                if (event.tradeInfo?.type && event.tradeInfo.type !== tradeType) {
+                    console.log('[Exchange] Trade type mismatch:', {
+                        calculatedType: tradeType,
+                        tradeInfoType: event.tradeInfo.type,
+                        amount0: amount0.toString(),
+                        txHash: event.transactionHash
+                    });
+                }
+                
+                return {
+                    id: `${event.transactionHash}-${index}`,
+                    type: tradeType,
+                    token: tokenSymbol,
+                    amount: tokenAmount,
+                    price: price,
+                    total: ethAmount,
+                    time: new Date(event.timestamp),
+                    txHash: `${event.transactionHash.slice(0, 6)}...${event.transactionHash.slice(-4)}`,
+                    fullTxHash: event.transactionHash,
+                    sender: event.actualSender || event.tradeInfo?.sender || event.args?.sender,
+                    recipient: event.actualRecipient || event.tradeInfo?.recipient || event.args?.recipient,
+                    poolAddress: event.poolAddress
+                };
+            });
+            
+            // Combine with existing global trades and sort by time
+            setGlobalTrades(prev => {
+                const combined = [...newGlobalTrades, ...prev];
+                // Remove duplicates based on transaction hash
+                const unique = combined.filter((trade, index, self) =>
+                    index === self.findIndex(t => t.fullTxHash === trade.fullTxHash)
+                );
+                // Sort by time descending and keep only the latest 50
+                return unique.sort((a, b) => b.time - a.time).slice(0, 50);
+            });
+        }
+    }, [wsEvents, tradeHistoryTab, poolToTokenMap]);
+
     // Fetch global trades when tab switches to global
     useEffect(() => {
         const fetchGlobalTrades = async () => {
@@ -1590,6 +1687,8 @@ const Exchange: React.FC = () => {
                         let tokenSymbol = 'UNKNOWN';
                         if (tokenInfo) {
                             tokenSymbol = tokenInfo.symbol;
+                        } else if (KNOWN_POOLS[poolAddress]) {
+                            tokenSymbol = KNOWN_POOLS[poolAddress].symbol;
                         } else if (trade.tokenSymbol) {
                             // If trade includes token symbol directly
                             tokenSymbol = trade.tokenSymbol;
@@ -1599,11 +1698,15 @@ const Exchange: React.FC = () => {
                         }
                         
                         // Debug logging only for unknown tokens
-                        if (!tokenInfo && index < 3) {
+                        if (!tokenInfo && !KNOWN_POOLS[poolAddress]) {
                             console.log('[Exchange] Unknown pool in global trades:', {
                                 poolAddress,
                                 tokenSymbol,
-                                tradeData: trade
+                                tradeData: trade,
+                                hasTokenSymbol: !!trade.tokenSymbol,
+                                hasToken0Symbol: !!trade.token0Symbol,
+                                hasToken1Symbol: !!trade.token1Symbol,
+                                tradeInfoKeys: trade.tradeInfo ? Object.keys(trade.tradeInfo) : []
                             });
                         }
                         
@@ -1612,9 +1715,27 @@ const Exchange: React.FC = () => {
                         const ethAmount = Math.abs(parseFloat(ethers.utils.formatEther(trade.tradeInfo?.amount1 || trade.args?.amount1 || '0')));
                         const price = tokenAmount > 0 ? ethAmount / tokenAmount : 0;
                         
+                        // Always determine from amounts for consistency
+                        const amount0Raw = trade.tradeInfo?.amount0 || trade.args?.amount0 || '0';
+                        const amount0 = BigInt(amount0Raw);
+                        // The actual behavior seems to be opposite of the spec
+                        // When someone BUYS: amount0 < 0 (tokens leave the pool)
+                        // When someone SELLS: amount0 > 0 (tokens enter the pool)
+                        const tradeType = amount0 < 0n ? "buy" : "sell";
+                        
+                        // Debug: Check if tradeInfo.type exists and differs
+                        if (trade.tradeInfo?.type && trade.tradeInfo.type !== tradeType) {
+                            console.log('[Exchange] Global trade type mismatch:', {
+                                calculatedType: tradeType,
+                                tradeInfoType: trade.tradeInfo.type,
+                                amount0: amount0.toString(),
+                                txHash: trade.transactionHash
+                            });
+                        }
+                        
                         return {
                             id: `global-${trade.transactionHash}-${index}`,
-                            type: trade.tradeInfo?.type || (parseFloat(trade.args?.amount0 || '0') > 0 ? 'buy' : 'sell'),
+                            type: tradeType,
                             token: tokenSymbol,
                             amount: tokenAmount,
                             price: price,
@@ -2641,8 +2762,8 @@ const Exchange: React.FC = () => {
                 setVaultDescriptions(deployedVaults);
                 
                 // Convert vault descriptions to token format for display
-                // console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
-                // console.log('Vault pool addresses:', deployedVaults.map(v => ({ symbol: v.tokenSymbol, poolAddress: v.poolAddress })));
+                console.log('Creating token list from deployedVaults:', deployedVaults.length, 'vaults');
+                console.log('Vault pool addresses:', deployedVaults.map(v => ({ symbol: v.tokenSymbol, poolAddress: v.poolAddress })));
                 const tokenList = await Promise.all(deployedVaults.map(async (vault, index) => {
                     // Fetch price stats for this specific token's pool
                     let change24h = (Math.random() - 0.5) * 20; // Default random change
@@ -2710,11 +2831,15 @@ const Exchange: React.FC = () => {
                                 token1: token.token1
                             };
                             console.log('[Exchange] Adding to pool map:', token.symbol, '->', token.poolAddress.toLowerCase());
+                            if (token.poolAddress.toLowerCase() === '0x8eb5c457f7a29554536dc964b3fada2961dd8212') {
+                                console.log('[Exchange] Found the mystery pool! Token:', token.symbol);
+                            }
                         }
                     });
                     setPoolToTokenMap(newPoolMap);
                     console.log('[Exchange] Built pool to token map:', Object.keys(newPoolMap).length, 'pools');
                     console.log('[Exchange] Pool addresses in map:', Object.keys(newPoolMap));
+                    console.log('[Exchange] Full poolToTokenMap:', newPoolMap);
                     
                     setIsTokensLoading(false);
                     
@@ -3436,7 +3561,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
+            const msg = error.message.toString().indexOf("fb8f41b2") > -1 ? "Insufficient allowance" :
+                        error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
                         error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
@@ -3533,7 +3659,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
+            const msg = error.message.toString().indexOf("fb8f41b2") > -1 ? "Insufficient allowance" :
+                        error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
                         error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("User rejected the request.") > -1  ? "Rejected operation" : error.message;
@@ -3629,7 +3756,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false); 
-            const msg = error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
+            const msg = error.message.toString().indexOf("fb8f41b2") > -1 ? "Insufficient allowance" :
+                        error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
                         error.message.toString().indexOf("SlippageExceeded()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("InvalidSwap()") > -1 ? "Error with swap operation. Try to increase slippage tolerance." :
                         error.message.toString().indexOf("0xe450d38c") > -1 ? "Not enough balance" :
@@ -3658,7 +3786,9 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("User rejected the request.") > -1 ? "Rejected operation" : error.message;
+            const msg = error.message.toString().indexOf("rate limited") > -1 ? "Rate limited. Slow down and try again." :
+                        error.message.toString().indexOf("fb8f41b2") > -1 ? "Insufficient allowance" :
+                        error.message.toString().indexOf("User rejected the request.") > -1 ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
                 description: msg,
@@ -3682,7 +3812,8 @@ const Exchange: React.FC = () => {
             console.error(`transaction failed: ${error.message}`);
             setIsLoading(false);
             setIsLoadingExecuteTrade(false);
-            const msg = error.message.toString().indexOf("User rejected the request.") > -1 ? "Rejected operation" : error.message;
+            const msg = error.message.toString().indexOf("fb8f41b2") > -1 ? "Insufficient allowance" :
+                        error.message.toString().indexOf("User rejected the request.") > -1 ? "Rejected operation" : error.message;
             toaster.create({
                 title: "Error",
                 description: msg,
