@@ -47,6 +47,7 @@ export function useBlockchainWebSocketWagmi(options: UseBlockchainWebSocketOptio
   const [error, setError] = useState<string | null>(null);
   const eventsRef = useRef<BlockchainEvent[]>([]);
   const maxEventsRef = useRef(1000); // Keep last 1000 events
+  const authAttemptedRef = useRef(false); // Track if auth has been attempted
 
   // Handle new events
   const handleEvent = useCallback((event: BlockchainEvent) => {
@@ -247,22 +248,34 @@ export function useBlockchainWebSocketWagmi(options: UseBlockchainWebSocketOptio
 
   // Auto-authenticate when wallet connects
   useEffect(() => {
-    if (!autoAuthenticate || !isConnected || isAuthenticated || !address || !isWalletConnected) {
+    if (!autoAuthenticate || !isConnected || isAuthenticated || !address || !isWalletConnected || authAttemptedRef.current) {
       return;
     }
+    
+    // Mark that we're attempting authentication
+    authAttemptedRef.current = true;
     
     // Add a small delay to ensure wallet connector is ready
     const timer = setTimeout(() => {
       console.log('[useBlockchainWebSocketWagmi] Auto-authentication triggered');
-      authenticate().catch(err => {
-        console.error('Auto-authenticate failed:', err);
-        if (!err.message?.includes('Connector not found')) {
-          setError(err.message || 'Authentication failed');
-        }
-      });
+      authenticate()
+        .then(() => {
+          // Keep authAttemptedRef as true on success
+        })
+        .catch(err => {
+          console.error('Auto-authenticate failed:', err);
+          if (!err.message?.includes('Connector not found')) {
+            setError(err.message || 'Authentication failed');
+          }
+          // Reset on failure so it can be retried if needed
+          authAttemptedRef.current = false;
+        });
     }, 2000); // 2 second delay
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      // Don't reset authAttemptedRef on cleanup to prevent re-runs
+    };
   }, [autoAuthenticate, isConnected, address, isWalletConnected]); // Remove isAuthenticated and authenticate from deps
 
   // Auto-subscribe to initial pools after authentication

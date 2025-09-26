@@ -35,7 +35,10 @@ export function useVault(options: UseVaultOptions = {}): UseVaultReturn {
   const [error, setError] = useState<string | null>(null);
 
   // Use WebSocket for real-time updates (future enhancement)
-  const { isConnected, isAuthenticated } = useBlockchainWebSocketWagmi();
+  const { isConnected, isAuthenticated } = useBlockchainWebSocketWagmi({
+    autoConnect: true,
+    autoAuthenticate: false // Authentication is handled by Exchange.tsx
+  });
 
   // Fetch vaults based on provided options
   const fetchVaults = useCallback(async () => {
