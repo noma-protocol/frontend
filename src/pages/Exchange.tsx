@@ -45,7 +45,6 @@ import { Tooltip } from "../components/ui/tooltip"
   
 import { useAccount, useBalance, useContractRead } from "wagmi";
 import { useSafeContractWrite } from "../hooks/useSafeContractWrite";
-import { useAllowance } from "../hooks/useAllowance";
 import { isMobile } from "react-device-detect";
 import { tokenApi } from '../services/tokenApi';
 import { useVault } from '../hooks/useVault';
@@ -143,6 +142,7 @@ import { FaArrowTrendUp, FaArrowTrendDown } from "react-icons/fa6";
 import { useMonPrice } from '../contexts/MonPriceContext';
 import { useGasPrice } from '../hooks/useGasPrice';
 import { useMulticallBalances } from '../hooks/useMulticallBalances';
+import { useMulticallAllowances } from '../hooks/useMulticallAllowances';
 
 const addresses = config.chain == "local"
   ? addressesLocal
@@ -252,21 +252,21 @@ const Exchange: React.FC = () => {
     const [referralCode, setReferralCode] = useState("");
     const [referredBy, setReferredBy] = useState<string | null>(null);
     
-    // Check token allowance for selling
-    const { allowance, hasEnoughAllowance, isMaxApproved } = useAllowance(
-        selectedToken?.token0,
-        exchangeHelperAddress
-    );
-    
-    // Check WETH allowance for buying with WETH
-    const { 
-        allowance: wethAllowance, 
-        hasEnoughAllowance: hasEnoughWethAllowance,
-        isMaxApproved: isMaxApprovedWeth
-    } = useAllowance(
-        selectedToken?.token1 || config.protocolAddresses.WMON,
-        exchangeHelperAddress
-    );
+    // Use multicall for allowance checking - reduces 2 polling hooks to 1
+    const {
+        tokenAllowance: allowance,
+        wethAllowance,
+        hasEnoughTokenAllowance: hasEnoughAllowance,
+        hasEnoughWethAllowance,
+        isTokenMaxApproved: isMaxApproved,
+        isWethMaxApproved: isMaxApprovedWeth,
+    } = useMulticallAllowances({
+        tokenAddress: selectedToken?.token0,
+        wethAddress: selectedToken?.token1 || WETH_ADDRESS,
+        spenderAddress: exchangeHelperAddress,
+        refetchInterval: 60000, // 60 seconds
+        enabled: !!address,
+    });
     
     // Gas price hook for real-time network fees
     const { 

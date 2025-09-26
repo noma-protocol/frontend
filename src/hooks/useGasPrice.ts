@@ -148,12 +148,13 @@ export const useGasPrice = (
     // Initial fetch
     fetchGasPrice();
 
-    // Set up polling every 30 seconds
-    const interval = setInterval(fetchGasPrice, CACHE_DURATION);
+    // Disable automatic polling - only fetch on demand
+    // Gas price doesn't change frequently enough to justify constant polling
+    // const interval = setInterval(fetchGasPrice, CACHE_DURATION);
 
     return () => {
       isMountedRef.current = false;
-      clearInterval(interval);
+      // clearInterval(interval);
       if (fetchTimeoutRef.current) {
         clearTimeout(fetchTimeoutRef.current);
       }

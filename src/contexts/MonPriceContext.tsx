@@ -54,9 +54,10 @@ export const MonPriceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     address: poolAddress as `0x${string}`,
     abi: poolABI,
     functionName: 'slot0',
-    watch: true,
-    cacheTime: 30_000, // Cache for 30 seconds
-    staleTime: 10_000, // Consider stale after 10 seconds
+    watch: false, // Disable constant polling
+    cacheTime: 60_000, // Cache for 60 seconds
+    staleTime: 30_000, // Consider stale after 30 seconds
+    refetchInterval: 60_000, // Refetch every 60 seconds instead of watching
   });
 
   useEffect(() => {
