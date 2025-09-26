@@ -3437,27 +3437,15 @@ const Exchange: React.FC = () => {
                         localProvider
                     );
 
-                    const ethBalance = await localProvider.getBalance(address);
+                    // Refetch all balances using multicall
+                    await refetchBalances();
+                    
+                    // Get fresh balances for the diff calculation
+                    const ethBalanceAfter = await localProvider.getBalance(address);
                     const balance = await tokenContract.balanceOf(address);
 
-                    setEthBalance(formatEther(ethBalance));
-                    
-                    // Also update WMON balance
-                    try {
-                        const wethContract = new ethers.Contract(WETH_ADDRESS, ERC20Abi, localProvider);
-                        const wethBal = await wethContract.balanceOf(address);
-                        if (wethBal && wethBal._isBigNumber) {
-                            setWethBalance(formatEther(wethBal));
-                        }
-                    } catch (error) {
-                        console.error("Error fetching WETH balance:", error);
-                    }
-
-                    const ethDiff = Number(formatEther(balanceBeforeSale)) - Number(formatEther(ethBalance));
+                    const ethDiff = Number(formatEther(balanceBeforeSale)) - Number(formatEther(ethBalanceAfter));
                     const tokenDiff = Number(formatEther(balance)) - Number(formatEther(balanceBeforePurchase));
-                    
-                    // Update token balance
-                    setTokenBalance(formatEther(balance));
 
                     setIsLoading(false);
                     setIsLoadingExecuteTrade(false);
@@ -3547,17 +3535,15 @@ const Exchange: React.FC = () => {
                         localProvider
                     );
 
-                    const wethBalance = await token1Contract.balanceOf(address);
+                    // Refetch all balances using multicall
+                    await refetchBalances();
+                    
+                    // Get fresh balances for the diff calculation
+                    const wethBalanceAfter = await token1Contract.balanceOf(address);
                     const balance = await token0Contract.balanceOf(address);
-                    
-                    // Update WETH balance state
-                    setWethBalance(formatEther(wethBalance));
 
-                    const wethDiff = Number(formatEther(balanceBeforeSale)) - Number(formatEther(wethBalance));
+                    const wethDiff = Number(formatEther(balanceBeforeSale)) - Number(formatEther(wethBalanceAfter));
                     const tokenDiff = Number(formatEther(balance)) - Number(formatEther(balanceBeforePurchase));
-                    
-                    // Update token balance
-                    setTokenBalance(formatEther(balance));
 
                     setIsLoading(false);
                     setIsLoadingExecuteTrade(false);
@@ -3646,15 +3632,15 @@ const Exchange: React.FC = () => {
                         localProvider
                     );
 
-                    const ethBalance = await localProvider.getBalance(address);
-                    const wethBalance = await token1Contract.balanceOf(address);
-                    const balance = await token0Contract.balanceOf(address);
+                    // Refetch all balances using multicall
+                    await refetchBalances();
                     
-                    // Update both ETH and WETH balances
-                    setEthBalance(formatEther(ethBalance));
-                    setWethBalance(formatEther(wethBalance));
+                    // Get fresh balances for the diff calculation
+                    const ethBalanceAfter = await localProvider.getBalance(address);
+                    const wethBalanceAfter = await token1Contract.balanceOf(address);
+                    const balance = await token0Contract.balanceOf(address);
 
-                    const wethDiff = (useWeth ? Number(formatEther(wethBalance)) : Number(formatEther(ethBalance))) - Number(formatEther(balanceBeforePurchase));
+                    const wethDiff = (useWeth ? Number(formatEther(wethBalanceAfter)) : Number(formatEther(ethBalanceAfter))) - Number(formatEther(balanceBeforePurchase));
                     const tokenDiff = Number(formatEther(balanceBeforeSale)) - Number(formatEther(balance));
 
                     setIsLoading(false);
