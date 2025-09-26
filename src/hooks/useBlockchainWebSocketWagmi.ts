@@ -113,54 +113,28 @@ export function useBlockchainWebSocketWagmi(options: UseBlockchainWebSocketOptio
         return result;
       }
       
-      // Fallback to wagmi methods if window.ethereum not available
-      console.log('[useBlockchainWebSocketWagmi] window.ethereum not available, trying wagmi methods');
-      console.log('[useBlockchainWebSocketWagmi] walletClient:', !!walletClient);
-      console.log('[useBlockchainWebSocketWagmi] connector:', !!connector);
+      // Fallback to using websocketService.authenticate with signer
+      console.log('[useBlockchainWebSocketWagmi] window.ethereum not available, using websocketService.authenticate');
       
-      const timestamp = Date.now();
-      const message = `Sign this message to authenticate with the blockchain monitor at ${timestamp}`;
-      let signature: string;
-      
-      if (walletClient && walletClient.signMessage) {
-        console.log('[useBlockchainWebSocketWagmi] Using walletClient.signMessage');
-        signature = await walletClient.signMessage({
-          account: address as `0x${string}`,
-          message
-        });
-      } else if (signMessageAsync) {
-        console.log('[useBlockchainWebSocketWagmi] Using signMessageAsync hook');
-        signature = await signMessageAsync({ message });
-      } else {
-        throw new Error('No signing method available');
+      // Create a signer from wagmi
+      if (walletClient && walletClient.account) {
+        const signer = {
+          signMessage: async (message: string) => {
+            return await walletClient.signMessage({
+              account: walletClient.account,
+              message
+            });
+          }
+        };
+        
+        const result = await websocketService.authenticate(address, signer as any);
+        if (result) {
+          setIsAuthenticated(true);
+        }
+        return result;
       }
       
-      // Send auth message
-      websocketService.send({
-        type: 'auth',
-        address,
-        signature,
-        message
-      });
-      
-      // Wait for auth response
-      const authResult = await new Promise<boolean>((resolve) => {
-        const timeout = setTimeout(() => {
-          setError('Authentication timeout');
-          resolve(false);
-        }, 5000);
-        
-        const checkInterval = setInterval(() => {
-          if (websocketService.isAuthenticated()) {
-            clearInterval(checkInterval);
-            clearTimeout(timeout);
-            setIsAuthenticated(true);
-            resolve(true);
-          }
-        }, 100);
-      });
-      
-      return authResult;
+      throw new Error('No signing method available');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
       console.error('[useBlockchainWebSocketWagmi] Auth error:', err);
