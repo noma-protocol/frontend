@@ -838,7 +838,8 @@ const TrollBox: React.FC = () => {
   };
 
   // Function to render message content with GIFs and images
-  const renderMessageContent = (content: string, showImages: boolean = true) => {
+  const renderMessageContent = (content: string | undefined, showImages: boolean = true) => {
+    if (!content) return null;
     // Check if content contains markdown image syntax ![alt](url)
     const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
     const parts: React.ReactNode[] = [];
@@ -1231,7 +1232,7 @@ const TrollBox: React.FC = () => {
           >
             <HStack gap={2} align="flex-start" w="100%">
               <Text 
-                color={msg.isTradeAlert ? '#ffcc00' : ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? '#ff9500' : '#4ade80'}
+                color={msg.isTradeAlert ? '#ffcc00' : ((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? '#ff9500' : '#4ade80'}
                 fontSize="xs" 
                 fontWeight="bold" 
                 minW="60px"
@@ -1240,12 +1241,12 @@ const TrollBox: React.FC = () => {
                 textOverflow="ellipsis"
                 whiteSpace="nowrap"
                 title={msg.username}
-                cursor={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? 'default' : 'pointer'}
-                _hover={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? {} : { textDecoration: "underline" }}
-                onClick={() => !msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) && handleUsernameClick(msg.username, msg.address)}
+                cursor={msg.isTradeAlert || ((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? 'default' : 'pointer'}
+                _hover={msg.isTradeAlert || ((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? {} : { textDecoration: "underline" }}
+                onClick={() => !msg.isTradeAlert && !((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) && handleUsernameClick(msg.username, msg.address)}
                 flexShrink={0}
               >
-                {msg.isTradeAlert ? 'System' : (msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication'))) ? 'System' : msg.username}
+                {msg.isTradeAlert ? 'System' : (msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication'))) ? 'System' : msg.username}
               </Text>
               <Box flex="1" minW="0">
                 {msg.replyTo && (
@@ -1271,9 +1272,9 @@ const TrollBox: React.FC = () => {
                   </Box>
                 )}
                 <Box 
-                  color={((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? '#ff9500' : 'white'} 
+                  color={((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? '#ff9500' : 'white'} 
                   fontSize="xs"
-                  fontWeight={((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? 'bold' : 'normal'}
+                  fontWeight={((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? 'bold' : 'normal'}
                 >
                   {renderMessageContent(msg.content, false)}
                 </Box>
@@ -1941,7 +1942,7 @@ const TrollBox: React.FC = () => {
               >
                 <HStack gap={3} align="flex-start" w="100%">
                   <Text 
-                    color={msg.isTradeAlert ? '#ffcc00' : ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? '#ff9500' : '#4ade80'}
+                    color={msg.isTradeAlert ? '#ffcc00' : ((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? '#ff9500' : '#4ade80'}
                     fontSize="sm" 
                     fontWeight="bold" 
                     minW="80px"
@@ -1950,12 +1951,12 @@ const TrollBox: React.FC = () => {
                     textOverflow="ellipsis"
                     whiteSpace="nowrap"
                     title={msg.username}
-                    cursor={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? 'default' : 'pointer'}
-                    _hover={msg.isTradeAlert || ((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? {} : { textDecoration: "underline" }}
-                    onClick={() => !msg.isTradeAlert && !((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) && handleUsernameClick(msg.username, msg.address)}
+                    cursor={msg.isTradeAlert || ((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? 'default' : 'pointer'}
+                    _hover={msg.isTradeAlert || ((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? {} : { textDecoration: "underline" }}
+                    onClick={() => !msg.isTradeAlert && !((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) && handleUsernameClick(msg.username, msg.address)}
                     flexShrink={0}
                   >
-                    {msg.isTradeAlert ? 'System' : (msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication'))) ? 'System' : msg.username}
+                    {msg.isTradeAlert ? 'System' : (msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication'))) ? 'System' : msg.username}
                   </Text>
                   <Box flex="1" minW="0">
                     {msg.replyTo && (
@@ -1980,9 +1981,9 @@ const TrollBox: React.FC = () => {
                       </Box>
                     )}
                     <Box 
-                      color={((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? '#ff9500' : 'white'} 
+                      color={((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? '#ff9500' : 'white'} 
                       fontSize="sm"
-                      fontWeight={((msg.content.includes('***') && (msg.content.includes('slapped') || msg.content.includes('has kicked') || msg.content.includes('cleared authentication')))) ? 'bold' : 'normal'}
+                      fontWeight={((msg.content?.includes('***') && (msg.content?.includes('slapped') || msg.content?.includes('has kicked') || msg.content?.includes('cleared authentication')))) ? 'bold' : 'normal'}
                     >
                       {renderMessageContent(msg.content, true)}
                     </Box>
