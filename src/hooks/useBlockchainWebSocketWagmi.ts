@@ -256,46 +256,40 @@ export function useBlockchainWebSocketWagmi(options: UseBlockchainWebSocketOptio
       });
     }
 
-    // Sync authentication state periodically
-    const authSyncInterval = setInterval(() => {
-      const serviceAuth = websocketService.isAuthenticated();
-      if (serviceAuth !== isAuthenticated) {
-        console.log('[useBlockchainWebSocketWagmi] Syncing auth state:', serviceAuth);
-        setIsAuthenticated(serviceAuth);
-      }
-    }, 1000);
+    // Sync authentication state on initial mount only
+    const serviceAuth = websocketService.isAuthenticated();
+    if (serviceAuth !== isAuthenticated) {
+      console.log('[useBlockchainWebSocketWagmi] Syncing auth state:', serviceAuth);
+      setIsAuthenticated(serviceAuth);
+    }
 
     // Cleanup
     return () => {
       unsubscribeEvent();
       unsubscribeError();
       unsubscribeConnection();
-      clearInterval(authSyncInterval);
     };
-  }, [autoConnect, isConnected, isAuthenticated, connect, handleEvent, handleError, handleConnectionChange]);
+  }, [autoConnect, isConnected, connect, handleEvent, handleError, handleConnectionChange]); // Remove isAuthenticated from deps
 
   // Auto-authenticate when wallet connects
   useEffect(() => {
-    // Prevent double-trigger
-    if (!autoAuthenticate) return;
+    if (!autoAuthenticate || !isConnected || isAuthenticated || !address || !isWalletConnected) {
+      return;
+    }
     
     // Add a small delay to ensure wallet connector is ready
     const timer = setTimeout(() => {
-      if (isConnected && !isAuthenticated && address && isWalletConnected) {
-        console.log('[useBlockchainWebSocketWagmi] Auto-authentication triggered');
-        // Double-check that we have a proper connection before attempting auth
-        authenticate().catch(err => {
-          console.error('Auto-authenticate failed:', err);
-          // Don't spam errors for connector issues during startup
-          if (!err.message?.includes('Connector not found')) {
-            setError(err.message || 'Authentication failed');
-          }
-        });
-      }
-    }, 1000); // 1 second delay
+      console.log('[useBlockchainWebSocketWagmi] Auto-authentication triggered');
+      authenticate().catch(err => {
+        console.error('Auto-authenticate failed:', err);
+        if (!err.message?.includes('Connector not found')) {
+          setError(err.message || 'Authentication failed');
+        }
+      });
+    }, 2000); // 2 second delay
 
     return () => clearTimeout(timer);
-  }, [autoAuthenticate, isConnected, isAuthenticated, address, isWalletConnected]); // Remove authenticate from deps to prevent loops
+  }, [autoAuthenticate, isConnected, address, isWalletConnected]); // Remove isAuthenticated and authenticate from deps
 
   // Auto-subscribe to initial pools after authentication
   useEffect(() => {

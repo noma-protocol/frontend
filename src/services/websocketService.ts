@@ -46,7 +46,7 @@ class WebSocketService {
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000;
+  private reconnectDelay = 5000; // Start with 5 seconds instead of 1 second
   private authenticated = false;
   private subscribedPools: Set<string> = new Set();
   private eventCallbacks: Set<EventCallback> = new Set();
@@ -481,6 +481,12 @@ class WebSocketService {
   }
 
   private attemptReconnect(): void {
+    // Don't reconnect if authentication is in progress
+    if (this.authInProgress) {
+      console.log('Skipping reconnect - authentication in progress');
+      return;
+    }
+
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('Max reconnection attempts reached');
       return;

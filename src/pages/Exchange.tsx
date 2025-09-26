@@ -1118,69 +1118,31 @@ const Exchange: React.FC = () => {
             wsAuthenticated,
             walletConnected: isConnected,
             address: address || 'no address',
-            wsError,
             authInProgress: authInProgressRef.current
         });
         
-        if (!wsConnected) {
-            console.log('[Exchange] WebSocket not connected yet');
+        if (!wsConnected || wsAuthenticated || !isConnected || !address || authInProgressRef.current) {
             return;
         }
         
-        if (wsAuthenticated) {
-            console.log('[Exchange] Already authenticated');
-            authInProgressRef.current = false; // Reset flag
-            return;
-        }
-        
-        if (!isConnected || !address) {
-            console.log('[Exchange] Wallet not connected - isConnected:', isConnected, 'address:', address);
-            return;
-        }
-        
-        // Prevent multiple authentication attempts
-        if (authInProgressRef.current) {
-            console.log('[Exchange] Authentication already in progress, skipping...');
-            return;
-        }
-        
-        console.log('[Exchange] All conditions met, authenticating WebSocket...');
+        console.log('[Exchange] Attempting WebSocket authentication...');
         authInProgressRef.current = true;
         
-        // Add retry logic for authentication
-        let retries = 0;
-        const maxRetries = 3;
-        
-        const attemptAuth = async () => {
-            try {
-                const success = await wsAuthenticate();
+        wsAuthenticate()
+            .then(success => {
                 if (success) {
                     console.log('[Exchange] WebSocket authenticated successfully');
-                    authInProgressRef.current = false;
                 } else {
                     console.error('[Exchange] WebSocket authentication failed');
-                    if (retries < maxRetries) {
-                        retries++;
-                        console.log(`[Exchange] Retrying authentication (${retries}/${maxRetries})...`);
-                        setTimeout(attemptAuth, 2000); // Wait 2 seconds before retry
-                    } else {
-                        authInProgressRef.current = false; // Reset after max retries
-                    }
                 }
-            } catch (err) {
+            })
+            .catch(err => {
                 console.error('[Exchange] WebSocket authentication error:', err);
-                if (err.message?.includes('Connector not found') && retries < maxRetries) {
-                    retries++;
-                    console.log(`[Exchange] Connector not ready, retrying (${retries}/${maxRetries})...`);
-                    setTimeout(attemptAuth, 2000); // Wait 2 seconds before retry
-                } else if (retries >= maxRetries) {
-                    authInProgressRef.current = false; // Reset after max retries
-                }
-            }
-        };
-        
-        attemptAuth();
-    }, [wsConnected, wsAuthenticated, isConnected, address, wsAuthenticate]);
+            })
+            .finally(() => {
+                authInProgressRef.current = false;
+            });
+    }, [wsConnected, wsAuthenticated, isConnected, address]); // Remove wsAuthenticate from deps to prevent loops
 
     
     // Subscribe to WebSocket events for the current pool
