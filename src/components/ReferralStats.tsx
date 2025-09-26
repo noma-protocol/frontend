@@ -80,10 +80,11 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
       
       // Estimate commission (assuming 1% referral fee)
       const commissionRate = 0.01;
-      const estimatedCommission = stats.totalVolumeETH * commissionRate;
+      const totalVolumeETH = stats.totalVolumeETH || 0;
+      const estimatedCommission = totalVolumeETH * commissionRate;
       
       // Get recent trades (last 5)
-      const recentTrades = stats.trades
+      const recentTrades = (stats.trades || [])
         .sort((a: any, b: any) => b.timestamp - a.timestamp)
         .slice(0, 5)
         .map((trade: any) => ({
@@ -98,9 +99,9 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
         }));
       
       setReferralStats({
-        totalReferred: stats.totalReferred,
-        totalVolumeETH: stats.totalVolumeETH,
-        totalVolumeUSD: stats.totalVolumeUSD,
+        totalReferred: stats.totalReferred || 0,
+        totalVolumeETH: totalVolumeETH,
+        totalVolumeUSD: stats.totalVolumeUSD || 0,
         estimatedCommission,
         recentTrades
       });
@@ -248,7 +249,7 @@ export const ReferralStats: React.FC<ReferralStatsProps> = ({ isExpanded = false
                   h="30px"
                   w={isMobile ? "320px" : "17vw"}
                   value={referralLink}
-                  isReadOnly
+                  readOnly
                   bg="rgba(0, 0, 0, 0.3)"
                   border="1px solid rgba(255, 149, 0, 0.3)"
                   color="white"
