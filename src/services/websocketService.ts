@@ -19,7 +19,7 @@ export interface BlockchainEvent {
 }
 
 export interface WebSocketMessage {
-  type: 'auth' | 'subscribe' | 'unsubscribe' | 'getHistory' | 'getLatest' | 'getGlobalTrades' | 'event' | 'error' | 'authenticated' | 'subscribed' | 'history' | 'latest' | 'globalTrades' | 'connection';
+  type: 'auth' | 'subscribe' | 'unsubscribe' | 'getHistory' | 'getLatest' | 'getGlobalTrades' | 'event' | 'error' | 'authenticated' | 'subscribed' | 'history' | 'latest' | 'globalTrades' | 'connection' | 'ping' | 'pong';
   data?: any;
   events?: any[];
   trades?: any[];
@@ -58,6 +58,12 @@ class WebSocketService {
   private historyPromiseReject: ((reason: any) => void) | null = null;
   private authInProgress = false;
   private authPromise: Promise<boolean> | null = null;
+  private lastAuthCredentials: { address: string; signer?: ethers.Signer } | null = null;
+  private useWindowEthereum = false;
+  private pingInterval: NodeJS.Timeout | null = null;
+  private pongTimeout: NodeJS.Timeout | null = null;
+  private readonly PING_INTERVAL = 30000; // 30 seconds
+  private readonly PONG_TIMEOUT = 10000; // 10 seconds
 
   constructor(url?: string) {
     const isProduction = import.meta.env.VITE_ENV === 'prod' || import.meta.env.VITE_ENV === 'production';
@@ -80,6 +86,7 @@ class WebSocketService {
           console.log('[WebSocketService] Connected successfully to', this.url);
           this.reconnectAttempts = 0;
           this.notifyConnectionCallbacks(true);
+          this.startHeartbeat();
           resolve();
         };
 
@@ -89,6 +96,7 @@ class WebSocketService {
           // Clear authentication state
           this.authInProgress = false;
           this.authPromise = null;
+          this.stopHeartbeat();
           this.notifyConnectionCallbacks(false);
           this.attemptReconnect();
         };
@@ -222,12 +230,29 @@ class WebSocketService {
         }
         break;
 
+      case 'ping':
+        // Respond to ping with pong
+        this.send({ type: 'pong' });
+        break;
+
+      case 'pong':
+        // Server responded to our ping, clear the timeout
+        if (this.pongTimeout) {
+          clearTimeout(this.pongTimeout);
+          this.pongTimeout = null;
+        }
+        break;
+
       default:
         console.log('[WebSocketService] Unhandled message type:', message.type);
     }
   }
 
   async authenticate(address: string, signer: ethers.Signer): Promise<boolean> {
+    // Store credentials for auto-reauthentication
+    this.lastAuthCredentials = { address, signer };
+    this.useWindowEthereum = false;
+
     // Check if authentication is already in progress
     if (this.authInProgress && this.authPromise) {
       console.log('[WebSocketService] Authentication already in progress, returning existing promise');
@@ -286,6 +311,10 @@ class WebSocketService {
 
   // Alternative authentication method using window.ethereum directly
   async authenticateWithWindowEthereum(address: string): Promise<boolean> {
+    // Store credentials for auto-reauthentication
+    this.lastAuthCredentials = { address };
+    this.useWindowEthereum = true;
+
     // Check if authentication is already in progress
     if (this.authInProgress && this.authPromise) {
       console.log('[WebSocketService] Authentication already in progress, returning existing promise');
@@ -503,7 +532,17 @@ class WebSocketService {
     console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`);
 
     this.reconnectTimeout = setTimeout(() => {
-      this.connect().catch(error => {
+      this.connect().then(() => {
+        // Auto-reauthenticate if we have stored credentials
+        if (this.lastAuthCredentials) {
+          console.log('[WebSocketService] Auto-reauthenticating after reconnect...');
+          if (this.useWindowEthereum) {
+            this.authenticateWithWindowEthereum(this.lastAuthCredentials.address);
+          } else if (this.lastAuthCredentials.signer) {
+            this.authenticate(this.lastAuthCredentials.address, this.lastAuthCredentials.signer);
+          }
+        }
+      }).catch(error => {
         console.error('Reconnection failed:', error);
       });
     }, delay);
@@ -515,6 +554,8 @@ class WebSocketService {
       this.reconnectTimeout = null;
     }
 
+    this.stopHeartbeat();
+
     if (this.ws) {
       this.ws.close();
       this.ws = null;
@@ -523,6 +564,38 @@ class WebSocketService {
     this.authenticated = false;
     this.subscribedPools.clear();
     this.notifyConnectionCallbacks(false);
+  }
+
+  private startHeartbeat(): void {
+    this.stopHeartbeat(); // Clear any existing heartbeat
+    
+    this.pingInterval = setInterval(() => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        // Send ping
+        this.send({ type: 'ping' });
+        
+        // Set timeout for pong response
+        this.pongTimeout = setTimeout(() => {
+          console.warn('[WebSocketService] No pong received, connection might be dead');
+          // Force reconnection
+          if (this.ws) {
+            this.ws.close();
+          }
+        }, this.PONG_TIMEOUT);
+      }
+    }, this.PING_INTERVAL);
+  }
+
+  private stopHeartbeat(): void {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+    
+    if (this.pongTimeout) {
+      clearTimeout(this.pongTimeout);
+      this.pongTimeout = null;
+    }
   }
 
   onEvent(callback: EventCallback): () => void {
