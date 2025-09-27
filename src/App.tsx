@@ -16,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { MenuProvider } from "./hooks/MenuContext"; // Import the MenuProvider
 import { TokenProvider } from "./contexts/TokenContext"; // Import the TokenProvider
 import { MonPriceProvider } from "./contexts/MonPriceContext"; // Import the MonPriceProvider
+import { NetworkProvider } from "./contexts/NetworkContext"; // Import the NetworkProvider
 
 import ReactGA from 'react-ga';
 import { Provider } from "./components/ui/provider"
@@ -47,14 +48,18 @@ function App() {
     connectors: {
       // Configure connectors with specific options if needed
     },
+    // Add aggressive caching to reduce eth_chainId calls
+    cacheTime: 60_000, // Cache data for 60 seconds
+    staleTime: 30_000, // Consider data stale after 30 seconds
     // Add error handling options
     transports: {
       [monad.id]: jsonRpcProvider({
         rpc: () => ({ http: config.RPC_URL }),
-        pollingInterval: 30_000, // Reduce polling frequency
+        pollingInterval: 60_000, // Increase polling interval to 60 seconds
       }),
       [localhost.id]: jsonRpcProvider({
         rpc: () => ({ http: 'http://localhost:8545' }),
+        pollingInterval: 60_000, // Increase polling interval
       }),
     },
   });
@@ -72,19 +77,21 @@ function App() {
 
   return (
     <WagmiConfig config={wagmiConfig}>
-      <LanguageProvider>
-        <MonPriceProvider>
-          <TokenProvider>
-            <MenuProvider>
-              <Provider>
-                <Header />
-                <Outlet />
-                <Footer />
-              </Provider>
-            </MenuProvider>
-          </TokenProvider>
-        </MonPriceProvider>
-      </LanguageProvider>
+      <NetworkProvider>
+        <LanguageProvider>
+          <MonPriceProvider>
+            <TokenProvider>
+              <MenuProvider>
+                <Provider>
+                  <Header />
+                  <Outlet />
+                  <Footer />
+                </Provider>
+              </MenuProvider>
+            </TokenProvider>
+          </MonPriceProvider>
+        </LanguageProvider>
+      </NetworkProvider>
     </WagmiConfig>
   );
 }

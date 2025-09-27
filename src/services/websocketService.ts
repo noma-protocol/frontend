@@ -19,7 +19,7 @@ export interface BlockchainEvent {
 }
 
 export interface WebSocketMessage {
-  type: 'auth' | 'subscribe' | 'unsubscribe' | 'getHistory' | 'getLatest' | 'getGlobalTrades' | 'event' | 'error' | 'authenticated' | 'subscribed' | 'history' | 'latest' | 'globalTrades' | 'connection' | 'ping' | 'pong';
+  type: 'auth' | 'subscribe' | 'unsubscribe' | 'getHistory' | 'getLatest' | 'getGlobalTrades' | 'event' | 'error' | 'authenticated' | 'subscribed' | 'history' | 'latest' | 'globalTrades' | 'connection' | 'ping' | 'pong' | 'unauthenticated';
   data?: any;
   events?: any[];
   trades?: any[];
@@ -62,8 +62,10 @@ class WebSocketService {
   private useWindowEthereum = false;
   private pingInterval: NodeJS.Timeout | null = null;
   private pongTimeout: NodeJS.Timeout | null = null;
+  private authCheckInterval: NodeJS.Timeout | null = null;
   private readonly PING_INTERVAL = 30000; // 30 seconds
   private readonly PONG_TIMEOUT = 10000; // 10 seconds
+  private readonly AUTH_CHECK_INTERVAL = 120000; // 2 minutes
 
   constructor(url?: string) {
     const isProduction = import.meta.env.VITE_ENV === 'prod' || import.meta.env.VITE_ENV === 'production';
@@ -182,6 +184,27 @@ class WebSocketService {
       case 'error':
         console.error('WebSocket error:', message.error);
         this.notifyErrorCallbacks(message.error || 'Unknown error');
+        
+        // Check if authentication is lost
+        if (message.error?.toLowerCase().includes('not authenticated') || 
+            message.error?.toLowerCase().includes('authentication required') ||
+            message.error?.toLowerCase().includes('unauthorized')) {
+          console.log('[WebSocketService] Authentication lost, clearing auth state');
+          this.authenticated = false;
+          
+          // Auto-reauthenticate if we have stored credentials
+          if (this.lastAuthCredentials && !this.authInProgress) {
+            console.log('[WebSocketService] Attempting auto-reauthentication...');
+            setTimeout(() => {
+              if (this.useWindowEthereum) {
+                this.authenticateWithWindowEthereum(this.lastAuthCredentials.address);
+              } else if (this.lastAuthCredentials.signer) {
+                this.authenticate(this.lastAuthCredentials.address, this.lastAuthCredentials.signer);
+              }
+            }, 1000); // Small delay to prevent rapid retries
+          }
+        }
+        
         if (this.authPromiseReject && message.error?.includes('auth')) {
           this.authPromiseReject(new Error(message.error));
           this.authPromiseResolve = null;
@@ -240,6 +263,24 @@ class WebSocketService {
         if (this.pongTimeout) {
           clearTimeout(this.pongTimeout);
           this.pongTimeout = null;
+        }
+        break;
+
+      case 'unauthenticated':
+        // Server explicitly told us we're not authenticated
+        console.log('[WebSocketService] Received unauthenticated message from server');
+        this.authenticated = false;
+        
+        // Auto-reauthenticate if we have stored credentials
+        if (this.lastAuthCredentials && !this.authInProgress) {
+          console.log('[WebSocketService] Attempting auto-reauthentication after unauthenticated message...');
+          setTimeout(() => {
+            if (this.useWindowEthereum) {
+              this.authenticateWithWindowEthereum(this.lastAuthCredentials.address);
+            } else if (this.lastAuthCredentials.signer) {
+              this.authenticate(this.lastAuthCredentials.address, this.lastAuthCredentials.signer);
+            }
+          }, 1000); // Small delay to prevent rapid retries
         }
         break;
 
@@ -379,13 +420,26 @@ class WebSocketService {
   }
 
   subscribe(pools: string[]): void {
+    // Always track subscribed pools
+    pools.forEach(pool => this.subscribedPools.add(pool));
+    
     if (!this.authenticated) {
-      console.error('Must authenticate before subscribing to pools');
+      console.log('[WebSocketService] Not authenticated yet, queuing subscription for pools:', pools);
+      // The pools will be subscribed after authentication in handleMessage
+      
+      // If we have credentials, try to authenticate
+      if (this.lastAuthCredentials && !this.authInProgress) {
+        console.log('[WebSocketService] Triggering authentication before subscription...');
+        if (this.useWindowEthereum) {
+          this.authenticateWithWindowEthereum(this.lastAuthCredentials.address);
+        } else if (this.lastAuthCredentials.signer) {
+          this.authenticate(this.lastAuthCredentials.address, this.lastAuthCredentials.signer);
+        }
+      }
       return;
     }
 
     console.log('[WebSocketService] Subscribing to pools:', pools);
-    pools.forEach(pool => this.subscribedPools.add(pool));
 
     const message: WebSocketMessage = {
       type: 'subscribe',
@@ -569,6 +623,7 @@ class WebSocketService {
   private startHeartbeat(): void {
     this.stopHeartbeat(); // Clear any existing heartbeat
     
+    // Ping/pong interval
     this.pingInterval = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         // Send ping
@@ -584,6 +639,15 @@ class WebSocketService {
         }, this.PONG_TIMEOUT);
       }
     }, this.PING_INTERVAL);
+    
+    // Periodic auth check
+    this.authCheckInterval = setInterval(() => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN && this.authenticated) {
+        // Test if we're still authenticated by trying to get latest events
+        console.log('[WebSocketService] Performing periodic auth check...');
+        this.send({ type: 'getLatest', limit: 1 });
+      }
+    }, this.AUTH_CHECK_INTERVAL);
   }
 
   private stopHeartbeat(): void {
@@ -595,6 +659,11 @@ class WebSocketService {
     if (this.pongTimeout) {
       clearTimeout(this.pongTimeout);
       this.pongTimeout = null;
+    }
+    
+    if (this.authCheckInterval) {
+      clearInterval(this.authCheckInterval);
+      this.authCheckInterval = null;
     }
   }
 

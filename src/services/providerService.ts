@@ -3,27 +3,7 @@ import config from '../config';
 
 const { JsonRpcProvider } = ethers.providers;
 
-// Test RPC connection on load
-if (config.RPC_URL) {
-  console.log('[ProviderService] Testing RPC connection to:', config.RPC_URL);
-  fetch(config.RPC_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'eth_chainId',
-      params: [],
-      id: 1
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log('[ProviderService] RPC test successful, chainId:', data.result);
-  })
-  .catch(error => {
-    console.error('[ProviderService] RPC test failed:', error);
-  });
-}
+// Removed unnecessary RPC test on module load to reduce eth_chainId calls
 
 /**
  * Singleton provider service to prevent multiple provider instances

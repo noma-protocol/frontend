@@ -1,7 +1,8 @@
 // RPC Request Interceptor to analyze and reduce requests
 
 const requestCache = new Map();
-const CACHE_DURATION = 5000; // 5 seconds
+const CACHE_DURATION = 60000; // 60 seconds for general calls
+const STATIC_CACHE_DURATION = 3600000; // 1 hour for static data like chainId
 
 // Track request counts
 const requestCounts: Record<string, number> = {};
@@ -48,11 +49,11 @@ export function createInterceptedFetch() {
         
         // Block excessive calls for certain methods
         const blockThresholds: Record<string, number> = {
-          'eth_accounts': 3,
-          'eth_chainId': 3,
-          'net_version': 3,
-          'eth_blockNumber': 5,
-          'eth_getBlockByNumber': 5
+          'eth_accounts': 5,
+          'eth_chainId': 10, // Allow more initial calls since wagmi needs them
+          'net_version': 5,
+          'eth_blockNumber': 10,
+          'eth_getBlockByNumber': 10
         };
         
         const threshold = blockThresholds[body.method];
@@ -82,7 +83,11 @@ export function createInterceptedFetch() {
         const cacheKey = `${body.method}-${JSON.stringify(body.params)}`;
         const cached = requestCache.get(cacheKey);
         
-        if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        // Use longer cache duration for static calls
+        const staticMethods = ['eth_chainId', 'net_version', 'eth_accounts'];
+        const cacheDuration = staticMethods.includes(body.method) ? STATIC_CACHE_DURATION : CACHE_DURATION;
+        
+        if (cached && Date.now() - cached.timestamp < cacheDuration) {
           // Return cached result silently
           return new Response(JSON.stringify(cached.response), {
             status: 200,
